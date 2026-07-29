@@ -1,0 +1,33 @@
+from app.schemas.dto import (
+    AIAnalyzeRequest,
+    AccountUpdateRequest,
+    CandidateProfileUpdateRequest,
+    ChangePasswordRequest,
+    DigitalHumanSessionRequest,
+    DigitalHumanSpeakRequest,
+    DigitalInterviewRequest,
+    JDParseRequest,
+    LoginRequest,
+    MatchAnalysisRequest,
+    RegisterRequest,
+    ResumeParseRequest,
+    ResumeSnapshotRequest,
+    ReviewActionResponse,
+)
+
+__all__ = [
+    "AIAnalyzeRequest",
+    "AccountUpdateRequest",
+    "CandidateProfileUpdateRequest",
+    "ChangePasswordRequest",
+    "DigitalHumanSessionRequest",
+    "DigitalHumanSpeakRequest",
+    "DigitalInterviewRequest",
+    "JDParseRequest",
+    "LoginRequest",
+    "MatchAnalysisRequest",
+    "RegisterRequest",
+    "ResumeParseRequest",
+    "ResumeSnapshotRequest",
+    "ReviewActionResponse",
+]
