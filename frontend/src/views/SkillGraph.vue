@@ -1775,7 +1775,8 @@ onBeforeUnmount(() => {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  box-shadow: 0 0 12px currentColor;
+  opacity: 0.88;
+  box-shadow: 0 0 8px rgba(112, 205, 224, 0.24);
 }
 
 .community-name,
@@ -1800,6 +1801,9 @@ onBeforeUnmount(() => {
   display: block;
   height: 100%;
   border-radius: inherit;
+  opacity: 0.78;
+  filter: saturate(0.78);
+  box-shadow: 0 0 8px rgba(100, 190, 218, 0.2);
 }
 
 .path-select {

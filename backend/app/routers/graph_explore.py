@@ -27,18 +27,18 @@ from app.models import EvolutionEvent, JobEntity, JobSkillRelation, RawJD, Skill
 
 router = APIRouter(prefix="/api", tags=["graph-explore"])
 
-# 社区配色，与前端主题（蓝/青/紫/绿/橙）保持一致
+# 社区配色使用低饱和冷色谱，和深蓝玻璃拟态背景保持一致。
 COMMUNITY_PALETTE = [
-    "#2563eb",  # 蓝
-    "#06b6d4",  # 青
-    "#7c3aed",  # 紫
-    "#18b981",  # 绿
-    "#f59e0b",  # 橙
-    "#ec4899",  # 粉
-    "#0ea5e9",  # 天蓝
-    "#14b8a6",  # 蓝绿
-    "#f43f5e",  # 玫红
-    "#8b5cf6",  # 紫罗兰
+    "#5B9BD5",
+    "#53B7C2",
+    "#748ED1",
+    "#5EA6BA",
+    "#64B8A3",
+    "#8299C9",
+    "#5AACA7",
+    "#8BA7D2",
+    "#6794C2",
+    "#74B6C9",
 ]
 
 
