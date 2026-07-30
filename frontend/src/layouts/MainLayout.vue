@@ -268,7 +268,7 @@ const router = useRouter()
 const route = useRoute()
 const searchKeyword = ref('')
 const candidateAvatar = ref('')
-const isDarkTheme = ref(localStorage.getItem('sr-theme') === 'dark')
+const isDarkTheme = ref(localStorage.getItem('sr-theme') !== 'light')
 const activeGroupKey = ref<string | null>(null)
 
 const visibleGroups = computed<MenuGroup[]>(() => {
