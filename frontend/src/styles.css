@@ -1290,3 +1290,148 @@ body:not(.login-active) .app-main :is(
 ) {
   color: #e9f9ff !important;
 }
+
+/* =========================================================
+   Dark-theme consistency patch
+   Force custom light/white panels to deep-blue glassmorphism
+   so every page matches the overview style.
+   ========================================================= */
+
+body.theme-dark .surface,
+body.theme-dark .profile-glass-card,
+body.theme-dark .profile-card,
+body.theme-dark .field-block,
+body.theme-dark .identity-card,
+body.theme-dark .history-item,
+body.theme-dark .dimension-card,
+body.theme-dark .skill-box,
+body.theme-dark .ai-column,
+body.theme-dark .ai-summary,
+body.theme-dark .graph-overview__item,
+body.theme-dark .candidate-summary,
+body.theme-dark .candidate-complete,
+body.theme-dark .candidate-section,
+body.theme-dark .missing-card,
+body.theme-dark .path-card,
+body.theme-dark .todo-item,
+body.theme-dark .diff-col,
+body.theme-dark .event-item,
+body.theme-dark .error-item,
+body.theme-dark .selection-card,
+body.theme-dark .job-preview,
+body.theme-dark .report-meta span,
+body.theme-dark .quality-grid div,
+body.theme-dark .evidence-lines p,
+body.theme-dark .interviewer-bubble,
+body.theme-dark .recent-resume-row,
+body.theme-dark .resume-upload-card,
+body.theme-dark .parsed-resume-status,
+body.theme-dark .connection-badge,
+body.theme-dark .overview-metric {
+  border-color: rgba(91, 145, 220, 0.34);
+  background:
+    linear-gradient(145deg, rgba(18, 38, 78, 0.78), rgba(8, 22, 48, 0.7)),
+    rgba(12, 28, 58, 0.68);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.22);
+}
+
+/* Hover / active states for list items */
+body.theme-dark .history-item:hover,
+body.theme-dark .history-item.active,
+body.theme-dark .todo-item:hover,
+body.theme-dark .diff-col:hover,
+body.theme-dark .event-item:hover,
+body.theme-dark .error-item:hover,
+body.theme-dark .resume-upload-card:hover {
+  border-color: rgba(86, 207, 255, 0.52);
+  background:
+    linear-gradient(145deg, rgba(24, 54, 108, 0.82), rgba(10, 32, 68, 0.74)),
+    rgba(16, 40, 80, 0.74);
+}
+
+/* Keep semantic accent colors */
+body.theme-dark .ai-column.warning {
+  border-color: rgba(245, 158, 11, 0.42);
+  background: rgba(92, 62, 8, 0.62);
+}
+
+body.theme-dark .skill-box.success {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+body.theme-dark .skill-box.danger {
+  border-color: rgba(239, 68, 68, 0.32);
+}
+
+/* Text readability on dark panels */
+body.theme-dark .history-item,
+body.theme-dark .history-item span,
+body.theme-dark .history-item small,
+body.theme-dark .field-block > label,
+body.theme-dark .section-title h3,
+body.theme-dark .section-title small,
+body.theme-dark .identity-card h3,
+body.theme-dark .identity-card p,
+body.theme-dark .skill-box > b,
+body.theme-dark .skill-box > div > span,
+body.theme-dark .ai-column h4,
+body.theme-dark .ai-column li,
+body.theme-dark .ai-column p,
+body.theme-dark .dimension-name b,
+body.theme-dark .dimension-name small,
+body.theme-dark .evidence-group > b,
+body.theme-dark .evidence-lines > b,
+body.theme-dark .evidence-lines p,
+body.theme-dark .selection-card b,
+body.theme-dark .selection-card p,
+body.theme-dark .selection-card span,
+body.theme-dark .job-preview b,
+body.theme-dark .job-preview p,
+body.theme-dark .job-preview span,
+body.theme-dark .report-meta span,
+body.theme-dark .quality-grid strong,
+body.theme-dark .quality-grid span,
+body.theme-dark .conversation-title h3,
+body.theme-dark .conversation-header p,
+body.theme-dark .start-card h2,
+body.theme-dark .start-card p,
+body.theme-dark .start-card label,
+body.theme-dark .section-title span,
+body.theme-dark .history-empty,
+body.theme-dark .history-item strong,
+body.theme-dark .candidate-summary,
+body.theme-dark .candidate-complete,
+body.theme-dark .candidate-section,
+body.theme-dark .missing-card,
+body.theme-dark .path-card,
+body.theme-dark .todo-item,
+body.theme-dark .diff-col,
+body.theme-dark .event-item,
+body.theme-dark .error-item,
+body.theme-dark .recent-resume-row,
+body.theme-dark .resume-upload-card,
+body.theme-dark .parsed-resume-status,
+body.theme-dark .connection-badge,
+body.theme-dark .graph-overview__item,
+body.theme-dark .graph-overview__item span,
+body.theme-dark .overview-metric,
+body.theme-dark .overview-metric strong,
+body.theme-dark .overview-metric span,
+body.theme-dark .overview-metric small {
+  color: #d9f3ff;
+}
+
+body.theme-dark .history-item small,
+body.theme-dark .section-title span,
+body.theme-dark .job-preview span,
+body.theme-dark .selection-card span,
+body.theme-dark .quality-grid span,
+body.theme-dark .skill-box > div > span,
+body.theme-dark .dimension-name small,
+body.theme-dark .evidence-lines p,
+body.theme-dark .history-empty,
+body.theme-dark .conversation-header p,
+body.theme-dark .start-card p,
+body.theme-dark .start-card label {
+  color: #9db3cf;
+}
