@@ -414,4 +414,169 @@ onMounted(async () => {
     grid-column: span 12;
   }
 }
+
+:global(body.theme-dark) .eval-page :deep(.metric-card) {
+  border-color: rgba(91, 145, 220, 0.4) !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.12), transparent 36%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.86), rgba(10, 28, 62, 0.78)),
+    rgba(14, 34, 72, 0.78) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.14) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+:global(body.theme-dark) .eval-page :deep(.metric-label) {
+  color: #9db3cf !important;
+}
+
+:global(body.theme-dark) .eval-page :deep(.metric-value) {
+  color: #7fc8ff !important;
+  text-shadow: 0 0 18px rgba(89, 166, 255, 0.35);
+}
+
+:global(body.theme-dark) .eval-page :deep(.report-panel) {
+  border-color: rgba(91, 145, 220, 0.36) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.1), transparent 30%),
+    linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
+    rgba(12, 28, 58, 0.72) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.14) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+:global(body.theme-dark) .report-title {
+  color: #e8f2ff !important;
+}
+
+:global(body.theme-dark) .report-head small {
+  color: #9db3cf !important;
+}
+
+:global(body.theme-dark) .report-cmd code {
+  border-color: rgba(0, 214, 255, 0.3) !important;
+  background:
+    linear-gradient(145deg, rgba(12, 56, 106, 0.8), rgba(8, 34, 72, 0.74)),
+    rgba(10, 44, 88, 0.76) !important;
+  color: #8ee2ff !important;
+}
+
+:global(body.theme-dark) .report-card {
+  border-color: color-mix(in srgb, var(--c) 48%, rgba(91, 145, 220, 0.4)) !important;
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--c) 26%, transparent), transparent 36%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.86), rgba(10, 28, 62, 0.8)),
+    rgba(14, 34, 72, 0.8) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--c) 22%, rgba(91, 145, 220, 0.14)) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+:global(body.theme-dark) .report-card::before {
+  opacity: 0.52 !important;
+  filter: blur(46px) !important;
+}
+
+:global(body.theme-dark) .report-card__name {
+  color: #e8f2ff !important;
+}
+
+:global(body.theme-dark) .score-lbl {
+  color: #9db3cf !important;
+}
+
+:global(body.theme-dark) .score-num {
+  color: var(--c) !important;
+  filter: brightness(1.25) saturate(1.3);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+:global(body.theme-dark) .prf-label {
+  color: #9db3cf !important;
+}
+
+:global(body.theme-dark) .prf-val {
+  color: #d8e8ff !important;
+}
+
+:global(body.theme-dark) .prf-bar {
+  background: rgba(70, 110, 170, 0.3) !important;
+  box-shadow: inset 0 0 0 1px rgba(91, 145, 220, 0.2) !important;
+}
+
+:global(body.theme-dark) .prf-bar i {
+  filter: brightness(1.2) saturate(1.25);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+:global(body.theme-dark) .error-block__head {
+  color: #e8f2ff !important;
+}
+
+:global(body.theme-dark) .error-item {
+  border-color: rgba(91, 145, 220, 0.32) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(89, 166, 255, 0.1), transparent 40%),
+    linear-gradient(145deg, rgba(20, 44, 90, 0.82), rgba(10, 26, 58, 0.74)),
+    rgba(12, 30, 66, 0.76) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.12) inset !important;
+}
+
+:global(body.theme-dark) .error-id {
+  color: #9db3cf !important;
+}
+
+:global(body.theme-dark) .err-detail {
+  color: #d8e8ff !important;
+}
+
+:global(body.theme-dark) .eval-page :deep(.panel) {
+  border-color: rgba(91, 145, 220, 0.36) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.1), transparent 30%),
+    linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
+    rgba(12, 28, 58, 0.72) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.14) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+:global(body.theme-dark) .panel-title-row {
+  color: #e8f2ff !important;
+}
+
+:global(body.theme-dark) .eval-page :deep(.el-table) {
+  background: transparent !important;
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --el-table-header-bg-color: transparent !important;
+  --el-table-row-hover-bg-color: rgba(30, 123, 255, 0.08) !important;
+  --el-table-border-color: rgba(91, 145, 220, 0.22) !important;
+  color: #d8e8ff !important;
+}
+
+:global(body.theme-dark) .eval-page :deep(.el-table th) {
+  background: rgba(20, 44, 90, 0.5) !important;
+  color: #e8f2ff !important;
+}
+
+:global(body.theme-dark) .eval-page :deep(.el-table tr) {
+  background: transparent !important;
+}
+
+:global(body.theme-dark) .eval-page :deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
+  background: rgba(20, 44, 90, 0.28) !important;
+}
+
+:global(body.theme-dark) .eval-page :deep(.el-table td),
+:global(body.theme-dark) .eval-page :deep(.el-table th.is-leaf) {
+  border-color: rgba(91, 145, 220, 0.18) !important;
+}
+
+:global(body.theme-dark) .eval-page :deep(.el-table::before) {
+  background-color: rgba(91, 145, 220, 0.18) !important;
+}
 </style>

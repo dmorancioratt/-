@@ -1609,3 +1609,270 @@ body:not(.login-active) .app-main :is(
 ) {
   color: #e9f9ff !important;
 }
+
+/* ============================================================
+ *  Skill Graph page — force deep-blue glassmorphism (no grey)
+ * ============================================================ */
+
+body.theme-dark .skill-graph-page .graph-overview__item {
+  border-color: rgba(91, 145, 220, 0.4) !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.14), transparent 36%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.8)),
+    rgba(14, 34, 72, 0.8) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.16) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.theme-dark .skill-graph-page .graph-overview strong {
+  color: #7fc8ff !important;
+  text-shadow: 0 0 18px rgba(89, 166, 255, 0.35);
+}
+
+body.theme-dark .skill-graph-page .graph-overview span {
+  color: #9db3cf !important;
+}
+
+body.theme-dark .skill-graph-page .selected-node {
+  border-color: rgba(91, 145, 220, 0.42) !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(0, 200, 245, 0.14), transparent 40%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.9), rgba(10, 28, 62, 0.82)),
+    rgba(14, 34, 72, 0.82) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.18) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.theme-dark .skill-graph-page .selected-node h3 {
+  color: #e8f2ff !important;
+}
+
+body.theme-dark .skill-graph-page .detail-heading {
+  color: #e8f2ff !important;
+}
+
+body.theme-dark .skill-graph-page .detail-block span,
+body.theme-dark .skill-graph-page .community-count,
+body.theme-dark .skill-graph-page .path-shared span {
+  color: #9db3cf !important;
+}
+
+body.theme-dark .skill-graph-page .detail-block p {
+  color: #d8e8ff !important;
+}
+
+body.theme-dark .skill-graph-page .community-row {
+  border-color: rgba(91, 145, 220, 0.34) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(89, 166, 255, 0.12), transparent 40%),
+    linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.78)),
+    rgba(12, 30, 66, 0.8) !important;
+  color: #e8f2ff !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.14) inset !important;
+}
+
+body.theme-dark .skill-graph-page .community-row:hover,
+body.theme-dark .skill-graph-page .community-row.active {
+  border-color: rgba(0, 214, 255, 0.58) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 214, 255, 0.24), transparent 42%),
+    linear-gradient(145deg, rgba(24, 72, 138, 0.92), rgba(14, 44, 92, 0.84)),
+    rgba(18, 56, 112, 0.86) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 214, 255, 0.24) inset,
+    0 14px 40px rgba(0, 120, 220, 0.24) !important;
+}
+
+body.theme-dark .skill-graph-page .community-bar {
+  background: rgba(70, 110, 170, 0.3) !important;
+  box-shadow: inset 0 0 0 1px rgba(91, 145, 220, 0.2) !important;
+}
+
+body.theme-dark .skill-graph-page .path-node {
+  border-color: rgba(91, 145, 220, 0.42) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.14), transparent 40%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.9), rgba(10, 28, 62, 0.82)),
+    rgba(14, 34, 72, 0.82) !important;
+  color: #d8e8ff !important;
+}
+
+body.theme-dark .skill-graph-page .path-node.skill,
+body.theme-dark .skill-graph-page .path-node.Skill {
+  border-color: rgba(0, 214, 255, 0.5) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(0, 214, 255, 0.22), transparent 40%),
+    linear-gradient(145deg, rgba(12, 70, 118, 0.9), rgba(8, 40, 78, 0.82)),
+    rgba(10, 50, 96, 0.82) !important;
+  color: #bef3ff !important;
+}
+
+body.theme-dark .skill-graph-page .path-shared .el-tag {
+  border-color: rgba(0, 214, 255, 0.38) !important;
+  background:
+    linear-gradient(145deg, rgba(12, 70, 118, 0.76), rgba(8, 40, 78, 0.7)),
+    rgba(10, 50, 96, 0.68) !important;
+  color: #bef3ff !important;
+}
+
+body.theme-dark .skill-graph-page .graph-legend__item {
+  border-color: rgba(91, 145, 220, 0.38) !important;
+  background:
+    linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.76)),
+    rgba(12, 30, 66, 0.78) !important;
+  color: #9db3cf !important;
+}
+
+body.theme-dark .skill-graph-page .graph-message {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.12), transparent 30%),
+    linear-gradient(145deg, rgba(18, 38, 78, 0.9), rgba(8, 22, 48, 0.84)),
+    rgba(12, 28, 58, 0.82) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+/* ============================================================
+ *  Evaluation page — force deep-blue glassmorphism (no grey)
+ * ============================================================ */
+
+body.theme-dark .eval-page .metric-card {
+  border-color: rgba(91, 145, 220, 0.4) !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.14), transparent 36%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.8)),
+    rgba(14, 34, 72, 0.8) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.16) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.theme-dark .eval-page .metric-card .metric-label {
+  color: #9db3cf !important;
+}
+
+body.theme-dark .eval-page .metric-card .metric-value {
+  color: #7fc8ff !important;
+  text-shadow: 0 0 18px rgba(89, 166, 255, 0.35);
+}
+
+body.theme-dark .eval-page .panel,
+body.theme-dark .eval-page .report-panel {
+  border-color: rgba(91, 145, 220, 0.38) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.12), transparent 30%),
+    linear-gradient(145deg, rgba(18, 38, 78, 0.86), rgba(8, 22, 48, 0.78)),
+    rgba(12, 28, 58, 0.76) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.16) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.theme-dark .eval-page .panel-title-row,
+body.theme-dark .eval-page .report-title,
+body.theme-dark .eval-page .error-block__head {
+  color: #e8f2ff !important;
+}
+
+body.theme-dark .eval-page .report-head small {
+  color: #9db3cf !important;
+}
+
+body.theme-dark .eval-page .report-cmd code {
+  border-color: rgba(0, 214, 255, 0.32) !important;
+  background:
+    linear-gradient(145deg, rgba(12, 56, 106, 0.82), rgba(8, 34, 72, 0.76)),
+    rgba(10, 44, 88, 0.78) !important;
+  color: #8ee2ff !important;
+}
+
+body.theme-dark .eval-page .report-card {
+  border-color: color-mix(in srgb, var(--c, #2563eb) 48%, rgba(91, 145, 220, 0.4)) !important;
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--c, #2563eb) 28%, transparent), transparent 36%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.82)),
+    rgba(14, 34, 72, 0.82) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--c, #2563eb) 24%, rgba(91, 145, 220, 0.16)) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+body.theme-dark .eval-page .report-card::before {
+  opacity: 0.56 !important;
+  filter: blur(46px) !important;
+}
+
+body.theme-dark .eval-page .report-card__name {
+  color: #e8f2ff !important;
+}
+
+body.theme-dark .eval-page .score-num {
+  filter: brightness(1.28) saturate(1.35);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--c, #2563eb) 60%, transparent);
+}
+
+body.theme-dark .eval-page .score-lbl,
+body.theme-dark .eval-page .prf-label,
+body.theme-dark .eval-page .error-id {
+  color: #9db3cf !important;
+}
+
+body.theme-dark .eval-page .prf-val,
+body.theme-dark .eval-page .err-detail {
+  color: #d8e8ff !important;
+}
+
+body.theme-dark .eval-page .prf-bar {
+  background: rgba(70, 110, 170, 0.32) !important;
+  box-shadow: inset 0 0 0 1px rgba(91, 145, 220, 0.22) !important;
+}
+
+body.theme-dark .eval-page .prf-bar i {
+  filter: brightness(1.22) saturate(1.28);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--c, #2563eb) 62%, transparent);
+}
+
+body.theme-dark .eval-page .error-item {
+  border-color: rgba(91, 145, 220, 0.34) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(89, 166, 255, 0.12), transparent 40%),
+    linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.78)),
+    rgba(12, 30, 66, 0.8) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.14) inset !important;
+}
+
+body.theme-dark .eval-page .el-table {
+  background: transparent !important;
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --el-table-header-bg-color: transparent !important;
+  --el-table-row-hover-bg-color: rgba(30, 123, 255, 0.08) !important;
+  --el-table-border-color: rgba(91, 145, 220, 0.24) !important;
+  color: #d8e8ff !important;
+}
+
+body.theme-dark .eval-page .el-table th.el-table__cell {
+  background: rgba(20, 44, 90, 0.56) !important;
+  color: #e8f2ff !important;
+}
+
+body.theme-dark .eval-page .el-table tr {
+  background: transparent !important;
+}
+
+body.theme-dark .eval-page .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: rgba(20, 44, 90, 0.3) !important;
+}
+
+body.theme-dark .eval-page .el-table td.el-table__cell,
+body.theme-dark .eval-page .el-table th.el-table__cell.is-leaf {
+  border-color: rgba(91, 145, 220, 0.2) !important;
+}
+
+body.theme-dark .eval-page .el-table::before {
+  background-color: rgba(91, 145, 220, 0.2) !important;
+}

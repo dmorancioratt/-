@@ -1891,27 +1891,91 @@ onBeforeUnmount(() => {
   box-shadow: 0 0 12px currentColor;
 }
 
-:global(body.theme-dark) .graph-overview__item,
-:global(body.theme-dark) .selected-node,
-:global(body.theme-dark) .community-row,
-:global(body.theme-dark) .path-node,
-:global(body.theme-dark) .graph-legend__item {
-  border-color: rgba(91, 145, 220, 0.36);
+:global(body.theme-dark) .graph-overview__item {
+  border-color: rgba(91, 145, 220, 0.4);
   background:
-    linear-gradient(145deg, rgba(18, 38, 78, 0.72), rgba(8, 22, 48, 0.58)),
-    rgba(12, 28, 58, 0.62);
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.12), transparent 36%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.86), rgba(10, 28, 62, 0.78)),
+    rgba(14, 34, 72, 0.78) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.14) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+:global(body.theme-dark) .selected-node {
+  border-color: rgba(91, 145, 220, 0.42);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(0, 200, 245, 0.12), transparent 40%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.78)),
+    rgba(14, 34, 72, 0.78) !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.16) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+:global(body.theme-dark) .community-row {
+  border-color: rgba(91, 145, 220, 0.34);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(89, 166, 255, 0.1), transparent 40%),
+    linear-gradient(145deg, rgba(20, 44, 90, 0.82), rgba(10, 26, 58, 0.74)),
+    rgba(12, 30, 66, 0.76) !important;
+  color: #e8f2ff !important;
+  box-shadow:
+    0 0 0 1px rgba(91, 145, 220, 0.12) inset !important;
 }
 
 :global(body.theme-dark) .community-row:hover,
 :global(body.theme-dark) .community-row.active {
-  border-color: rgba(0, 200, 245, 0.48);
-  background: rgba(16, 68, 126, 0.62);
+  border-color: rgba(0, 214, 255, 0.56) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 214, 255, 0.22), transparent 42%),
+    linear-gradient(145deg, rgba(24, 72, 138, 0.9), rgba(14, 44, 92, 0.82)),
+    rgba(18, 56, 112, 0.84) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 214, 255, 0.22) inset,
+    0 14px 40px rgba(0, 120, 220, 0.22) !important;
+}
+
+:global(body.theme-dark) .path-node {
+  border-color: rgba(91, 145, 220, 0.42) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.12), transparent 40%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.8)),
+    rgba(14, 34, 72, 0.8) !important;
+  color: #d8e8ff !important;
+}
+
+:global(body.theme-dark) .path-node.skill,
+:global(body.theme-dark) .path-node.Skill {
+  border-color: rgba(0, 214, 255, 0.48) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(0, 214, 255, 0.2), transparent 40%),
+    linear-gradient(145deg, rgba(12, 70, 118, 0.88), rgba(8, 40, 78, 0.8)),
+    rgba(10, 50, 96, 0.8) !important;
+  color: #bef3ff !important;
+}
+
+:global(body.theme-dark) .graph-legend__item {
+  border-color: rgba(91, 145, 220, 0.36) !important;
+  background:
+    linear-gradient(145deg, rgba(20, 44, 90, 0.82), rgba(10, 26, 58, 0.72)),
+    rgba(12, 30, 66, 0.74) !important;
+  color: #9db3cf !important;
 }
 
 :global(body.theme-dark) .graph-box {
   box-shadow:
-    inset 0 0 90px rgba(0, 200, 245, 0.08),
-    0 18px 54px rgba(0, 0, 0, 0.28);
+    inset 0 0 120px rgba(0, 200, 245, 0.12),
+    inset 0 0 72px rgba(89, 166, 255, 0.08),
+    0 22px 64px rgba(0, 0, 0, 0.32) !important;
+}
+
+:global(body.theme-dark) .graph-message {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.1), transparent 30%),
+    linear-gradient(145deg, rgba(18, 38, 78, 0.88), rgba(8, 22, 48, 0.82)),
+    rgba(12, 28, 58, 0.8) !important;
+  backdrop-filter: blur(18px) !important;
 }
 
 @keyframes nebulaSpin {
@@ -1931,7 +1995,11 @@ onBeforeUnmount(() => {
   }
 }
 
-:global(body.theme-dark) .graph-overview strong,
+:global(body.theme-dark) .graph-overview strong {
+  color: #7fc8ff !important;
+  text-shadow: 0 0 18px rgba(89, 166, 255, 0.35);
+}
+
 :global(body.theme-dark) .detail-heading,
 :global(body.theme-dark) .selected-node h3,
 :global(body.theme-dark) .community-name {
@@ -1941,18 +2009,25 @@ onBeforeUnmount(() => {
 :global(body.theme-dark) .graph-overview span,
 :global(body.theme-dark) .detail-block span,
 :global(body.theme-dark) .community-count,
-:global(body.theme-dark) .path-shared span,
-:global(body.theme-dark) .graph-legend__item {
+:global(body.theme-dark) .path-shared span {
   color: #9db3cf;
 }
 
-:global(body.theme-dark) .detail-block p,
-:global(body.theme-dark) .path-node {
+:global(body.theme-dark) .detail-block p {
   color: #d8e8ff;
 }
 
 :global(body.theme-dark) .community-bar {
-  background: rgba(94, 132, 190, 0.24);
+  background: rgba(70, 110, 170, 0.28) !important;
+  box-shadow: inset 0 0 0 1px rgba(91, 145, 220, 0.18) !important;
+}
+
+:global(body.theme-dark) :deep(.path-shared .el-tag) {
+  border-color: rgba(0, 214, 255, 0.36) !important;
+  background:
+    linear-gradient(145deg, rgba(12, 70, 118, 0.72), rgba(8, 40, 78, 0.66)),
+    rgba(10, 50, 96, 0.64) !important;
+  color: #bef3ff !important;
 }
 
 @keyframes graphOrbit {
