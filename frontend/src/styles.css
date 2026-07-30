@@ -218,6 +218,325 @@ body.theme-dark .el-textarea__inner {
   color: #d8e8ff;
 }
 
+/* ========== PersonalCenter / 个人中心页面深色覆盖 ========== */
+body.theme-dark .profile-page::before {
+  background:
+    radial-gradient(circle at 82% 6%, rgba(55, 139, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 18% 24%, rgba(0, 207, 245, 0.12), transparent 26%),
+    linear-gradient(180deg, #07182e 0%, #08172c 100%);
+}
+
+body.theme-dark .profile-page::after {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(95, 217, 255, 0.06) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(90deg, rgba(95, 217, 255, 0.06) 0 1px, transparent 1px 36px);
+}
+
+body.theme-dark .profile-page .profile-glass-card,
+body.theme-dark .profile-page .profile-card,
+body.theme-dark .profile-page .profile-section-card,
+body.theme-dark .profile-page .profile-flow-card,
+body.theme-dark .profile-page .profile-flow-summary,
+body.theme-dark .profile-page .profile-status-card {
+  border-color: rgba(91, 145, 220, 0.36) !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.08), transparent 30%),
+    linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
+    rgba(12, 28, 58, 0.72) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.theme-dark .profile-page .profile-chip,
+body.theme-dark .profile-page .certificate-chip {
+  border-color: rgba(91, 145, 220, 0.34) !important;
+  background: rgba(18, 38, 78, 0.72) !important;
+  color: #c9dcff !important;
+}
+
+body.theme-dark .profile-page .more-chip {
+  color: #59a6ff !important;
+}
+
+body.theme-dark .profile-page .profile-secondary-btn {
+  border-color: rgba(91, 145, 220, 0.34) !important;
+  background: rgba(18, 38, 78, 0.62) !important;
+  color: #59a6ff !important;
+}
+
+body.theme-dark .profile-page .section-head h3,
+body.theme-dark .profile-page .experience-head h3,
+body.theme-dark .profile-page .profile-status-card b,
+body.theme-dark .profile-page .experience-item p {
+  color: #e8f2ff !important;
+}
+
+body.theme-dark .profile-page .profile-flow-card b,
+body.theme-dark .profile-page .profile-flow-card strong,
+body.theme-dark .profile-page .profile-status-card strong {
+  color: #d8e8ff !important;
+}
+
+body.theme-dark .profile-page .profile-flow-summary h3 {
+  color: #e8f2ff;
+}
+
+body.theme-dark .profile-page .profile-flow-summary p,
+body.theme-dark .profile-page .experience-head p,
+body.theme-dark .profile-page .profile-chip span,
+body.theme-dark .profile-page .salary-range span,
+body.theme-dark .profile-page .salary-range em,
+body.theme-dark .profile-page .select-meta {
+  color: #9db3cf !important;
+}
+
+body.theme-dark .profile-page :deep(.experience-item),
+body.theme-dark .profile-page .experience-item {
+  border-color: rgba(91, 145, 220, 0.3) !important;
+  background: rgba(16, 34, 64, 0.72) !important;
+  box-shadow: none !important;
+}
+
+body.theme-dark .profile-page :deep(.experience-empty),
+body.theme-dark .profile-page .experience-empty {
+  border-color: rgba(91, 145, 220, 0.28) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 200, 245, 0.08), transparent 42%),
+    rgba(12, 28, 58, 0.52) !important;
+}
+
+body.theme-dark .profile-page :deep(.experience-empty p),
+body.theme-dark .profile-page .experience-empty p {
+  color: #9db3cf !important;
+}
+
+body.theme-dark .profile-page :deep(.experience-remove-btn),
+body.theme-dark .profile-page .experience-remove-btn {
+  border-color: rgba(220, 38, 38, 0.26) !important;
+  background: rgba(46, 16, 18, 0.7) !important;
+  color: #ff9999 !important;
+}
+
+body.theme-dark .profile-page :deep(.el-form-item__label) {
+  color: #9db3cf !important;
+}
+
+body.theme-dark .profile-page :deep(.el-input__wrapper),
+body.theme-dark .profile-page :deep(.el-select__wrapper),
+body.theme-dark .profile-page :deep(.el-cascader .el-input__wrapper),
+body.theme-dark .profile-page :deep(.el-textarea__inner) {
+  border-color: rgba(91, 145, 220, 0.3) !important;
+  background: rgba(12, 28, 58, 0.62) !important;
+}
+
+body.theme-dark .profile-page :deep(.el-input__wrapper.is-focus),
+body.theme-dark .profile-page :deep(.el-select__wrapper.is-focused),
+body.theme-dark .profile-page :deep(.el-textarea__inner:focus) {
+  background: rgba(16, 38, 72, 0.78) !important;
+}
+
+body.theme-dark .profile-page .experience-index {
+  background: linear-gradient(135deg, rgba(51, 214, 255, 0.22), rgba(89, 166, 255, 0.24)) !important;
+  color: #59a6ff !important;
+}
+
+body.theme-dark .profile-page .completion-panel > span {
+  color: #9db3cf;
+}
+
+/* ========== DigitalInterviewer / 数字人面试官页面深色覆盖 ========== */
+body.theme-dark .digital-page .surface {
+  border-color: rgba(91, 145, 220, 0.36) !important;
+  background:
+    linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
+    rgba(12, 28, 58, 0.72) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.theme-dark .digital-page .section-title h3,
+body.theme-dark .digital-page .conversation-title h3,
+body.theme-dark .digital-page .start-card h2,
+body.theme-dark .digital-page .report-hero > div:last-child > b {
+  color: #e8f2ff !important;
+}
+
+body.theme-dark .digital-page .section-title span,
+body.theme-dark .digital-page .conversation-header p,
+body.theme-dark .digital-page .history-item span,
+body.theme-dark .digital-page .history-item small,
+body.theme-dark .digital-page .history-empty,
+body.theme-dark .digital-page .start-card p,
+body.theme-dark .digital-page .input-state,
+body.theme-dark .digital-page .resume-session-bar,
+body.theme-dark .digital-page .score-list span,
+body.theme-dark .digital-page .report-hero p,
+body.theme-dark .digital-page .report-dimensions span,
+body.theme-dark .digital-page .report-columns p,
+body.theme-dark .digital-page .report-trend b,
+body.theme-dark .digital-page .connection-empty,
+body.theme-dark .digital-page .connection-loading,
+body.theme-dark .digital-page .start-card label,
+body.theme-dark .digital-page .resume-upload-copy span,
+body.theme-dark .digital-page .recent-resume-row {
+  color: #9db3cf !important;
+}
+
+body.theme-dark .digital-page .history-item:hover {
+  background: rgba(16, 34, 64, 0.78) !important;
+}
+
+body.theme-dark .digital-page .history-item.active {
+  border-color: rgba(0, 200, 245, 0.32) !important;
+  background: rgba(16, 68, 126, 0.42) !important;
+  box-shadow: inset 3px 0 #33d6ff !important;
+}
+
+body.theme-dark .digital-page .history-item strong,
+body.theme-dark .digital-page .resume-upload-copy strong {
+  color: #d8e8ff !important;
+}
+
+body.theme-dark .digital-page .resume-upload-card {
+  border-color: rgba(91, 145, 220, 0.38) !important;
+  background: rgba(16, 34, 64, 0.72) !important;
+}
+
+body.theme-dark .digital-page .resume-upload-card:hover {
+  background: rgba(22, 48, 86, 0.78) !important;
+}
+
+body.theme-dark .digital-page .parsed-resume-status {
+  background: rgba(16, 52, 60, 0.7) !important;
+}
+
+body.theme-dark .digital-page .parsed-resume-status span {
+  color: #59e0c0 !important;
+}
+
+body.theme-dark .digital-page .conversation-title span {
+  background: rgba(16, 68, 126, 0.56) !important;
+  color: #59a6ff !important;
+}
+
+body.theme-dark .digital-page .composer {
+  border-top-color: rgba(91, 145, 220, 0.3) !important;
+  background: rgba(12, 28, 58, 0.62) !important;
+}
+
+body.theme-dark .digital-page .avatar-stage {
+  background: linear-gradient(180deg, #08172c, #0b2246) !important;
+}
+
+body.theme-dark .digital-page .interviewer-bubble {
+  border-color: rgba(91, 145, 220, 0.3) !important;
+  background: rgba(16, 34, 64, 0.8) !important;
+  color: #d8e8ff !important;
+}
+
+body.theme-dark .digital-page .chat-bubble {
+  color: #d8e8ff !important;
+}
+
+body.theme-dark .digital-page .candidate-mark {
+  background: rgba(51, 214, 255, 0.14) !important;
+  color: #59a6ff !important;
+}
+
+body.theme-dark .digital-page .report-hero,
+body.theme-dark .digital-page .final-score-mini {
+  background:
+    linear-gradient(135deg, rgba(16, 68, 126, 0.56), rgba(12, 46, 72, 0.54)) !important;
+}
+
+body.theme-dark .digital-page .report-columns section {
+  background: rgba(12, 46, 72, 0.62) !important;
+}
+
+body.theme-dark .digital-page .report-columns .improvement-section {
+  background: rgba(60, 44, 16, 0.56) !important;
+}
+
+body.theme-dark .digital-page .report-columns h4 {
+  color: #8ee8cb !important;
+}
+
+body.theme-dark .digital-page .report-columns .improvement-section h4 {
+  color: #ffcc66 !important;
+}
+
+body.theme-dark .digital-page .final-score-mini strong,
+body.theme-dark .digital-page .final-score-mini b,
+body.theme-dark .digital-page .report-score strong,
+body.theme-dark .digital-page .report-dimensions strong,
+body.theme-dark .digital-page .score-list b {
+  color: #59a6ff !important;
+}
+
+body.theme-dark .digital-page .final-score-mini span,
+body.theme-dark .digital-page .report-score span {
+  color: #9eeaff !important;
+}
+
+body.theme-dark .digital-page .report-trend {
+  border-top-color: rgba(91, 145, 220, 0.3) !important;
+}
+
+body.theme-dark .digital-page .connection-badge {
+  background: rgba(12, 46, 72, 0.82) !important;
+  color: #59e0c0 !important;
+}
+
+body.theme-dark .digital-page .start-kicker {
+  color: #59a6ff !important;
+}
+
+body.theme-dark .digital-page .turn-feedback {
+  border-left-color: #4ae0b0 !important;
+}
+
+body.theme-dark .digital-page .turn-feedback span {
+  color: #59e0c0 !important;
+}
+
+body.theme-dark .digital-page .turn-feedback p {
+  color: #9db3cf !important;
+}
+
+/* ========== SkillGraph / 能力图谱页面深色覆盖（补充） ========== */
+body.theme-dark .skill-graph-page .graph-overview__item {
+  border-color: rgba(91, 145, 220, 0.36) !important;
+  background:
+    linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
+    rgba(12, 28, 58, 0.72) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+body.theme-dark .skill-graph-page .graph-message {
+  background: rgba(12, 28, 58, 0.72) !important;
+}
+
+body.theme-dark .skill-graph-page .detail-block p {
+  color: #d8e8ff !important;
+}
+
+body.theme-dark .skill-graph-page .path-node {
+  border-color: rgba(91, 145, 220, 0.3) !important;
+  background: rgba(16, 34, 64, 0.76) !important;
+  color: #c9dcff !important;
+}
+
+body.theme-dark .skill-graph-page .path-node.skill,
+body.theme-dark .skill-graph-page .path-node.Skill {
+  border-color: rgba(0, 200, 245, 0.34) !important;
+  background: rgba(12, 52, 68, 0.72) !important;
+  color: #9eeaff !important;
+}
+
+body.theme-dark .skill-graph-page .graph-legend__item {
+  border-color: rgba(91, 145, 220, 0.32) !important;
+  background: rgba(16, 34, 64, 0.72) !important;
+  color: #9db3cf !important;
+}
+
 @keyframes sheen {
   from {
     transform: translateX(-120%) skewX(-18deg);
@@ -1289,149 +1608,4 @@ body:not(.login-active) .app-main :is(
   .el-textarea__inner
 ) {
   color: #e9f9ff !important;
-}
-
-/* =========================================================
-   Dark-theme consistency patch
-   Force custom light/white panels to deep-blue glassmorphism
-   so every page matches the overview style.
-   ========================================================= */
-
-body.theme-dark .surface,
-body.theme-dark .profile-glass-card,
-body.theme-dark .profile-card,
-body.theme-dark .field-block,
-body.theme-dark .identity-card,
-body.theme-dark .history-item,
-body.theme-dark .dimension-card,
-body.theme-dark .skill-box,
-body.theme-dark .ai-column,
-body.theme-dark .ai-summary,
-body.theme-dark .graph-overview__item,
-body.theme-dark .candidate-summary,
-body.theme-dark .candidate-complete,
-body.theme-dark .candidate-section,
-body.theme-dark .missing-card,
-body.theme-dark .path-card,
-body.theme-dark .todo-item,
-body.theme-dark .diff-col,
-body.theme-dark .event-item,
-body.theme-dark .error-item,
-body.theme-dark .selection-card,
-body.theme-dark .job-preview,
-body.theme-dark .report-meta span,
-body.theme-dark .quality-grid div,
-body.theme-dark .evidence-lines p,
-body.theme-dark .interviewer-bubble,
-body.theme-dark .recent-resume-row,
-body.theme-dark .resume-upload-card,
-body.theme-dark .parsed-resume-status,
-body.theme-dark .connection-badge,
-body.theme-dark .overview-metric {
-  border-color: rgba(91, 145, 220, 0.34);
-  background:
-    linear-gradient(145deg, rgba(18, 38, 78, 0.78), rgba(8, 22, 48, 0.7)),
-    rgba(12, 28, 58, 0.68);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.22);
-}
-
-/* Hover / active states for list items */
-body.theme-dark .history-item:hover,
-body.theme-dark .history-item.active,
-body.theme-dark .todo-item:hover,
-body.theme-dark .diff-col:hover,
-body.theme-dark .event-item:hover,
-body.theme-dark .error-item:hover,
-body.theme-dark .resume-upload-card:hover {
-  border-color: rgba(86, 207, 255, 0.52);
-  background:
-    linear-gradient(145deg, rgba(24, 54, 108, 0.82), rgba(10, 32, 68, 0.74)),
-    rgba(16, 40, 80, 0.74);
-}
-
-/* Keep semantic accent colors */
-body.theme-dark .ai-column.warning {
-  border-color: rgba(245, 158, 11, 0.42);
-  background: rgba(92, 62, 8, 0.62);
-}
-
-body.theme-dark .skill-box.success {
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-body.theme-dark .skill-box.danger {
-  border-color: rgba(239, 68, 68, 0.32);
-}
-
-/* Text readability on dark panels */
-body.theme-dark .history-item,
-body.theme-dark .history-item span,
-body.theme-dark .history-item small,
-body.theme-dark .field-block > label,
-body.theme-dark .section-title h3,
-body.theme-dark .section-title small,
-body.theme-dark .identity-card h3,
-body.theme-dark .identity-card p,
-body.theme-dark .skill-box > b,
-body.theme-dark .skill-box > div > span,
-body.theme-dark .ai-column h4,
-body.theme-dark .ai-column li,
-body.theme-dark .ai-column p,
-body.theme-dark .dimension-name b,
-body.theme-dark .dimension-name small,
-body.theme-dark .evidence-group > b,
-body.theme-dark .evidence-lines > b,
-body.theme-dark .evidence-lines p,
-body.theme-dark .selection-card b,
-body.theme-dark .selection-card p,
-body.theme-dark .selection-card span,
-body.theme-dark .job-preview b,
-body.theme-dark .job-preview p,
-body.theme-dark .job-preview span,
-body.theme-dark .report-meta span,
-body.theme-dark .quality-grid strong,
-body.theme-dark .quality-grid span,
-body.theme-dark .conversation-title h3,
-body.theme-dark .conversation-header p,
-body.theme-dark .start-card h2,
-body.theme-dark .start-card p,
-body.theme-dark .start-card label,
-body.theme-dark .section-title span,
-body.theme-dark .history-empty,
-body.theme-dark .history-item strong,
-body.theme-dark .candidate-summary,
-body.theme-dark .candidate-complete,
-body.theme-dark .candidate-section,
-body.theme-dark .missing-card,
-body.theme-dark .path-card,
-body.theme-dark .todo-item,
-body.theme-dark .diff-col,
-body.theme-dark .event-item,
-body.theme-dark .error-item,
-body.theme-dark .recent-resume-row,
-body.theme-dark .resume-upload-card,
-body.theme-dark .parsed-resume-status,
-body.theme-dark .connection-badge,
-body.theme-dark .graph-overview__item,
-body.theme-dark .graph-overview__item span,
-body.theme-dark .overview-metric,
-body.theme-dark .overview-metric strong,
-body.theme-dark .overview-metric span,
-body.theme-dark .overview-metric small {
-  color: #d9f3ff;
-}
-
-body.theme-dark .history-item small,
-body.theme-dark .section-title span,
-body.theme-dark .job-preview span,
-body.theme-dark .selection-card span,
-body.theme-dark .quality-grid span,
-body.theme-dark .skill-box > div > span,
-body.theme-dark .dimension-name small,
-body.theme-dark .evidence-lines p,
-body.theme-dark .history-empty,
-body.theme-dark .conversation-header p,
-body.theme-dark .start-card p,
-body.theme-dark .start-card label {
-  color: #9db3cf;
 }

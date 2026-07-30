@@ -66,9 +66,9 @@
         </div>
       </div>
 
-      <nav class="top-nav">
+      <nav class="top-nav" ref="navRef">
         <template v-for="group in visibleGroups" :key="group.key">
-          <div class="nav-group">
+          <div class="nav-group" :ref="(el) => setTriggerRef(group.key, el as HTMLElement | null)">
             <button
               class="nav-trigger"
               :class="{ active: isGroupActive(group) || activeGroupKey === group.key }"
@@ -79,24 +79,6 @@
               <span>{{ group.label }}</span>
               <span class="caret" :class="{ open: activeGroupKey === group.key }"></span>
             </button>
-
-            <section v-if="activeGroupKey === group.key" class="nav-dropdown" aria-label="功能选择栏">
-              <button
-                v-for="item in group.items"
-                :key="item.path"
-                class="dropdown-item"
-                :class="{ active: route.path === item.path }"
-                type="button"
-                @click="navigateTo(item.path)"
-              >
-                <el-icon v-if="item.icon"><component :is="item.icon" /></el-icon>
-                <span class="item-copy">
-                  <b>{{ item.label }}</b>
-                  <small>{{ item.hint }}</small>
-                </span>
-                <span class="item-arrow"><el-icon><ArrowRight /></el-icon></span>
-              </button>
-            </section>
           </div>
         </template>
       </nav>
@@ -162,6 +144,28 @@
         </el-dropdown>
       </div>
     </header>
+
+    <Teleport to="body">
+      <Transition name="dropdown">
+        <section v-if="activeGroup" class="nav-dropdown nav-dropdown--top" :style="dropdownStyle" aria-label="功能选择栏">
+          <button
+            v-for="item in activeGroup.items"
+            :key="item.path"
+            class="dropdown-item"
+            :class="{ active: route.path === item.path }"
+            type="button"
+            @click="navigateTo(item.path)"
+          >
+            <el-icon v-if="item.icon"><component :is="item.icon" /></el-icon>
+            <span class="item-copy">
+              <b>{{ item.label }}</b>
+              <small>{{ item.hint }}</small>
+            </span>
+            <span class="item-arrow"><el-icon><ArrowRight /></el-icon></span>
+          </button>
+        </section>
+      </Transition>
+    </Teleport>
 
     <main class="app-main">
       <div class="app-titlebar">
@@ -266,6 +270,32 @@ const searchKeyword = ref('')
 const candidateAvatar = ref('')
 const isDarkTheme = ref(localStorage.getItem('sr-theme') !== 'light')
 const activeGroupKey = ref<string | null>(null)
+const navRef = ref<HTMLElement | null>(null)
+const triggerRefs = new Map<string, HTMLElement>()
+
+function setTriggerRef(key: string, el: HTMLElement | null) {
+  if (el) {
+    triggerRefs.set(key, el)
+  } else {
+    triggerRefs.delete(key)
+  }
+}
+
+const dropdownStyle = computed(() => {
+  if (!activeGroupKey.value) return {}
+  const trigger = triggerRefs.get(activeGroupKey.value)
+  if (!trigger) return {}
+  const nav = navRef.value
+  if (!nav) return {}
+  const triggerRect = trigger.getBoundingClientRect()
+  const navRect = nav.getBoundingClientRect()
+  const left = triggerRect.left + triggerRect.width / 2 - 140
+  const clampedLeft = Math.max(8, Math.min(left, window.innerWidth - 296))
+  return {
+    left: `${clampedLeft}px`,
+    top: `${navRect.bottom + 2}px`
+  }
+})
 
 const visibleGroups = computed<MenuGroup[]>(() => {
   const allowed = new Set(roleRouteMap[auth.role || 'candidate'] || roleRouteMap.candidate)
@@ -339,6 +369,11 @@ const searchTargets = computed(() =>
 )
 
 onMounted(() => {
+  if (localStorage.getItem('sr-theme-first-init-ok') !== '1') {
+    localStorage.setItem('sr-theme', 'dark')
+    localStorage.setItem('sr-theme-first-init-ok', '1')
+  }
+  isDarkTheme.value = localStorage.getItem('sr-theme') !== 'light'
   applyThemeClass()
   loadCandidateAvatar()
   window.addEventListener('profile-avatar-updated', handleAvatarUpdated as EventListener)
@@ -582,7 +617,7 @@ async function handleUserCommand(command: string) {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  z-index: 2147483647;
+  z-index: 30;
   min-width: 240px;
   border: 1px solid rgba(190, 213, 242, 0.86);
   border-radius: 18px;
@@ -591,6 +626,7 @@ async function handleUserCommand(command: string) {
     linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(232, 245, 255, 0.92));
   box-shadow: 0 18px 54px rgba(37, 99, 235, 0.16);
   backdrop-filter: blur(20px);
+  animation: dropdownIn 220ms ease;
 }
 
 .nav-dropdown::before {
@@ -1330,20 +1366,25 @@ async function handleUserCommand(command: string) {
 }
 
 .nav-dropdown {
-  top: calc(100% + 8px);
-  border-color: rgba(82, 192, 255, 0.55);
-  background:
-    linear-gradient(135deg, rgba(16, 42, 90, 0.98), rgba(8, 24, 54, 0.98));
-  box-shadow:
-    0 20px 46px rgba(0, 4, 22, 0.58),
-    0 0 0 1px rgba(86, 207, 255, 0.22);
-  backdrop-filter: blur(20px);
+  z-index: 1000;
+  top: calc(100% + 2px);
+  border-color: rgba(82, 192, 255, 0.42);
+  background: #071d4a;
+  box-shadow: 0 20px 46px rgba(0, 4, 22, 0.58);
+  backdrop-filter: none;
+}
+
+.nav-dropdown--top {
+  position: fixed;
+  z-index: 2147483647;
+  min-width: 280px;
+  max-height: calc(100vh - 92px);
+  overflow-y: auto;
 }
 
 .nav-dropdown::before {
-  border-color: rgba(82, 192, 255, 0.55);
-  background:
-    linear-gradient(135deg, rgba(16, 42, 90, 0.98), rgba(8, 24, 54, 0.98));
+  border-color: rgba(82, 192, 255, 0.42);
+  background: #071d4a;
 }
 
 .dropdown-item,
