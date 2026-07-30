@@ -80,25 +80,23 @@
               <span class="caret" :class="{ open: activeGroupKey === group.key }"></span>
             </button>
 
-            <Transition name="dropdown">
-              <section v-if="activeGroupKey === group.key" class="nav-dropdown" aria-label="功能选择栏">
-                <button
-                  v-for="item in group.items"
-                  :key="item.path"
-                  class="dropdown-item"
-                  :class="{ active: route.path === item.path }"
-                  type="button"
-                  @click="navigateTo(item.path)"
-                >
-                  <el-icon v-if="item.icon"><component :is="item.icon" /></el-icon>
-                  <span class="item-copy">
-                    <b>{{ item.label }}</b>
-                    <small>{{ item.hint }}</small>
-                  </span>
-                  <span class="item-arrow"><el-icon><ArrowRight /></el-icon></span>
-                </button>
-              </section>
-            </Transition>
+            <section v-if="activeGroupKey === group.key" class="nav-dropdown" aria-label="功能选择栏">
+              <button
+                v-for="item in group.items"
+                :key="item.path"
+                class="dropdown-item"
+                :class="{ active: route.path === item.path }"
+                type="button"
+                @click="navigateTo(item.path)"
+              >
+                <el-icon v-if="item.icon"><component :is="item.icon" /></el-icon>
+                <span class="item-copy">
+                  <b>{{ item.label }}</b>
+                  <small>{{ item.hint }}</small>
+                </span>
+                <span class="item-arrow"><el-icon><ArrowRight /></el-icon></span>
+              </button>
+            </section>
           </div>
         </template>
       </nav>
@@ -584,7 +582,7 @@ async function handleUserCommand(command: string) {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  z-index: 30;
+  z-index: 2147483647;
   min-width: 240px;
   border: 1px solid rgba(190, 213, 242, 0.86);
   border-radius: 18px;
@@ -593,7 +591,6 @@ async function handleUserCommand(command: string) {
     linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(232, 245, 255, 0.92));
   box-shadow: 0 18px 54px rgba(37, 99, 235, 0.16);
   backdrop-filter: blur(20px);
-  animation: dropdownIn 220ms ease;
 }
 
 .nav-dropdown::before {
@@ -1333,27 +1330,20 @@ async function handleUserCommand(command: string) {
 }
 
 .nav-dropdown {
-  z-index: 1000;
-  top: calc(100% + 2px);
-  border-color: rgba(82, 192, 255, 0.42);
-  background: #071d4a;
-  box-shadow: 0 20px 46px rgba(0, 4, 22, 0.58);
-  backdrop-filter: none;
-}
-
-.nav-group .nav-dropdown {
-  position: absolute;
   top: calc(100% + 8px);
-  left: 0;
-  z-index: 2147483647;
-  min-width: 240px;
-  max-height: calc(100vh - 92px);
-  overflow-y: auto;
+  border-color: rgba(82, 192, 255, 0.55);
+  background:
+    linear-gradient(135deg, rgba(16, 42, 90, 0.98), rgba(8, 24, 54, 0.98));
+  box-shadow:
+    0 20px 46px rgba(0, 4, 22, 0.58),
+    0 0 0 1px rgba(86, 207, 255, 0.22);
+  backdrop-filter: blur(20px);
 }
 
 .nav-dropdown::before {
-  border-color: rgba(82, 192, 255, 0.42);
-  background: #071d4a;
+  border-color: rgba(82, 192, 255, 0.55);
+  background:
+    linear-gradient(135deg, rgba(16, 42, 90, 0.98), rgba(8, 24, 54, 0.98));
 }
 
 .dropdown-item,
