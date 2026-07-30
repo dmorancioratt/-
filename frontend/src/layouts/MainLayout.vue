@@ -79,6 +79,26 @@
               <span>{{ group.label }}</span>
               <span class="caret" :class="{ open: activeGroupKey === group.key }"></span>
             </button>
+
+            <Transition name="dropdown">
+              <section v-if="activeGroupKey === group.key" class="nav-dropdown" aria-label="功能选择栏">
+                <button
+                  v-for="item in group.items"
+                  :key="item.path"
+                  class="dropdown-item"
+                  :class="{ active: route.path === item.path }"
+                  type="button"
+                  @click="navigateTo(item.path)"
+                >
+                  <el-icon v-if="item.icon"><component :is="item.icon" /></el-icon>
+                  <span class="item-copy">
+                    <b>{{ item.label }}</b>
+                    <small>{{ item.hint }}</small>
+                  </span>
+                  <span class="item-arrow"><el-icon><ArrowRight /></el-icon></span>
+                </button>
+              </section>
+            </Transition>
           </div>
         </template>
       </nav>
@@ -144,28 +164,6 @@
         </el-dropdown>
       </div>
     </header>
-
-    <Teleport to="body">
-      <Transition name="dropdown">
-        <section v-if="activeGroup" class="nav-dropdown nav-dropdown--top" aria-label="功能选择栏">
-          <button
-            v-for="item in activeGroup.items"
-            :key="item.path"
-            class="dropdown-item"
-            :class="{ active: route.path === item.path }"
-            type="button"
-            @click="navigateTo(item.path)"
-          >
-            <el-icon v-if="item.icon"><component :is="item.icon" /></el-icon>
-            <span class="item-copy">
-              <b>{{ item.label }}</b>
-              <small>{{ item.hint }}</small>
-            </span>
-            <span class="item-arrow"><el-icon><ArrowRight /></el-icon></span>
-          </button>
-        </section>
-      </Transition>
-    </Teleport>
 
     <main class="app-main">
       <div class="app-titlebar">
@@ -1343,12 +1341,12 @@ async function handleUserCommand(command: string) {
   backdrop-filter: none;
 }
 
-.nav-dropdown--top {
-  position: fixed;
-  top: 76px;
-  left: clamp(196px, 18vw, 296px);
+.nav-group .nav-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
   z-index: 2147483647;
-  min-width: 280px;
+  min-width: 240px;
   max-height: calc(100vh - 92px);
   overflow-y: auto;
 }
