@@ -84,50 +84,6 @@
       </nav>
 
       <div class="header-actions">
-        <div class="search-bar-shell">
-          <span class="search-glow"></span>
-          <span class="search-white"></span>
-          <span class="search-border"></span>
-          <span class="search-dark-border"></span>
-          <el-autocomplete
-            v-model="searchKeyword"
-            class="global-search"
-            value-key="label"
-            clearable
-            :fetch-suggestions="querySearch"
-            placeholder="搜索页面、岗位、简历或能力"
-            @select="handleSearchSelect"
-            @keydown.enter="handleSearchEnter"
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-            <template #default="{ item }">
-              <div class="search-suggestion">
-                <span>{{ item.label }}</span>
-                <small>{{ item.hint }}</small>
-              </div>
-            </template>
-          </el-autocomplete>
-        </div>
-        <button class="theme-switch" type="button" :class="{ dark: isDarkTheme }" :aria-label="isDarkTheme ? '切换白天模式' : '切换黑夜模式'" @click="toggleTheme">
-          <span class="theme-slider">
-            <span class="theme-sun-moon">
-              <i class="moon-dot dot-1"></i>
-              <i class="moon-dot dot-2"></i>
-              <i class="moon-dot dot-3"></i>
-              <i class="light-ray ray-1"></i>
-              <i class="light-ray ray-2"></i>
-              <i class="light-ray ray-3"></i>
-            </span>
-            <i class="theme-cloud cloud-1"></i>
-            <i class="theme-cloud cloud-2"></i>
-            <i class="theme-cloud cloud-3"></i>
-            <i class="theme-star star-1"></i>
-            <i class="theme-star star-2"></i>
-            <i class="theme-star star-3"></i>
-          </span>
-        </button>
         <el-tag effect="light" type="success">SQLite 已连接</el-tag>
         <el-tag effect="light" type="primary">{{ roleLabel }}</el-tag>
         <el-dropdown trigger="click" @command="handleUserCommand">
@@ -198,15 +154,13 @@ import {
   Management,
   Operation,
   Reading,
-  Search,
   Setting,
   TrendCharts,
   User,
   VideoCamera
 } from '@element-plus/icons-vue'
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/api/http'
 import TechParticleBackground from '@/components/TechParticleBackground.vue'
@@ -266,9 +220,7 @@ const groupDefs: Array<{ key: string; label: string; icon: any; items: string[] 
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
-const searchKeyword = ref('')
 const candidateAvatar = ref('')
-const isDarkTheme = ref(localStorage.getItem('sr-theme') !== 'light')
 const activeGroupKey = ref<string | null>(null)
 const navRef = ref<HTMLElement | null>(null)
 const triggerRefs = new Map<string, HTMLElement>()
@@ -330,7 +282,36 @@ function toggleGroup(key: string) {
 
 async function navigateTo(path: string) {
   activeGroupKey.value = null
-  if (route.path !== path) await router.push(path)
+  const isEvaluation = path === '/evaluation'
+  if (route.path === path) {
+    if (isEvaluation) {
+      location.href = path + '#'
+      requestAnimationFrame(() => { location.replace(path + '?v=' + Date.now()) })
+    }
+    return
+  }
+  try {
+    if (isEvaluation) {
+      location.replace(path + '?v=' + Date.now())
+      return
+    }
+    const res = await router.push(path)
+    if (res && (res as any)?.failed) {
+      const failure = (res as any)?.type ? String((res as any).type) : ''
+      const code = (res as any)?.code ? String((res as any).code) : ''
+      if (failure.includes('aborted') || failure.includes('cancelled') || failure.includes('4') || code.includes('NAVIGATION_ABORTED') || /redirect|duplicated/i.test(failure + code)) {
+        if (location.pathname !== path) location.href = path
+      } else if (location.pathname !== path) {
+        location.href = path
+      }
+    } else if (location.pathname !== path) {
+      requestAnimationFrame(() => {
+        if (location.pathname !== path) location.href = path
+      })
+    }
+  } catch {
+    if (location.pathname !== path) location.href = path
+  }
 }
 
 const headerSubtitle = computed(() => {
@@ -357,24 +338,8 @@ const headerSubtitle = computed(() => {
   return map[route.path] || (auth.role === 'candidate' ? '维护个人画像，查看岗位匹配和学习路径' : '管理岗位数据、能力图谱和候选人资料')
 })
 
-const searchTargets = computed(() =>
-  visibleGroups.value.flatMap((g) =>
-    g.items.map((item) => ({
-      label: item.label,
-      path: item.path,
-      hint: item.hint,
-      keywords: `${item.label} ${item.hint} ${g.label}`
-    }))
-  )
-)
-
 onMounted(() => {
-  if (localStorage.getItem('sr-theme-first-init-ok') !== '1') {
-    localStorage.setItem('sr-theme', 'dark')
-    localStorage.setItem('sr-theme-first-init-ok', '1')
-  }
-  isDarkTheme.value = localStorage.getItem('sr-theme') !== 'light'
-  applyThemeClass()
+  document.body.classList.add('theme-dark')
   loadCandidateAvatar()
   window.addEventListener('profile-avatar-updated', handleAvatarUpdated as EventListener)
 })
@@ -382,28 +347,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('profile-avatar-updated', handleAvatarUpdated as EventListener)
 })
-
-function querySearch(query: string, callback: (items: any[]) => void) {
-  const keyword = query.trim().toLowerCase()
-  const rows = searchTargets.value.filter((item) => !keyword || item.keywords.toLowerCase().includes(keyword))
-  callback(rows.slice(0, 8))
-}
-
-function handleSearchSelect(item: { path: string }) {
-  searchKeyword.value = ''
-  router.push(item.path).catch(() => undefined)
-}
-
-function handleSearchEnter() {
-  const keyword = searchKeyword.value.trim().toLowerCase()
-  if (!keyword) return
-  const match = searchTargets.value.find((item) => item.keywords.toLowerCase().includes(keyword))
-  if (!match) {
-    ElMessage.info('没有找到匹配的功能入口')
-    return
-  }
-  handleSearchSelect(match)
-}
 
 async function loadCandidateAvatar() {
   if (auth.role !== 'candidate' || !auth.token) return
@@ -419,16 +362,6 @@ function handleAvatarUpdated(event: CustomEvent<{ avatar_url?: string }>) {
   candidateAvatar.value = event.detail?.avatar_url || ''
 }
 
-function toggleTheme() {
-  isDarkTheme.value = !isDarkTheme.value
-  localStorage.setItem('sr-theme', isDarkTheme.value ? 'dark' : 'light')
-  applyThemeClass()
-}
-
-function applyThemeClass() {
-  document.body.classList.toggle('theme-dark', isDarkTheme.value)
-}
-
 async function handleUserCommand(command: string) {
   if (command === 'account') {
     router.push('/account-settings').catch(() => undefined)
@@ -441,16 +374,12 @@ async function handleUserCommand(command: string) {
 </script>
 
 <style scoped>
-@property --search-border-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
 .app-shell {
+  position: relative;
   min-height: 100vh;
+  isolation: isolate;
   color: var(--text);
-  background: #f3f9ff;
+  background: #04112b;
   display: flex;
   flex-direction: column;
 }
@@ -458,19 +387,19 @@ async function handleUserCommand(command: string) {
 .app-header {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 100;
   display: flex;
   align-items: center;
   gap: 18px;
   height: 72px;
   flex: 0 0 auto;
   overflow: visible;
-  border-bottom: 1px solid rgba(107, 174, 255, 0.28);
+  border-bottom: 1px solid rgba(95, 211, 255, 0.28);
   background:
-    radial-gradient(circle at 18% 0%, rgba(0, 200, 245, 0.14), transparent 28%),
-    radial-gradient(circle at 82% 18%, rgba(30, 123, 255, 0.12), transparent 28%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(232, 245, 255, 0.84));
-  box-shadow: 0 12px 34px rgba(37, 99, 235, 0.08);
+    radial-gradient(circle at 18% 0%, rgba(0, 200, 245, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(30, 123, 255, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(3, 13, 36, 0.9), rgba(5, 27, 68, 0.7));
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.26);
   backdrop-filter: blur(18px);
 }
 
@@ -517,7 +446,7 @@ async function handleUserCommand(command: string) {
 }
 
 .brand-name {
-  color: #071a3d;
+  color: #ecf8ff;
   font-size: 17px;
   font-weight: 950;
   line-height: 1.1;
@@ -525,7 +454,7 @@ async function handleUserCommand(command: string) {
 
 .brand-desc {
   margin-top: 3px;
-  color: #526b8e;
+  color: #9cc4e8;
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
@@ -564,7 +493,7 @@ async function handleUserCommand(command: string) {
   border-radius: 14px;
   padding: 0 14px;
   background: transparent;
-  color: #14346c;
+  color: #ecf8ff;
   font-size: 14px;
   font-weight: 850;
   white-space: nowrap;
@@ -579,9 +508,9 @@ async function handleUserCommand(command: string) {
 }
 
 .nav-trigger:hover {
-  border-color: rgba(190, 213, 242, 0.86);
-  background: rgba(255, 255, 255, 0.7);
-  color: #0a2a6c;
+  border-color: rgba(87, 223, 255, 0.36);
+  background: rgba(19, 127, 209, 0.24);
+  color: #fff;
 }
 
 .nav-trigger:hover .el-icon,
@@ -590,9 +519,9 @@ async function handleUserCommand(command: string) {
 }
 
 .nav-trigger.active {
-  border-color: rgba(37, 99, 235, 0.32);
-  background: rgba(37, 99, 235, 0.1);
-  color: #0a2a6c;
+  border-color: rgba(87, 223, 255, 0.36);
+  background: rgba(19, 127, 209, 0.24);
+  color: #fff;
   box-shadow: 0 8px 22px rgba(37, 99, 235, 0.12);
 }
 
@@ -614,19 +543,22 @@ async function handleUserCommand(command: string) {
 }
 
 .nav-dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
+  position: fixed;
+  z-index: 2147483647;
+  top: calc(100% + 2px);
   left: 0;
-  z-index: 30;
-  min-width: 240px;
-  border: 1px solid rgba(190, 213, 242, 0.86);
+  min-width: 280px;
+  max-height: calc(100vh - 92px);
+  overflow-y: auto;
+  border: 1px solid rgba(82, 192, 255, 0.42);
   border-radius: 18px;
   padding: 8px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(232, 245, 255, 0.92));
-  box-shadow: 0 18px 54px rgba(37, 99, 235, 0.16);
-  backdrop-filter: blur(20px);
+  background: #071d4a;
+  box-shadow: 0 20px 46px rgba(0, 4, 22, 0.58);
   animation: dropdownIn 220ms ease;
+  pointer-events: auto !important;
+  user-select: none;
+  isolation: isolate;
 }
 
 .nav-dropdown::before {
@@ -636,10 +568,10 @@ async function handleUserCommand(command: string) {
   width: 12px;
   height: 12px;
   content: "";
-  border-top: 1px solid rgba(190, 213, 242, 0.86);
-  border-left: 1px solid rgba(190, 213, 242, 0.86);
+  border-top: 1px solid rgba(82, 192, 255, 0.42);
+  border-left: 1px solid rgba(82, 192, 255, 0.42);
   border-radius: 3px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(232, 245, 255, 0.92));
+  background: #071d4a;
   transform: rotate(45deg);
 }
 
@@ -654,7 +586,7 @@ async function handleUserCommand(command: string) {
   border-radius: 13px;
   padding: 8px 12px;
   background: transparent;
-  color: #14346c;
+  color: #e6f5ff;
   text-align: left;
   text-decoration: none;
   cursor: pointer;
@@ -677,7 +609,7 @@ async function handleUserCommand(command: string) {
 
 .dropdown-item b {
   display: block;
-  color: #071a3d;
+  color: #e6f5ff;
   font-size: 14px;
   font-weight: 850;
   line-height: 1.2;
@@ -686,7 +618,7 @@ async function handleUserCommand(command: string) {
 .dropdown-item small {
   display: block;
   margin-top: 3px;
-  color: #6f87a8;
+  color: #98bde2;
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
@@ -704,8 +636,8 @@ async function handleUserCommand(command: string) {
 }
 
 .dropdown-item:hover {
-  border-color: rgba(190, 213, 242, 0.86);
-  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(79, 220, 255, 0.36);
+  background: rgba(18, 132, 209, 0.24);
   transform: translateX(3px);
 }
 
@@ -723,12 +655,12 @@ async function handleUserCommand(command: string) {
 }
 
 .dropdown-item.active {
-  border-color: rgba(37, 99, 235, 0.24);
-  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(79, 220, 255, 0.36);
+  background: rgba(18, 132, 209, 0.24);
 }
 
 .dropdown-item.active b {
-  color: #0a2a6c;
+  color: #e6f5ff;
 }
 
 .header-actions {
@@ -737,298 +669,6 @@ async function handleUserCommand(command: string) {
   gap: 10px;
   flex: 0 0 auto;
   padding-right: 4px;
-}
-
-.search-bar-shell {
-  --search-border-angle: 0deg;
-
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 286px;
-  height: 44px;
-  isolation: isolate;
-  overflow: hidden;
-  border-radius: 14px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(239, 248, 255, 0.78));
-  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.08);
-}
-
-.search-glow,
-.search-white,
-.search-border,
-.search-dark-border {
-  display: none;
-}
-
-.search-bar-shell::before {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  content: "";
-  padding: 2px;
-  border-radius: inherit;
-  background:
-    conic-gradient(
-      from var(--search-border-angle),
-      transparent 0deg,
-      transparent 26deg,
-      rgba(0, 200, 245, 0.12) 35deg,
-      rgba(77, 245, 255, 0.62) 44deg,
-      rgba(255, 255, 255, 0.88) 50deg,
-      rgba(30, 123, 255, 0.54) 58deg,
-      transparent 72deg,
-      transparent 190deg,
-      rgba(77, 245, 255, 0.5) 208deg,
-      rgba(255, 255, 255, 0.76) 216deg,
-      rgba(30, 123, 255, 0.5) 226deg,
-      transparent 244deg,
-      transparent 360deg
-    );
-  opacity: 0.64;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  animation: searchBorderSpin 9s linear infinite;
-}
-
-.search-bar-shell:focus-within::before,
-.search-bar-shell:hover::before {
-  opacity: 0.82;
-}
-
-.global-search {
-  width: 276px;
-  position: relative;
-  z-index: 1;
-}
-
-.global-search :deep(.el-input__wrapper) {
-  height: 38px;
-  border: 1px solid rgba(190, 213, 242, 0.24);
-  border-radius: 11px;
-  background: transparent;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    0 8px 24px rgba(37, 99, 235, 0.04);
-  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
-}
-
-.global-search :deep(.el-input__wrapper.is-focus) {
-  border-color: rgba(0, 200, 245, 0.58);
-  box-shadow:
-    0 0 0 3px rgba(0, 200, 245, 0.08),
-    0 12px 30px rgba(37, 99, 235, 0.14);
-}
-
-.global-search :deep(.el-input__prefix) {
-  color: var(--primary);
-}
-
-.theme-switch {
-  position: relative;
-  flex: 0 0 auto;
-  width: 60px;
-  height: 34px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.theme-slider {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border: 1px solid rgba(93, 168, 255, 0.56);
-  border-radius: 34px;
-  background: linear-gradient(135deg, #51b6ff, #2196f3);
-  box-shadow: 0 10px 22px rgba(33, 150, 243, 0.2);
-  transition: background 0.4s ease, box-shadow 0.4s ease;
-}
-
-.theme-switch.dark .theme-slider {
-  border-color: rgba(88, 112, 180, 0.62);
-  background: linear-gradient(135deg, #071124, #101b3d);
-  box-shadow: 0 10px 24px rgba(5, 10, 25, 0.24);
-}
-
-.theme-sun-moon {
-  position: absolute;
-  z-index: 3;
-  left: 4px;
-  bottom: 4px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #ffe45c;
-  box-shadow: 0 0 16px rgba(255, 228, 92, 0.55);
-  transition: transform 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
-}
-
-.theme-switch.dark .theme-sun-moon {
-  transform: translateX(26px) rotate(180deg);
-  background: #fff;
-  box-shadow: 0 0 14px rgba(255, 255, 255, 0.48);
-}
-
-.moon-dot,
-.light-ray,
-.theme-cloud,
-.theme-star {
-  position: absolute;
-  display: block;
-  pointer-events: none;
-}
-
-.moon-dot {
-  border-radius: 50%;
-  background: #9ca3af;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-
-.theme-switch.dark .moon-dot {
-  opacity: 1;
-}
-
-.dot-1 {
-  top: 4px;
-  left: 11px;
-  width: 6px;
-  height: 6px;
-}
-
-.dot-2 {
-  top: 11px;
-  left: 3px;
-  width: 9px;
-  height: 9px;
-}
-
-.dot-3 {
-  top: 19px;
-  left: 17px;
-  width: 3px;
-  height: 3px;
-}
-
-.light-ray {
-  z-index: -1;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.ray-1 {
-  inset: -8px;
-}
-
-.ray-2 {
-  inset: -14px;
-}
-
-.ray-3 {
-  inset: -20px;
-}
-
-.theme-cloud {
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.74);
-  animation: themeCloudMove 6s ease-in-out infinite;
-}
-
-.cloud-1 {
-  right: -3px;
-  top: 15px;
-  width: 34px;
-  height: 9px;
-}
-
-.cloud-2 {
-  right: 6px;
-  top: 10px;
-  width: 18px;
-  height: 7px;
-  animation-delay: 0.8s;
-}
-
-.cloud-3 {
-  right: 18px;
-  top: 24px;
-  width: 26px;
-  height: 8px;
-  animation-delay: 1.3s;
-}
-
-.theme-switch.dark .theme-cloud {
-  opacity: 0;
-}
-
-.theme-star {
-  border-radius: 50%;
-  background: #fff;
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: opacity 0.35s ease, transform 0.35s ease;
-  animation: themeStarTwinkle 2s ease-in-out infinite;
-}
-
-.theme-switch.dark .theme-star {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.star-1 {
-  left: 8px;
-  top: 8px;
-  width: 5px;
-  height: 5px;
-}
-
-.star-2 {
-  left: 18px;
-  top: 20px;
-  width: 3px;
-  height: 3px;
-  animation-delay: 0.5s;
-}
-
-.star-3 {
-  left: 29px;
-  top: 7px;
-  width: 4px;
-  height: 4px;
-  animation-delay: 1.1s;
-}
-
-.search-suggestion {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
-}
-
-.search-suggestion span {
-  color: #0f2b57;
-  font-weight: 850;
-}
-
-.search-suggestion small {
-  overflow: hidden;
-  max-width: 150px;
-  color: #8a9bb1;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .user-avatar {
@@ -1042,11 +682,11 @@ async function handleUserCommand(command: string) {
   align-items: center;
   gap: 8px;
   max-width: 176px;
-  border: 1px solid rgba(190, 213, 242, 0.88);
+  border: 1px solid rgba(99, 207, 255, 0.36);
   border-radius: 14px;
   padding: 4px 10px 4px 4px;
-  background: rgba(255, 255, 255, 0.74);
-  color: #14346c;
+  background: rgba(4, 27, 68, 0.66);
+  color: #eaf7ff;
   font-weight: 850;
 }
 
@@ -1062,10 +702,7 @@ async function handleUserCommand(command: string) {
   position: relative;
   min-height: calc(100vh - 72px);
   padding: 18px 22px 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(238, 247, 255, 0.2)),
-    url("@/assets/images/layout-main-bg.png") center top / cover no-repeat fixed,
-    #f3f9ff;
+  background: transparent;
 }
 
 .app-titlebar {
@@ -1073,7 +710,7 @@ async function handleUserCommand(command: string) {
   z-index: 1;
   margin-bottom: 14px;
   padding: 4px 4px 14px;
-  border-bottom: 1px solid rgba(190, 213, 242, 0.5);
+  border-bottom: 1px solid rgba(105, 213, 255, 0.26);
 }
 
 .app-titlebar .header-title-row {
@@ -1091,7 +728,7 @@ async function handleUserCommand(command: string) {
 }
 
 .app-titlebar .header-title {
-  color: #071a3d;
+  color: #ecf8ff;
   font-size: 22px;
   font-weight: 950;
   line-height: 1.2;
@@ -1099,7 +736,7 @@ async function handleUserCommand(command: string) {
 
 .app-titlebar .header-desc {
   margin-top: 6px;
-  color: #526b8e;
+  color: #9cc4e8;
   font-size: 13px;
   font-weight: 700;
 }
@@ -1110,74 +747,6 @@ async function handleUserCommand(command: string) {
   z-index: 1;
 }
 
-:global(body.theme-dark) .app-shell {
-  background: #071124;
-}
-
-:global(body.theme-dark) .app-header {
-  border-color: rgba(91, 145, 220, 0.34);
-  background:
-    radial-gradient(circle at 18% 0%, rgba(0, 200, 245, 0.18), transparent 28%),
-    radial-gradient(circle at 82% 18%, rgba(30, 123, 255, 0.18), transparent 28%),
-    linear-gradient(135deg, rgba(7, 18, 40, 0.92), rgba(11, 28, 58, 0.92));
-}
-
-:global(body.theme-dark) .brand-name,
-:global(body.theme-dark) .app-titlebar .header-title,
-:global(body.theme-dark) .dropdown-item b,
-:global(body.theme-dark) .nav-trigger {
-  color: #e8f2ff;
-}
-
-:global(body.theme-dark) .brand-desc,
-:global(body.theme-dark) .app-titlebar .header-desc,
-:global(body.theme-dark) .dropdown-item small {
-  color: #9db3cf;
-}
-
-:global(body.theme-dark) .nav-trigger:hover,
-:global(body.theme-dark) .dropdown-item:hover {
-  background: rgba(20, 40, 80, 0.72);
-  border-color: rgba(91, 145, 220, 0.5);
-}
-
-:global(body.theme-dark) .nav-trigger.active,
-:global(body.theme-dark) .dropdown-item.active {
-  background: rgba(0, 200, 245, 0.16);
-  border-color: rgba(0, 200, 245, 0.4);
-}
-
-:global(body.theme-dark) .nav-dropdown {
-  border-color: rgba(91, 145, 220, 0.5);
-  background:
-    linear-gradient(135deg, rgba(7, 18, 40, 0.96), rgba(11, 28, 58, 0.96));
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.5);
-}
-
-:global(body.theme-dark) .nav-dropdown::before {
-  border-color: rgba(91, 145, 220, 0.5);
-  background: linear-gradient(135deg, rgba(7, 18, 40, 0.96), rgba(11, 28, 58, 0.96));
-}
-
-:global(body.theme-dark) .app-main {
-  background:
-    linear-gradient(180deg, rgba(5, 15, 34, 0.84), rgba(7, 19, 42, 0.88)),
-    url("@/assets/images/layout-main-bg.png") center top / cover no-repeat fixed,
-    #071124;
-  background-blend-mode: multiply, normal, normal;
-}
-
-:global(body.theme-dark) .user-chip {
-  border-color: rgba(91, 145, 220, 0.5);
-  background: rgba(20, 40, 80, 0.6);
-  color: #e8f2ff;
-}
-
-:global(body.theme-dark) .app-titlebar {
-  border-color: rgba(91, 145, 220, 0.34);
-}
-
-/* Logged-in workspace: animated blue particle-and-flow background. */
 .workspace-atmosphere {
   position: fixed;
   z-index: 0;
@@ -1324,117 +893,6 @@ async function handleUserCommand(command: string) {
   animation: workspaceHazeMove 16s ease-in-out infinite reverse;
 }
 
-.app-shell {
-  position: relative;
-  isolation: isolate;
-  background: #04112b;
-}
-
-.app-shell > .app-header,
-.app-shell > .app-main {
-  position: relative;
-  z-index: 1;
-}
-
-.app-shell > .app-header {
-  z-index: 100;
-}
-
-.app-header {
-  border-bottom-color: rgba(95, 211, 255, 0.28);
-  background:
-    linear-gradient(180deg, rgba(3, 13, 36, 0.9), rgba(5, 27, 68, 0.7)) !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.26);
-}
-
-.brand-name,
-.nav-trigger,
-.app-titlebar .header-title {
-  color: #ecf8ff;
-}
-
-.brand-desc,
-.app-titlebar .header-desc {
-  color: #9cc4e8;
-}
-
-.nav-trigger:hover,
-.nav-trigger.active {
-  border-color: rgba(87, 223, 255, 0.36);
-  background: rgba(19, 127, 209, 0.24);
-  color: #fff;
-}
-
-.nav-dropdown {
-  z-index: 1000;
-  top: calc(100% + 2px);
-  border-color: rgba(82, 192, 255, 0.42);
-  background: #071d4a;
-  box-shadow: 0 20px 46px rgba(0, 4, 22, 0.58);
-  backdrop-filter: none;
-}
-
-.nav-dropdown--top {
-  position: fixed;
-  z-index: 2147483647;
-  min-width: 280px;
-  max-height: calc(100vh - 92px);
-  overflow-y: auto;
-}
-
-.nav-dropdown::before {
-  border-color: rgba(82, 192, 255, 0.42);
-  background: #071d4a;
-}
-
-.dropdown-item,
-.dropdown-item b {
-  color: #e6f5ff;
-}
-
-.dropdown-item small {
-  color: #98bde2;
-}
-
-.dropdown-item:hover,
-.dropdown-item.active {
-  border-color: rgba(79, 220, 255, 0.36);
-  background: rgba(18, 132, 209, 0.24);
-}
-
-.search-bar-shell {
-  background: rgba(4, 27, 68, 0.76);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
-}
-
-.global-search :deep(.el-input__wrapper) {
-  border-color: rgba(111, 217, 255, 0.22);
-  background: rgba(3, 16, 44, 0.3);
-  box-shadow: inset 0 1px 0 rgba(164, 235, 255, 0.1);
-}
-
-.global-search :deep(.el-input__inner) {
-  color: #e9f8ff;
-}
-
-.global-search :deep(.el-input__inner::placeholder) {
-  color: rgba(192, 222, 246, 0.62);
-}
-
-.user-chip {
-  border-color: rgba(99, 207, 255, 0.36);
-  background: rgba(4, 27, 68, 0.66);
-  color: #eaf7ff;
-}
-
-.app-main {
-  background: transparent !important;
-}
-
-.app-titlebar {
-  border-bottom-color: rgba(105, 213, 255, 0.26);
-}
-
 @media (max-width: 1380px) {
   .app-header {
     gap: 10px;
@@ -1447,10 +905,6 @@ async function handleUserCommand(command: string) {
 
   .brand-desc {
     display: none;
-  }
-
-  .search-bar-shell {
-    width: 180px;
   }
 
   .header-actions {
@@ -1517,42 +971,6 @@ async function handleUserCommand(command: string) {
   50% {
     opacity: 1;
     width: 236px;
-  }
-}
-
-@keyframes searchBorderSpin {
-  to {
-    --search-border-angle: 360deg;
-  }
-}
-
-@keyframes themeCloudMove {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  45% {
-    transform: translateX(4px);
-  }
-
-  80% {
-    transform: translateX(-4px);
-  }
-}
-
-@keyframes themeStarTwinkle {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  45% {
-    transform: scale(1.28);
-  }
-
-  80% {
-    transform: scale(0.82);
   }
 }
 </style>

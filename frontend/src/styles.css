@@ -1,17 +1,17 @@
 :root {
-  --primary: #2563eb;
-  --primary-dark: #0f2f78;
-  --primary-soft: #e8f2ff;
-  --cyan: #06b6d4;
-  --cyan-soft: #e7fbff;
+  --primary: #59a6ff;
+  --primary-dark: #d8e8ff;
+  --primary-soft: rgba(26, 49, 96, 0.72);
+  --cyan: #33d6ff;
+  --cyan-soft: rgba(16, 72, 92, 0.56);
   --green: #18b981;
   --orange: #f59e0b;
-  --bg: #f5f9ff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: rgba(190, 213, 242, 0.82);
-  --glass: rgba(255, 255, 255, 0.74);
-  --shadow: 0 18px 54px rgba(37, 99, 235, 0.1);
+  --bg: #071124;
+  --text: #e8f2ff;
+  --muted: #9db3cf;
+  --border: rgba(91, 145, 220, 0.38);
+  --glass: rgba(12, 28, 58, 0.72);
+  --shadow: 0 18px 54px rgba(0, 0, 0, 0.28);
   font-family: Inter, "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
   color: var(--text);
 }
@@ -40,35 +40,23 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-body.theme-dark {
-  --primary: #59a6ff;
-  --primary-dark: #d8e8ff;
-  --primary-soft: rgba(26, 49, 96, 0.72);
-  --cyan: #33d6ff;
-  --cyan-soft: rgba(16, 72, 92, 0.56);
-  --bg: #071124;
-  --text: #e8f2ff;
-  --muted: #9db3cf;
-  --border: rgba(91, 145, 220, 0.38);
-  --glass: rgba(12, 28, 58, 0.72);
-  --shadow: 0 18px 54px rgba(0, 0, 0, 0.28);
-  color: var(--text);
-}
+
 
 body::before {
   position: fixed;
   z-index: -3;
   inset: 0;
   content: "";
+  opacity: 0.88;
   background:
-    linear-gradient(rgba(37, 99, 235, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(37, 99, 235, 0.045) 1px, transparent 1px),
-    linear-gradient(rgba(6, 182, 212, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.035) 1px, transparent 1px),
-    radial-gradient(circle at 18% 7%, rgba(6, 182, 212, 0.18), transparent 25%),
-    radial-gradient(circle at 92% 13%, rgba(37, 99, 235, 0.16), transparent 29%),
-    radial-gradient(circle at 72% 86%, rgba(24, 185, 129, 0.09), transparent 23%),
-    linear-gradient(135deg, #f5f9ff 0%, #fbfdff 46%, #eef7ff 100%);
+    linear-gradient(rgba(51, 214, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(51, 214, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(rgba(89, 166, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(89, 166, 255, 0.032) 1px, transparent 1px),
+    radial-gradient(circle at 18% 7%, rgba(51, 214, 255, 0.16), transparent 25%),
+    radial-gradient(circle at 92% 13%, rgba(89, 166, 255, 0.15), transparent 29%),
+    radial-gradient(circle at 72% 86%, rgba(124, 58, 237, 0.09), transparent 23%),
+    linear-gradient(135deg, #061020 0%, #0a1a36 50%, #071124 100%);
   background-size:
     40px 40px,
     40px 40px,
@@ -80,18 +68,7 @@ body::before {
     auto;
 }
 
-body.theme-dark::before {
-  opacity: 0.88;
-  background:
-    linear-gradient(rgba(51, 214, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(51, 214, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(rgba(89, 166, 255, 0.032) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(89, 166, 255, 0.032) 1px, transparent 1px),
-    radial-gradient(circle at 18% 7%, rgba(51, 214, 255, 0.16), transparent 25%),
-    radial-gradient(circle at 92% 13%, rgba(89, 166, 255, 0.15), transparent 29%),
-    radial-gradient(circle at 72% 86%, rgba(124, 58, 237, 0.09), transparent 23%),
-    linear-gradient(135deg, #061020 0%, #0a1a36 50%, #071124 100%);
-}
+
 
 body::after {
   position: fixed;
@@ -102,7 +79,7 @@ body::after {
   height: 360px;
   pointer-events: none;
   content: "";
-  opacity: 0.5;
+  opacity: 0.34;
   background:
     radial-gradient(circle at 12% 24%, rgba(37, 99, 235, 0.58) 0 3px, transparent 4px),
     radial-gradient(circle at 44% 8%, rgba(6, 182, 212, 0.52) 0 2px, transparent 3px),
@@ -115,9 +92,7 @@ body::after {
   animation: pulseLine 5.4s ease-in-out infinite;
 }
 
-body.theme-dark::after {
-  opacity: 0.34;
-}
+
 
 @keyframes pulseLine {
   0%, 100% {
@@ -129,36 +104,36 @@ body.theme-dark::after {
   }
 }
 
-body.theme-dark .app-header,
-body.theme-dark .page-header,
-body.theme-dark .panel,
-body.theme-dark .metric-card,
-body.theme-dark .profile-glass-card,
-body.theme-dark .hero-card,
-body.theme-dark .name-card,
-body.theme-dark .intent-card,
-body.theme-dark .score-card,
-body.theme-dark .missing-card,
-body.theme-dark .path-card,
-body.theme-dark .formula-card,
-body.theme-dark .tag-panel,
-body.theme-dark .page-toolbar,
-body.theme-dark .candidate-hero,
-body.theme-dark .candidate-section,
-body.theme-dark .detail-grid article,
-body.theme-dark .experience-block,
-body.theme-dark .resume-snippet,
-body.theme-dark .workflow-item,
-body.theme-dark .result-block,
-body.theme-dark .score-panel,
-body.theme-dark .radar-panel,
-body.theme-dark .gap-panel,
-body.theme-dark .evidence-panel,
-body.theme-dark .ai-panel,
-body.theme-dark .action-item,
-body.theme-dark .todo-item,
-body.theme-dark .side-block,
-body.theme-dark .avatar-panel {
+.app-header,
+.page-header,
+.panel,
+.metric-card,
+.profile-glass-card,
+.hero-card,
+.name-card,
+.intent-card,
+.score-card,
+.missing-card,
+.path-card,
+.formula-card,
+.tag-panel,
+.page-toolbar,
+.candidate-hero,
+.candidate-section,
+.detail-grid article,
+.experience-block,
+.resume-snippet,
+.workflow-item,
+.result-block,
+.score-panel,
+.radar-panel,
+.gap-panel,
+.evidence-panel,
+.ai-panel,
+.action-item,
+.todo-item,
+.side-block,
+.avatar-panel {
   border-color: rgba(91, 145, 220, 0.36);
   background:
     linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
@@ -166,78 +141,78 @@ body.theme-dark .avatar-panel {
   box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28);
 }
 
-body.theme-dark .app-aside {
+.app-aside {
   border-color: rgba(91, 145, 220, 0.28);
   background:
     radial-gradient(circle at 15% 8%, rgba(51, 214, 255, 0.18), transparent 28%),
     linear-gradient(180deg, #071a35, #08172f 52%, #061124);
 }
 
-body.theme-dark .brand-name,
-body.theme-dark .header-title,
-body.theme-dark .page-title,
-body.theme-dark .panel h3,
-body.theme-dark .panel h4,
-body.theme-dark .metric-value,
-body.theme-dark .section-title h4,
-body.theme-dark .candidate-title-row h3,
-body.theme-dark .detail-grid b {
+.brand-name,
+.header-title,
+.page-title,
+.panel h3,
+.panel h4,
+.metric-value,
+.section-title h4,
+.candidate-title-row h3,
+.detail-grid b {
   color: #e8f2ff;
 }
 
-body.theme-dark .header-desc,
-body.theme-dark .brand-desc,
-body.theme-dark .candidate-title-row p,
-body.theme-dark .candidate-summary,
-body.theme-dark .metric-label,
-body.theme-dark .section-title span,
-body.theme-dark .detail-grid article > span {
+.header-desc,
+.brand-desc,
+.candidate-title-row p,
+.candidate-summary,
+.metric-label,
+.section-title span,
+.detail-grid article > span {
   color: #9db3cf;
 }
 
-body.theme-dark .el-table,
-body.theme-dark .el-table__inner-wrapper,
-body.theme-dark .el-table th.el-table__cell,
-body.theme-dark .el-table tr,
-body.theme-dark .el-table td.el-table__cell {
+.el-table,
+.el-table__inner-wrapper,
+.el-table th.el-table__cell,
+.el-table tr,
+.el-table td.el-table__cell {
   background-color: rgba(10, 24, 52, 0.78);
   color: #d8e8ff;
 }
 
-body.theme-dark .el-input__wrapper,
-body.theme-dark .el-select__wrapper,
-body.theme-dark .el-textarea__inner {
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner {
   border-color: rgba(91, 145, 220, 0.36);
   background-color: rgba(10, 24, 52, 0.7);
   box-shadow: none;
 }
 
-body.theme-dark .el-input__inner,
-body.theme-dark .el-select__placeholder,
-body.theme-dark .el-textarea__inner {
+.el-input__inner,
+.el-select__placeholder,
+.el-textarea__inner {
   color: #d8e8ff;
 }
 
 /* ========== PersonalCenter / 个人中心页面深色覆盖 ========== */
-body.theme-dark .profile-page::before {
+.profile-page::before {
   background:
     radial-gradient(circle at 82% 6%, rgba(55, 139, 255, 0.18), transparent 28%),
     radial-gradient(circle at 18% 24%, rgba(0, 207, 245, 0.12), transparent 26%),
     linear-gradient(180deg, #07182e 0%, #08172c 100%);
 }
 
-body.theme-dark .profile-page::after {
+.profile-page::after {
   background-image:
     repeating-linear-gradient(0deg, rgba(95, 217, 255, 0.06) 0 1px, transparent 1px 36px),
     repeating-linear-gradient(90deg, rgba(95, 217, 255, 0.06) 0 1px, transparent 1px 36px);
 }
 
-body.theme-dark .profile-page .profile-glass-card,
-body.theme-dark .profile-page .profile-card,
-body.theme-dark .profile-page .profile-section-card,
-body.theme-dark .profile-page .profile-flow-card,
-body.theme-dark .profile-page .profile-flow-summary,
-body.theme-dark .profile-page .profile-status-card {
+.profile-page .profile-glass-card,
+.profile-page .profile-card,
+.profile-page .profile-section-card,
+.profile-page .profile-flow-card,
+.profile-page .profile-flow-summary,
+.profile-page .profile-status-card {
   border-color: rgba(91, 145, 220, 0.36) !important;
   background:
     radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.08), transparent 30%),
@@ -246,105 +221,105 @@ body.theme-dark .profile-page .profile-status-card {
   box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
-body.theme-dark .profile-page .profile-chip,
-body.theme-dark .profile-page .certificate-chip {
+.profile-page .profile-chip,
+.profile-page .certificate-chip {
   border-color: rgba(91, 145, 220, 0.34) !important;
   background: rgba(18, 38, 78, 0.72) !important;
   color: #c9dcff !important;
 }
 
-body.theme-dark .profile-page .more-chip {
+.profile-page .more-chip {
   color: #59a6ff !important;
 }
 
-body.theme-dark .profile-page .profile-secondary-btn {
+.profile-page .profile-secondary-btn {
   border-color: rgba(91, 145, 220, 0.34) !important;
   background: rgba(18, 38, 78, 0.62) !important;
   color: #59a6ff !important;
 }
 
-body.theme-dark .profile-page .section-head h3,
-body.theme-dark .profile-page .experience-head h3,
-body.theme-dark .profile-page .profile-status-card b,
-body.theme-dark .profile-page .experience-item p {
+.profile-page .section-head h3,
+.profile-page .experience-head h3,
+.profile-page .profile-status-card b,
+.profile-page .experience-item p {
   color: #e8f2ff !important;
 }
 
-body.theme-dark .profile-page .profile-flow-card b,
-body.theme-dark .profile-page .profile-flow-card strong,
-body.theme-dark .profile-page .profile-status-card strong {
+.profile-page .profile-flow-card b,
+.profile-page .profile-flow-card strong,
+.profile-page .profile-status-card strong {
   color: #d8e8ff !important;
 }
 
-body.theme-dark .profile-page .profile-flow-summary h3 {
+.profile-page .profile-flow-summary h3 {
   color: #e8f2ff;
 }
 
-body.theme-dark .profile-page .profile-flow-summary p,
-body.theme-dark .profile-page .experience-head p,
-body.theme-dark .profile-page .profile-chip span,
-body.theme-dark .profile-page .salary-range span,
-body.theme-dark .profile-page .salary-range em,
-body.theme-dark .profile-page .select-meta {
+.profile-page .profile-flow-summary p,
+.profile-page .experience-head p,
+.profile-page .profile-chip span,
+.profile-page .salary-range span,
+.profile-page .salary-range em,
+.profile-page .select-meta {
   color: #9db3cf !important;
 }
 
-body.theme-dark .profile-page :deep(.experience-item),
-body.theme-dark .profile-page .experience-item {
+.profile-page :deep(.experience-item),
+.profile-page .experience-item {
   border-color: rgba(91, 145, 220, 0.3) !important;
   background: rgba(16, 34, 64, 0.72) !important;
   box-shadow: none !important;
 }
 
-body.theme-dark .profile-page :deep(.experience-empty),
-body.theme-dark .profile-page .experience-empty {
+.profile-page :deep(.experience-empty),
+.profile-page .experience-empty {
   border-color: rgba(91, 145, 220, 0.28) !important;
   background:
     radial-gradient(circle at 50% 0%, rgba(0, 200, 245, 0.08), transparent 42%),
     rgba(12, 28, 58, 0.52) !important;
 }
 
-body.theme-dark .profile-page :deep(.experience-empty p),
-body.theme-dark .profile-page .experience-empty p {
+.profile-page :deep(.experience-empty p),
+.profile-page .experience-empty p {
   color: #9db3cf !important;
 }
 
-body.theme-dark .profile-page :deep(.experience-remove-btn),
-body.theme-dark .profile-page .experience-remove-btn {
+.profile-page :deep(.experience-remove-btn),
+.profile-page .experience-remove-btn {
   border-color: rgba(220, 38, 38, 0.26) !important;
   background: rgba(46, 16, 18, 0.7) !important;
   color: #ff9999 !important;
 }
 
-body.theme-dark .profile-page :deep(.el-form-item__label) {
+.profile-page :deep(.el-form-item__label) {
   color: #9db3cf !important;
 }
 
-body.theme-dark .profile-page :deep(.el-input__wrapper),
-body.theme-dark .profile-page :deep(.el-select__wrapper),
-body.theme-dark .profile-page :deep(.el-cascader .el-input__wrapper),
-body.theme-dark .profile-page :deep(.el-textarea__inner) {
+.profile-page :deep(.el-input__wrapper),
+.profile-page :deep(.el-select__wrapper),
+.profile-page :deep(.el-cascader .el-input__wrapper),
+.profile-page :deep(.el-textarea__inner) {
   border-color: rgba(91, 145, 220, 0.3) !important;
   background: rgba(12, 28, 58, 0.62) !important;
 }
 
-body.theme-dark .profile-page :deep(.el-input__wrapper.is-focus),
-body.theme-dark .profile-page :deep(.el-select__wrapper.is-focused),
-body.theme-dark .profile-page :deep(.el-textarea__inner:focus) {
+.profile-page :deep(.el-input__wrapper.is-focus),
+.profile-page :deep(.el-select__wrapper.is-focused),
+.profile-page :deep(.el-textarea__inner:focus) {
   background: rgba(16, 38, 72, 0.78) !important;
 }
 
-body.theme-dark .profile-page .experience-index {
+.profile-page .experience-index {
   background: linear-gradient(135deg, rgba(51, 214, 255, 0.22), rgba(89, 166, 255, 0.24)) !important;
   color: #59a6ff !important;
 }
 
-body.theme-dark .profile-page .completion-panel > span {
+.profile-page .completion-panel > span {
   color: #9db3cf;
 }
 
 /* ========== DigitalInterviewer / 数字人面试官页面深色覆盖 ========== */
-body.theme-dark .digital-page .surface {
+.digital-page .surface {
   border-color: rgba(91, 145, 220, 0.36) !important;
   background:
     linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
@@ -352,157 +327,157 @@ body.theme-dark .digital-page .surface {
   box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
-body.theme-dark .digital-page .section-title h3,
-body.theme-dark .digital-page .conversation-title h3,
-body.theme-dark .digital-page .start-card h2,
-body.theme-dark .digital-page .report-hero > div:last-child > b {
+.digital-page .section-title h3,
+.digital-page .conversation-title h3,
+.digital-page .start-card h2,
+.digital-page .report-hero > div:last-child > b {
   color: #e8f2ff !important;
 }
 
-body.theme-dark .digital-page .section-title span,
-body.theme-dark .digital-page .conversation-header p,
-body.theme-dark .digital-page .history-item span,
-body.theme-dark .digital-page .history-item small,
-body.theme-dark .digital-page .history-empty,
-body.theme-dark .digital-page .start-card p,
-body.theme-dark .digital-page .input-state,
-body.theme-dark .digital-page .resume-session-bar,
-body.theme-dark .digital-page .score-list span,
-body.theme-dark .digital-page .report-hero p,
-body.theme-dark .digital-page .report-dimensions span,
-body.theme-dark .digital-page .report-columns p,
-body.theme-dark .digital-page .report-trend b,
-body.theme-dark .digital-page .connection-empty,
-body.theme-dark .digital-page .connection-loading,
-body.theme-dark .digital-page .start-card label,
-body.theme-dark .digital-page .resume-upload-copy span,
-body.theme-dark .digital-page .recent-resume-row {
+.digital-page .section-title span,
+.digital-page .conversation-header p,
+.digital-page .history-item span,
+.digital-page .history-item small,
+.digital-page .history-empty,
+.digital-page .start-card p,
+.digital-page .input-state,
+.digital-page .resume-session-bar,
+.digital-page .score-list span,
+.digital-page .report-hero p,
+.digital-page .report-dimensions span,
+.digital-page .report-columns p,
+.digital-page .report-trend b,
+.digital-page .connection-empty,
+.digital-page .connection-loading,
+.digital-page .start-card label,
+.digital-page .resume-upload-copy span,
+.digital-page .recent-resume-row {
   color: #9db3cf !important;
 }
 
-body.theme-dark .digital-page .history-item:hover {
+.digital-page .history-item:hover {
   background: rgba(16, 34, 64, 0.78) !important;
 }
 
-body.theme-dark .digital-page .history-item.active {
+.digital-page .history-item.active {
   border-color: rgba(0, 200, 245, 0.32) !important;
   background: rgba(16, 68, 126, 0.42) !important;
   box-shadow: inset 3px 0 #33d6ff !important;
 }
 
-body.theme-dark .digital-page .history-item strong,
-body.theme-dark .digital-page .resume-upload-copy strong {
+.digital-page .history-item strong,
+.digital-page .resume-upload-copy strong {
   color: #d8e8ff !important;
 }
 
-body.theme-dark .digital-page .resume-upload-card {
+.digital-page .resume-upload-card {
   border-color: rgba(91, 145, 220, 0.38) !important;
   background: rgba(16, 34, 64, 0.72) !important;
 }
 
-body.theme-dark .digital-page .resume-upload-card:hover {
+.digital-page .resume-upload-card:hover {
   background: rgba(22, 48, 86, 0.78) !important;
 }
 
-body.theme-dark .digital-page .parsed-resume-status {
+.digital-page .parsed-resume-status {
   background: rgba(16, 52, 60, 0.7) !important;
 }
 
-body.theme-dark .digital-page .parsed-resume-status span {
+.digital-page .parsed-resume-status span {
   color: #59e0c0 !important;
 }
 
-body.theme-dark .digital-page .conversation-title span {
+.digital-page .conversation-title span {
   background: rgba(16, 68, 126, 0.56) !important;
   color: #59a6ff !important;
 }
 
-body.theme-dark .digital-page .composer {
+.digital-page .composer {
   border-top-color: rgba(91, 145, 220, 0.3) !important;
   background: rgba(12, 28, 58, 0.62) !important;
 }
 
-body.theme-dark .digital-page .avatar-stage {
+.digital-page .avatar-stage {
   background: linear-gradient(180deg, #08172c, #0b2246) !important;
 }
 
-body.theme-dark .digital-page .interviewer-bubble {
+.digital-page .interviewer-bubble {
   border-color: rgba(91, 145, 220, 0.3) !important;
   background: rgba(16, 34, 64, 0.8) !important;
   color: #d8e8ff !important;
 }
 
-body.theme-dark .digital-page .chat-bubble {
+.digital-page .chat-bubble {
   color: #d8e8ff !important;
 }
 
-body.theme-dark .digital-page .candidate-mark {
+.digital-page .candidate-mark {
   background: rgba(51, 214, 255, 0.14) !important;
   color: #59a6ff !important;
 }
 
-body.theme-dark .digital-page .report-hero,
-body.theme-dark .digital-page .final-score-mini {
+.digital-page .report-hero,
+.digital-page .final-score-mini {
   background:
     linear-gradient(135deg, rgba(16, 68, 126, 0.56), rgba(12, 46, 72, 0.54)) !important;
 }
 
-body.theme-dark .digital-page .report-columns section {
+.digital-page .report-columns section {
   background: rgba(12, 46, 72, 0.62) !important;
 }
 
-body.theme-dark .digital-page .report-columns .improvement-section {
+.digital-page .report-columns .improvement-section {
   background: rgba(60, 44, 16, 0.56) !important;
 }
 
-body.theme-dark .digital-page .report-columns h4 {
+.digital-page .report-columns h4 {
   color: #8ee8cb !important;
 }
 
-body.theme-dark .digital-page .report-columns .improvement-section h4 {
+.digital-page .report-columns .improvement-section h4 {
   color: #ffcc66 !important;
 }
 
-body.theme-dark .digital-page .final-score-mini strong,
-body.theme-dark .digital-page .final-score-mini b,
-body.theme-dark .digital-page .report-score strong,
-body.theme-dark .digital-page .report-dimensions strong,
-body.theme-dark .digital-page .score-list b {
+.digital-page .final-score-mini strong,
+.digital-page .final-score-mini b,
+.digital-page .report-score strong,
+.digital-page .report-dimensions strong,
+.digital-page .score-list b {
   color: #59a6ff !important;
 }
 
-body.theme-dark .digital-page .final-score-mini span,
-body.theme-dark .digital-page .report-score span {
+.digital-page .final-score-mini span,
+.digital-page .report-score span {
   color: #9eeaff !important;
 }
 
-body.theme-dark .digital-page .report-trend {
+.digital-page .report-trend {
   border-top-color: rgba(91, 145, 220, 0.3) !important;
 }
 
-body.theme-dark .digital-page .connection-badge {
+.digital-page .connection-badge {
   background: rgba(12, 46, 72, 0.82) !important;
   color: #59e0c0 !important;
 }
 
-body.theme-dark .digital-page .start-kicker {
+.digital-page .start-kicker {
   color: #59a6ff !important;
 }
 
-body.theme-dark .digital-page .turn-feedback {
+.digital-page .turn-feedback {
   border-left-color: #4ae0b0 !important;
 }
 
-body.theme-dark .digital-page .turn-feedback span {
+.digital-page .turn-feedback span {
   color: #59e0c0 !important;
 }
 
-body.theme-dark .digital-page .turn-feedback p {
+.digital-page .turn-feedback p {
   color: #9db3cf !important;
 }
 
 /* ========== SkillGraph / 能力图谱页面深色覆盖（补充） ========== */
-body.theme-dark .skill-graph-page .graph-overview__item {
+.skill-graph-page .graph-overview__item {
   border-color: rgba(91, 145, 220, 0.36) !important;
   background:
     linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
@@ -510,28 +485,28 @@ body.theme-dark .skill-graph-page .graph-overview__item {
   box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
-body.theme-dark .skill-graph-page .graph-message {
+.skill-graph-page .graph-message {
   background: rgba(12, 28, 58, 0.72) !important;
 }
 
-body.theme-dark .skill-graph-page .detail-block p {
+.skill-graph-page .detail-block p {
   color: #d8e8ff !important;
 }
 
-body.theme-dark .skill-graph-page .path-node {
+.skill-graph-page .path-node {
   border-color: rgba(91, 145, 220, 0.3) !important;
   background: rgba(16, 34, 64, 0.76) !important;
   color: #c9dcff !important;
 }
 
-body.theme-dark .skill-graph-page .path-node.skill,
-body.theme-dark .skill-graph-page .path-node.Skill {
+.skill-graph-page .path-node.skill,
+.skill-graph-page .path-node.Skill {
   border-color: rgba(0, 200, 245, 0.34) !important;
   background: rgba(12, 52, 68, 0.72) !important;
   color: #9eeaff !important;
 }
 
-body.theme-dark .skill-graph-page .graph-legend__item {
+.skill-graph-page .graph-legend__item {
   border-color: rgba(91, 145, 220, 0.32) !important;
   background: rgba(16, 34, 64, 0.72) !important;
   color: #9db3cf !important;
@@ -1614,7 +1589,7 @@ body:not(.login-active) .app-main :is(
  *  Skill Graph page — force deep-blue glassmorphism (no grey)
  * ============================================================ */
 
-body.theme-dark .skill-graph-page .graph-overview__item {
+.skill-graph-page .graph-overview__item {
   border-color: rgba(91, 145, 220, 0.4) !important;
   background:
     radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.14), transparent 36%),
@@ -1625,16 +1600,16 @@ body.theme-dark .skill-graph-page .graph-overview__item {
     0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
-body.theme-dark .skill-graph-page .graph-overview strong {
+.skill-graph-page .graph-overview strong {
   color: #7fc8ff !important;
   text-shadow: 0 0 18px rgba(89, 166, 255, 0.35);
 }
 
-body.theme-dark .skill-graph-page .graph-overview span {
+.skill-graph-page .graph-overview span {
   color: #9db3cf !important;
 }
 
-body.theme-dark .skill-graph-page .selected-node {
+.skill-graph-page .selected-node {
   border-color: rgba(91, 145, 220, 0.42) !important;
   background:
     radial-gradient(circle at 8% 0%, rgba(0, 200, 245, 0.14), transparent 40%),
@@ -1645,25 +1620,25 @@ body.theme-dark .skill-graph-page .selected-node {
     0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
-body.theme-dark .skill-graph-page .selected-node h3 {
+.skill-graph-page .selected-node h3 {
   color: #e8f2ff !important;
 }
 
-body.theme-dark .skill-graph-page .detail-heading {
+.skill-graph-page .detail-heading {
   color: #e8f2ff !important;
 }
 
-body.theme-dark .skill-graph-page .detail-block span,
-body.theme-dark .skill-graph-page .community-count,
-body.theme-dark .skill-graph-page .path-shared span {
+.skill-graph-page .detail-block span,
+.skill-graph-page .community-count,
+.skill-graph-page .path-shared span {
   color: #9db3cf !important;
 }
 
-body.theme-dark .skill-graph-page .detail-block p {
+.skill-graph-page .detail-block p {
   color: #d8e8ff !important;
 }
 
-body.theme-dark .skill-graph-page .community-row {
+.skill-graph-page .community-row {
   border-color: rgba(91, 145, 220, 0.34) !important;
   background:
     radial-gradient(circle at 100% 0%, rgba(89, 166, 255, 0.12), transparent 40%),
@@ -1674,8 +1649,8 @@ body.theme-dark .skill-graph-page .community-row {
     0 0 0 1px rgba(91, 145, 220, 0.14) inset !important;
 }
 
-body.theme-dark .skill-graph-page .community-row:hover,
-body.theme-dark .skill-graph-page .community-row.active {
+.skill-graph-page .community-row:hover,
+.skill-graph-page .community-row.active {
   border-color: rgba(0, 214, 255, 0.58) !important;
   background:
     radial-gradient(circle at 0% 0%, rgba(0, 214, 255, 0.24), transparent 42%),
@@ -1686,12 +1661,12 @@ body.theme-dark .skill-graph-page .community-row.active {
     0 14px 40px rgba(0, 120, 220, 0.24) !important;
 }
 
-body.theme-dark .skill-graph-page .community-bar {
+.skill-graph-page .community-bar {
   background: rgba(70, 110, 170, 0.3) !important;
   box-shadow: inset 0 0 0 1px rgba(91, 145, 220, 0.2) !important;
 }
 
-body.theme-dark .skill-graph-page .path-node {
+.skill-graph-page .path-node {
   border-color: rgba(91, 145, 220, 0.42) !important;
   background:
     radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.14), transparent 40%),
@@ -1700,8 +1675,8 @@ body.theme-dark .skill-graph-page .path-node {
   color: #d8e8ff !important;
 }
 
-body.theme-dark .skill-graph-page .path-node.skill,
-body.theme-dark .skill-graph-page .path-node.Skill {
+.skill-graph-page .path-node.skill,
+.skill-graph-page .path-node.Skill {
   border-color: rgba(0, 214, 255, 0.5) !important;
   background:
     radial-gradient(circle at 100% 0%, rgba(0, 214, 255, 0.22), transparent 40%),
@@ -1710,7 +1685,7 @@ body.theme-dark .skill-graph-page .path-node.Skill {
   color: #bef3ff !important;
 }
 
-body.theme-dark .skill-graph-page .path-shared .el-tag {
+.skill-graph-page .path-shared .el-tag {
   border-color: rgba(0, 214, 255, 0.38) !important;
   background:
     linear-gradient(145deg, rgba(12, 70, 118, 0.76), rgba(8, 40, 78, 0.7)),
@@ -1718,7 +1693,7 @@ body.theme-dark .skill-graph-page .path-shared .el-tag {
   color: #bef3ff !important;
 }
 
-body.theme-dark .skill-graph-page .graph-legend__item {
+.skill-graph-page .graph-legend__item {
   border-color: rgba(91, 145, 220, 0.38) !important;
   background:
     linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.76)),
@@ -1726,7 +1701,7 @@ body.theme-dark .skill-graph-page .graph-legend__item {
   color: #9db3cf !important;
 }
 
-body.theme-dark .skill-graph-page .graph-message {
+.skill-graph-page .graph-message {
   background:
     radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.12), transparent 30%),
     linear-gradient(145deg, rgba(18, 38, 78, 0.9), rgba(8, 22, 48, 0.84)),
@@ -1738,7 +1713,7 @@ body.theme-dark .skill-graph-page .graph-message {
  *  Evaluation page — force deep-blue glassmorphism (no grey)
  * ============================================================ */
 
-body.theme-dark .eval-page .metric-card {
+.eval-page .metric-card {
   border-color: rgba(91, 145, 220, 0.4) !important;
   background:
     radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.14), transparent 36%),
@@ -1749,17 +1724,17 @@ body.theme-dark .eval-page .metric-card {
     0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
-body.theme-dark .eval-page .metric-card .metric-label {
+.eval-page .metric-card .metric-label {
   color: #9db3cf !important;
 }
 
-body.theme-dark .eval-page .metric-card .metric-value {
+.eval-page .metric-card .metric-value {
   color: #7fc8ff !important;
   text-shadow: 0 0 18px rgba(89, 166, 255, 0.35);
 }
 
-body.theme-dark .eval-page .panel,
-body.theme-dark .eval-page .report-panel {
+.eval-page .panel,
+.eval-page .report-panel {
   border-color: rgba(91, 145, 220, 0.38) !important;
   background:
     radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.12), transparent 30%),
@@ -1770,17 +1745,17 @@ body.theme-dark .eval-page .report-panel {
     0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
-body.theme-dark .eval-page .panel-title-row,
-body.theme-dark .eval-page .report-title,
-body.theme-dark .eval-page .error-block__head {
+.eval-page .panel-title-row,
+.eval-page .report-title,
+.eval-page .error-block__head {
   color: #e8f2ff !important;
 }
 
-body.theme-dark .eval-page .report-head small {
+.eval-page .report-head small {
   color: #9db3cf !important;
 }
 
-body.theme-dark .eval-page .report-cmd code {
+.eval-page .report-cmd code {
   border-color: rgba(0, 214, 255, 0.32) !important;
   background:
     linear-gradient(145deg, rgba(12, 56, 106, 0.82), rgba(8, 34, 72, 0.76)),
@@ -1788,7 +1763,7 @@ body.theme-dark .eval-page .report-cmd code {
   color: #8ee2ff !important;
 }
 
-body.theme-dark .eval-page .report-card {
+.eval-page .report-card {
   border-color: color-mix(in srgb, var(--c, #2563eb) 48%, rgba(91, 145, 220, 0.4)) !important;
   background:
     radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--c, #2563eb) 28%, transparent), transparent 36%),
@@ -1800,42 +1775,42 @@ body.theme-dark .eval-page .report-card {
   backdrop-filter: blur(18px) !important;
 }
 
-body.theme-dark .eval-page .report-card::before {
+.eval-page .report-card::before {
   opacity: 0.56 !important;
   filter: blur(46px) !important;
 }
 
-body.theme-dark .eval-page .report-card__name {
+.eval-page .report-card__name {
   color: #e8f2ff !important;
 }
 
-body.theme-dark .eval-page .score-num {
+.eval-page .score-num {
   filter: brightness(1.28) saturate(1.35);
   text-shadow: 0 0 24px color-mix(in srgb, var(--c, #2563eb) 60%, transparent);
 }
 
-body.theme-dark .eval-page .score-lbl,
-body.theme-dark .eval-page .prf-label,
-body.theme-dark .eval-page .error-id {
+.eval-page .score-lbl,
+.eval-page .prf-label,
+.eval-page .error-id {
   color: #9db3cf !important;
 }
 
-body.theme-dark .eval-page .prf-val,
-body.theme-dark .eval-page .err-detail {
+.eval-page .prf-val,
+.eval-page .err-detail {
   color: #d8e8ff !important;
 }
 
-body.theme-dark .eval-page .prf-bar {
+.eval-page .prf-bar {
   background: rgba(70, 110, 170, 0.32) !important;
   box-shadow: inset 0 0 0 1px rgba(91, 145, 220, 0.22) !important;
 }
 
-body.theme-dark .eval-page .prf-bar i {
+.eval-page .prf-bar i {
   filter: brightness(1.22) saturate(1.28);
   box-shadow: 0 0 10px color-mix(in srgb, var(--c, #2563eb) 62%, transparent);
 }
 
-body.theme-dark .eval-page .error-item {
+.eval-page .error-item {
   border-color: rgba(91, 145, 220, 0.34) !important;
   background:
     radial-gradient(circle at 100% 0%, rgba(89, 166, 255, 0.12), transparent 40%),
@@ -1845,7 +1820,7 @@ body.theme-dark .eval-page .error-item {
     0 0 0 1px rgba(91, 145, 220, 0.14) inset !important;
 }
 
-body.theme-dark .eval-page .el-table {
+.eval-page .el-table {
   background: transparent !important;
   --el-table-bg-color: transparent !important;
   --el-table-tr-bg-color: transparent !important;
@@ -1855,24 +1830,24 @@ body.theme-dark .eval-page .el-table {
   color: #d8e8ff !important;
 }
 
-body.theme-dark .eval-page .el-table th.el-table__cell {
+.eval-page .el-table th.el-table__cell {
   background: rgba(20, 44, 90, 0.56) !important;
   color: #e8f2ff !important;
 }
 
-body.theme-dark .eval-page .el-table tr {
+.eval-page .el-table tr {
   background: transparent !important;
 }
 
-body.theme-dark .eval-page .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+.eval-page .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
   background: rgba(20, 44, 90, 0.3) !important;
 }
 
-body.theme-dark .eval-page .el-table td.el-table__cell,
-body.theme-dark .eval-page .el-table th.el-table__cell.is-leaf {
+.eval-page .el-table td.el-table__cell,
+.eval-page .el-table th.el-table__cell.is-leaf {
   border-color: rgba(91, 145, 220, 0.2) !important;
 }
 
-body.theme-dark .eval-page .el-table::before {
+.eval-page .el-table::before {
   background-color: rgba(91, 145, 220, 0.2) !important;
 }

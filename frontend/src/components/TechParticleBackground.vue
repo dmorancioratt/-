@@ -85,7 +85,6 @@ function draw(timestamp: number) {
 
   drawParticles(time)
   drawNetwork(time)
-  drawEnergyStreams(time)
 
   context.restore()
   if (!reduceMotion) {
@@ -157,76 +156,7 @@ function drawNetwork(time: number) {
   })
 }
 
-function drawEnergyStreams(time: number) {
-  const ctx = context
-  if (!ctx) return
-  const lanes = [0, 1, 2, 3, 4, 5]
-  lanes.forEach((lane) => {
-    const laneOffset = lane * 0.027
-    const startY = height * (0.80 + laneOffset)
-    const endY = height * (0.52 + laneOffset * 0.42)
-    const gradient = ctx.createLinearGradient(0, startY, width, endY)
-    gradient.addColorStop(0, 'rgba(12, 110, 255, 0.02)')
-    gradient.addColorStop(0.35, `rgba(10, 163, 255, ${lane < 2 ? 0.3 : 0.18})`)
-    gradient.addColorStop(0.62, `rgba(91, 242, 255, ${lane < 2 ? 0.7 : 0.42})`)
-    gradient.addColorStop(1, 'rgba(66, 181, 255, 0.03)')
 
-    ctx.strokeStyle = gradient
-    ctx.lineWidth = lane < 2 ? 4.2 : 1.6
-    ctx.shadowBlur = lane < 2 ? 5 : 2
-    ctx.shadowColor = 'rgba(24, 207, 255, 0.46)'
-    ctx.beginPath()
-    ctx.moveTo(-width * 0.08, startY)
-    ctx.bezierCurveTo(
-      width * 0.26,
-      height * (0.67 + laneOffset),
-      width * 0.55,
-      height * (0.98 - laneOffset),
-      width * 0.77,
-      endY
-    )
-    ctx.bezierCurveTo(width * 0.9, height * (0.43 + laneOffset), width * 1.03, height * 0.56, width * 1.12, height * 0.49)
-    ctx.stroke()
-    ctx.shadowBlur = 0
-
-    if (lane < 3) {
-      ctx.strokeStyle = `rgba(198, 252, 255, ${lane === 0 ? 0.74 : 0.44})`
-      ctx.lineWidth = lane === 0 ? 1.05 : 0.72
-      ctx.beginPath()
-      ctx.moveTo(-width * 0.08, startY)
-      ctx.bezierCurveTo(width * 0.26, height * (0.67 + laneOffset), width * 0.55, height * (0.98 - laneOffset), width * 0.77, endY)
-      ctx.bezierCurveTo(width * 0.9, height * (0.43 + laneOffset), width * 1.03, height * 0.56, width * 1.12, height * 0.49)
-      ctx.stroke()
-    }
-
-    for (let marker = 0; marker < 3; marker += 1) {
-      const progress = (time * (0.06 + lane * 0.004) + marker * 0.23 + lane * 0.11) % 0.72
-      const point = cubicFlowPoint(progress, laneOffset)
-      ctx.fillStyle = '#e8feff'
-      ctx.beginPath()
-      ctx.arc(point.x, point.y, 2.2, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.strokeStyle = 'rgba(88, 238, 255, 0.52)'
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      ctx.arc(point.x, point.y, 6.5, 0, Math.PI * 2)
-      ctx.stroke()
-    }
-  })
-}
-
-function cubicFlowPoint(progress: number, laneOffset: number) {
-  const start = { x: -width * 0.08, y: height * (0.8 + laneOffset) }
-  const control1 = { x: width * 0.26, y: height * (0.67 + laneOffset) }
-  const control2 = { x: width * 0.55, y: height * (0.98 - laneOffset) }
-  const end = { x: width * 0.77, y: height * (0.52 + laneOffset * 0.42) }
-  const t = Math.min(progress / 0.72, 1)
-  const inverse = 1 - t
-  return {
-    x: inverse ** 3 * start.x + 3 * inverse ** 2 * t * control1.x + 3 * inverse * t ** 2 * control2.x + t ** 3 * end.x,
-    y: inverse ** 3 * start.y + 3 * inverse ** 2 * t * control1.y + 3 * inverse * t ** 2 * control2.y + t ** 3 * end.y
-  }
-}
 </script>
 
 <style scoped>
