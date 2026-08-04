@@ -174,6 +174,7 @@
 <script setup lang="ts">
 import * as THREE from 'three'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import { api } from '@/api/http'
 
@@ -210,6 +211,7 @@ type PositionedNode = GraphNode & {
 }
 
 const containerRef = ref<HTMLDivElement>()
+const route = useRoute()
 const raw = ref<{ nodes: GraphNode[]; edges: GraphEdge[] }>({ nodes: [], edges: [] })
 const keyword = ref('')
 const nodeType = ref('')
@@ -1381,12 +1383,12 @@ async function loadGraph() {
       Array.isArray(response?.edges) ? response.edges : []
     )
     raw.value = cleanGraph
-    graphStats.value = explore?.stats ?? {
+    graphStats.value = {
+      ...(explore?.stats || {}),
       nodeCount: cleanGraph.nodes.length,
       jobCount: cleanGraph.nodes.filter((node) => node.type === 'Job').length,
       skillCount: cleanGraph.nodes.filter((node) => node.type === 'Skill').length,
       edgeCount: cleanGraph.edges.length,
-      communityCount: 0,
       avgDegree: cleanGraph.nodes.length ? ((cleanGraph.edges.length * 2) / cleanGraph.nodes.length).toFixed(2) : '0'
     }
     communities.value = Array.isArray(explore?.communities) ? explore.communities : []
@@ -1403,6 +1405,15 @@ async function loadGraph() {
     if (pathFrom.value && !pathJobOptions.value.some((job) => job.value === pathFrom.value)) pathFrom.value = null
     if (pathTo.value && !pathJobOptions.value.some((job) => job.value === pathTo.value)) pathTo.value = null
     await renderGraph()
+    const queryJobId = Number(route.query.jobId || 0)
+    const requestedJob = queryJobId ? raw.value.nodes.find((node) => node.id === `job-${queryJobId}`) : undefined
+    if (requestedJob) {
+      viewMode.value = 'job'
+      targetJobId.value = requestedJob.id
+      selected.value = requestedJob
+      await renderGraph()
+      applyGraphFocus(requestedJob.id)
+    }
   } catch {
     graphError.value = true
     clearGraphGroup()

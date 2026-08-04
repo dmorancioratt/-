@@ -93,15 +93,68 @@ class DataSource(Base):
     __tablename__ = "data_sources"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    source_key: Mapped[str] = mapped_column(String(80), default="", index=True)
     source_name: Mapped[str] = mapped_column(String(120), index=True)
+    publisher: Mapped[str] = mapped_column(String(160), default="")
+    source_url: Mapped[str] = mapped_column(Text, default="")
+    license_name: Mapped[str] = mapped_column(String(120), default="")
+    version: Mapped[str] = mapped_column(String(80), default="")
     data_type: Mapped[str] = mapped_column(String(60))
     domain: Mapped[str] = mapped_column(String(80))
+    published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_synced_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     data_count: Mapped[int] = mapped_column(Integer, default=0)
+    indexed_count: Mapped[int] = mapped_column(Integer, default=0)
     duplicate_rate: Mapped[float] = mapped_column(Float, default=0)
     noise_rate: Mapped[float] = mapped_column(Float, default=0)
     quality_score: Mapped[float] = mapped_column(Float, default=0)
     status: Mapped[str] = mapped_column(String(40), default="processed")
+    sync_message: Mapped[str] = mapped_column(Text, default="")
+    metadata_json: Mapped[str] = mapped_column(Text, default="{}")
+
+
+class ExternalCatalogItem(Base):
+    __tablename__ = "external_catalog_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    source_key: Mapped[str] = mapped_column(String(80), index=True)
+    external_id: Mapped[str] = mapped_column(String(160), index=True)
+    item_type: Mapped[str] = mapped_column(String(40), index=True)
+    name: Mapped[str] = mapped_column(String(240), index=True)
+    category: Mapped[str] = mapped_column(String(160), default="")
+    description: Mapped[str] = mapped_column(Text, default="")
+    payload_json: Mapped[str] = mapped_column(Text, default="{}")
+    published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    indexed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
+class IndustryMetric(Base):
+    __tablename__ = "industry_metrics"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    source_key: Mapped[str] = mapped_column(String(80), index=True)
+    metric_key: Mapped[str] = mapped_column(String(120), index=True)
+    label: Mapped[str] = mapped_column(String(200))
+    period: Mapped[str] = mapped_column(String(80), index=True)
+    value: Mapped[float] = mapped_column(Float)
+    unit: Mapped[str] = mapped_column(String(40), default="")
+    dimension: Mapped[str] = mapped_column(String(80), default="market")
+    evidence_url: Mapped[str] = mapped_column(Text, default="")
+    published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    collected_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
+class DataSyncRun(Base):
+    __tablename__ = "data_sync_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    status: Mapped[str] = mapped_column(String(40), default="running", index=True)
+    source_count: Mapped[int] = mapped_column(Integer, default=0)
+    record_count: Mapped[int] = mapped_column(Integer, default=0)
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    details_json: Mapped[str] = mapped_column(Text, default="{}")
 
 
 class RawJD(Base):
@@ -112,6 +165,12 @@ class RawJD(Base):
     title: Mapped[str] = mapped_column(String(160), index=True)
     content: Mapped[str] = mapped_column(Text)
     text_hash: Mapped[str] = mapped_column(String(64), index=True)
+    external_id: Mapped[str] = mapped_column(String(160), default="", index=True)
+    source_url: Mapped[str] = mapped_column(Text, default="")
+    publisher: Mapped[str] = mapped_column(String(160), default="")
+    published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    parse_status: Mapped[str] = mapped_column(String(40), default="pending", index=True)
+    parse_error: Mapped[str] = mapped_column(Text, default="")
     is_duplicate: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
@@ -150,6 +209,7 @@ class JobEntity(Base):
     evidence: Mapped[str] = mapped_column(Text)
 
     skill_relations = relationship("JobSkillRelation", back_populates="job")
+    certificate_relations = relationship("JobCertificateRelation", back_populates="job")
 
 
 class SkillEntity(Base):
@@ -174,6 +234,34 @@ class JobSkillRelation(Base):
 
     job = relationship("JobEntity", back_populates="skill_relations")
     skill = relationship("SkillEntity")
+
+
+class CertificateEntity(Base):
+    __tablename__ = "certificate_entities"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(200), unique=True, index=True)
+    category: Mapped[str] = mapped_column(String(120), default="职业资格")
+    issuer: Mapped[str] = mapped_column(String(200), default="")
+    levels: Mapped[str] = mapped_column(Text, default="[]")
+    description: Mapped[str] = mapped_column(Text, default="")
+    source_key: Mapped[str] = mapped_column(String(80), default="", index=True)
+    external_id: Mapped[str] = mapped_column(String(160), default="", index=True)
+    evidence: Mapped[str] = mapped_column(Text, default="")
+
+
+class JobCertificateRelation(Base):
+    __tablename__ = "job_certificate_relations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    job_id: Mapped[int] = mapped_column(ForeignKey("job_entities.id"), index=True)
+    certificate_id: Mapped[int] = mapped_column(ForeignKey("certificate_entities.id"), index=True)
+    relation_type: Mapped[str] = mapped_column(String(40), default="recommended")
+    weight: Mapped[float] = mapped_column(Float, default=0.5)
+    evidence: Mapped[str] = mapped_column(Text, default="")
+
+    job = relationship("JobEntity", back_populates="certificate_relations")
+    certificate = relationship("CertificateEntity")
 
 
 class EvolutionEvent(Base):
@@ -266,6 +354,11 @@ class ReviewTask(Base):
     confidence: Mapped[float] = mapped_column(Float, default=0)
     evidence: Mapped[str] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(40), default="pending")
+    target_type: Mapped[str] = mapped_column(String(60), default="", index=True)
+    target_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    payload_json: Mapped[str] = mapped_column(Text, default="{}")
+    resolution_note: Mapped[str] = mapped_column(Text, default="")
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 

@@ -1,0 +1,5 @@
+{"id":"m_001","skills":["Python","RAG","大语言模型","LangChain","Docker","Linux"],"projects":["负责企业知识库问答，使用 Python、RAG 和 Docker 部署，回答准确率提升 18%"],"self_summary":"熟悉大模型应用、向量检索和接口封装"}
+{"id":"m_002","skills":["Java","Spring Boot","MySQL","Redis","Kafka","Git"],"projects":["负责 Spring Boot 订单服务和 MySQL 索引优化，接口平均响应降低 25%"],"self_summary":"有微服务、缓存和消息队列开发经历"}
+{"id":"m_003","skills":["SQL","Python","Pandas","统计分析","数据可视化","Tableau"],"projects":["使用 SQL 和 Python 搭建经营分析看板，定位转化漏斗并推动指标提升 12%"],"self_summary":"目标是数据分析岗位，擅长业务指标、数据清洗和可视化分析"}
+{"id":"m_004","skills":["JavaScript","TypeScript","Vue","ECharts","数据可视化","响应式布局"],"projects":["负责 Vue 和 TypeScript 数据可视化后台，优化首屏加载 35%"],"self_summary":"熟悉前端组件、图表交互、复杂表格和响应式布局"}
+{"id":"m_005","skills":["Linux","Docker","Kubernetes","Prometheus","Grafana","CI/CD"],"projects":["负责 Kubernetes 集群发布和 Prometheus 监控，故障恢复时间降低 40%"],"self_summary":"目标是 DevOps 平台工程岗位，有平台部署、监控告警和持续交付经验"}

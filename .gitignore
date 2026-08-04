@@ -15,9 +15,12 @@ backend/shurong_zhilian.db
 
 # Dev logs
 backend/devserver.*.log
+backend/qa-*.log
+frontend/qa-*.log
 
 # Generated evaluation reports (reproducible via `python -m app.evaluation.run_eval`)
 backend/app/evaluation/reports/
+backend/data/external/
 
 # Node / frontend
 node_modules/

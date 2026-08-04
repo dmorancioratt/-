@@ -1,23 +1,31 @@
 import ast
+import csv
+import io
 import json
 from datetime import datetime
+from pathlib import Path
+from uuid import uuid4
 
-from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models import (
+    CertificateEntity,
     DataSource,
     CandidateProfile,
     EvolutionEvent,
+    ExternalCatalogItem,
     InterviewSession,
     InterviewTurn,
     JobEntity,
+    JobCertificateRelation,
     JobSkillRelation,
     MatchAnalysisRecord,
     MatchReport,
+    ParsedJD,
     RawJD,
     Resume,
     ResumeSkill,
@@ -36,6 +44,7 @@ from app.schemas import (
     DigitalHumanSpeakRequest,
     DigitalInterviewRequest,
     JDParseRequest,
+    JobUpdateRequest,
     LoginRequest,
     MatchAnalysisRequest,
     RegisterRequest,
@@ -59,9 +68,12 @@ from app.services.auth import (
 )
 from app.services.constants import SKILLS
 from app.services.document_parser import DocumentParseError, MAX_UPLOAD_BYTES, extract_resume_text
+from app.services.capability_catalog import enriched_job, job_authority, job_requirements, resolve_onet
 from app.services.emerging_jobs import build_emerging_candidate
 from app.services.hallucination_guard import guard_payload
+from app.services.jd_parser import text_hash
 from app.services.matching import score_match
+from app.services.official_data import catalog_to_dict, market_snapshot, source_to_dict, sync_official_data, sync_status
 from app.services.xunfei_virtual_human import (
     VirtualHumanError,
     get_media_file,
@@ -73,6 +85,25 @@ from app.services.xunfei_virtual_human import (
 )
 
 router = APIRouter(prefix="/api")
+
+
+def _coverage_summary() -> dict:
+    report_path = Path(__file__).resolve().parents[1] / "evaluation" / "reports" / "coverage_summary.json"
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+        return {
+            "coverage": float(payload.get("coverage") or 0),
+            "generated_at": payload.get("generated_at"),
+            "command": payload.get("command") or "python -m app.evaluation.run_coverage",
+            "note": f"标准库逐行追踪：{payload.get('covered_lines', 0)}/{payload.get('executable_lines', 0)} 行。",
+        }
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        return {
+            "coverage": None,
+            "generated_at": None,
+            "command": "python -m app.evaluation.run_coverage",
+            "note": "尚未生成覆盖率报告，请先运行可复现覆盖率命令。",
+        }
 
 
 @router.get("/auth/captcha")
@@ -473,39 +504,143 @@ def stop_virtual_human(req: DigitalHumanSessionRequest, _: User = Depends(curren
 
 @router.get("/overview/summary")
 def overview_summary(db: Session = Depends(get_db)):
+    from app.evaluation.run_eval import run as run_evaluation
+
     test_total = db.scalar(select(func.count(TestCase.id))) or 1
     test_passed = db.scalar(select(func.count(TestCase.id)).where(TestCase.passed.is_(True))) or 0
     distribution_rows = db.execute(
         select(JobEntity.domain, func.count(JobEntity.id)).group_by(JobEntity.domain).order_by(func.count(JobEntity.id).desc())
     ).all()
+    evaluation = {item.task: item for item in run_evaluation()}
+    coverage = _coverage_summary()
+    market = market_snapshot(db)
+    skill_relation_count = db.scalar(select(func.count(JobSkillRelation.id))) or 0
+    certificate_relation_count = db.scalar(select(func.count(JobCertificateRelation.id))) or 0
     return {
         "jd_count": db.scalar(select(func.count(RawJD.id))) or 0,
+        "parsed_jd_count": db.scalar(select(func.count(ParsedJD.id))) or 0,
+        "resume_count": db.scalar(select(func.count(Resume.id))) or 0,
         "job_count": db.scalar(select(func.count(JobEntity.id))) or 0,
         "skill_count": db.scalar(select(func.count(SkillEntity.id))) or 0,
-        "graph_relation_count": db.scalar(select(func.count(JobSkillRelation.id))) or 0,
+        "graph_relation_count": skill_relation_count + certificate_relation_count,
+        "skill_relation_count": skill_relation_count,
+        "certificate_count": db.scalar(select(func.count(CertificateEntity.id))) or 0,
+        "certificate_relation_count": certificate_relation_count,
         "emerging_job_count": db.scalar(select(func.count(JobEntity.id)).where(JobEntity.is_emerging.is_(True))) or 0,
         "evolution_event_count": db.scalar(select(func.count(EvolutionEvent.id))) or 0,
-        "jd_parse_accuracy": 91.6,
-        "resume_parse_accuracy": 92.4,
-        "match_accuracy": 91.8,
+        "jd_parse_accuracy": round((evaluation["jd_extraction"].f1 or 0) * 100, 2),
+        "resume_parse_accuracy": round((evaluation["resume_extraction"].f1 or 0) * 100, 2),
+        "match_accuracy": round((evaluation["job_match"].accuracy or 0) * 100, 2),
+        "benchmark_sample_count": sum(item.samples for item in evaluation.values()),
         "test_case_count": test_total,
-        "unit_test_coverage": round(test_passed / test_total * 100, 1),
+        "business_case_pass_rate": round(test_passed / test_total * 100, 1),
+        "unit_test_coverage": coverage["coverage"],
+        "unit_test_coverage_generated_at": coverage["generated_at"],
         "trend": [
-            {"date": f"06-{day:02d}", "jd": 8 + day % 7, "skills": 3 + day % 5, "updates": day % 4}
-            for day in range(1, 15)
+            {
+                "date": item["period"],
+                "value": item["value"],
+                "unit": item["unit"],
+                "source": "工业和信息化部",
+                "evidence_url": item["evidence_url"],
+            }
+            for item in market["software_revenue_trend"]
         ],
         "job_distribution": [{"name": domain, "value": count} for domain, count in distribution_rows],
+        "market_coverage": market["coverage"],
+        "market_as_of": market["as_of"],
+        "market_last_synced_at": market["last_synced_at"],
     }
 
 
 @router.get("/datasets")
-def datasets(db: Session = Depends(get_db)):
-    return [to_dict(row) for row in db.scalars(select(DataSource).order_by(DataSource.uploaded_at.desc())).all()]
+def datasets(include_archived: bool = False, db: Session = Depends(get_db)):
+    query = select(DataSource).order_by(DataSource.published_at.desc(), DataSource.id.desc())
+    if not include_archived:
+        query = query.where(DataSource.status != "archived")
+    return [source_to_dict(row) for row in db.scalars(query).all()]
 
 
-@router.post("/jd/parse")
-def parse_jd(req: JDParseRequest, db: Session = Depends(get_db)):
-    ai_response = analyze_with_ai("jd_parse", {"text": req.text})
+@router.get("/data-sources/status")
+def data_sources_status(_: User = Depends(current_user), db: Session = Depends(get_db)):
+    return sync_status(db)
+
+
+@router.post("/data-sources/sync")
+def sync_data_sources(_: User = Depends(require_roles("admin")), db: Session = Depends(get_db)):
+    try:
+        return sync_official_data(db, include_network=True)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"权威数据源同步失败：{exc}") from exc
+
+
+@router.get("/market/snapshot")
+def get_market_snapshot(_: User = Depends(current_user), db: Session = Depends(get_db)):
+    return market_snapshot(db)
+
+
+@router.get("/market/catalog")
+def search_market_catalog(
+    keyword: str = Query(default="", max_length=80),
+    item_type: str = Query(default="", pattern="^(|occupation|skill|software_skill|essential_skill|certificate)$"),
+    limit: int = Query(default=50, ge=1, le=200),
+    _: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    query = select(ExternalCatalogItem)
+    if keyword.strip():
+        query = query.where(ExternalCatalogItem.name.ilike(f"%{keyword.strip()}%"))
+    if item_type:
+        query = query.where(ExternalCatalogItem.item_type == item_type)
+    rows = db.scalars(query.order_by(ExternalCatalogItem.indexed_at.desc(), ExternalCatalogItem.id).limit(limit)).all()
+    return {"items": [catalog_to_dict(row) for row in rows], "count": len(rows), "keyword": keyword, "item_type": item_type}
+
+
+def _parse_optional_date(value: object) -> datetime | None:
+    source = str(value or "").strip()
+    if not source:
+        return None
+    try:
+        return datetime.fromisoformat(source.replace("Z", "+00:00")).replace(tzinfo=None)
+    except ValueError:
+        return None
+
+
+def _first_value(row: dict, *keys: str) -> str:
+    for key in keys:
+        value = row.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip()
+    return ""
+
+
+def _decode_jd_import(filename: str, payload: bytes) -> list[dict]:
+    try:
+        text_payload = payload.decode("utf-8-sig")
+    except UnicodeDecodeError as exc:
+        raise HTTPException(status_code=400, detail="文件必须使用 UTF-8 编码") from exc
+    suffix = Path(filename).suffix.lower()
+    try:
+        if suffix == ".csv":
+            rows = list(csv.DictReader(io.StringIO(text_payload)))
+        elif suffix == ".json":
+            decoded = json.loads(text_payload)
+            rows = decoded.get("items", decoded.get("data", [])) if isinstance(decoded, dict) else decoded
+        else:
+            raise HTTPException(status_code=400, detail="仅支持 CSV 或 JSON 文件")
+    except (csv.Error, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=f"文件内容无法解析：{exc}") from exc
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        raise HTTPException(status_code=400, detail="文件内容必须是对象数组或带 items 数组的对象")
+    if not rows:
+        raise HTTPException(status_code=400, detail="导入文件没有数据")
+    if len(rows) > 1000:
+        raise HTTPException(status_code=400, detail="单次最多导入 1000 条 JD")
+    return rows
+
+
+def _analyze_and_persist_jd(source_text: str, db: Session, raw_jd: RawJD | None = None) -> dict:
+    ai_response = analyze_with_ai("jd_parse", {"text": source_text})
     parsed = ai_response["result"]
     if "evidence_sources" not in parsed:
         parsed["evidence_sources"] = parsed.pop("evidence", [])
@@ -514,6 +649,52 @@ def parse_jd(req: JDParseRequest, db: Session = Depends(get_db)):
     ok, issues = guard_payload({"confidence": parsed["confidence"], "evidence": parsed["evidence_sources"]})
     parsed["guard_status"] = "passed" if ok else "needs_review"
     parsed["guard_issues"] = issues
+
+    content_hash = text_hash(source_text)
+    deduplicated = False
+    if raw_jd is None:
+        raw_jd = db.scalar(select(RawJD).where(RawJD.text_hash == content_hash).order_by(RawJD.id))
+        deduplicated = raw_jd is not None
+        if raw_jd is None:
+            raw_jd = RawJD(
+                source_id=None,
+                title=parsed["job_name"] or "未命名岗位",
+                content=source_text,
+                text_hash=content_hash,
+                parse_status="processing",
+                is_duplicate=False,
+            )
+            db.add(raw_jd)
+            db.flush()
+
+    parsed_record = ParsedJD(
+        raw_jd_id=raw_jd.id,
+        job_name=parsed["job_name"] or "未命名岗位",
+        domain=parsed["domain"] or "未分类",
+        level=parsed["level"] or "未说明",
+        responsibilities=json.dumps(parsed["responsibilities"], ensure_ascii=False),
+        required_skills=json.dumps(parsed["required_skills"], ensure_ascii=False),
+        preferred_skills=json.dumps(parsed["preferred_skills"], ensure_ascii=False),
+        tools=json.dumps(parsed["tools"], ensure_ascii=False),
+        certificates=json.dumps(parsed["certificates"], ensure_ascii=False),
+        experience=parsed["experience"] or "未说明",
+        scenarios=json.dumps(parsed["scenarios"], ensure_ascii=False),
+        confidence=float(parsed["confidence"]),
+        evidence=json.dumps(
+            {
+                "sources": parsed["evidence_sources"],
+                "guard_status": parsed["guard_status"],
+                "guard_issues": issues,
+                "ai_provider": ai_response["provider"],
+                "ai_model": ai_response.get("model", ""),
+            },
+            ensure_ascii=False,
+        ),
+    )
+    db.add(parsed_record)
+    db.flush()
+    raw_jd.parse_status = "parsed"
+    raw_jd.parse_error = ""
     if not ok:
         db.add(
             ReviewTask(
@@ -521,31 +702,417 @@ def parse_jd(req: JDParseRequest, db: Session = Depends(get_db)):
                 title=parsed["job_name"],
                 description="低置信度或证据不足的 JD 解析结果",
                 confidence=parsed["confidence"],
-                evidence=str(parsed["evidence_sources"]),
+                evidence=json.dumps(parsed["evidence_sources"], ensure_ascii=False),
+                target_type="parsed_jd",
+                target_id=parsed_record.id,
+                payload_json=json.dumps({"guard_issues": issues}, ensure_ascii=False),
             )
         )
-        db.commit()
+    parsed["raw_jd_id"] = raw_jd.id
+    parsed["parsed_jd_id"] = parsed_record.id
+    parsed["deduplicated"] = deduplicated
     return parsed
+
+
+@router.post("/jd/parse")
+def parse_jd(req: JDParseRequest, db: Session = Depends(get_db)):
+    source_text = req.text.strip()
+    if len(source_text) < 20:
+        raise HTTPException(status_code=400, detail="JD 原文过短，请至少提供岗位职责和技能要求")
+    parsed = _analyze_and_persist_jd(source_text, db)
+    db.commit()
+    return parsed
+
+
+def _jd_import_batch_to_dict(db: Session, source: DataSource) -> dict:
+    records = db.scalars(select(RawJD).where(RawJD.source_id == source.id).order_by(RawJD.id.desc())).all()
+    status_counts: dict[str, int] = {}
+    for row in records:
+        status_counts[row.parse_status or "pending"] = status_counts.get(row.parse_status or "pending", 0) + 1
+    metadata = json.loads(source.metadata_json or "{}")
+    return {
+        "id": source.id,
+        "source_name": source.source_name,
+        "publisher": source.publisher,
+        "source_url": source.source_url,
+        "license_name": source.license_name,
+        "filename": metadata.get("filename", ""),
+        "total_count": source.data_count,
+        "imported_count": source.indexed_count,
+        "duplicate_count": metadata.get("duplicate_count", 0),
+        "invalid_count": metadata.get("invalid_count", 0),
+        "status_counts": status_counts,
+        "status": source.status,
+        "uploaded_at": source.uploaded_at,
+        "recent_records": [
+            {
+                "id": row.id,
+                "title": row.title,
+                "external_id": row.external_id,
+                "source_url": row.source_url,
+                "published_at": row.published_at,
+                "parse_status": row.parse_status,
+                "parse_error": row.parse_error,
+            }
+            for row in records[:5]
+        ],
+    }
+
+
+@router.post("/jd/import")
+async def import_jds(
+    file: UploadFile = File(...),
+    source_name: str = Form(...),
+    publisher: str = Form(...),
+    source_url: str = Form(...),
+    license_name: str = Form(default="公开招聘信息，仅用于研究分析"),
+    auto_parse: bool = Form(default=False),
+    parse_limit: int = Form(default=20),
+    _: User = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+):
+    if not source_name.strip() or not publisher.strip():
+        raise HTTPException(status_code=400, detail="请填写数据来源名称和发布机构")
+    if not source_url.strip().startswith(("http://", "https://")):
+        raise HTTPException(status_code=400, detail="来源主页必须是可核验的 HTTP(S) 地址")
+    payload = await file.read(5 * 1024 * 1024 + 1)
+    if len(payload) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="文件不能超过 5 MB")
+    rows = _decode_jd_import(file.filename or "", payload)
+    now = datetime.utcnow()
+    normalized: list[dict] = []
+    invalid_rows: list[dict] = []
+    for index, row in enumerate(rows, start=2):
+        title = _first_value(row, "title", "job_name", "岗位名称", "职位名称")
+        content = _first_value(row, "content", "description", "jd", "job_description", "岗位描述", "职位描述")
+        if len(content) < 20:
+            invalid_rows.append({"row": index, "reason": "JD 正文少于 20 个字符"})
+            continue
+        normalized.append(
+            {
+                "title": title or content.splitlines()[0][:160] or "未命名岗位",
+                "content": content,
+                "external_id": _first_value(row, "external_id", "id", "job_id", "原始编号"),
+                "source_url": _first_value(row, "source_url", "url", "job_url", "来源链接") or source_url.strip(),
+                "publisher": _first_value(row, "publisher", "company", "发布机构", "企业名称") or publisher.strip(),
+                "published_at": _parse_optional_date(_first_value(row, "published_at", "publish_date", "发布日期")),
+            }
+        )
+
+    existing_hashes = set(db.scalars(select(RawJD.text_hash)).all())
+    batch_hashes: set[str] = set()
+    imported: list[RawJD] = []
+    duplicate_count = 0
+    source = DataSource(
+        source_key=f"jd-import-{now:%Y%m%d%H%M%S}-{uuid4().hex[:8]}",
+        source_name=source_name.strip(),
+        publisher=publisher.strip(),
+        source_url=source_url.strip(),
+        license_name=license_name.strip(),
+        version=f"导入于 {now:%Y-%m-%d}",
+        data_type="真实岗位 JD",
+        domain="多领域招聘市场",
+        published_at=max((row["published_at"] for row in normalized if row["published_at"]), default=now),
+        last_synced_at=now,
+        uploaded_at=now,
+        data_count=len(rows),
+        indexed_count=0,
+        duplicate_rate=0,
+        noise_rate=round(len(invalid_rows) / len(rows), 4),
+        quality_score=0,
+        status="imported",
+        sync_message="已完成文件校验、来源登记与正文哈希去重",
+    )
+    db.add(source)
+    db.flush()
+    for row in normalized:
+        content_hash = text_hash(row["content"])
+        if content_hash in existing_hashes or content_hash in batch_hashes:
+            duplicate_count += 1
+            continue
+        batch_hashes.add(content_hash)
+        raw = RawJD(
+            source_id=source.id,
+            title=row["title"][:160],
+            content=row["content"],
+            text_hash=content_hash,
+            external_id=row["external_id"][:160],
+            source_url=row["source_url"],
+            publisher=row["publisher"][:160],
+            published_at=row["published_at"],
+            parse_status="pending",
+            is_duplicate=False,
+        )
+        db.add(raw)
+        imported.append(raw)
+    db.flush()
+    source.indexed_count = len(imported)
+    source.duplicate_rate = round(duplicate_count / len(rows), 4)
+    valid_ratio = len(imported) / len(rows)
+    provenance_bonus = 5 if source.source_url.startswith("https://") else 2
+    source.quality_score = round(min(100, valid_ratio * 90 + provenance_bonus), 1)
+    source.metadata_json = json.dumps(
+        {
+            "kind": "jd_import",
+            "filename": file.filename or "",
+            "duplicate_count": duplicate_count,
+            "invalid_count": len(invalid_rows),
+            "invalid_rows": invalid_rows[:50],
+            "column_contract": "title/content/source_url/external_id/published_at/publisher",
+        },
+        ensure_ascii=False,
+    )
+
+    parsed_count = 0
+    failed_count = 0
+    if auto_parse:
+        for raw in imported[: max(1, min(parse_limit, 100))]:
+            raw.parse_status = "processing"
+            try:
+                _analyze_and_persist_jd(raw.content, db, raw)
+                parsed_count += 1
+            except Exception as exc:
+                raw.parse_status = "failed"
+                raw.parse_error = str(exc)[:500]
+                failed_count += 1
+    pending_count = len(imported) - parsed_count - failed_count
+    if imported and pending_count == 0 and failed_count == 0:
+        source.status = "parsed"
+    elif parsed_count or failed_count:
+        source.status = "partially_parsed"
+    db.commit()
+    return {
+        **_jd_import_batch_to_dict(db, source),
+        "parsed_now": parsed_count,
+        "failed_now": failed_count,
+    }
+
+
+@router.get("/jd/imports")
+def jd_import_history(
+    _: User = Depends(require_roles("admin", "hr")),
+    db: Session = Depends(get_db),
+):
+    sources = db.scalars(
+        select(DataSource).where(DataSource.source_key.like("jd-import-%")).order_by(DataSource.id.desc())
+    ).all()
+    return [_jd_import_batch_to_dict(db, source) for source in sources]
+
+
+@router.post("/jd/imports/{source_id}/parse")
+def parse_jd_import_batch(
+    source_id: int,
+    limit: int = Query(default=50, ge=1, le=100),
+    _: User = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+):
+    source = db.get(DataSource, source_id)
+    if not source or not source.source_key.startswith("jd-import-"):
+        raise HTTPException(status_code=404, detail="JD 导入批次不存在")
+    records = db.scalars(
+        select(RawJD)
+        .where(RawJD.source_id == source.id, RawJD.parse_status.in_(["pending", "failed"]))
+        .order_by(RawJD.id)
+        .limit(limit)
+    ).all()
+    parsed_count = 0
+    failed_count = 0
+    for raw in records:
+        raw.parse_status = "processing"
+        try:
+            _analyze_and_persist_jd(raw.content, db, raw)
+            parsed_count += 1
+        except Exception as exc:
+            raw.parse_status = "failed"
+            raw.parse_error = str(exc)[:500]
+            failed_count += 1
+    remaining = db.scalar(
+        select(func.count(RawJD.id)).where(RawJD.source_id == source.id, RawJD.parse_status.in_(["pending", "failed"]))
+    ) or 0
+    source.status = "parsed" if remaining == 0 and source.indexed_count else "partially_parsed"
+    source.sync_message = f"批量解析：本次成功 {parsed_count} 条，失败 {failed_count} 条，待处理 {remaining} 条"
+    db.commit()
+    return {**_jd_import_batch_to_dict(db, source), "parsed_now": parsed_count, "failed_now": failed_count}
+
+
+def _parsed_jd_to_dict(parsed: ParsedJD, raw: RawJD) -> dict:
+    evidence = json.loads(parsed.evidence or "{}")
+    return {
+        "id": parsed.id,
+        "parsed_jd_id": parsed.id,
+        "raw_jd_id": raw.id,
+        "job_name": parsed.job_name,
+        "domain": parsed.domain,
+        "level": parsed.level,
+        "responsibilities": json.loads(parsed.responsibilities or "[]"),
+        "required_skills": json.loads(parsed.required_skills or "[]"),
+        "preferred_skills": json.loads(parsed.preferred_skills or "[]"),
+        "tools": json.loads(parsed.tools or "[]"),
+        "certificates": json.loads(parsed.certificates or "[]"),
+        "experience": parsed.experience,
+        "scenarios": json.loads(parsed.scenarios or "[]"),
+        "confidence": parsed.confidence,
+        "evidence_sources": evidence.get("sources", []),
+        "guard_status": evidence.get("guard_status", "unknown"),
+        "guard_issues": evidence.get("guard_issues", []),
+        "ai_provider": evidence.get("ai_provider", ""),
+        "ai_model": evidence.get("ai_model", ""),
+        "source_text": raw.content,
+        "source_url": raw.source_url,
+        "publisher": raw.publisher,
+        "external_id": raw.external_id,
+        "published_at": raw.published_at,
+        "parse_status": raw.parse_status,
+        "created_at": raw.created_at,
+    }
+
+
+@router.get("/jd/history")
+def jd_history(
+    limit: int = Query(default=30, ge=1, le=100),
+    _: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    rows = db.execute(
+        select(ParsedJD, RawJD)
+        .join(RawJD, RawJD.id == ParsedJD.raw_jd_id)
+        .order_by(ParsedJD.id.desc())
+        .limit(limit)
+    ).all()
+    return [_parsed_jd_to_dict(parsed, raw) for parsed, raw in rows]
 
 
 @router.get("/jobs")
 def jobs(db: Session = Depends(get_db)):
-    return [to_dict(row) for row in db.scalars(select(JobEntity).order_by(JobEntity.id)).all()]
+    return [enriched_job(db, row) for row in db.scalars(select(JobEntity).order_by(JobEntity.id)).all()]
+
+
+def _next_job_version(db: Session, job_id: int) -> str:
+    event_count = db.scalar(select(func.count(EvolutionEvent.id)).where(EvolutionEvent.job_id == job_id)) or 0
+    return f"v{event_count + 2}.0"
+
+
+@router.put("/jobs/{job_id}")
+def update_job(
+    job_id: int,
+    req: JobUpdateRequest,
+    _: User = Depends(require_roles("admin", "hr")),
+    db: Session = Depends(get_db),
+):
+    job = db.get(JobEntity, job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="岗位不存在")
+    if not req.update_note.strip():
+        raise HTTPException(status_code=400, detail="请填写本次更新说明")
+
+    existing_relations = list(job.skill_relations)
+    existing_required = {row.skill.name for row in existing_relations if row.relation_type == "requires"}
+    existing_preferred = {row.skill.name for row in existing_relations if row.relation_type != "requires"}
+    required = list(dict.fromkeys(item.strip() for item in (req.required_skills if req.required_skills is not None else existing_required) if item.strip()))
+    preferred = list(dict.fromkeys(item.strip() for item in (req.preferred_skills if req.preferred_skills is not None else existing_preferred) if item.strip() and item.strip() not in required))
+    if not required:
+        raise HTTPException(status_code=400, detail="岗位至少需要一项必备技能")
+
+    old_all = existing_required | existing_preferred
+    new_required = set(required)
+    new_preferred = set(preferred)
+    new_all = new_required | new_preferred
+    changed_relation = sorted(
+        skill for skill in old_all & new_all
+        if (skill in existing_required) != (skill in new_required)
+    )
+    metadata_changes = []
+    for field, label in (("domain", "所属领域"), ("job_type", "岗位类型"), ("level", "岗位等级"), ("description", "岗位描述"), ("status", "状态")):
+        value = getattr(req, field)
+        if value is not None and value.strip() and value.strip() != getattr(job, field):
+            metadata_changes.append({"skill": label, "change": f"{getattr(job, field)} → {value.strip()}"})
+            setattr(job, field, value.strip())
+
+    source_note = "；".join(item.strip() for item in req.evidence_sources if item.strip()) or "管理员人工复核"
+    db.execute(delete(JobSkillRelation).where(JobSkillRelation.job_id == job.id))
+    skill_by_name = {row.name: row for row in db.scalars(select(SkillEntity).where(SkillEntity.name.in_(list(new_all)))).all()}
+    for relation_type, skill_names in (("requires", required), ("prefers", preferred)):
+        for index, skill_name in enumerate(skill_names):
+            skill = skill_by_name.get(skill_name)
+            if skill is None:
+                skill = SkillEntity(
+                    name=skill_name,
+                    category="人工复核能力",
+                    description=f"{skill_name} 由人工优化流程补充到岗位能力图谱。",
+                    evidence=f"人工复核来源：{source_note}",
+                )
+                db.add(skill)
+                db.flush()
+                skill_by_name[skill_name] = skill
+            db.add(JobSkillRelation(
+                job_id=job.id,
+                skill_id=skill.id,
+                relation_type=relation_type,
+                weight=round(max(0.55, 1.0 - index * 0.04), 2),
+                evidence=f"人工复核：{job.name} → {skill_name}；依据：{source_note}",
+            ))
+
+    previous_version = job.version
+    next_version = _next_job_version(db, job.id)
+    modified = metadata_changes + [
+        {"skill": skill, "change": "必备能力与加分能力之间调整"}
+        for skill in changed_relation
+    ]
+    event = EvolutionEvent(
+        job_id=job.id,
+        added_skills=json.dumps(sorted(new_all - old_all), ensure_ascii=False),
+        removed_skills=json.dumps(sorted(old_all - new_all), ensure_ascii=False),
+        modified_skills=json.dumps(modified, ensure_ascii=False),
+        update_note=req.update_note.strip(),
+        data_sources=json.dumps(req.evidence_sources or ["管理员人工复核"], ensure_ascii=False),
+        confidence=1.0,
+        version_record=json.dumps([previous_version, next_version], ensure_ascii=False),
+        evidence=f"人工优化记录；依据：{source_note}",
+    )
+    job.version = next_version
+    job.evidence = f"{job.evidence}\n人工优化 {next_version}：{req.update_note.strip()}；依据：{source_note}"
+    db.add(event)
+    db.commit()
+    db.refresh(job)
+    return enriched_job(db, job)
 
 
 @router.get("/emerging-jobs")
-def emerging_jobs():
-    candidates = [
-        build_emerging_candidate("AI 产品经理", ["产品设计", "需求分析", "RAG", "Prompt Engineering", "模型评估"], "企业官网岗位页", 0.86),
-        build_emerging_candidate("AIGC 内容风控分析师", ["内容审核", "风险策略", "安全合规", "统计分析", "数据标注"], "招聘平台样本库", 0.84),
-        build_emerging_candidate("数据资产运营专员", ["数据资产运营", "元数据管理", "数据质量", "BI 分析", "权限管理"], "行业报告与白皮书", 0.81),
-        build_emerging_candidate("LLMOps 平台运营专员", ["LLMOps", "模型部署", "Prometheus", "Grafana", "项目管理"], "技术社区文章", 0.76),
-        build_emerging_candidate("低代码平台配置顾问", ["业务流程建模", "权限管理", "SQL", "产品设计", "实施交付"], "校招数据集", 0.73),
-    ]
+def emerging_jobs(db: Session = Depends(get_db)):
+    market = market_snapshot(db)
+    skill_map = {
+        "数字孪生工程技术人员": ["数字孪生", "三维建模", "仿真分析", "物联网", "数据治理"],
+        "具身智能机器人应用技术员": ["机器人", "具身智能", "计算机视觉", "模型部署", "现场调试"],
+        "运动数据分析师": ["统计分析", "Python", "数据可视化", "时序数据", "业务分析"],
+        "智能体开发员": ["智能体编排", "大模型", "RAG", "Prompt Engineering", "API 集成"],
+        "大数据专家": ["大数据", "数据治理", "Spark", "云计算", "统计分析"],
+    }
+    candidates = []
+    for item in market["emerging_jobs"][:5]:
+        candidates.append(build_emerging_candidate(
+            item["name"],
+            skill_map.get(item["name"], ["AI 与大数据", "技术素养", "分析性思维"]),
+            item["category"],
+            0.96 if item["source_key"].startswith("mohrss") else 0.90,
+        ))
+        candidates[-1]["source_url"] = next((source["source_url"] for source in market["sources"] if source["source_key"] == item["source_key"]), "")
+        candidates[-1]["source_key"] = item["source_key"]
+        candidates[-1]["publication_status"] = item["payload"].get("status", "published")
     ai_response = analyze_with_ai("emerging_job_analysis", {"candidates": candidates})
+    source_by_name = {item["job_name"]: item for item in candidates}
+    formal_jobs = {
+        job.name: job
+        for job in db.scalars(select(JobEntity).where(JobEntity.name.in_(list(source_by_name)))).all()
+    }
     return [
         {
             **item,
+            "job_id": formal_jobs[item["job_name"]].id if item["job_name"] in formal_jobs else None,
+            "requirements": job_requirements(db, formal_jobs[item["job_name"]]) if item["job_name"] in formal_jobs else {},
+            "authority": job_authority(db, formal_jobs[item["job_name"]]) if item["job_name"] in formal_jobs else {},
+            "source_key": source_by_name.get(item["job_name"], {}).get("source_key", ""),
+            "source_url": source_by_name.get(item["job_name"], {}).get("source_url", ""),
+            "publication_status": source_by_name.get(item["job_name"], {}).get("publication_status", "published"),
             "ai_provider": ai_response["provider"],
             "ai_task_type": ai_response["task_type"],
         }
@@ -555,9 +1122,19 @@ def emerging_jobs():
 
 @router.get("/job-evolution/{job_id}")
 def job_evolution(job_id: int, db: Session = Depends(get_db)):
-    event = db.scalar(select(EvolutionEvent).where(EvolutionEvent.job_id == job_id).order_by(EvolutionEvent.created_at.desc()))
-    if not event:
+    events = db.scalars(select(EvolutionEvent).where(EvolutionEvent.job_id == job_id).order_by(EvolutionEvent.created_at)).all()
+    if not events:
         raise HTTPException(status_code=404, detail="未找到岗位能力更新记录")
+    event = events[-1]
+    timeline = [{"time": "v1.0", "content": "初始岗位能力画像"}]
+    for row in events:
+        versions = parse_list(row.version_record)
+        timeline.append({
+            "time": versions[-1] if versions else row.created_at.strftime("%Y-%m-%d"),
+            "content": row.update_note,
+            "created_at": row.created_at,
+            "confidence": row.confidence,
+        })
     return {
         "job_id": job_id,
         "added_skills": parse_list(event.added_skills),
@@ -568,28 +1145,51 @@ def job_evolution(job_id: int, db: Session = Depends(get_db)):
         "confidence": event.confidence,
         "version_record": parse_list(event.version_record),
         "evidence": event.evidence,
-        "timeline": [
-            {"time": "v1.0", "content": "初始岗位能力画像"},
-            {"time": event.version_record, "content": event.update_note},
-        ],
+        "timeline": timeline,
+        "history_count": len(events),
     }
 
 
 @router.get("/skill-graph")
 def skill_graph(db: Session = Depends(get_db)):
     jobs = db.scalars(select(JobEntity)).all()
-    skills = db.scalars(select(SkillEntity).limit(80)).all()
-    relations = db.scalars(select(JobSkillRelation).limit(220)).all()
-    nodes = [{"id": f"job-{job.id}", "label": job.name, "type": "Job", "evidence": job.evidence} for job in jobs]
+    skills = db.scalars(select(SkillEntity)).all()
+    relations = db.scalars(select(JobSkillRelation)).all()
+    certificates = db.scalars(select(CertificateEntity)).all()
+    certificate_relations = db.scalars(select(JobCertificateRelation)).all()
+    nodes = [
+        {
+            "id": f"job-{job.id}",
+            "label": job.name,
+            "type": "Job",
+            "domain": job.domain,
+            "level": job.level,
+            "status": job.status,
+            "version": job.version,
+            "evidence": job.evidence,
+            "authority": job_authority(db, job),
+        }
+        for job in jobs
+    ]
     nodes += [
         {"id": f"skill-{skill.id}", "label": skill.name, "type": "Skill", "category": skill.category, "evidence": skill.evidence}
         for skill in skills
     ]
-    tool_names = ["Docker", "Kubernetes", "Git", "Linux", "Milvus", "Neo4j"]
-    nodes += [{"id": f"tool-{idx}", "label": name, "type": "Tool", "evidence": "seed: 常见工具实体"} for idx, name in enumerate(tool_names)]
-    nodes += [{"id": "cert-1", "label": "软考中级", "type": "Certificate", "evidence": "seed: 证书实体"}]
-    nodes += [{"id": "course-1", "label": "岗位能力图谱实践课", "type": "Course", "evidence": "seed: 学习路径课程"}]
-    nodes += [{"id": "level-1", "label": "中级", "type": "Level", "evidence": "seed: 岗位等级"}]
+    nodes += [
+        {
+            "id": f"cert-{item.id}",
+            "label": item.name,
+            "type": "Certificate",
+            "category": item.category,
+            "issuer": item.issuer,
+            "levels": parse_json_list(item.levels),
+            "source_key": item.source_key,
+            "evidence": item.evidence,
+        }
+        for item in certificates
+    ]
+    levels = sorted({job.level for job in jobs if job.level})
+    nodes += [{"id": f"level-{level}", "label": level, "type": "Level", "evidence": "系统岗位画像等级标签。"} for level in levels]
     edges = [
         {
             "source": f"job-{rel.job_id}",
@@ -601,10 +1201,41 @@ def skill_graph(db: Session = Depends(get_db)):
         for rel in relations
     ]
     edges += [
-        {"source": "course-1", "target": "skill-1", "label": "learned_by", "type": "learned_by", "evidence": "seed: 课程覆盖技能"},
-        {"source": "skill-1", "target": "skill-2", "label": "similar_to", "type": "similar_to", "evidence": "seed: 技能相似关系"},
-        {"source": "level-1", "target": "job-1", "label": "belongs_to", "type": "belongs_to", "evidence": "seed: 等级归属"},
+        {
+            "source": f"job-{rel.job_id}",
+            "target": f"cert-{rel.certificate_id}",
+            "label": rel.relation_type,
+            "type": rel.relation_type,
+            "weight": rel.weight,
+            "evidence": rel.evidence,
+        }
+        for rel in certificate_relations
     ]
+    edges += [
+        {"source": f"job-{job.id}", "target": f"level-{job.level}", "label": "has_level", "type": "has_level", "evidence": f"{job.name} 当前岗位画像等级：{job.level}。"}
+        for job in jobs if job.level
+    ]
+
+    # O*NET software examples become connected tool nodes instead of decorative isolated nodes.
+    tool_nodes: dict[str, dict] = {}
+    tool_edges: list[dict] = []
+    jobs_by_code: dict[str, list[JobEntity]] = {}
+    for job in jobs:
+        code, _ = resolve_onet(job)
+        jobs_by_code.setdefault(code, []).append(job)
+    for code, linked_jobs in jobs_by_code.items():
+        items = db.scalars(
+            select(ExternalCatalogItem)
+            .where(ExternalCatalogItem.source_key == "onet_30_3", ExternalCatalogItem.item_type == "software_skill", ExternalCatalogItem.external_id.like(f"{code}:%"))
+            .limit(4)
+        ).all()
+        for item in items:
+            node_id = f"tool-{item.id}"
+            tool_nodes[node_id] = {"id": node_id, "label": item.name, "type": "Tool", "category": item.category, "source_key": item.source_key, "evidence": item.description}
+            for job in linked_jobs:
+                tool_edges.append({"source": f"job-{job.id}", "target": node_id, "label": "uses", "type": "uses", "evidence": f"O*NET 30.3 {code} 软件技能示例。"})
+    nodes += list(tool_nodes.values())
+    edges += tool_edges
     return {"nodes": nodes, "edges": edges}
 
 
@@ -673,6 +1304,8 @@ def match_analysis(req: MatchAnalysisRequest, user: User = Depends(current_user)
     preferred_relations = [rel for rel in relations if rel.relation_type == "prefers"]
     required = [rel.skill.name for rel in required_relations]
     preferred = [rel.skill.name for rel in preferred_relations]
+    requirements = job_requirements(db, job)
+    recommended_certificates = [item["name"] for item in requirements["recommended_certificates"]]
     result = score_match(
         candidate.get("skills", []),
         required,
@@ -690,6 +1323,7 @@ def match_analysis(req: MatchAnalysisRequest, user: User = Depends(current_user)
         job_level=job.level,
         required_weights={rel.skill.name: rel.weight for rel in required_relations},
         preferred_weights={rel.skill.name: rel.weight for rel in preferred_relations},
+        recommended_certificates=recommended_certificates,
     )
     result.update(
         {
@@ -703,6 +1337,8 @@ def match_analysis(req: MatchAnalysisRequest, user: User = Depends(current_user)
                 "description": job.description,
                 "required_skills": required,
                 "preferred_skills": preferred,
+                "recommended_certificates": requirements["recommended_certificates"],
+                "authority": job_authority(db, job),
             },
             "candidate": {
                 "name": candidate.get("name") or candidate.get("real_name") or user.display_name,
@@ -738,6 +1374,7 @@ def match_analysis(req: MatchAnalysisRequest, user: User = Depends(current_user)
                 "suggestions": result["suggestions"],
             },
             "missing_skills": result["missing_skills"],
+            "recommended_certificates": requirements["recommended_certificates"],
         },
     )
     result["ai_analysis"] = ai_response["result"]
@@ -795,6 +1432,8 @@ def learning_path(report_id: int, user: User = Depends(current_user), db: Sessio
     missing = deterministic.get("missing_skills") or (parse_list(legacy_report.missing_skills) if legacy_report else ["RAG", "Docker", "模型部署"])
     target_job = deterministic.get("target_job") or (db.get(JobEntity, legacy_report.job_id).name if legacy_report and db.get(JobEntity, legacy_report.job_id) else "目标岗位")
     deterministic_suggestions = deterministic.get("suggestions") or []
+    recommended_certificates = deterministic.get("job_profile", {}).get("recommended_certificates", [])
+    missing_certificates = deterministic.get("missing_certificates", [])
     stages = ["基础阶段", "核心技能阶段", "项目实践阶段", "部署阶段", "提升阶段"]
     path = [
         {
@@ -814,6 +1453,8 @@ def learning_path(report_id: int, user: User = Depends(current_user), db: Sessio
             "missing_skills": missing,
             "match_suggestions": deterministic_suggestions,
             "dimension_rows": deterministic.get("dimension_rows", []),
+            "recommended_certificates": recommended_certificates,
+            "missing_certificates": missing_certificates,
             "suggested_stages": path,
         },
     )
@@ -825,44 +1466,92 @@ def learning_path(report_id: int, user: User = Depends(current_user), db: Sessio
         "ai_task_type": ai_response["task_type"],
         "report_id": report_id,
         "target_job": target_job,
+        "recommended_certificates": recommended_certificates,
+        "missing_certificates": missing_certificates,
+        "catalog_version": deterministic.get("job_profile", {}).get("authority", {}).get("catalog_version"),
     }
 
 
 @router.get("/review-tasks")
-def review_tasks(db: Session = Depends(get_db)):
+def review_tasks(_: User = Depends(require_roles("admin", "hr")), db: Session = Depends(get_db)):
     return [to_dict(row) for row in db.scalars(select(ReviewTask).order_by(ReviewTask.created_at.desc())).all()]
 
 
 @router.post("/review-tasks/{task_id}/approve", response_model=ReviewActionResponse)
-def approve_task(task_id: int, db: Session = Depends(get_db)):
+def approve_task(task_id: int, _: User = Depends(require_roles("admin", "hr")), db: Session = Depends(get_db)):
     task = db.get(ReviewTask, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="审核任务不存在")
+    if task.status != "pending":
+        raise HTTPException(status_code=409, detail="审核任务已处理，不能重复提交")
+    writeback = _apply_review_decision(db, task, "approved")
     task.status = "approved"
+    task.resolution_note = writeback
+    task.resolved_at = datetime.utcnow()
     db.commit()
-    return {"id": task.id, "status": task.status, "message": "审核已通过"}
+    return {"id": task.id, "status": task.status, "message": f"审核已通过；{writeback}"}
 
 
 @router.post("/review-tasks/{task_id}/reject", response_model=ReviewActionResponse)
-def reject_task(task_id: int, db: Session = Depends(get_db)):
+def reject_task(task_id: int, _: User = Depends(require_roles("admin", "hr")), db: Session = Depends(get_db)):
     task = db.get(ReviewTask, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="审核任务不存在")
+    if task.status != "pending":
+        raise HTTPException(status_code=409, detail="审核任务已处理，不能重复提交")
+    writeback = _apply_review_decision(db, task, "rejected")
     task.status = "rejected"
+    task.resolution_note = writeback
+    task.resolved_at = datetime.utcnow()
     db.commit()
-    return {"id": task.id, "status": task.status, "message": "审核已驳回"}
+    return {"id": task.id, "status": task.status, "message": f"审核已驳回；{writeback}"}
+
+
+def _apply_review_decision(db: Session, task: ReviewTask, decision: str) -> str:
+    if task.target_type == "parsed_jd" and task.target_id:
+        parsed = db.get(ParsedJD, task.target_id)
+        if not parsed:
+            raise HTTPException(status_code=409, detail="审核目标已不存在，无法写回")
+        try:
+            evidence = json.loads(parsed.evidence or "{}")
+        except json.JSONDecodeError:
+            evidence = {"legacy_evidence": parsed.evidence}
+        evidence["guard_status"] = "manual_approved" if decision == "approved" else "manual_rejected"
+        evidence["review_task_id"] = task.id
+        evidence["reviewed_at"] = datetime.utcnow().isoformat()
+        parsed.evidence = json.dumps(evidence, ensure_ascii=False)
+        return f"已写回 JD 解析记录 #{parsed.id}"
+    return "该历史任务没有结构化写回目标，仅保留审核结论"
 
 
 @router.get("/evaluation/metrics")
 def evaluation_metrics(db: Session = Depends(get_db)):
-    total = db.scalar(select(func.count(TestCase.id))) or 1
+    from app.evaluation.run_eval import run as run_evaluation
+
+    results = {item.task: item for item in run_evaluation()}
+    jd_result = results["jd_extraction"]
+    resume_result = results["resume_extraction"]
+    match_result = results["job_match"]
+    coverage = _coverage_summary()
+    total = db.scalar(select(func.count(TestCase.id))) or 0
     passed = db.scalar(select(func.count(TestCase.id)).where(TestCase.passed.is_(True))) or 0
     return {
-        "jd_parse_accuracy": 91.6,
-        "resume_parse_accuracy": 92.4,
-        "match_accuracy": 91.8,
+        "jd_parse_accuracy": round((jd_result.f1 or 0) * 100, 2),
+        "resume_parse_accuracy": round((resume_result.f1 or 0) * 100, 2),
+        "match_accuracy": round((match_result.accuracy or 0) * 100, 2),
+        "benchmark_sample_count": sum(item.samples for item in results.values()),
+        "benchmark_samples": {key: item.samples for key, item in results.items()},
         "test_case_count": total,
-        "unit_test_coverage": round(passed / total * 100, 1),
+        "business_case_pass_rate": round(passed / total * 100, 1) if total else 0,
+        "unit_test_coverage": coverage["coverage"],
+        "unit_test_coverage_note": coverage["note"],
+        "unit_test_coverage_generated_at": coverage["generated_at"],
+        "unit_test_coverage_command": coverage["command"],
+        "competition_thresholds": {
+            "accuracy_target": 90,
+            "jd_sample_target": 100,
+            "unit_test_coverage_target": 60,
+        },
         "cases": [to_dict(row) for row in db.scalars(select(TestCase).limit(12)).all()],
     }
 
