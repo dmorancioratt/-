@@ -51,7 +51,7 @@
         </el-table-column>
         <el-table-column label="状态" width="110">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'active' ? 'success' : 'info'">{{ row.status }}</el-tag>
+            <el-tag :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="version" label="版本号" width="100" />
@@ -92,9 +92,31 @@
         <section>
           <h4>状态与写入规则</h4>
           <div class="tag-list">
-            <el-tag type="success">状态：{{ currentJob.status }}</el-tag>
+            <el-tag :type="statusType(currentJob.status)">状态：{{ statusLabel(currentJob.status) }}</el-tag>
             <el-tag type="primary">证据可追溯</el-tag>
             <el-tag type="info">低置信度需审核</el-tag>
+          </div>
+        </section>
+
+        <section>
+          <h4>统一能力要求</h4>
+          <div class="requirement-block">
+            <b>必备能力</b>
+            <div class="tag-list"><el-tag v-for="item in currentJob.requirements?.required_skills || []" :key="item">{{ item }}</el-tag></div>
+          </div>
+          <div class="requirement-block">
+            <b>加分能力</b>
+            <div class="tag-list"><el-tag v-for="item in currentJob.requirements?.preferred_skills || []" :key="item" type="info">{{ item }}</el-tag></div>
+          </div>
+        </section>
+
+        <section>
+          <h4>建议证书</h4>
+          <p class="requirement-note">以下证书来自人社部考试计划，并按岗位领域关联，不代表强制任职门槛。</p>
+          <div class="certificate-list">
+            <div v-for="item in currentJob.requirements?.recommended_certificates || []" :key="item.id">
+              <b>{{ item.name }}</b><span>{{ item.levels?.join(' / ') || '等级以考试计划为准' }}</span>
+            </div>
           </div>
         </section>
 
@@ -106,23 +128,53 @@
 
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
-        <el-button type="primary" @click="detailVisible = false">已了解</el-button>
+        <el-button @click="openGraph">在图谱中查看</el-button>
+        <el-button v-if="canEdit" @click="openEdit">人工优化</el-button>
+        <el-button type="primary" @click="startMatch">用于匹配分析</el-button>
       </template>
+    </el-dialog>
+
+    <el-dialog v-model="editVisible" class="edit-dialog" title="人工优化岗位画像" width="720px" align-center>
+      <el-form label-position="top" class="edit-form">
+        <div class="edit-grid">
+          <el-form-item label="所属领域"><el-input v-model="editForm.domain" /></el-form-item>
+          <el-form-item label="岗位类型"><el-input v-model="editForm.job_type" /></el-form-item>
+          <el-form-item label="岗位等级"><el-input v-model="editForm.level" /></el-form-item>
+          <el-form-item label="状态">
+            <el-select v-model="editForm.status"><el-option label="已启用" value="active" /><el-option label="公示中" value="proposed" /><el-option label="趋势岗位" value="trend" /><el-option label="已归档" value="archived" /></el-select>
+          </el-form-item>
+        </div>
+        <el-form-item label="岗位描述"><el-input v-model="editForm.description" type="textarea" :rows="3" /></el-form-item>
+        <el-form-item label="必备技能（用逗号或换行分隔）"><el-input v-model="editForm.required_skills" type="textarea" :rows="3" /></el-form-item>
+        <el-form-item label="加分技能（用逗号或换行分隔）"><el-input v-model="editForm.preferred_skills" type="textarea" :rows="3" /></el-form-item>
+        <el-form-item label="本次更新说明"><el-input v-model="editForm.update_note" placeholder="说明为什么调整岗位画像" /></el-form-item>
+        <el-form-item label="证据来源（每行一条 URL、报告或 JD 批次）"><el-input v-model="editForm.evidence_sources" type="textarea" :rows="3" /></el-form-item>
+      </el-form>
+      <template #footer><el-button @click="editVisible = false">取消</el-button><el-button type="primary" :loading="saving" @click="saveJob">保存并生成新版本</el-button></template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ElMessage } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import { api } from '@/api/http'
+import { useAuthStore } from '@/stores/auth'
 
 const rows = ref<any[]>([])
+const router = useRouter()
+const auth = useAuthStore()
 const domain = ref('')
 const type = ref('')
 const level = ref('')
 const detailVisible = ref(false)
 const currentJob = ref<any>()
+const editVisible = ref(false)
+const saving = ref(false)
+const editForm = ref<any>({})
+const canEdit = computed(() => ['admin', 'hr'].includes(auth.user?.role || ''))
 
 const domains = computed(() => Array.from(new Set(rows.value.map((row) => row.domain))))
 const jobTypes = computed(() => Array.from(new Set(rows.value.map((row) => row.job_type))))
@@ -146,6 +198,74 @@ function resetFilters() {
 function openDetail(row: any) {
   currentJob.value = row
   detailVisible.value = true
+}
+
+function statusLabel(status: string) {
+  return ({ active: '已启用', proposed: '公示中', trend: '趋势岗位', archived: '已归档' } as Record<string, string>)[status] || status
+}
+
+function statusType(status: string) {
+  return status === 'active' ? 'success' : status === 'proposed' ? 'warning' : 'primary'
+}
+
+function openGraph() {
+  if (!currentJob.value) return
+  detailVisible.value = false
+  router.push({ path: '/skill-graph', query: { jobId: String(currentJob.value.id) } })
+}
+
+function startMatch() {
+  if (!currentJob.value) return
+  detailVisible.value = false
+  router.push({ path: '/match-analysis', query: { jobId: String(currentJob.value.id) } })
+}
+
+function splitItems(value: string) {
+  return [...new Set(value.split(/[，,\n]/).map((item) => item.trim()).filter(Boolean))]
+}
+
+function openEdit() {
+  if (!currentJob.value) return
+  const job = currentJob.value
+  editForm.value = {
+    domain: job.domain,
+    job_type: job.job_type,
+    level: job.level,
+    status: job.status,
+    description: job.description,
+    required_skills: (job.requirements?.required_skills || []).join('，'),
+    preferred_skills: (job.requirements?.preferred_skills || []).join('，'),
+    update_note: '',
+    evidence_sources: ''
+  }
+  detailVisible.value = false
+  editVisible.value = true
+}
+
+async function saveJob() {
+  if (!currentJob.value) return
+  if (!editForm.value.update_note.trim()) {
+    ElMessage.warning('请填写本次更新说明')
+    return
+  }
+  saving.value = true
+  try {
+    const updated = await api.updateJob(currentJob.value.id, {
+      ...editForm.value,
+      required_skills: splitItems(editForm.value.required_skills),
+      preferred_skills: splitItems(editForm.value.preferred_skills),
+      evidence_sources: splitItems(editForm.value.evidence_sources)
+    })
+    const index = rows.value.findIndex((item) => item.id === updated.id)
+    if (index >= 0) rows.value[index] = updated
+    currentJob.value = updated
+    editVisible.value = false
+    ElMessage.success(`岗位画像已更新至 ${updated.version}`)
+  } catch (error: any) {
+    ElMessage.error(error?.response?.data?.detail || '岗位画像更新失败')
+  } finally {
+    saving.value = false
+  }
 }
 
 onMounted(async () => {
@@ -286,4 +406,26 @@ onMounted(async () => {
   color: #31506f;
   line-height: 1.8;
 }
+
+.requirement-block { margin-bottom: 12px; }
+.requirement-block > b { display: block; margin-bottom: 8px; color: #29456f; font-size: 12px; }
+.requirement-note { margin: 0 0 10px; color: #718096; font-size: 12px; }
+.certificate-list { display: grid; gap: 8px; }
+.certificate-list > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid rgba(190,213,242,.72); border-radius: 12px; padding: 10px 12px; background: rgba(232,242,255,.48); }
+.certificate-list b { color: #14346c; font-size: 13px; }
+.certificate-list span { color: #718096; font-size: 11px; }
+.edit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+:deep(.edit-dialog) { border: 1px solid rgba(77,198,255,.32); background: #071a36; color: #eaf8ff; }
+:deep(.edit-dialog .el-dialog__title) { color: #f1fbff; font-weight: 850; }
+:deep(.edit-dialog .el-dialog__headerbtn .el-dialog__close) { color: #9fc4de; }
+:deep(.edit-dialog .el-form-item__label) { color: #acc8dd; font-weight: 750; }
+:deep(.edit-dialog .el-input__wrapper),
+:deep(.edit-dialog .el-select__wrapper),
+:deep(.edit-dialog .el-textarea__inner) { border: 1px solid rgba(83,166,218,.3); background: #0b274d; box-shadow: none; }
+:deep(.edit-dialog .el-input__inner),
+:deep(.edit-dialog .el-select__selected-item),
+:deep(.edit-dialog .el-textarea__inner) { color: #edfaff; }
+:deep(.edit-dialog .el-input__inner::placeholder),
+:deep(.edit-dialog .el-textarea__inner::placeholder) { color: #789ab5; }
+@media (max-width: 720px) { .edit-grid { grid-template-columns: 1fr; } }
 </style>

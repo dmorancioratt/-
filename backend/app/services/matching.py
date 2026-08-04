@@ -46,6 +46,11 @@ TOOL_SKILLS = {
     "echarts", "hive", "spark", "flink", "kafka", "airflow",
 }
 
+JOB_FOCUS_TERMS = (
+    "大模型", "智能体", "数据分析", "数据治理", "机器学习", "算法", "java", "前端",
+    "devops", "sre", "运维", "云计算", "网络安全", "物联网", "产品经理", "ui/ux",
+)
+
 _ALIAS_LOOKUP = {
     re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "", alias.lower()): canonical
     for canonical, aliases in SKILL_ALIAS_GROUPS.items()
@@ -71,6 +76,7 @@ def score_match(
     job_level: str = "",
     required_weights: dict[str, float] | None = None,
     preferred_weights: dict[str, float] | None = None,
+    recommended_certificates: list[str] | None = None,
 ) -> dict:
     """Build an explainable deterministic match report.
 
@@ -103,7 +109,14 @@ def score_match(
         job_description,
         job_domain,
     )
-    certificate_score, certificate_detail = _certificate_score(certificates, awards, job_description, required + preferred)
+    recommended_certificates = recommended_certificates or []
+    certificate_score, certificate_detail = _certificate_score(
+        certificates,
+        awards,
+        job_description,
+        required + preferred,
+        recommended_certificates,
+    )
 
     scores = {
         "required_skill_score": required_eval["score"],
@@ -123,6 +136,11 @@ def score_match(
     missing_required = required_eval["missing"]
     missing_preferred = preferred_eval["missing"]
     suggestions = _build_suggestions(missing_required, missing_preferred, project_score, scenario_score, certificates)
+    if certificate_detail.get("missing"):
+        suggestions.append(
+            f"可选提升项：了解{'、'.join(certificate_detail['missing'][:2])}；它们是岗位相关证明，不是强制门槛"
+        )
+        suggestions = _unique(suggestions)[:6]
 
     dimensions = [
         _dimension("必备技能", scores["required_skill_score"], 40, required_eval),
@@ -142,6 +160,9 @@ def score_match(
         "matched_preferred_skills": matched_preferred,
         "missing_skills": missing_required,
         "missing_preferred_skills": missing_preferred,
+        "matched_certificates": certificate_detail.get("matched", []),
+        "missing_certificates": certificate_detail.get("missing", []),
+        "recommended_certificates": recommended_certificates,
         "suggestions": suggestions,
         "confidence": confidence,
         "confidence_label": "高" if confidence >= 80 else "中" if confidence >= 55 else "低",
@@ -154,6 +175,7 @@ def score_match(
             "education": education,
             "major": major,
             "job_requirement_count": len(required) + len(preferred),
+            "job_certificate_count": len(recommended_certificates),
             "job_level": job_level,
         },
         "scoring_version": "evidence-v2",
@@ -167,6 +189,62 @@ def ratio_score(candidate: set[str], target: set[str]) -> float:
     normalized_candidate = {canonical_skill(item) for item in candidate}
     normalized_target = {canonical_skill(item) for item in target}
     return round(len(normalized_candidate & normalized_target) / len(normalized_target) * 100, 1)
+
+
+def rank_job_profiles(candidate: dict[str, Any], job_profiles: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Rank current graph jobs using the same evidence scorer as match analysis.
+
+    The returned ranking is deterministic and keeps the component scores so an
+    evaluation report can explain why a job won instead of relying on an LLM
+    or a hand-authored prediction file.
+    """
+    ranked: list[dict[str, Any]] = []
+    candidate_text = " ".join(
+        [
+            *[str(_skill_row(item)[0]) for item in candidate.get("skills", [])],
+            *[_item_text(item) for item in candidate.get("projects", [])],
+            *[_item_text(item) for item in candidate.get("internships", [])],
+            str(candidate.get("self_summary") or ""),
+            str(candidate.get("target_role") or ""),
+        ]
+    ).casefold()
+    for profile in job_profiles:
+        required = list(profile.get("required_skills") or [])
+        preferred = list(profile.get("preferred_skills") or [])
+        report = score_match(
+            candidate.get("skills", []),
+            required,
+            preferred,
+            candidate.get("certificates", []),
+            projects=candidate.get("projects", []),
+            internships=candidate.get("internships", []),
+            awards=candidate.get("awards", []),
+            education=str(candidate.get("education") or ""),
+            major=str(candidate.get("major") or ""),
+            self_summary=str(candidate.get("self_summary") or "")[:4000],
+            job_name=str(profile.get("name") or ""),
+            job_description=str(profile.get("description") or ""),
+            job_domain=str(profile.get("domain") or ""),
+            job_level=str(profile.get("level") or ""),
+        )
+        job_name = str(profile.get("name") or "")
+        focus_hits = [term for term in JOB_FOCUS_TERMS if term in job_name.casefold() and term in candidate_text]
+        focus_score = min(12.0, len(focus_hits) * 12.0)
+        ranked.append(
+            {
+                "job_name": job_name,
+                "job_id": profile.get("id"),
+                "total_score": report["total_score"],
+                "ranking_score": round(report["total_score"] + focus_score, 1),
+                "focus_score": focus_score,
+                "focus_hits": focus_hits,
+                "required_skill_score": report["required_skill_score"],
+                "scenario_score": report["scenario_score"],
+                "report": report,
+            }
+        )
+    ranked.sort(key=lambda item: (item["ranking_score"], item["required_skill_score"], item["scenario_score"], str(item["job_name"])), reverse=True)
+    return ranked
 
 
 def canonical_skill(value: str) -> str:
@@ -322,8 +400,31 @@ def _scenario_score(
     }
 
 
-def _certificate_score(certificates: list[Any], awards: list[Any], job_description: str, target_skills: list[str]) -> tuple[float, dict]:
+def _certificate_score(
+    certificates: list[Any],
+    awards: list[Any],
+    job_description: str,
+    target_skills: list[str],
+    recommended_certificates: list[str],
+) -> tuple[float, dict]:
     rows = [_item_text(item) for item in certificates + awards if _item_text(item)]
+    if recommended_certificates:
+        matched = [target for target in recommended_certificates if any(_certificate_matches(row, target) for row in rows)]
+        missing = [target for target in recommended_certificates if target not in matched]
+        if not rows:
+            return 35.0, {
+                "matched": [],
+                "missing": missing,
+                "evidence": [],
+                "summary": "岗位关联证书均为建议项，不是强制任职条件；当前未提供证书证据",
+            }
+        score = 55 + (40 * len(matched) / len(recommended_certificates)) + min(5, max(0, len(rows) - len(matched)) * 2)
+        return round(min(100, score), 1), {
+            "matched": matched,
+            "missing": missing,
+            "evidence": rows[:6],
+            "summary": f"岗位目录建议 {len(recommended_certificates)} 项证书，已匹配 {len(matched)} 项；证书维度仅占 5%",
+        }
     if not rows:
         return 25.0, {"matched": [], "missing": ["未提供证书或成果"], "evidence": [], "summary": "证书成果权重仅占 5%，不会替代项目能力证据"}
     context = f"{job_description} {' '.join(target_skills)}".lower()
@@ -335,6 +436,20 @@ def _certificate_score(certificates: list[Any], awards: list[Any], job_descripti
         "evidence": rows[:6],
         "summary": f"提供 {len(certificates)} 项证书、{len(awards)} 项竞赛或成果",
     }
+
+
+def _certificate_matches(candidate: str, target: str) -> bool:
+    candidate_norm = re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "", candidate.casefold())
+    target_norm = re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "", target.casefold())
+    aliases = {
+        "计算机技术与软件专业技术资格": ("软考", "计算机技术与软件专业技术资格", "软件水平考试"),
+        "通信专业技术人员职业资格": ("通信专业技术人员职业资格", "通信工程师", "通信专业技术"),
+        "统计专业技术资格": ("统计专业技术资格", "统计师", "统计专业资格"),
+    }
+    return target_norm in candidate_norm or any(
+        re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "", alias.casefold()) in candidate_norm
+        for alias in aliases.get(target, (target,))
+    )
 
 
 def _certificate_tokens(value: str) -> list[str]:

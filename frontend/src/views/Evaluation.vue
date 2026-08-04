@@ -3,11 +3,11 @@
     <PageHeader title="测试评估" desc="展示 JD 解析、简历解析、匹配分析、测试用例数量和可复现评测结果" />
 
     <div class="metric-grid">
-      <div class="metric-card"><div class="metric-label">JD 解析准确率</div><div class="metric-value">{{ metrics.jd_parse_accuracy }}%</div></div>
-      <div class="metric-card"><div class="metric-label">简历解析准确率</div><div class="metric-value">{{ metrics.resume_parse_accuracy }}%</div></div>
-      <div class="metric-card"><div class="metric-label">匹配准确率</div><div class="metric-value">{{ metrics.match_accuracy }}%</div></div>
-      <div class="metric-card"><div class="metric-label">测试用例数量</div><div class="metric-value">{{ metrics.test_case_count || 0 }}</div></div>
-      <div class="metric-card"><div class="metric-label">单元测试覆盖率</div><div class="metric-value">{{ metrics.unit_test_coverage }}%</div></div>
+      <div class="metric-card"><div class="metric-label">JD 抽取 F1</div><div class="metric-value">{{ metrics.jd_parse_accuracy }}%</div><small>{{ metrics.benchmark_samples?.jd_extraction || 0 }} 个标注样本</small></div>
+      <div class="metric-card"><div class="metric-label">简历抽取 F1</div><div class="metric-value">{{ metrics.resume_parse_accuracy }}%</div><small>{{ metrics.benchmark_samples?.resume_extraction || 0 }} 个标注样本</small></div>
+      <div class="metric-card"><div class="metric-label">匹配 Top-1</div><div class="metric-value">{{ metrics.match_accuracy }}%</div><small>{{ metrics.benchmark_samples?.job_match || 0 }} 个标注样本</small></div>
+      <div class="metric-card"><div class="metric-label">业务用例通过率</div><div class="metric-value">{{ metrics.business_case_pass_rate || 0 }}%</div><small>{{ metrics.test_case_count || 0 }} 条业务用例</small></div>
+      <div class="metric-card"><div class="metric-label">代码测试覆盖率</div><div class="metric-value">{{ metrics.unit_test_coverage == null ? '待测' : `${metrics.unit_test_coverage}%` }}</div><small>{{ metrics.unit_test_coverage_note }}</small></div>
     </div>
 
     <!-- Reproducible evaluation report -->
@@ -135,14 +135,14 @@ const option = computed(() => ({
   textStyle: { color: '#8595ad' },
   tooltip: {},
   grid: { left: 40, right: 20, top: 20, bottom: 30 },
-  xAxis: { type: 'category', data: ['JD解析', '简历解析', '匹配分析', '覆盖率'], axisLine: { lineStyle: { color: 'rgba(120,150,190,0.4)' } } },
+  xAxis: { type: 'category', data: ['JD抽取 F1', '简历抽取 F1', '匹配 Top-1', '业务用例'], axisLine: { lineStyle: { color: 'rgba(120,150,190,0.4)' } } },
   yAxis: { type: 'value', max: 100, splitLine: { lineStyle: { color: 'rgba(120,150,190,0.14)' } } },
   series: [
     {
       type: 'bar',
       barWidth: '46%',
       itemStyle: { color: '#1768d1', borderRadius: [6, 6, 0, 0] },
-      data: [metrics.value.jd_parse_accuracy, metrics.value.resume_parse_accuracy, metrics.value.match_accuracy, metrics.value.unit_test_coverage]
+      data: [metrics.value.jd_parse_accuracy, metrics.value.resume_parse_accuracy, metrics.value.match_accuracy, metrics.value.business_case_pass_rate]
     }
   ]
 }))

@@ -1,82 +1,83 @@
 <template>
   <div class="page learning-page">
-    <PageHeader title="学习路径" desc="基于最近一次人岗匹配差距，生成基础、核心、项目、部署和提升阶段的成长路线">
+    <PageHeader title="学习路径" desc="按顺序完成，不必同时开始">
       <div class="toolbar">
         <el-button @click="router.push('/match-analysis')">返回匹配分析</el-button>
         <el-button type="primary" :loading="loading" @click="regenerate">{{ path.length ? '重新生成路径' : '生成路径' }}</el-button>
       </div>
     </PageHeader>
 
-    <section class="learning-hero panel">
-      <div class="learning-summary">
-        <span>最近一次匹配结论</span>
-        <h3>{{ report?.target_job || '目标岗位待选择' }}</h3>
-        <p>{{ aiAnalysis?.note || '系统会根据匹配报告中的缺失技能、风险点和岗位要求生成阶段化学习建议。' }}</p>
+    <section class="learning-overview">
+      <div class="goal-copy">
+        <span>目标岗位</span>
+        <h2>{{ report?.target_job || '尚未选择目标岗位' }}</h2>
+        <p>{{ heroSummary }}</p>
       </div>
-      <div class="score-card">
-        <span>综合匹配度</span>
-        <strong>{{ report?.total_score ?? '-' }}%</strong>
-        <em>{{ scoreLabel }}</em>
+      <div class="match-number">
+        <strong>{{ scoreDisplay }}</strong>
+        <span>{{ scoreLabel }}</span>
       </div>
-      <div class="missing-card">
-        <span>优先补齐</span>
-        <div class="tag-list">
-          <el-tag v-for="item in missingSkills" :key="item" type="danger" effect="light">{{ item }}</el-tag>
-          <el-tag v-if="!missingSkills.length" type="success" effect="light">暂无明显短板</el-tag>
-        </div>
+      <div class="priority-copy">
+        <span>先解决</span>
+        <b>{{ missingSkills[0] || '项目成果表达' }}</b>
+        <small v-if="missingSkills.length > 1">随后：{{ missingSkills.slice(1, 3).join('、') }}</small>
       </div>
     </section>
 
-    <div class="content-grid">
-      <section class="panel span-8">
-        <div class="section-head">
-          <div>
-            <span>阶段路线</span>
-            <h3>从补基础到项目证明</h3>
-          </div>
-          <small>每个阶段都对应具体产出，方便更新简历和准备面试表达</small>
+    <section class="learning-workspace">
+      <aside class="weekly-panel">
+        <div class="workspace-heading">
+          <span>本周</span>
+          <h3>只做这三件事</h3>
         </div>
-        <div class="path-timeline">
-          <article v-for="(item, index) in path" :key="item.stage" class="path-card">
-            <div class="stage-index">{{ String(index + 1).padStart(2, '0') }}</div>
-            <div>
-              <h3>{{ item.stage }}</h3>
-              <p>{{ item.content }}</p>
-              <div class="path-detail">
-                <span><b>建议项目：</b>{{ item.project }}</span>
-                <span><b>预计周期：</b>{{ item.duration }}</span>
-                <span><b>前置技能：</b>{{ item.prerequisites?.length ? item.prerequisites.join('、') : '无' }}</span>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <aside class="panel span-4 learning-side">
-        <div class="section-head compact">
-          <div>
-            <span>执行清单</span>
-            <h3>本周建议</h3>
-          </div>
-        </div>
-        <div class="todo-list">
-          <div v-for="item in weeklyTodos" :key="item" class="todo-item">{{ item }}</div>
-        </div>
-
-        <div class="side-block">
-          <h3>生成说明</h3>
-          <p>{{ aiAnalysis?.summary || '当前路径会结合匹配报告、岗位技能和缺失项生成，并可进一步细化到课程、项目和练习题。' }}</p>
-          <div class="tag-list">
-            <el-tag v-for="item in aiAnalysis?.stages || []" :key="item" type="primary" effect="light">{{ item }}</el-tag>
-          </div>
-        </div>
-
-        <div class="side-actions">
-          <el-button type="primary" @click="router.push('/resume-parser')">更新简历证据</el-button>
-          <el-button @click="router.push('/digital-interviewer')">面试练习</el-button>
+        <ol class="weekly-list">
+          <li v-for="(item, index) in weeklyTodos.slice(0, 3)" :key="item">
+            <i>{{ index + 1 }}</i>
+            <span>{{ item }}</span>
+          </li>
+        </ol>
+        <div class="certificate-note">
+          <span>建议证书</span>
+          <p>{{ recommendedCertificates.length ? recommendedCertificates.slice(0, 2).map((item) => item.name).join('、') : '当前岗位没有明确证书要求' }}</p>
         </div>
       </aside>
-    </div>
+
+      <div class="route-panel">
+        <div class="route-heading">
+          <div>
+            <span>成长路线</span>
+            <h3>{{ path.length }} 个阶段，逐项完成</h3>
+          </div>
+          <small>点击阶段查看具体任务</small>
+        </div>
+
+        <ol v-if="path.length" class="route-list">
+          <li v-for="(item, index) in path" :key="`${item.stage}-${index}`" :class="{ active: activeStage === index }">
+            <button type="button" class="route-row" @click="activeStage = index">
+              <i>{{ String(index + 1).padStart(2, '0') }}</i>
+              <span><b>{{ item.stage }}</b><small>{{ item.duration }}</small></span>
+              <em aria-hidden="true">{{ activeStage === index ? '−' : '+' }}</em>
+            </button>
+            <div v-if="activeStage === index" class="route-detail">
+              <p>{{ stageContent(item, index) }}</p>
+              <dl>
+                <div><dt>完成产出</dt><dd>{{ item.project }}</dd></div>
+                <div><dt>开始前</dt><dd>{{ item.prerequisites?.length ? item.prerequisites.join('、') : '无需额外准备' }}</dd></div>
+              </dl>
+            </div>
+          </li>
+        </ol>
+        <div v-else class="route-empty">完成一次岗位匹配后，这里会生成对应的成长路线。</div>
+      </div>
+    </section>
+
+    <footer class="learning-footer">
+      <small>路径保留最近一次结果，只有点击“重新生成路径”才会更新。</small>
+      <div>
+        <el-button @click="router.push('/resume-parser')">更新简历</el-button>
+        <el-button type="primary" @click="router.push('/digital-interviewer')">练习表达</el-button>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -94,23 +95,29 @@ const path = ref<any[]>([])
 const aiAnalysis = ref<any>()
 const report = ref<any>()
 const loading = ref(false)
+const activeStage = ref(0)
 
 const missingSkills = computed<string[]>(() => report.value?.missing_skills || [])
+const recommendedCertificates = computed<any[]>(() => report.value?.job_profile?.recommended_certificates || [])
+const scoreDisplay = computed(() => report.value ? `${report.value.total_score ?? 0}%` : '--')
 const scoreLabel = computed(() => {
+  if (!report.value) return '等待匹配'
   const score = Number(report.value?.total_score || 0)
   if (score >= 85) return '高度匹配'
   if (score >= 70) return '建议复核'
   if (score >= 55) return '可培养'
   return '需系统补强'
 })
+const heroSummary = computed(() => missingSkills.value.length
+  ? `当前最需要补齐 ${missingSkills.value.length} 项能力。不要同时开始所有内容，先从影响最大的 ${missingSkills.value[0]} 入手。`
+  : '岗位基础能力已覆盖，接下来重点把项目成果变成简历和面试中可验证的证据。')
 const weeklyTodos = computed(() => {
   const first = missingSkills.value.slice(0, 2)
   if (!first.length) return ['整理一个项目复盘：背景、个人负责内容、结果', '完善岗位相关证书或课程记录', '准备 3 分钟项目介绍']
   return [
     `先把 ${first[0]} 的基础用法过一遍，并做一份笔记`,
     first[1] ? `围绕 ${first[1]} 做一个小任务，写清楚你怎么完成的` : '做一个能讲清楚过程的小项目',
-    '把新的项目经历同步到个人画像和简历文本',
-    '使用数字人面试官进行一次追问练习'
+    '把新的项目经历同步到个人画像和简历文本'
   ]
 })
 
@@ -144,6 +151,7 @@ async function load(force = false) {
     const response = await api.learningPath(reportId)
     const rows = Array.isArray(response) ? response : response.items
     path.value = enrichPath(rows || [])
+    activeStage.value = 0
     aiAnalysis.value = Array.isArray(response) ? undefined : response.ai_analysis
     savePageState<LearningPathState>(pageKey, {
       path: path.value,
@@ -162,12 +170,25 @@ function regenerate() {
   return load(true)
 }
 
+function stageContent(item: any, index: number) {
+  const skill = missingSkills.value[index]
+  const content = String(item?.content || '')
+  const duplicatePrefix = skill ? `${skill}：${skill}：` : ''
+  return duplicatePrefix && content.startsWith(duplicatePrefix)
+    ? content.slice(skill.length + 1)
+    : content
+}
+
 function enrichPath(rows: any[]) {
   if (!missingSkills.value.length) return rows
-  return rows.map((item, index) => ({
-    ...item,
-    content: index < missingSkills.value.length ? `${missingSkills.value[index]}：${item.content}` : item.content
-  }))
+  return rows.map((item, index) => {
+    const skill = missingSkills.value[index]
+    const content = String(item.content || '')
+    return {
+      ...item,
+      content: skill && !content.startsWith(`${skill}：`) ? `${skill}：${content}` : content
+    }
+  })
 }
 
 onMounted(() => load(false))
@@ -180,7 +201,7 @@ watch(() => route.query.reportId, (next, previous) => {
 <style scoped>
 .learning-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px 360px;
+  grid-template-columns: minmax(0, 1fr) 190px minmax(300px, .72fr);
   gap: 16px;
   align-items: stretch;
 }
@@ -189,19 +210,10 @@ watch(() => route.query.reportId, (next, previous) => {
 .score-card,
 .missing-card {
   border: 1px solid rgba(190, 213, 242, 0.74);
-  border-radius: 18px;
+  border-radius: 10px;
   padding: 18px;
   background: rgba(255, 255, 255, 0.58);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-}
-
-.learning-summary:hover,
-.missing-card:hover,
-.path-card:hover,
-.todo-item:hover {
-  border-color: rgba(6, 182, 212, 0.42);
-  box-shadow: 0 18px 42px rgba(37, 99, 235, 0.12);
-  transform: translateY(-2px);
 }
 
 .learning-summary span,
@@ -230,27 +242,11 @@ watch(() => route.query.reportId, (next, previous) => {
 }
 
 .score-card {
-  position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
   color: #fff;
-  background:
-    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.34), transparent 30%),
-    linear-gradient(135deg, #2563eb, #06b6d4);
-}
-
-.score-card::after {
-  position: absolute;
-  right: -34px;
-  bottom: -48px;
-  width: 118px;
-  height: 118px;
-  content: "";
-  border: 1px dashed rgba(255, 255, 255, 0.42);
-  border-radius: 50%;
-  animation: learningRing 13s linear infinite;
+  background: #1d5fbd;
 }
 
 .score-card span {
@@ -269,9 +265,15 @@ watch(() => route.query.reportId, (next, previous) => {
   font-weight: 900;
 }
 
-.missing-card .tag-list {
-  margin-top: 14px;
-}
+.missing-card h3 { margin: 10px 0 7px; color: #0f2148; font-size: 21px; }
+.missing-card p { margin: 0; color: #455b77; font-size: 14px; font-weight: 700; line-height: 1.7; }
+.missing-card small { display: block; margin-top: 10px; color: #64748b; font-size: 12px; }
+:global(body.theme-dark) .learning-summary { border-color: rgba(74, 184, 238, 0.28); background: #0b2b55; }
+:global(body.theme-dark) .score-card { border-color: rgba(74, 184, 238, 0.34); background: #155eab; }
+:global(body.theme-dark) .missing-card { border-color: rgba(74, 184, 238, 0.28); background: #082345; }
+:global(body.theme-dark) .missing-card h3 { color: #f2fbff; }
+:global(body.theme-dark) .missing-card p,
+:global(body.theme-dark) .missing-card small { color: #9ab9cf; }
 
 .section-head {
   display: flex;
@@ -305,7 +307,7 @@ watch(() => route.query.reportId, (next, previous) => {
   grid-template-columns: 54px minmax(0, 1fr);
   gap: 14px;
   border: 1px solid rgba(190, 213, 242, 0.74);
-  border-radius: 18px;
+  border-radius: 10px;
   padding: 16px;
   background: rgba(255, 255, 255, 0.58);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
@@ -316,9 +318,9 @@ watch(() => route.query.reportId, (next, previous) => {
   place-items: center;
   width: 48px;
   height: 48px;
-  border-radius: 16px;
+  border-radius: 8px;
   color: #fff;
-  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  background: #2563eb;
   font-weight: 950;
 }
 
@@ -358,26 +360,29 @@ watch(() => route.query.reportId, (next, previous) => {
 
 .todo-list {
   display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 
 .todo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
   border: 1px solid rgba(190, 213, 242, 0.74);
-  border-radius: 15px;
-  padding: 12px;
+  border-radius: 9px;
+  padding: 14px;
   color: #243856;
   background: rgba(255, 255, 255, 0.62);
   font-size: 14px;
   font-weight: 780;
   line-height: 1.6;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
-
-@keyframes learningRing {
-  to {
-    transform: rotate(360deg);
-  }
-}
+.todo-item i { display: grid; flex: 0 0 auto; place-items: center; width: 26px; height: 26px; border-radius: 6px; color: #fff; background: #2563eb; font-size: 12px; font-style: normal; font-weight: 900; }
+.todo-item span { padding-top: 2px; }
+.weekly-focus { margin-bottom: 0; }
+.span-12 { grid-column: span 12; }
+.method-note summary { color: #0f2148; font-size: 15px; font-weight: 900; cursor: pointer; }
+.method-note[open] summary { margin-bottom: 10px; }
 
 .side-block {
   border-top: 1px solid rgba(190, 213, 242, 0.72);
@@ -400,8 +405,284 @@ watch(() => route.query.reportId, (next, previous) => {
 
 @media (max-width: 1100px) {
   .learning-hero,
-  .path-detail {
+  .path-detail,
+  .todo-list {
     grid-template-columns: 1fr;
   }
+}
+
+/* Focused student learning workspace */
+.learning-page {
+  display: grid;
+  gap: 16px;
+  color: #e7f1f4;
+}
+
+.learning-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px minmax(230px, .55fr);
+  min-height: 158px;
+  overflow: hidden;
+  border: 1px solid rgba(68, 133, 158, .28);
+  border-radius: 6px;
+  background: #081824;
+}
+
+.goal-copy,
+.match-number,
+.priority-copy {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 24px 28px;
+}
+
+.match-number {
+  align-items: center;
+  border-right: 1px solid rgba(68, 133, 158, .22);
+  border-left: 1px solid rgba(68, 133, 158, .22);
+  text-align: center;
+}
+
+.goal-copy > span,
+.priority-copy > span,
+.workspace-heading > span,
+.route-heading span,
+.certificate-note > span {
+  color: #69c3cc;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.goal-copy h2 {
+  margin: 7px 0 8px;
+  color: #f0f7f8;
+  font-size: 27px;
+  letter-spacing: 0;
+}
+
+.goal-copy p {
+  max-width: 650px;
+  margin: 0;
+  color: #8fa5af;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.match-number strong {
+  color: #f2f8f9;
+  font-size: 38px;
+  line-height: 1;
+}
+
+.match-number span {
+  margin-top: 10px;
+  color: #8fa8b2;
+  font-size: 12px;
+}
+
+.priority-copy b {
+  margin-top: 7px;
+  color: #f0f6f7;
+  font-size: 20px;
+}
+
+.priority-copy small {
+  margin-top: 9px;
+  color: #849aa5;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.learning-workspace {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(68, 133, 158, .28);
+  border-radius: 6px;
+  background: #091a28;
+}
+
+.weekly-panel {
+  padding: 26px;
+  border-right: 1px solid rgba(68, 133, 158, .24);
+  background: #081824;
+}
+
+.workspace-heading h3,
+.route-heading h3 {
+  margin: 5px 0 0;
+  color: #edf5f7;
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.weekly-list {
+  display: grid;
+  gap: 0;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.weekly-list li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 11px;
+  padding: 15px 0;
+  border-top: 1px solid rgba(70, 126, 147, .2);
+}
+
+.weekly-list i {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border: 1px solid rgba(76, 187, 196, .4);
+  border-radius: 50%;
+  color: #73d3d8;
+  font-size: 10px;
+  font-style: normal;
+}
+
+.weekly-list span {
+  color: #cbdbe0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.certificate-note {
+  margin-top: 20px;
+  border-left: 2px solid #b98950;
+  padding-left: 11px;
+}
+
+.certificate-note p {
+  margin: 5px 0 0;
+  color: #a9b9bf;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.route-panel { min-width: 0; padding: 26px 28px; }
+.route-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+.route-heading small { color: #718a96; font-size: 11px; }
+
+.route-list {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid rgba(70, 126, 147, .22);
+  list-style: none;
+}
+
+.route-list > li {
+  border-top: 1px solid rgba(70, 126, 147, .22);
+  transition: background 150ms ease;
+}
+
+.route-list > li.active { background: #0c2231; }
+
+.route-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-height: 64px;
+  border: 0;
+  padding: 0 14px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.route-row:focus-visible {
+  outline: 2px solid rgba(83, 196, 204, .72);
+  outline-offset: -2px;
+}
+
+.route-row > i {
+  color: #64c7cf;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.route-row > span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.route-row b { color: #dce9ed; font-size: 14px; }
+.route-row small { color: #8298a3; font-size: 11px; }
+.route-row em { color: #6bbfc7; font-size: 11px; font-style: normal; text-align: center; }
+
+.route-detail {
+  padding: 2px 52px 22px 65px;
+}
+
+.route-detail > p {
+  margin: 0 0 15px;
+  color: #9eb2bb;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.route-detail dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(170px, .5fr);
+  gap: 18px;
+  margin: 0;
+}
+
+.route-detail dl > div {
+  border-left: 2px solid rgba(66, 184, 194, .5);
+  padding-left: 11px;
+}
+
+.route-detail dt { color: #6fc3ca; font-size: 10px; }
+.route-detail dd { margin: 5px 0 0; color: #c6d5da; font-size: 12px; line-height: 1.55; }
+.route-empty { padding: 60px 20px; color: #7f97a2; text-align: center; }
+
+.learning-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 58px;
+  border-top: 1px solid rgba(68, 133, 158, .24);
+  padding: 8px 2px 0;
+}
+
+.learning-footer > small { color: #718894; font-size: 11px; }
+.learning-footer > div { display: flex; gap: 8px; }
+.learning-footer .el-button { margin: 0; border-radius: 4px; }
+
+@media (max-width: 980px) {
+  .learning-overview { grid-template-columns: 1fr 150px; }
+  .priority-copy { grid-column: 1 / -1; border-top: 1px solid rgba(68, 133, 158, .22); }
+  .learning-workspace { grid-template-columns: 1fr; }
+  .weekly-panel { border-right: 0; border-bottom: 1px solid rgba(68, 133, 158, .24); }
+}
+
+@media (max-width: 640px) {
+  .learning-overview { grid-template-columns: 1fr; }
+  .match-number { align-items: flex-start; border: 0; border-top: 1px solid rgba(68, 133, 158, .22); text-align: left; }
+  .goal-copy, .match-number, .priority-copy, .weekly-panel, .route-panel { padding: 20px 17px; }
+  .route-heading, .learning-footer { align-items: flex-start; flex-direction: column; }
+  .route-row > span { align-items: flex-start; flex-direction: column; gap: 3px; }
+  .route-detail { padding: 0 17px 20px 52px; }
+  .route-detail dl { grid-template-columns: 1fr; }
 }
 </style>
