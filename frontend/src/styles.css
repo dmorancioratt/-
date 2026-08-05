@@ -1848,23 +1848,9 @@ body:not(.login-active) .app-main :is(
   border-color: rgba(91, 145, 220, 0.2) !important;
 }
 
-/* Logged-in workspace uses one quiet static backdrop. Individual dashboard
- * visualizations own motion, so the page shell no longer competes with them. */
-body:not(.login-active)::before {
-  background:
-    radial-gradient(circle at 16% -8%, rgba(30, 123, 255, 0.18), transparent 34%),
-    radial-gradient(circle at 88% 12%, rgba(0, 200, 245, 0.1), transparent 28%),
-    linear-gradient(155deg, #020718 0%, #06142f 52%, #030a1d 100%);
-  background-size: auto;
-}
-
-body:not(.login-active)::after {
-  display: none;
-  animation: none;
-}
-
+/* 登录后保留动态背景：body::before 网格渐变 + body::after 粒子脉冲 + workspace-atmosphere 流光 */
 body:not(.login-active) {
-  background: #030a1d;
+  background: transparent;
 }
 
 body.theme-dark .eval-page .el-table::before {

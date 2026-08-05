@@ -14,7 +14,7 @@ const routes = [
     redirect: '/overview',
     children: [
       { path: 'overview', name: 'overview', component: () => import('@/views/Overview.vue'), meta: { title: '系统概览', roles: allRoles } },
-      { path: 'growth-cockpit', name: 'growth-cockpit', component: () => import('@/views/GrowthCockpit.vue'), meta: { title: '成长驾驶舱', roles: candidateRoles } },
+      { path: 'growth-cockpit', name: 'growth-cockpit', component: () => import('@/views/GrowthCockpit.vue'), meta: { title: '个人成长驾驶舱', roles: candidateRoles, fullscreen: true } },
       { path: 'personal-center', name: 'personal-center', component: () => import('@/views/PersonalCenter.vue'), meta: { title: '个人中心', roles: candidateRoles } },
       { path: 'hr-candidates', name: 'hr-candidates', component: () => import('@/views/HrCandidates.vue'), meta: { title: '候选人管理', roles: hrRoles } },
       { path: 'datasets', name: 'datasets', component: () => import('@/views/Datasets.vue'), meta: { title: '权威数据源中心', roles: hrRoles } },
