@@ -14,9 +14,10 @@ const routes = [
     redirect: '/overview',
     children: [
       { path: 'overview', name: 'overview', component: () => import('@/views/Overview.vue'), meta: { title: '系统概览', roles: allRoles } },
+      { path: 'growth-cockpit', name: 'growth-cockpit', component: () => import('@/views/GrowthCockpit.vue'), meta: { title: '成长驾驶舱', roles: candidateRoles } },
       { path: 'personal-center', name: 'personal-center', component: () => import('@/views/PersonalCenter.vue'), meta: { title: '个人中心', roles: candidateRoles } },
       { path: 'hr-candidates', name: 'hr-candidates', component: () => import('@/views/HrCandidates.vue'), meta: { title: '候选人管理', roles: hrRoles } },
-      { path: 'datasets', name: 'datasets', component: () => import('@/views/Datasets.vue'), meta: { title: '数据源管理', roles: hrRoles } },
+      { path: 'datasets', name: 'datasets', component: () => import('@/views/Datasets.vue'), meta: { title: '权威数据源中心', roles: hrRoles } },
       { path: 'jd-parser', name: 'jd-parser', component: () => import('@/views/JdParser.vue'), meta: { title: 'JD解析', roles: hrRoles } },
       { path: 'jobs', name: 'jobs', component: () => import('@/views/Jobs.vue'), meta: { title: '岗位管理', roles: hrRoles } },
       { path: 'emerging-jobs', name: 'emerging-jobs', component: () => import('@/views/EmergingJobs.vue'), meta: { title: '新岗位发现', roles: hrRoles } },

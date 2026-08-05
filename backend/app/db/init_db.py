@@ -28,6 +28,7 @@ from app.services.emerging_jobs import build_emerging_candidate
 from app.services.jd_parser import text_hash
 from app.services.matching import score_match
 from app.services.auth import hash_password
+from app.services.official_data import bootstrap_official_data
 
 DOMAINS = ["人工智能", "数据技术", "软件研发", "物联网", "智能系统", "安全合规", "产业数字化"]
 
@@ -43,7 +44,9 @@ def seed_database() -> None:
     db = SessionLocal()
     try:
         if db.scalar(select(User).limit(1)):
+            ensure_admin_user(db)
             ensure_minimum_test_cases(db)
+            bootstrap_official_data(db)
             db.commit()
             return
         seed_users(db)
@@ -58,6 +61,7 @@ def seed_database() -> None:
         seed_reports(db, resumes, jobs)
         seed_review_tasks(db)
         seed_test_cases(db)
+        bootstrap_official_data(db)
         db.commit()
     finally:
         db.close()
@@ -105,6 +109,55 @@ def migrate_database() -> None:
                 connection.execute(text("ALTER TABLE resumes ADD COLUMN source_filename VARCHAR(255) DEFAULT ''"))
             if "created_at" not in columns:
                 connection.execute(text("ALTER TABLE resumes ADD COLUMN created_at DATETIME"))
+        if inspector.has_table("data_sources"):
+            columns = {column["name"] for column in inspector.get_columns("data_sources")}
+            additions = {
+                "source_key": "VARCHAR(80) DEFAULT ''",
+                "publisher": "VARCHAR(160) DEFAULT ''",
+                "source_url": "TEXT DEFAULT ''",
+                "license_name": "VARCHAR(120) DEFAULT ''",
+                "version": "VARCHAR(80) DEFAULT ''",
+                "published_at": "DATETIME",
+                "last_synced_at": "DATETIME",
+                "indexed_count": "INTEGER DEFAULT 0",
+                "sync_message": "TEXT DEFAULT ''",
+                "metadata_json": "TEXT DEFAULT '{}'",
+            }
+            for column_name, column_type in additions.items():
+                if column_name not in columns:
+                    connection.execute(text(f"ALTER TABLE data_sources ADD COLUMN {column_name} {column_type}"))
+        if inspector.has_table("raw_jds"):
+            columns = {column["name"] for column in inspector.get_columns("raw_jds")}
+            additions = {
+                "external_id": "VARCHAR(160) DEFAULT ''",
+                "source_url": "TEXT DEFAULT ''",
+                "publisher": "VARCHAR(160) DEFAULT ''",
+                "published_at": "DATETIME",
+                "parse_status": "VARCHAR(40) DEFAULT 'pending'",
+                "parse_error": "TEXT DEFAULT ''",
+            }
+            for column_name, column_type in additions.items():
+                if column_name not in columns:
+                    connection.execute(text(f"ALTER TABLE raw_jds ADD COLUMN {column_name} {column_type}"))
+            if inspector.has_table("parsed_jds"):
+                connection.execute(
+                    text(
+                        "UPDATE raw_jds SET parse_status = 'parsed' "
+                        "WHERE id IN (SELECT raw_jd_id FROM parsed_jds WHERE raw_jd_id IS NOT NULL)"
+                    )
+                )
+        if inspector.has_table("review_tasks"):
+            columns = {column["name"] for column in inspector.get_columns("review_tasks")}
+            additions = {
+                "target_type": "VARCHAR(60) DEFAULT ''",
+                "target_id": "INTEGER",
+                "payload_json": "TEXT DEFAULT '{}'",
+                "resolution_note": "TEXT DEFAULT ''",
+                "resolved_at": "DATETIME",
+            }
+            for column_name, column_type in additions.items():
+                if column_name not in columns:
+                    connection.execute(text(f"ALTER TABLE review_tasks ADD COLUMN {column_name} {column_type}"))
 
 
 def seed_skills(db):
@@ -236,6 +289,14 @@ def seed_evolution(db, jobs):
 def seed_users(db):
     accounts = [
         {
+            "username": "admin_demo",
+            "password": "Demo@123",
+            "role": "admin",
+            "display_name": "平台管理员",
+            "email": "admin@example.com",
+            "organization": "数融智联平台",
+        },
+        {
             "username": "hr_admin",
             "password": "Demo@123",
             "role": "hr",
@@ -292,6 +353,24 @@ def seed_users(db):
                     completeness=92,
                 )
             )
+    db.flush()
+
+
+def ensure_admin_user(db):
+    """Add the platform administrator to an existing demo database without resetting user data."""
+    if db.scalar(select(User).where(User.username == "admin_demo")):
+        return
+    db.add(
+        User(
+            username="admin_demo",
+            password_hash=hash_password("Demo@123"),
+            role="admin",
+            display_name="平台管理员",
+            email="admin@example.com",
+            organization="数融智联平台",
+            phone="13800000000",
+        )
+    )
     db.flush()
 
 

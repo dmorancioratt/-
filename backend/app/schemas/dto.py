@@ -1,8 +1,20 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class JDParseRequest(BaseModel):
     text: str
+
+
+class JobUpdateRequest(BaseModel):
+    domain: str | None = None
+    job_type: str | None = None
+    level: str | None = None
+    description: str | None = None
+    status: str | None = None
+    required_skills: list[str] | None = None
+    preferred_skills: list[str] | None = None
+    update_note: str = "人工优化岗位画像"
+    evidence_sources: list[str] = Field(default_factory=list)
 
 
 class ResumeParseRequest(BaseModel):

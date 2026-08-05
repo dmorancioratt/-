@@ -36,6 +36,24 @@
         </template>
       </div>
     </div>
+    <section class="panel history-panel">
+      <div class="history-head">
+        <div><h3>解析历史</h3><p>每次点击解析都会保存结果；相同原文只保存一份原始 JD。</p></div>
+        <el-button text :loading="historyLoading" @click="loadHistory">刷新</el-button>
+      </div>
+      <el-table :data="history" stripe @row-click="restoreHistory">
+        <el-table-column prop="job_name" label="岗位" min-width="180" />
+        <el-table-column prop="domain" label="领域" min-width="120" />
+        <el-table-column prop="level" label="等级" width="90" />
+        <el-table-column label="核心技能" min-width="240">
+          <template #default="{ row }">{{ (row.required_skills || []).slice(0, 4).join('、') || '未提取' }}</template>
+        </el-table-column>
+        <el-table-column label="置信度" width="90">
+          <template #default="{ row }">{{ Math.round(Number(row.confidence || 0) * 100) }}%</template>
+        </el-table-column>
+        <el-table-column label="操作" width="90"><template #default><el-button link type="primary">查看</el-button></template></el-table-column>
+      </el-table>
+    </section>
   </div>
 </template>
 
@@ -47,6 +65,8 @@ import { api } from '@/api/http'
 import { loadPageState, savePageState } from '@/utils/pageState'
 
 const loading = ref(false)
+const historyLoading = ref(false)
+const history = ref<any[]>([])
 const result = ref<any>()
 const text = ref('大模型应用工程师，负责企业知识库 RAG 应用建设，需要 Python、FastAPI、LangChain、向量数据库、Docker、Prompt Engineering，熟悉智能制造或智慧教育场景。')
 
@@ -54,6 +74,7 @@ async function submit() {
   loading.value = true
   try {
     result.value = await api.parseJd(text.value)
+    await loadHistory()
     persistState()
   } catch {
     ElMessage.error('解析失败，请确认后端服务已启动')
@@ -62,16 +83,42 @@ async function submit() {
   }
 }
 
+async function loadHistory() {
+  historyLoading.value = true
+  try {
+    history.value = await api.jdHistory()
+  } catch {
+    history.value = []
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+function restoreHistory(row: any) {
+  text.value = row.source_text || ''
+  result.value = row
+  persistState()
+}
+
 function persistState() {
   savePageState('jd-parser', { text: text.value, result: result.value })
 }
 
 watch(text, persistState)
 
-onMounted(() => {
+onMounted(async () => {
   const cached = loadPageState<{ text?: string; result?: any }>('jd-parser')
-  if (!cached) return
-  if (typeof cached.text === 'string') text.value = cached.text
-  result.value = cached.result
+  if (cached) {
+    if (typeof cached.text === 'string') text.value = cached.text
+    result.value = cached.result
+  }
+  await loadHistory()
 })
 </script>
+
+<style scoped>
+.history-panel { margin-top: 18px; padding: 20px; }
+.history-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.history-head h3 { margin: 0; color: var(--text); font-size: 17px; }
+.history-head p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+</style>

@@ -97,11 +97,17 @@ def eval_match(gold_path: Path, pred_path: Path) -> EvalResult:
         samples=len(gold),
         accuracy=safe_div(matched, len(gold)),
         error_cases=error_cases[:10],
-        notes="Top-1 岗位命中率",
+        notes="基于当前岗位图谱、候选人技能与经历实时生成预测；小规模回归集，不代表大样本泛化精度",
     )
 
 
 def run() -> list[EvalResult]:
+    # Keep match predictions tied to the current graph instead of a stale
+    # hand-authored fixture.  JD/resume predictions remain explicit fixtures
+    # until a labeled import batch is supplied.
+    from app.evaluation.generate_match_predictions import generate
+
+    generate()
     gold = SAMPLES_DIR / "gold"
     pred = SAMPLES_DIR / "pred"
     return [

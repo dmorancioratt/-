@@ -54,6 +54,11 @@
                 <span>{{ selectedJob.domain }} · {{ selectedJob.level }} · {{ selectedJob.job_type }}</span>
               </div>
               <p>{{ selectedJob.description }}</p>
+              <div class="job-requirement-preview">
+                <span>{{ selectedJob.requirements?.required_skills?.length || 0 }} 项必备能力</span>
+                <span>{{ selectedJob.requirements?.preferred_skills?.length || 0 }} 项加分能力</span>
+                <span>{{ selectedJob.requirements?.recommended_certificates?.length || 0 }} 项建议证书</span>
+              </div>
             </div>
           </div>
         </div>
@@ -118,6 +123,9 @@
           <div class="skill-line">
             <el-tag v-for="item in report.job_profile?.required_skills?.slice(0, 4) || []" :key="item" size="small">{{ item }}</el-tag>
           </div>
+          <div v-if="report.job_profile?.recommended_certificates?.length" class="certificate-line">
+            建议证书：{{ report.job_profile.recommended_certificates.map((item: any) => item.name).join('、') }}
+          </div>
         </div>
         <div class="score-card" :class="scoreLevel.className">
           <span>综合匹配度</span>
@@ -130,6 +138,7 @@
         <span>报告 #{{ report.report_id }}</span>
         <span>评分可信度 {{ report.confidence_label }}（{{ report.confidence }}%）</span>
         <span>{{ report.scoring_version }}</span>
+        <span>能力目录 {{ report.job_profile?.authority?.catalog_version || '-' }}</span>
         <span>{{ report.ai_provider === 'mock' ? '模拟 AI' : `AI：${report.ai_provider}${report.ai_model ? ` / ${report.ai_model}` : ''}` }}</span>
         <span>{{ formatDate(report.created_at) }}</span>
       </div>
@@ -217,7 +226,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import EChart from '@/components/EChart.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -226,6 +235,7 @@ import { useAuthStore } from '@/stores/auth'
 import { loadPageState, savePageState } from '@/utils/pageState'
 
 const router = useRouter()
+const route = useRoute()
 const auth = useAuthStore()
 const jobs = ref<any[]>([])
 const resumes = ref<any[]>([])
@@ -299,6 +309,8 @@ async function loadBaseData() {
     resumes.value = resumeRows || []
     history.value = historyRows || []
     profile.value = profileRow
+    const queryJobId = Number(route.query.jobId || 0)
+    if (queryJobId && jobs.value.some((item) => item.id === queryJobId)) jobId.value = queryJobId
     if (!jobId.value) jobId.value = jobs.value[0]?.id
     if (!resumeId.value) resumeId.value = resumes.value[0]?.id
     const cachedReportId = cachedState?.reportId
@@ -406,6 +418,9 @@ onMounted(loadBaseData)
 .selection-card span, .job-preview span { display: block; margin-top: 5px; color: #718096; font-size: 11px; font-weight: 750; }
 .job-preview { min-height: 84px; border-radius: 15px; padding: 12px; background: #eff7ff; }
 .job-preview p { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.job-requirement-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.job-requirement-preview span { margin: 0; border-radius: 999px; padding: 4px 8px; background: rgba(37,99,235,.08); color: #315a8f; }
+.certificate-line { margin-top: 8px; color: #60758f; font-size: 11px; line-height: 1.5; }
 .option-meta { float: right; color: #8492a6; }
 .run-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 16px; border-top: 1px solid rgba(190,213,242,.58); padding-top: 16px; }
 .run-row p { margin: 0; color: #64748b; font-size: 12px; font-weight: 700; line-height: 1.6; }

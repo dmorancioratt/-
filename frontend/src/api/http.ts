@@ -26,8 +26,24 @@ export const api = {
   hrCandidates: () => http.get('/api/hr/candidates').then((res) => res.data),
   overview: () => http.get('/api/overview/summary').then((res) => res.data),
   datasets: () => http.get('/api/datasets').then((res) => res.data),
+  dataSourceStatus: () => http.get('/api/data-sources/status').then((res) => res.data),
+  syncDataSources: () => http.post('/api/data-sources/sync', {}, { timeout: 180000 }).then((res) => res.data),
+  marketSnapshot: () => http.get('/api/market/snapshot').then((res) => res.data),
+  marketCatalog: (params?: { keyword?: string; item_type?: string; limit?: number }) =>
+    http.get('/api/market/catalog', { params }).then((res) => res.data),
   parseJd: (text: string) => http.post('/api/jd/parse', { text }, { timeout: 120000 }).then((res) => res.data),
+  jdHistory: () => http.get('/api/jd/history').then((res) => res.data),
+  jdImports: () => http.get('/api/jd/imports').then((res) => res.data),
+  importJds: (file: File, payload: { source_name: string; publisher: string; source_url: string; license_name: string; auto_parse: boolean; parse_limit: number }) => {
+    const form = new FormData()
+    form.append('file', file, file.name)
+    Object.entries(payload).forEach(([key, value]) => form.append(key, String(value)))
+    return http.post('/api/jd/import', form, { timeout: 180000 }).then((res) => res.data)
+  },
+  parseJdImport: (sourceId: number, limit = 50) =>
+    http.post(`/api/jd/imports/${sourceId}/parse`, {}, { params: { limit }, timeout: 180000 }).then((res) => res.data),
   jobs: () => http.get('/api/jobs').then((res) => res.data),
+  updateJob: (id: number, payload: unknown) => http.put(`/api/jobs/${id}`, payload).then((res) => res.data),
   emergingJobs: () => http.get('/api/emerging-jobs').then((res) => res.data),
   jobEvolution: (id: number) => http.get(`/api/job-evolution/${id}`).then((res) => res.data),
   skillGraph: () => http.get('/api/skill-graph').then((res) => res.data),

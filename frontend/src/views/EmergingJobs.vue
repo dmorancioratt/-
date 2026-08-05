@@ -33,8 +33,17 @@
           <div class="tag-list"><el-tag v-for="item in current.required_skills" :key="item">{{ item }}</el-tag></div>
           <h4>应用场景</h4>
           <div class="tag-list"><el-tag v-for="item in current.scenarios" :key="item" type="info">{{ item }}</el-tag></div>
+          <h4>建议证书</h4>
+          <div class="tag-list">
+            <el-tag v-for="item in current.requirements?.recommended_certificates || []" :key="item.id" type="warning" effect="light">{{ item.name }}</el-tag>
+            <span v-if="!current.requirements?.recommended_certificates?.length">暂无明确证书建议</span>
+          </div>
           <h4>证据来源</h4>
           <el-alert v-for="item in current.evidence" :key="item.quote" :title="item.quote" :description="item.source" type="info" :closable="false" />
+          <div class="detail-actions">
+            <el-button :disabled="!current.job_id" @click="openGraph">在能力图谱中查看</el-button>
+            <el-button type="primary" :disabled="!current.job_id" @click="startMatch">用于匹配分析</el-button>
+          </div>
         </template>
       </div>
     </div>
@@ -43,6 +52,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import PageHeader from '@/components/PageHeader.vue'
 import { api } from '@/api/http'
@@ -55,6 +65,7 @@ type EmergingJobsState = {
 }
 
 const rows = ref<any[]>([])
+const router = useRouter()
 const current = ref<any>()
 const loading = ref(false)
 const lastUpdated = ref<string>()
@@ -70,6 +81,14 @@ function persistState() {
 function selectCurrent(row?: any) {
   current.value = row
   persistState()
+}
+
+function openGraph() {
+  if (current.value?.job_id) router.push({ path: '/skill-graph', query: { jobId: String(current.value.job_id) } })
+}
+
+function startMatch() {
+  if (current.value?.job_id) router.push({ path: '/match-analysis', query: { jobId: String(current.value.job_id) } })
 }
 
 async function generate(notify = false) {
@@ -95,7 +114,8 @@ function formatTime(value: string) {
 
 onMounted(async () => {
   const cached = loadPageState<EmergingJobsState>('emerging-jobs')
-  if (cached?.rows?.length) {
+  const cacheMatchesCatalog = cached?.rows?.length && cached.rows.every((item) => item.job_id && item.requirements && item.authority)
+  if (cacheMatchesCatalog) {
     rows.value = cached.rows
     lastUpdated.value = cached.lastUpdated
     current.value = rows.value.find((item) => item.job_name === cached.currentJobName) || rows.value[0]
@@ -104,3 +124,7 @@ onMounted(async () => {
   await generate()
 })
 </script>
+
+<style scoped>
+.detail-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+</style>

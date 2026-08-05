@@ -6,6 +6,9 @@
         <el-table-column prop="task_type" label="任务类型" width="120" />
         <el-table-column prop="title" label="标题" min-width="180" />
         <el-table-column prop="description" label="说明" min-width="260" show-overflow-tooltip />
+        <el-table-column label="写回对象" width="130">
+          <template #default="{ row }">{{ row.target_type && row.target_id ? `${row.target_type} #${row.target_id}` : '历史任务' }}</template>
+        </el-table-column>
         <el-table-column label="置信度" width="130">
           <template #default="{ row }">{{ Math.round(row.confidence * 100) }}%</template>
         </el-table-column>
@@ -37,13 +40,13 @@ async function load() {
   rows.value = await api.reviewTasks()
 }
 async function approve(id: number) {
-  await api.approveTask(id)
-  ElMessage.success('已通过')
+  const result = await api.approveTask(id)
+  ElMessage.success(result.message)
   await load()
 }
 async function reject(id: number) {
-  await api.rejectTask(id)
-  ElMessage.success('已驳回')
+  const result = await api.rejectTask(id)
+  ElMessage.success(result.message)
   await load()
 }
 onMounted(load)
