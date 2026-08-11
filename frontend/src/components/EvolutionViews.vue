@@ -1,119 +1,229 @@
 <template>
-  <section v-if="mode === 'version'" class="evo-view version-view">
-    <aside class="hud-stack">
-      <article class="hud-panel version-summary">
-        <PanelTitle title="版本对比总览" code="VERSION DELTA" />
-        <div class="version-gauge">
-          <div><small>上一版</small><b>{{ previousCount }}</b><em>{{ activeCard.fromVersion }}</em></div>
-          <span class="gauge-core"><i>净变化</i><strong>{{ signedDelta }}</strong><small>SKILLS</small></span>
-          <div><small>当前版</small><b>{{ currentCount }}</b><em>{{ activeCard.toVersion }}</em></div>
-        </div>
-        <div class="delta-counters">
-          <span class="tone-add"><b>+{{ addedItems.length }}</b>新增</span>
-          <span class="tone-mod"><b>{{ modifiedItems.length }}</b>调整</span>
-          <span class="tone-remove"><b>-{{ removedItems.length }}</b>淘汰</span>
-        </div>
-      </article>
+  <section v-if="mode === 'version'" class="version-dashboard">
+    <div class="v-starfield-bg"></div>
+    <div class="v-grid-overlay"></div>
 
-      <article class="hud-panel trend-panel">
-        <PanelTitle title="演化趋势" code="4 VERSIONS" />
-        <div class="mini-chart" aria-hidden="true">
-          <svg viewBox="0 0 280 118" preserveAspectRatio="none">
-            <path class="grid-line" d="M0 24H280M0 59H280M0 94H280" />
-            <path class="trend add" d="M5 88 C52 76 72 47 108 54 S158 28 194 48 S242 35 275 20" />
-            <path class="trend mod" d="M5 96 C48 92 80 75 111 77 S168 64 198 68 S245 55 275 62" />
-            <path class="trend remove" d="M5 104 C52 99 80 91 110 95 S166 88 198 91 S244 82 275 87" />
-            <circle v-for="x in [5, 94, 184, 275]" :key="x" :cx="x" cy="54" r="3" />
+    <div class="v-top-bar">
+      <div class="v-title-box">
+        <div class="v-title-main">版本对比战场态势</div>
+        <div class="v-title-sub">VERSION COMPARISON BATTLEFIELD SITUATION</div>
+      </div>
+    </div>
+
+    <div class="v-main-layout">
+      <aside class="v-col v-col-left">
+        <section class="v-panel">
+          <div class="v-panel-head"><span>版本概览</span><small>VERSION DATA</small></div>
+          <div class="v-metric-grid">
+            <div class="v-metric">
+              <div class="v-m-val">{{ previousCount }}</div>
+              <div class="v-m-label">上一版</div>
+              <div class="v-m-delta cyan">{{ activeCard.fromVersion || 'v1.1' }}</div>
+            </div>
+            <div class="v-metric">
+              <div class="v-mini-ring"><span class="v-m-val" style="font-size:.9em">{{ signedDelta }}</span></div>
+              <div class="v-m-label">净变化</div>
+              <div class="v-m-delta" :class="delta >= 0 ? 'up' : 'down'">{{ changeCount }}项变更</div>
+            </div>
+            <div class="v-metric">
+              <div class="v-m-val">{{ currentCount }}</div>
+              <div class="v-m-label">当前版</div>
+              <div class="v-m-delta gold">{{ activeCard.toVersion || 'v1.2' }}</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="v-panel">
+          <div class="v-panel-head"><span>差异转向</span><small>DELTA AVISIONS</small></div>
+          <div class="v-gauge-grid">
+            <div class="v-gauge">
+              <div class="v-gauge-ring green"><span class="v-g-num">{{ addedItems.length }}</span></div>
+              <div class="v-g-label">新增能力</div>
+            </div>
+            <div class="v-gauge">
+              <div class="v-gauge-ring gold"><span class="v-g-num">{{ modifiedItems.length }}</span></div>
+              <div class="v-g-label">调整能力</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="v-panel">
+          <div class="v-panel-head"><span>能力变化方向</span><small>EVOLUTION</small></div>
+          <div class="v-skill-grid">
+            <div class="v-skill" v-for="(s, i) in versionSkillBalls" :key="i">
+              <div class="v-skill-ball" :class="s.color">{{ s.val }}</div>
+              <label>{{ s.name }}</label>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <main class="v-col v-col-center">
+        <section class="v-hero-panel">
+          <div class="v-corner-tl"></div>
+          <div class="v-corner-br"></div>
+          <div class="v-hero-bg"></div>
+          <div class="v-hero-glow"></div>
+          <div class="v-hero-grid-floor"></div>
+          <div class="v-scan-line"></div>
+          <div class="v-holo-row">
+            <div v-for="(h, i) in versionHoloCards" :key="i" class="v-holo-card" :style="{ '--glow': h.glow }">
+              <div class="v-holo-title">{{ h.title }}<span class="v-holo-count">{{ h.count }}</span></div>
+              <div class="v-holo-frame">
+                <img :src="h.img" :class="['v-core-img', h.imgClass]" />
+                <div class="v-core-mask"></div>
+                <div class="v-holo-corner-l"></div>
+                <div class="v-holo-corner-r"></div>
+                <div class="v-holo-pillar"></div>
+                <div class="v-holo-halo"></div>
+                <div v-for="o in 3" :key="'fr'+i+o" class="v-holo-float" :class="'r'+o"></div>
+                <div v-for="o in 4" :key="'ob'+i+o" class="v-holo-orbit" :class="'o'+o"></div>
+                <div class="v-holo-stage-label">{{ h.stage }}</div>
+                <div class="v-holo-skills">
+                  <span v-for="(sk, si) in h.skills.slice(0, 3)" :key="si" class="v-holo-skill-tag">{{ sk }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="v-chart-panel v-tree-panel">
+          <div class="v-corner-tl"></div>
+          <div class="v-corner-br"></div>
+          <div class="v-panel-title">能力演化树 · SKILL EVOLUTION TREE</div>
+          <SkillEvolutionTree 
+            :added-skills="addedItems.map(i => i.name)"
+            :removed-skills="removedItems.map(i => i.name)"
+            :core-skills="coreSkills"
+            :from-version="activeCard.fromVersion || 'v1.1'"
+            :to-version="activeCard.toVersion || 'v1.2'"
+          />
+        </section>
+
+        <section class="v-chart-panel">
+          <div class="v-corner-tl"></div>
+          <div class="v-corner-br"></div>
+          <svg class="v-trend-svg" viewBox="0 0 1000 360" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="vAreaFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#57e8ff" stop-opacity=".14"/>
+                <stop offset="1" stop-color="#57e8ff" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="vGoldArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffd66b" stop-opacity=".12"/>
+                <stop offset="1" stop-color="#ffd66b" stop-opacity="0"/>
+              </linearGradient>
+              <filter id="vLineGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <g opacity=".24" stroke="#4bd5f3" stroke-width="1">
+              <path v-for="x in [55,185,315,445,575,705,835,965]" :key="'vx'+x" :d="`M${x} 40V315`"/>
+              <path v-for="y in [70,125,180,235,290]" :key="'hy'+y" :d="`M55 ${y}H965`"/>
+            </g>
+            <path d="M55 315H965M55 40V315" stroke="#8eeeff" stroke-width="1.5" opacity=".65"/>
+            <path d="M55 290 L215 250 L395 220 L560 180 L730 140 L965 100 L965 315 L55 315Z" fill="url(#vAreaFill)"/>
+            <path d="M55 280 C120 258 150 218 215 198 S340 225 395 205 S500 150 560 155 S660 105 730 118 S850 125 965 82" fill="none" stroke="#71efff" stroke-width="4" filter="url(#vLineGlow)"/>
+            <path d="M55 300 C125 285 160 270 215 250 S335 255 395 240 S490 200 560 190 S655 155 730 150 S840 170 965 155" fill="none" stroke="#ffe098" stroke-width="3.5" filter="url(#vLineGlow)"/>
+            <path d="M55 298 C120 288 155 275 215 260 S330 262 395 252 S495 220 560 210 S660 180 730 175 S835 185 965 170" fill="none" stroke="#ff785f" stroke-width="2.8" filter="url(#vLineGlow)" opacity=".85"/>
+            <g fill="#f8fdff" stroke="#75edff" stroke-width="2">
+              <circle v-for="p in vCyanNodes" :key="'cn'+p.x" :cx="p.x" :cy="p.y" r="5"/>
+            </g>
+            <g fill="#fff6df" stroke="#ffda7c" stroke-width="2">
+              <circle v-for="p in vGoldNodes" :key="'gn'+p.x" :cx="p.x" :cy="p.y" r="4"/>
+            </g>
+            <g fill="#ff9f8d" stroke="#ff785f" stroke-width="2">
+              <circle v-for="p in vRedNodes" :key="'rn'+p.x" :cx="p.x" :cy="p.y" r="3.5"/>
+            </g>
+            <g class="v-year-labels" fill="#dffaff" font-weight="700" font-size="12">
+              <text x="170" y="180">v1.0</text>
+              <text x="365" y="195">v1.1</text>
+              <text x="535" y="140">{{ activeCard.fromVersion || 'v1.1' }}</text>
+              <text x="705" y="100">{{ activeCard.toVersion || 'v1.2' }}</text>
+              <text x="850" y="70">v1.3</text>
+            </g>
+            <g class="v-x-labels" fill="#b9dcea" font-size="11">
+              <text x="40" y="342">基础版本</text>
+              <text x="250" y="342">迭代更新</text>
+              <text x="465" y="342">能力升级</text>
+              <text x="690" y="342">当前版本</text>
+              <text x="885" y="342">未来演进</text>
+            </g>
+            <g class="v-legend" font-size="10" fill="#a6c9dc">
+              <circle cx="80" cy="30" r="4" fill="#71efff"/>
+              <text x="92" y="34">能力总数</text>
+              <circle cx="180" cy="30" r="4" fill="#ffe098"/>
+              <text x="192" y="34">核心能力</text>
+              <circle cx="280" cy="30" r="4" fill="#ff785f"/>
+              <text x="292" y="34">淘汰趋势</text>
+            </g>
           </svg>
-        </div>
-        <div class="mini-axis"><span>v1.0</span><span>v1.1</span><span class="active">{{ activeCard.toVersion || 'v1.2' }}</span><span>v1.3</span></div>
-      </article>
+        </section>
+      </main>
 
-      <article class="hud-panel insight-panel">
-        <PanelTitle title="能力演化洞察" code="AI INSIGHT" />
-        <p>{{ activeCard.note || '本次更新聚焦工程效率与岗位核心能力，能力结构正在向高复用、可落地方向收敛。' }}</p>
-        <ul>
-          <li class="tone-add"><i>01</i>云原生与框架能力增强</li>
-          <li class="tone-mod"><i>02</i>技术栈完成迭代与替代</li>
-          <li class="tone-remove"><i>03</i>低关联能力逐步退出</li>
-        </ul>
-      </article>
-    </aside>
+      <aside class="v-col v-col-right">
+        <section class="v-panel">
+          <div class="v-panel-head"><span>版本匹配分析</span><small>INTELLIGENCE</small></div>
+          <div class="v-intel-body">
+            <div class="v-big-ring">
+              <div><div class="v-big-t">匹配置信度</div><div class="v-big-v">{{ confidence }}%</div></div>
+            </div>
+          </div>
+        </section>
 
-    <main class="hud-panel version-command">
-      <div class="command-head">
-        <div><small>ROLE COMPARISON COCKPIT</small><h2>角色对比驾驶舱</h2></div>
-        <button class="role-selector" type="button" @click="cycleCard(1)">{{ activeCard.jobName || 'AI 智能体开发工程师' }} <span>⌄</span></button>
-        <span class="domain-chip">{{ activeCard.domain || '人工智能' }}</span>
-        <div class="version-switch"><b>{{ activeCard.fromVersion || 'v1.1' }}</b><i>→</i><strong>{{ activeCard.toVersion || 'v1.2' }}</strong></div>
-      </div>
-      <p class="command-note">{{ activeCard.note || '通过版本更新事件重建岗位能力画像，清晰展示新增、调整与淘汰能力。' }}</p>
+        <section class="v-panel">
+          <div class="v-panel-head"><span>变化维度</span><small>CHANGE DIM</small></div>
+          <div class="v-dim-list">
+            <div v-for="(item, i) in vDimList" :key="i" class="v-list-row">
+              <span class="v-item-label"><i class="v-row-bullet" :class="item.color"></i>{{ item.name }}</span>
+              <span class="v-item-val">{{ item.val }}</span>
+            </div>
+          </div>
+        </section>
 
-      <div class="version-lab">
+        <section class="v-panel">
+          <div class="v-panel-head"><span>版本演进分项指标</span><small>METRICS</small></div>
+          <div class="v-metrics-body">
+            <div class="v-bar-group">
+              <div v-for="(b, i) in vBarMetrics" :key="i" class="v-bar-line">
+                <span>{{ b.name }}</span>
+                <div class="v-bar-bg"><div class="v-bar-fill" :style="{width: b.val + '%'}"></div></div>
+              </div>
+            </div>
+            <div class="v-num-row">
+              <div v-for="(n, i) in vNumSet1" :key="i" class="v-num-cell"><b>{{ n.val }}</b><small>{{ n.label }}</small></div>
+            </div>
+            <div class="v-num-row">
+              <div v-for="(n, i) in vNumSet2" :key="i" class="v-num-cell"><b>{{ n.val }}</b><small>{{ n.label }}</small></div>
+            </div>
+            <div class="v-spark-line">
+              <svg viewBox="0 0 240 70">
+                <path d="M0 58L22 52L38 45L61 40L82 30L102 28L123 22L145 25L166 15L188 20L210 12L240 8" fill="none" stroke="#4bffd0" stroke-width="2"/>
+                <path d="M0 40L22 45L38 38L61 48L82 35L102 42L123 32L145 38L166 28L188 35L210 25L240 30" fill="none" stroke="#ffd25c" stroke-width="2"/>
+                <path d="M0 65H240" stroke="#3d829f" opacity=".3"/>
+              </svg>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <footer class="v-footer-strip">
+      <button class="v-strip-arrow" type="button" @click="cycleCard(-1)">‹</button>
+      <div class="v-strip-title"><small>QUICK SWITCH</small><b>其他岗位快速对比</b></div>
+      <div class="v-role-cards">
         <button
-          v-for="well in wells"
-          :key="well.key"
+          v-for="(card, index) in roleCards"
+          :key="card.jobId || index"
           type="button"
-          class="energy-well"
-          :class="[`energy-well--${well.key}`, { active: activeWell === well.key }]"
-          @click="activeWell = well.key"
+          class="v-role-card"
+          :class="{ active: index === activeCardIndex }"
+          @click="activeCardIndex = index"
         >
-          <span class="well-label">{{ well.title }} <b>{{ well.items.length }} 项</b></span>
-          <span class="well-chamber">
-            <i class="well-particles"></i><i class="well-particles well-particles--far"></i><i class="well-beam"></i><i class="well-core"><b></b></i>
-            <em v-for="item in well.items.slice(0, 3)" :key="skillLabel(item)">{{ well.prefix }} {{ skillLabel(item) }}</em>
-            <em v-if="!well.items.length">暂无变更</em>
-          </span>
-          <span class="well-base"><i></i><b></b><em></em></span><span class="well-plinth"><i></i></span>
+          <span><i>◇</i>{{ card.jobName }}</span>
+          <em>{{ card.domain }}</em>
+          <b><strong class="up">+{{ card.added?.length || 0 }}</strong> / <span class="warn">{{ card.modified?.length || 0 }}</span> / <i class="down">-{{ card.removed?.length || 0 }}</i></b>
         </button>
       </div>
-
-      <div class="focused-change">
-        <span :class="`tone-${activeWell}`">{{ activeWellData.title }}</span>
-        <p>{{ activeWellDescription }}</p>
-        <div><i v-for="item in activeWellData.items.slice(0, 5)" :key="skillLabel(item)">{{ skillLabel(item) }}</i></div>
-      </div>
-      <div class="confidence-rail">
-        <span>上一版能力 <b>{{ previousCount }} 项</b></span>
-        <i><b :style="{ width: `${confidence}%` }"></b></i>
-        <span>证据置信度 <strong>{{ confidence }}%</strong></span>
-        <span>当前能力 <b>{{ currentCount }} 项</b></span>
-      </div>
-    </main>
-
-    <aside class="hud-stack">
-      <article class="hud-panel diff-panel">
-        <PanelTitle title="差异说明" code="CHANGE LOG" />
-        <p>本次版本共发生 <b>{{ changeCount }}</b> 项变化，净变化 <strong>{{ signedDelta }}</strong> 项。</p>
-        <button v-for="well in wells" :key="well.key" type="button" :class="[well.key, { active: activeWell === well.key }]" @click="activeWell = well.key">
-          <i>{{ well.items.length }}</i><span><b>{{ well.title }}</b><em>{{ well.items.slice(0, 2).map(skillLabel).join('、') || '暂无变化' }}</em></span>
-        </button>
-      </article>
-      <article class="hud-panel evidence-panel">
-        <PanelTitle title="证据来源分布" code="EVIDENCE" />
-        <div class="evidence-ring" :style="{ '--confidence': `${confidence * 3.6}deg` }"><b>{{ confidence }}%</b><small>高置信度</small></div>
-        <div class="evidence-bars"><span><i style="width: 76%"></i>高置信度 76%</span><span><i style="width: 18%"></i>中等置信度 18%</span><span><i style="width: 6%"></i>低置信度 6%</span></div>
-      </article>
-      <article class="hud-panel impact-panel">
-        <PanelTitle title="变更影响范围" code="IMPACT" />
-        <div><span class="tone-add"><b>5</b>无影响</span><span class="tone-mod"><b>3</b>中等影响</span><span class="tone-remove"><b>1</b>局部影响</span></div>
-      </article>
-    </aside>
-
-    <footer class="hud-panel role-strip">
-      <button class="strip-arrow" type="button" @click="cycleCard(-1)">‹</button>
-      <div class="strip-title"><small>QUICK SWITCH</small><b>其他角色快速对比</b></div>
-      <button
-        v-for="(card, index) in roleCards"
-        :key="card.jobId || index"
-        type="button"
-        class="role-card"
-        :class="{ active: index === activeCardIndex }"
-        @click="activeCardIndex = index"
-      >
-        <span><i>◇</i>{{ card.jobName }}</span><em>{{ card.domain }}</em><b><strong>+{{ card.added?.length || 0 }}</strong> / {{ card.modified?.length || 0 }} / <i>-{{ card.removed?.length || 0 }}</i></b>
-      </button>
-      <button class="strip-arrow" type="button" @click="cycleCard(1)">›</button>
+      <button class="v-strip-arrow" type="button" @click="cycleCard(1)">›</button>
     </footer>
   </section>
 
@@ -209,6 +319,10 @@
 <script setup lang="ts">
 import { computed, defineComponent, h, ref, watch } from 'vue'
 import EChart from '@/components/EChart.vue'
+import SkillEvolutionTree from '@/components/SkillEvolutionTree.vue'
+import holoNewSkills from '@/assets/images/holo-new-skills.png'
+import holoModified from '@/assets/images/holo-modified.png'
+import holoRemoved from '@/assets/images/holo-removed.png'
 
 const props = defineProps<{ mode: string; hotspot: any; compare: any; cards: any[] }>()
 
@@ -221,8 +335,8 @@ const PanelTitle = defineComponent({
 
 const fallbackCards = [{
   jobId: 0, jobName: 'AI 智能体开发工程师', domain: '人工智能', fromVersion: 'v1.1', toVersion: 'v1.2',
-  added: ['Kubernetes', 'Spring Boot'], modified: [{ name: 'Vue', change: '升级为 Vue 3 工程化能力' }], removed: ['Spring Cloud'],
-  previousSkills: Array.from({ length: 13 }), currentSkills: Array.from({ length: 12 }), confidence: .76,
+  added: ['Kubernetes', 'Spring Boot', 'Rust', 'WebAssembly'], modified: [{ name: 'Vue', change: '升级为 Vue 3 工程化能力' }, { name: 'TypeScript', change: '增强类型系统能力' }], removed: ['Spring Cloud', 'jQuery'],
+  previousSkills: Array.from({ length: 13 }), currentSkills: Array.from({ length: 15 }), confidence: .76,
   note: '岗位画像在最近样本中更强调业务场景、证据来源与可落地成果。'
 }]
 const displayCards = computed(() => props.cards?.length ? props.cards : fallbackCards)
@@ -239,13 +353,70 @@ const addedItems = computed(() => activeCard.value.added || [])
 const modifiedItems = computed(() => activeCard.value.modified || [])
 const removedItems = computed(() => activeCard.value.removed || [])
 const changeCount = computed(() => addedItems.value.length + modifiedItems.value.length + removedItems.value.length)
-const wells = computed(() => [
-  { key: 'add', title: '新增能力', prefix: '+', items: addedItems.value },
-  { key: 'mod', title: '调整/替代', prefix: '~', items: modifiedItems.value },
-  { key: 'remove', title: '淘汰能力', prefix: '−', items: removedItems.value }
+
+const coreSkills = computed(() => {
+  const core = ['JavaScript', 'TypeScript', '数据结构', '算法', '系统设计']
+  if (activeCard.value.domain?.includes('人工智能')) {
+    return ['Python', '机器学习', '深度学习', 'PyTorch', 'NLP']
+  }
+  if (activeCard.value.domain?.includes('前端')) {
+    return ['JavaScript', 'Vue', 'React', 'CSS', 'TypeScript']
+  }
+  return core
+})
+
+const versionSkillBalls = computed(() => [
+  { val: addedItems.value.length || 2, name: '新增能力', color: 'green' },
+  { val: modifiedItems.value.length || 2, name: '调整能力', color: 'gold' },
+  { val: removedItems.value.length || 2, name: '淘汰能力', color: 'red' },
+  { val: currentCount.value || 12, name: '当前总数', color: 'cyan' },
+  { val: previousCount.value || 13, name: '上版总数', color: 'cyan' },
+  { val: confidence.value || 76, name: '置信度%', color: 'cyan' }
 ])
-const activeWellData = computed(() => wells.value.find((item) => item.key === activeWell.value) || wells.value[0])
-const activeWellDescription = computed(() => ({ add: '新增能力将直接补强岗位交付边界与工程效率。', mod: '调整项代表技能要求已升级或被新技术栈替代。', remove: '淘汰项从核心画像退出，降低学习路径冗余。' }[activeWell.value] || ''))
+
+const versionHoloCards = computed(() => [
+  { title: '新增能力', count: `${addedItems.value.length}项`, glow: '#54f2ff', stage: 'NEW SKILLS', img: holoNewSkills, imgClass: 'core-left', skills: addedItems.value.map((i: any) => typeof i === 'string' ? i : i.name) },
+  { title: '调整/替代', count: `${modifiedItems.value.length}项`, glow: '#ffe066', stage: 'MODIFIED', img: holoModified, imgClass: 'core-center', skills: modifiedItems.value.map((i: any) => i.name || i) },
+  { title: '淘汰能力', count: `${removedItems.value.length}项`, glow: '#ff785f', stage: 'REMOVED', img: holoRemoved, imgClass: 'core-right', skills: removedItems.value.map((i: any) => typeof i === 'string' ? i : i.name) }
+])
+
+const vCyanNodes = computed(() => [
+  { x: 215, y: 198 }, { x: 395, y: 205 }, { x: 560, y: 155 }, { x: 730, y: 118 }, { x: 965, y: 82 }
+])
+const vGoldNodes = computed(() => [
+  { x: 215, y: 250 }, { x: 395, y: 240 }, { x: 560, y: 190 }, { x: 730, y: 150 }
+])
+const vRedNodes = computed(() => [
+  { x: 215, y: 260 }, { x: 395, y: 252 }, { x: 560, y: 210 }, { x: 730, y: 175 }, { x: 965, y: 170 }
+])
+
+const vDimList = computed(() => [
+  { name: '技术栈更新', val: `${addedItems.value.length}项`, color: 'cyan' },
+  { name: '能力升级', val: `${modifiedItems.value.length}项`, color: 'gold' },
+  { name: '旧技术淘汰', val: `${removedItems.value.length}项`, color: 'red' },
+  { name: '领域扩展', val: '2个', color: 'cyan' },
+  { name: '要求提升', val: '18%', color: 'gold' }
+])
+
+const vBarMetrics = computed(() => [
+  { name: '技术匹配', val: confidence.value },
+  { name: '能力覆盖', val: Math.min(95, 70 + addedItems.value.length * 5) },
+  { name: '更新幅度', val: Math.min(90, 40 + changeCount.value * 8) },
+  { name: '迁移难度', val: Math.min(85, 30 + modifiedItems.value.length * 10) }
+])
+
+const vNumSet1 = computed(() => [
+  { val: addedItems.value.length || 2, label: '新增' },
+  { val: modifiedItems.value.length || 2, label: '调整' },
+  { val: removedItems.value.length || 2, label: '淘汰' },
+  { val: signedDelta.value, label: '净变' }
+])
+const vNumSet2 = computed(() => [
+  { val: confidence.value + '%', label: '置信度' },
+  { val: currentCount.value, label: '当前' },
+  { val: previousCount.value, label: '上版' },
+  { val: Math.round(changeCount.value / Math.max(previousCount.value, 1) * 100) + '%', label: '变更率' }
+])
 
 function skillLabel(item: any) { return typeof item === 'string' ? item : item?.name || '能力项' }
 function cycleCard(step: number) { activeCardIndex.value = (activeCardIndex.value + step + displayCards.value.length) % displayCards.value.length }
@@ -304,9 +475,9 @@ const hotspotGraphOption = computed(() => {
     links.push({ source: 'core', target: `skill-${index}`, lineStyle: { color, width: activeSkillName.value === skill.name ? 2.6 : 1, opacity: activeSkillName.value === skill.name ? .95 : .55, curveness: index % 2 ? .1 : -.1, shadowBlur: 9, shadowColor: color } })
   })
   return {
-    backgroundColor: '#01060c',
+    backgroundColor: 'transparent',
     animationDurationUpdate: 650,
-    tooltip: { backgroundColor: 'rgba(3,20,54,.96)', borderColor: '#27cfff', textStyle: { color: '#dffaff' }, formatter: (p: any) => p.data?.skillName ? `<b>${p.data.skillName}</b><br/>热度：${p.data.value}<br/>点击聚焦该能力` : '能力热点总览' },
+    tooltip: { backgroundColor: 'rgba(3,20,54,.35)', borderColor: '#27cfff', textStyle: { color: '#dffaff' }, formatter: (p: any) => p.data?.skillName ? `<b>${p.data.skillName}</b><br/>热度：${p.data.value}<br/>点击聚焦该能力` : '能力热点总览' },
     graphic: [
       { type: 'circle', shape: { cx, cy, r: 178 }, style: { fill: 'transparent', stroke: 'rgba(72,206,255,.32)', lineWidth: 1.5, shadowBlur: 8, shadowColor: '#1fa8ff' } },
       { type: 'circle', shape: { cx, cy, r: 205 }, style: { fill: 'transparent', stroke: 'rgba(35,158,255,.18)', lineWidth: 1, lineDash: [2, 6] } },
@@ -319,7 +490,7 @@ const hotspotGraphOption = computed(() => {
 
 const trendOption = computed(() => ({
   animationDuration: 900, grid: { left: 22, right: 16, top: 16, bottom: 22 },
-  tooltip: { trigger: 'axis', backgroundColor: 'rgba(3,20,54,.95)', borderColor: '#21cfff', textStyle: { color: '#e9fbff' } },
+  tooltip: { trigger: 'axis', backgroundColor: 'rgba(3,20,54,.3)', borderColor: '#21cfff', textStyle: { color: '#e9fbff' } },
   xAxis: { type: 'category', boundaryGap: false, data: ['01', '02', '03', '04', '05', '06'], axisLine: { lineStyle: { color: 'rgba(83,190,255,.26)' } }, axisLabel: { color: '#78a9c8', fontSize: 9 } },
   yAxis: { type: 'value', splitNumber: 3, axisLabel: { color: '#78a9c8', fontSize: 9 }, splitLine: { lineStyle: { color: 'rgba(83,190,255,.10)' } } },
   series: [{ type: 'line', smooth: .45, data: [6.4, 10.8, 7.1, 13.9, 9.2, Number(activeSkill.value.heat || 14.2)], symbolSize: 7, lineStyle: { color: '#27d9ff', width: 2 }, itemStyle: { color: '#8ff7ff', shadowBlur: 10, shadowColor: '#21d8ff' }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(28,171,255,.42)' }, { offset: 1, color: 'rgba(28,171,255,0)' }] } } }]
@@ -349,12 +520,12 @@ const sunburstOption = computed(() => {
   const activeSkills = (activeDomain.value.topSkills || []).slice(0, 5)
 
   return {
-    backgroundColor: '#01060c',
+    backgroundColor: 'transparent',
     animationDuration: 850,
     animationDurationUpdate: 850,
     animationEasingUpdate: 'cubicInOut',
     tooltip: {
-      backgroundColor: 'rgba(1,12,28,.97)',
+      backgroundColor: 'rgba(1,12,28,.35)',
       borderColor: '#5be5ff',
       borderWidth: 1,
       padding: [9, 12],
@@ -465,10 +636,917 @@ const sunburstOption = computed(() => {
 </script>
 
 <style scoped>
-.evo-view { --cyan: #5ce7ff; --line: rgba(83, 203, 255, .24); --panel: rgba(1, 9, 23, .94); position: relative; isolation: isolate; display: grid; gap: 14px; min-height: 690px; color: #c9ecff; background: radial-gradient(circle at 52% 48%, rgba(0, 112, 187, .11), transparent 34%), linear-gradient(180deg, rgba(1, 8, 20, .36), rgba(0, 4, 13, .72)); }
-.evo-view::before { position: absolute; z-index: -1; inset: 22% 0 0; content: ''; opacity: .44; background: repeating-linear-gradient(90deg, transparent 0 61px, rgba(45, 141, 203, .06) 62px 63px), repeating-linear-gradient(0deg, transparent 0 48px, rgba(45, 141, 203, .05) 49px 50px); mask-image: linear-gradient(to bottom, transparent, #000 34%, #000); transform: perspective(520px) rotateX(61deg) scale(1.25); transform-origin: bottom; pointer-events: none; }
+.version-dashboard {
+  --v-bg: #020915;
+  --v-panel: #06162a;
+  --v-cyan: #55efff;
+  --v-cyan2: #00b7e8;
+  --v-line: rgba(76, 216, 255, .55);
+  --v-gold: #ffd66b;
+  --v-white: #eafcff;
+  --v-muted: #78a9c7;
+  --v-red: #ff785f;
+  --v-green: #4bffd0;
+  position: relative;
+  width: 100%;
+  min-height: 900px;
+  color: var(--v-white);
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: rgba(3, 16, 30, 0.15);
+  overflow: hidden;
+  padding-bottom: 100px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px) saturate(1.1);
+  border: 1px solid rgba(70, 200, 255, 0.2);
+}
+
+.v-starfield-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 26%, rgba(0, 128, 212, .13), transparent 36%);
+  pointer-events: none;
+}
+
+.v-grid-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: .38;
+  background-image:
+    linear-gradient(rgba(0, 195, 255, .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 195, 255, .07) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,.75), rgba(0,0,0,.35));
+  pointer-events: none;
+}
+.v-grid-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 0 45%, rgba(0,0,0,.6) 93%);
+}
+
+.v-top-bar {
+  position: relative;
+  height: 10.6%;
+  min-height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+}
+.v-top-bar::before, .v-top-bar::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  width: 34%;
+  height: 35px;
+  border-top: 1px solid #1ddfff;
+  opacity: .45;
+}
+.v-top-bar::before {
+  left: 0;
+  clip-path: polygon(0 0, 93% 0, 100% 100%, 12% 100%, 7% 62%, 0 62%);
+  background: linear-gradient(180deg, rgba(0,174,255,.12), transparent);
+}
+.v-top-bar::after {
+  right: 0;
+  clip-path: polygon(7% 0, 100% 0, 100% 62%, 93% 62%, 88% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(0,174,255,.12), transparent);
+}
+.v-title-box {
+  margin-top: 0;
+  width: 31%;
+  min-width: 380px;
+  height: 72%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(9% 0, 91% 0, 86% 70%, 80% 100%, 20% 100%, 14% 70%);
+  background: linear-gradient(180deg, rgba(13,89,128,.46), rgba(1,25,45,.9));
+  border-top: 1px solid #47ebff;
+  filter: drop-shadow(0 0 8px rgba(42,218,255,.65));
+}
+.v-title-box::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  clip-path: inherit;
+  border: 1px solid rgba(99,238,255,.75);
+}
+.v-title-main {
+  font-size: clamp(18px, 2vw, 28px);
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 0 0 7px #6fefff, 0 0 18px #00aede;
+  z-index: 1;
+}
+.v-title-sub {
+  font-size: clamp(10px, .95vw, 14px);
+  font-weight: 700;
+  margin-top: 4px;
+  text-shadow: 0 0 6px #49d9ff;
+  z-index: 1;
+}
+
+.v-main-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: 16.4% 1fr 16.7%;
+  gap: 0 1.1%;
+  padding: 0 .7% .8%;
+  height: calc(89.4% - 10px);
+  min-height: 700px;
+}
+.v-col { display: flex; flex-direction: column; gap: 1.25%; min-height: 0; }
+.v-col-left { grid-column: 1; }
+.v-col-center { grid-column: 2; display: grid; grid-template-rows: 57% 43%; gap: 1.2%; min-width: 0; min-height: 0; }
+.v-col-right { grid-column: 3; }
+
+.v-panel {
+  position: relative;
+  background: linear-gradient(180deg, rgba(6,28,53,.10), rgba(4,18,35,.12));
+  border: 1px solid rgba(67,208,255,.25);
+  box-shadow: inset 0 0 28px rgba(0,141,211,.04), 0 0 10px rgba(0,148,213,.03);
+  overflow: hidden;
+  backdrop-filter: blur(6px) saturate(1.05);
+  border-radius: 8px;
+}
+.v-col-left .v-panel {
+  border-color: rgba(91,228,255,.5);
+  box-shadow: inset 0 0 30px rgba(0,166,227,.08), inset 3px 0 0 rgba(85,239,255,.35), 0 0 0 1px rgba(71,210,255,.1), 0 0 12px rgba(0,148,213,.05);
+}
+.v-panel::before, .v-panel::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 10px;
+  z-index: 2;
+}
+.v-panel::before {
+  left: -1px; top: -1px;
+  border-left: 3px solid var(--v-cyan);
+  border-top: 3px solid var(--v-cyan);
+  box-shadow: 0 0 8px rgba(108,239,255,.45);
+}
+.v-panel::after {
+  right: -1px; bottom: -1px;
+  border-right: 3px solid var(--v-cyan);
+  border-bottom: 3px solid var(--v-cyan);
+  box-shadow: 0 0 8px rgba(108,239,255,.35);
+}
+.v-col-left .v-panel::before {
+  width: 20px; height: 12px;
+  border-left: 3px solid #6cefff;
+  border-top: 3px solid #6cefff;
+  box-shadow: 0 0 8px rgba(108,239,255,.45);
+}
+.v-col-left .v-panel::after {
+  width: 20px; height: 12px;
+  border-right: 3px solid #6cefff;
+  border-bottom: 3px solid #6cefff;
+  box-shadow: 0 0 8px rgba(108,239,255,.35);
+}
+
+.v-panel-head {
+  height: 17%;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7%;
+  font-size: clamp(12px, 1vw, 16px);
+  font-weight: 800;
+  color: #eefcff;
+  letter-spacing: .5px;
+  background: linear-gradient(90deg, rgba(0,182,234,.10), transparent 75%);
+}
+.v-col-left .v-panel-head {
+  background: linear-gradient(90deg, rgba(0,193,243,.18), rgba(0,122,177,.08) 46%, transparent 92%);
+  border-bottom: 1px solid rgba(91,228,255,.24);
+}
+.v-panel-head small {
+  font-size: .52em;
+  color: #a5d9ee;
+  letter-spacing: 1px;
+}
+
+.v-col-left .v-panel > :not(.v-panel-head) {
+  position: relative;
+}
+.v-col-left .v-panel > :not(.v-panel-head)::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(93,231,255,.15);
+  pointer-events: none;
+  clip-path: polygon(0 7px, 7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px));
+}
+.v-col-left .v-panel > :not(.v-panel-head)::after {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 9px;
+  width: 28px;
+  height: 8px;
+  border-top: 1px solid rgba(96,235,255,.35);
+  border-left: 1px solid rgba(96,235,255,.35);
+  opacity: .55;
+  pointer-events: none;
+}
+.v-metric, .v-gauge, .v-skill {
+  position: relative;
+  z-index: 1;
+}
+
+.v-col-left .v-panel:nth-child(1) { height: 28%; }
+.v-col-left .v-panel:nth-child(2) { height: 24%; }
+.v-col-left .v-panel:nth-child(3) { flex: 1; }
+
+.v-metric-grid {
+  height: 83%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  padding: 0 5% 6%;
+}
+.v-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.v-m-val {
+  font-size: clamp(18px, 1.7vw, 28px);
+  font-weight: 900;
+  color: #eaffff;
+  text-shadow: 0 0 8px #69eaff;
+}
+.v-m-label {
+  font-size: clamp(8px, .58vw, 11px);
+  color: #a6c9dc;
+}
+.v-m-delta {
+  font-size: clamp(11px, .7vw, 14px);
+  font-weight: 900;
+}
+.v-m-delta.up { color: var(--v-green); }
+.v-m-delta.warn { color: var(--v-gold); }
+.v-m-delta.down { color: var(--v-red); }
+.v-m-delta.cyan { color: var(--v-cyan); }
+.v-m-delta.gold { color: var(--v-gold); }
+
+.v-mini-ring {
+  width: clamp(34px, 3vw, 52px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(75,238,255,.35);
+  position: relative;
+  background: radial-gradient(circle, rgba(34,146,194,.15), transparent 63%);
+}
+.v-mini-ring::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 2px solid var(--v-cyan);
+  border-left-color: transparent;
+  filter: drop-shadow(0 0 4px var(--v-cyan));
+}
+
+.v-gauge-grid {
+  height: 83%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+  padding: 0 8% 5%;
+}
+.v-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.v-gauge-ring {
+  width: clamp(54px, 5.5vw, 80px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle, rgba(6,39,68,.45) 0 47%, transparent 49%);
+  --gc: var(--v-cyan);
+}
+.v-gauge-ring.green { --gc: var(--v-green); }
+.v-gauge-ring.gold { --gc: var(--v-gold); }
+.v-gauge-ring.red { --gc: var(--v-red); }
+.v-gauge-ring::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: conic-gradient(var(--gc) 0 78%, rgba(53,124,160,.3) 78%);
+  mask: radial-gradient(circle, transparent 0 58%, #000 59%);
+  filter: drop-shadow(0 0 5px var(--gc));
+}
+.v-g-num {
+  font-size: clamp(20px, 1.7vw, 28px);
+  font-weight: 900;
+  position: relative;
+  z-index: 1;
+}
+.v-g-label {
+  font-size: clamp(9px, .62vw, 12px);
+  color: #b4d8e9;
+}
+
+.v-skill-grid {
+  height: 83%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 6%;
+  padding: 6% 6% 10%;
+}
+.v-skill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.v-skill-ball {
+  width: clamp(38px, 3.4vw, 56px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: clamp(12px, 1vw, 16px);
+  border: 2px solid rgba(74,233,255,.66);
+  box-shadow: inset 0 0 16px rgba(0,177,230,.24), 0 0 8px rgba(71,233,255,.14);
+  color: var(--v-white);
+}
+.v-skill-ball.green { border-color: var(--v-green); color: #a5ffe4; }
+.v-skill-ball.gold { border-color: var(--v-gold); color: #ffe393; }
+.v-skill-ball.red { border-color: var(--v-red); color: #ff9f8d; }
+.v-skill label {
+  font-size: clamp(8px, .55vw, 11px);
+  color: #9ec8db;
+}
+
+.v-hero-panel {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(6,28,53,.32), rgba(4,18,35,.38));
+  border: 1px solid rgba(67,208,255,.45);
+  box-shadow: inset 0 0 28px rgba(0,141,211,.08), 0 0 10px rgba(0,148,213,.06);
+  backdrop-filter: blur(12px) saturate(1.08);
+  border-radius: 8px;
+}
+.v-corner-tl, .v-corner-br {
+  position: absolute;
+  width: 20px;
+  height: 12px;
+  z-index: 6;
+  pointer-events: none;
+}
+.v-corner-tl {
+  left: -1px; top: -1px;
+  border-left: 3px solid #6cefff;
+  border-top: 3px solid #6cefff;
+  box-shadow: 0 0 8px rgba(108,239,255,.45);
+}
+.v-corner-br {
+  right: -1px; bottom: -1px;
+  border-right: 3px solid #6cefff;
+  border-bottom: 3px solid #6cefff;
+  box-shadow: 0 0 8px rgba(108,239,255,.35);
+}
+.v-hero-bg {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 72%, rgba(2,150,203,.11), transparent 48%),
+    linear-gradient(180deg, rgba(1,19,31,.04), rgba(1,10,20,.34));
+  pointer-events: none;
+}
+.v-hero-glow {
+  content: "";
+  position: absolute;
+  inset: 8% 14% auto 14%;
+  height: 55%;
+  pointer-events: none;
+  opacity: .18;
+  background:
+    radial-gradient(circle at 18% 55%, rgba(84,242,255,.35), transparent 35%),
+    radial-gradient(circle at 50% 52%, rgba(255,216,110,.28), transparent 35%),
+    radial-gradient(circle at 82% 55%, rgba(219,232,255,.30), transparent 35%);
+}
+.v-hero-grid-floor {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 35%;
+  opacity: .28;
+  background-image:
+    linear-gradient(rgba(72,225,255,.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(72,225,255,.18) 1px, transparent 1px);
+  background-size: 33px 20px;
+  transform: perspective(340px) rotateX(61deg);
+  transform-origin: bottom center;
+}
+.v-scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #ff6a54 50%, transparent);
+  box-shadow: 0 0 7px #ff704c;
+  opacity: .65;
+  animation: v-scan 5s linear infinite;
+  z-index: 5;
+}
+@keyframes v-scan {
+  0% { top: 20%; opacity: 0; }
+  10% { opacity: .7; }
+  60% { opacity: .3; }
+  100% { top: 95%; opacity: 0; }
+}
+
+.v-holo-row {
+  position: absolute;
+  inset: 5% 1% 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5%;
+}
+.v-holo-card {
+  position: relative;
+  text-align: center;
+  min-width: 0;
+  --glow: var(--v-cyan);
+}
+.v-holo-card::before {
+  content: "";
+  position: absolute;
+  inset: 6% 7% 6% 7%;
+  clip-path: polygon(6% 0, 94% 0, 100% 12%, 100% 88%, 94% 100%, 6% 100%, 0 88%, 0 12%);
+  border: 1px solid color-mix(in srgb, var(--glow) 40%, transparent);
+  background: linear-gradient(180deg, rgba(5,37,61,.06), rgba(5,28,46,.02));
+  box-shadow: inset 0 0 18px rgba(71,225,255,.05);
+  pointer-events: none;
+}
+.v-holo-title {
+  font-size: clamp(11px, .95vw, 16px);
+  font-weight: 800;
+  color: #eefcff;
+  text-shadow: 0 0 6px var(--glow);
+  position: absolute;
+  top: 1%;
+  left: 0; right: 0;
+  z-index: 6;
+}
+.v-holo-count {
+  display: block;
+  font-size: clamp(20px, 1.7vw, 28px);
+  line-height: 1;
+  margin-top: 3px;
+  color: var(--glow);
+}
+.v-holo-frame {
+  position: absolute;
+  left: -5%; right: -5%; top: 2%; bottom: 8%;
+  z-index: 3;
+  overflow: hidden;
+}
+.v-core-img {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  width: 125%;
+  height: 120%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  opacity: 1;
+  filter: brightness(1.2) saturate(1.25) drop-shadow(0 0 20px var(--glow));
+  z-index: 1;
+}
+.v-core-img.core-left {
+  width: 120%;
+  height: 125%;
+  clip-path: inset(0 0 0 0);
+}
+.v-core-img.core-center {
+  width: 125%;
+  height: 115%;
+  top: 47%;
+}
+.v-core-img.core-right {
+  width: 130%;
+  height: 120%;
+  clip-path: inset(0 0 0 0);
+}
+.v-core-mask {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 48%, rgba(255,255,255,.06), transparent 32%);
+  pointer-events: none;
+  z-index: 2;
+}
+.v-holo-corner-l, .v-holo-corner-r {
+  position: absolute;
+  top: 5%;
+  width: 18%;
+  height: 10%;
+  border-top: 1px solid rgba(255,255,255,.18);
+  opacity: .3;
+  z-index: 4;
+}
+.v-holo-corner-l {
+  left: 6%;
+  border-left: 1px solid rgba(255,255,255,.18);
+  clip-path: polygon(0 0, 100% 0, 75% 100%, 0 100%);
+}
+.v-holo-corner-r {
+  right: 6%;
+  border-right: 1px solid rgba(255,255,255,.18);
+  clip-path: polygon(25% 0, 100% 0, 100% 100%, 0 100%);
+}
+.v-holo-pillar {
+  position: absolute;
+  left: 50%;
+  bottom: 25%;
+  transform: translateX(-50%);
+  width: 10%;
+  height: 35%;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 12%, color-mix(in srgb, var(--glow) 60%, transparent) 60%, transparent 100%);
+  filter: blur(1px);
+  opacity: .38;
+  z-index: 4;
+}
+.v-holo-halo {
+  position: absolute;
+  left: 12%; right: 12%; top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glow) 30%, var(--glow) 70%, transparent);
+  opacity: .18;
+  z-index: 4;
+}
+.v-holo-float {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) rotate(-5deg);
+  width: 44%;
+  height: 8%;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--glow) 70%, white 30%);
+  opacity: .45;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--glow) 60%, transparent);
+  z-index: 4;
+}
+.v-holo-float.r1 { top: 15%; }
+.v-holo-float.r2 { top: 28%; width: 34%; height: 6%; transform: translateX(-50%) rotate(6deg); opacity: .35; }
+.v-holo-float.r3 { top: 40%; width: 28%; height: 5%; transform: translateX(-50%) rotate(-8deg); opacity: .22; }
+.v-holo-orbit {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 1.6px solid color-mix(in srgb, var(--glow) 72%, white 28%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--glow) 55%, transparent);
+  opacity: .58;
+  z-index: 4;
+}
+.v-holo-orbit.o1 { bottom: 18%; width: 82%; height: 14%; }
+.v-holo-orbit.o2 { bottom: 22%; width: 64%; height: 10%; opacity: .42; }
+.v-holo-orbit.o3 { bottom: 26%; width: 46%; height: 7%; opacity: .34; }
+.v-holo-orbit.o4 { bottom: 30%; width: 28%; height: 4.4%; opacity: .25; }
+.v-holo-stage-label {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(9px, .7vw, 12px);
+  font-weight: 700;
+  color: var(--glow);
+  padding: 2px 10px;
+  background: rgba(2,24,39,.35);
+  border: 1px solid rgba(76,219,255,.25);
+  z-index: 6;
+  backdrop-filter: blur(6px);
+}
+.v-holo-skills {
+  position: absolute;
+  bottom: 8%;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 5%;
+  z-index: 5;
+}
+.v-holo-skill-tag {
+  border: 1px solid color-mix(in srgb, var(--glow) 50%, transparent);
+  padding: 2px 6px;
+  font-size: 9px;
+  color: var(--v-white);
+  background: rgba(2, 24, 39, .3);
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+
+.v-chart-panel {
+  position: relative;
+  background: linear-gradient(180deg, rgba(6,28,53,.32), rgba(4,18,35,.38));
+  border: 1px solid rgba(67,208,255,.45);
+  box-shadow: inset 0 0 28px rgba(0,141,211,.08), 0 0 10px rgba(0,148,213,.06);
+  padding: 0 .7% .7%;
+  backdrop-filter: blur(12px) saturate(1.08);
+  border-radius: 8px;
+}
+
+.v-tree-panel {
+  height: 460px;
+  padding: 12px;
+}
+
+.v-panel-title {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  z-index: 10;
+  font-size: 13px;
+  font-weight: 600;
+  color: #71efff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(113, 239, 255, 0.5);
+}
+
+.v-tree-panel :deep(.skill-tree-container) {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+}
+.v-trend-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.v-col-right .v-panel:nth-child(1) { height: 31%; }
+.v-col-right .v-panel:nth-child(2) { height: 37%; }
+.v-col-right .v-panel:nth-child(3) { flex: 1; }
+
+.v-intel-body {
+  height: 83%;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.v-big-ring {
+  width: clamp(92px, 8.5vw, 130px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle, rgba(17,63,92,.4) 0 46%, transparent 47%);
+}
+.v-big-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(#ffe56e 0 18%, #80f4ff 18% 74%, rgba(42,97,124,.28) 74%);
+  mask: radial-gradient(circle, transparent 0 65%, #000 66%);
+  filter: drop-shadow(0 0 5px #55eaff);
+}
+.v-big-ring::after {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  border: 1px solid rgba(96,231,255,.25);
+}
+.v-big-v {
+  font-size: clamp(22px, 2.2vw, 34px);
+  font-weight: 900;
+  color: #fff;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.v-big-t {
+  font-size: clamp(9px, .7vw, 12px);
+  color: #b9ddec;
+  text-align: center;
+}
+
+.v-dim-list {
+  height: 83%;
+  padding: 3% 7%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+.v-list-row {
+  height: 15%;
+  border: 1px solid rgba(71,192,232,.22);
+  background: rgba(3,40,65,.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6%;
+  font-size: clamp(8px, .62vw, 11px);
+  color: #d7f6ff;
+  backdrop-filter: blur(6px);
+}
+.v-item-label {
+  display: flex;
+  align-items: center;
+}
+.v-item-val {
+  font-weight: 800;
+  color: var(--v-cyan);
+}
+.v-row-bullet {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #62f3ff;
+  box-shadow: 0 0 6px #62f3ff;
+  margin-right: 6px;
+  display: inline-block;
+}
+.v-row-bullet.gold { background: var(--v-gold); box-shadow: 0 0 6px var(--v-gold); }
+.v-row-bullet.red { background: var(--v-red); box-shadow: 0 0 6px var(--v-red); }
+.v-row-bullet.green { background: var(--v-green); box-shadow: 0 0 6px var(--v-green); }
+
+.v-metrics-body {
+  height: 83%;
+  padding: 4% 6%;
+  display: flex;
+  flex-direction: column;
+  gap: 4%;
+}
+.v-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6%;
+  flex: 0 0 auto;
+}
+.v-bar-line {
+  display: grid;
+  grid-template-columns: 1fr 42%;
+  align-items: center;
+  font-size: clamp(8px, .55vw, 10px);
+  color: #b7d8e7;
+  gap: 4px;
+}
+.v-bar-bg {
+  height: 6px;
+  border: 1px solid rgba(76,222,255,.28);
+  background: rgba(28,87,111,.25);
+}
+.v-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #188be8, #66f3ff);
+  box-shadow: 0 0 5px #47e9ff;
+}
+.v-num-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2%;
+  text-align: center;
+  border-top: 1px solid rgba(73,209,255,.2);
+  padding-top: 4%;
+}
+.v-num-cell b {
+  display: block;
+  font-size: clamp(13px, 1vw, 17px);
+  color: #dffcff;
+}
+.v-num-cell small {
+  font-size: clamp(7px, .48vw, 9px);
+  color: #81aabf;
+}
+.v-spark-line {
+  flex: 1;
+  min-height: 42px;
+  border-top: 1px solid rgba(57,198,238,.18);
+  padding-top: 4%;
+}
+.v-spark-line svg {
+  width: 100%;
+  height: 100%;
+}
+
+.v-footer-strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(6,28,53,.35), rgba(4,18,35,.45));
+  border-top: 1px solid rgba(67,208,255,.35);
+  z-index: 10;
+  backdrop-filter: blur(12px) saturate(1.08);
+}
+.v-strip-arrow {
+  width: 34px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(70, 205, 255, .4);
+  color: #70eaff;
+  font-size: 25px;
+  background: rgba(5, 45, 96, .35);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.v-strip-title {
+  display: flex;
+  width: 128px;
+  flex: 0 0 auto;
+  flex-direction: column;
+  justify-content: center;
+}
+.v-strip-title small {
+  color: #34d7ff;
+  font-size: 8px;
+  letter-spacing: .14em;
+}
+.v-strip-title b {
+  color: #dff9ff;
+  font-size: 12px;
+}
+.v-role-cards {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  overflow-x: auto;
+}
+.v-role-card {
+  display: flex;
+  min-width: 180px;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid rgba(63, 178, 237, .25);
+  padding: 9px;
+  color: #b9def0;
+  text-align: left;
+  background: rgba(4, 33, 75, .35);
+  cursor: pointer;
+  transition: .2s ease;
+  backdrop-filter: blur(8px);
+}
+.v-role-card:hover, .v-role-card.active {
+  border-color: #33d9ff;
+  background: rgba(7, 66, 126, .45);
+  box-shadow: inset 0 -2px #2bd9ff, 0 0 14px rgba(38, 207, 255, .17);
+  transform: translateY(-2px);
+}
+.v-role-card span {
+  overflow: hidden;
+  color: #e3f9ff;
+  font-size: 11px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v-role-card span i {
+  margin-right: 6px;
+  color: #35ddff;
+  font-style: normal;
+}
+.v-role-card em {
+  color: #66bde5;
+  font-size: 9px;
+  font-style: normal;
+}
+.v-role-card > b {
+  font-size: 11px;
+}
+.v-role-card strong.up { color: #4bffd0; }
+.v-role-card span.warn { color: #ffd25c; }
+.v-role-card i.down { color: #ff785f; font-style: normal; }
+
+.evo-view { --cyan: #5ce7ff; --line: rgba(83, 203, 255, .24); --panel: rgba(1, 9, 23, .94); position: relative; isolation: isolate; display: grid; gap: 14px; min-height: 690px; color: #c9ecff; background: rgba(4, 22, 50, 0.06); border-radius: 12px; backdrop-filter: blur(4px) saturate(1.02); border: 1px solid rgba(70, 200, 255, 0.12); padding: 8px; }
+.evo-view::before { position: absolute; z-index: -1; inset: 22% 0 0; content: ''; opacity: .25; background: repeating-linear-gradient(90deg, transparent 0 61px, rgba(45, 141, 203, .04) 62px 63px), repeating-linear-gradient(0deg, transparent 0 48px, rgba(45, 141, 203, .03) 49px 50px); mask-image: linear-gradient(to bottom, transparent, #000 34%, #000); transform: perspective(520px) rotateX(61deg) scale(1.25); transform-origin: bottom; pointer-events: none; }
 button { font: inherit; }
-.hud-panel { position: relative; border: 1px solid var(--line); color: inherit; background: linear-gradient(145deg, rgba(4, 18, 39, .97), rgba(0, 6, 18, .96) 72%); box-shadow: inset 0 1px rgba(205, 246, 255, .08), inset 0 0 44px rgba(17, 94, 146, .055), 0 18px 36px rgba(0, 2, 12, .32); clip-path: polygon(0 12px, 12px 0, calc(100% - 22px) 0, 100% 22px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 14px 100%, 0 calc(100% - 14px)); }
+.hud-panel { position: relative; border: 1px solid rgba(83, 203, 255, .2); color: inherit; background: linear-gradient(145deg, rgba(4, 18, 39, .15), rgba(0, 6, 18, .12) 72%); box-shadow: inset 0 1px rgba(205, 246, 255, .05), inset 0 0 44px rgba(17, 94, 146, .02), 0 18px 36px rgba(0, 2, 12, .08); clip-path: polygon(0 12px, 12px 0, calc(100% - 22px) 0, 100% 22px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 14px 100%, 0 calc(100% - 14px)); backdrop-filter: blur(6px) saturate(1.05); }
 .hud-panel::before, .hud-panel::after { position: absolute; z-index: 2; width: 36px; height: 2px; content: ''; background: #31dfff; box-shadow: 0 0 10px #22cfff; pointer-events: none; }
 .hud-panel::before { top: 0; left: 22px; }.hud-panel::after { right: 22px; bottom: 0; }
 .hud-stack, .domain-stack { display: flex; min-width: 0; flex-direction: column; gap: 13px; }
@@ -477,66 +1555,20 @@ button { font: inherit; }
 .panel-title h3 { margin: 0; color: #eafaff; font-size: 15px; letter-spacing: .02em; }.panel-title h3::before { margin-right: 8px; color: var(--cyan); content: '‹'; }.panel-title small { color: #45dfff; font-size: 9px; font-weight: 800; letter-spacing: .14em; }
 .tone-add { color: #34efb6 !important; }.tone-mod { color: #ffbd3e !important; }.tone-remove { color: #ff7797 !important; }
 
-.version-view { grid-template-columns: 265px minmax(620px, 1fr) 285px; }
-.version-summary { min-height: 190px; }.version-gauge { display: grid; grid-template-columns: 1fr 104px 1fr; align-items: center; text-align: center; }
-.version-gauge > div small, .version-gauge > div em { display: block; color: #84b8d7; font-size: 10px; font-style: normal; }.version-gauge > div b { display: block; color: #e8fbff; font-size: 29px; }
-.gauge-core { position: relative; display: grid; place-items: center; width: 92px; height: 92px; border: 2px solid #42dfff; border-radius: 50%; background: radial-gradient(circle, rgba(28, 157, 255, .42), rgba(2, 20, 62, .9) 64%); box-shadow: 0 0 24px rgba(39, 208, 255, .5), inset 0 0 18px rgba(91, 231, 255, .22); }
-.gauge-core::before, .gauge-core::after { position: absolute; inset: -9px; border: 1px dashed rgba(67, 220, 255, .5); border-radius: 50%; content: ''; animation: spin 12s linear infinite; }.gauge-core::after { inset: 9px; border-style: solid; border-color: transparent #60ebff; animation-direction: reverse; animation-duration: 7s; }
-.gauge-core i, .gauge-core small { color: #72badb; font-size: 9px; font-style: normal; letter-spacing: .1em; }.gauge-core strong { color: #fff; font-size: 24px; line-height: 1; }
-.delta-counters { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 13px; text-align: center; }.delta-counters span { color: #86b8d3; font-size: 10px; }.delta-counters b { display: block; font-size: 21px; }
-.trend-panel { min-height: 160px; }.mini-chart { height: 96px; }.mini-chart svg { width: 100%; height: 100%; overflow: visible; }.grid-line { fill: none; stroke: rgba(75, 174, 231, .13); }.trend { fill: none; stroke-width: 2; filter: drop-shadow(0 0 5px currentColor); }.trend.add { color: #34eab5; stroke: currentColor; }.trend.mod { color: #ffbd3e; stroke: currentColor; }.trend.remove { color: #ff6f94; stroke: currentColor; }.mini-chart circle { fill: #9af8ff; filter: drop-shadow(0 0 5px #25d9ff); }.mini-axis { display: flex; justify-content: space-between; color: #6698b8; font-size: 9px; }.mini-axis .active { color: #dffbff; font-weight: 900; }
-.insight-panel { flex: 1; }.insight-panel p { margin: 0; color: #9fc7dd; font-size: 12px; line-height: 1.65; }.insight-panel ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }.insight-panel li { display: flex; align-items: center; gap: 8px; font-size: 11px; }.insight-panel li i { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid currentColor; border-radius: 50%; font-size: 8px; font-style: normal; box-shadow: 0 0 10px currentColor; }
-.version-command { min-width: 0; overflow: hidden; padding: 18px 20px 15px; background: radial-gradient(ellipse at 50% 82%, rgba(0, 120, 210, .15), transparent 46%), linear-gradient(180deg, rgba(2, 14, 32, .98), rgba(0, 5, 14, .98)); }.version-command::after { width: auto; height: auto; inset: 42% -10% -18%; opacity: .56; border: 1px solid rgba(48, 176, 255, .16); border-radius: 50%; background: repeating-radial-gradient(ellipse, transparent 0 31px, rgba(38, 151, 224, .11) 32px 33px), repeating-linear-gradient(90deg, transparent 0 45px, rgba(33, 161, 255, .08) 46px 47px); box-shadow: inset 0 0 44px rgba(0, 129, 221, .1); transform: perspective(480px) rotateX(62deg); }
-.command-head { position: relative; z-index: 3; display: flex; align-items: center; gap: 10px; }.command-head h2, .graph-title h2 { margin: 2px 0 0; color: #effdff; font-size: 19px; }.command-head small, .graph-title small { color: #45dcff; font-size: 8px; font-weight: 850; letter-spacing: .17em; }
-.role-selector, .domain-chip { border: 1px solid rgba(68, 210, 255, .38); padding: 6px 10px; color: #dff8ff; background: rgba(5, 50, 104, .72); cursor: pointer; }.role-selector:hover { border-color: #4fe7ff; box-shadow: 0 0 14px rgba(31, 212, 255, .25); }.domain-chip { color: #5be8ff; font-size: 11px; }.version-switch { display: flex; align-items: center; gap: 10px; margin-left: auto; }.version-switch b, .version-switch strong { border: 1px solid rgba(57, 192, 255, .35); padding: 5px 12px; color: #b2d9ed; background: rgba(4, 37, 84, .7); }.version-switch strong { color: #e9fcff; box-shadow: inset 0 -2px #2cceff; }.version-switch i { color: #61dfff; font-style: normal; }
-.command-note { position: relative; z-index: 3; margin: 10px 0 0; color: #8dbbd4; font-size: 11px; }
-.version-lab { position: relative; z-index: 3; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; min-height: 365px; padding: 34px 16px 8px; perspective: 900px; }
-.energy-well { display: flex; min-width: 0; flex-direction: column; align-items: center; border: 0; color: #35efb7; background: transparent; cursor: pointer; transition: transform .25s ease, filter .25s ease; }.energy-well:hover, .energy-well.active { transform: translateY(-8px); filter: brightness(1.2); }.energy-well--mod { color: #ffc048; }.energy-well--remove { color: #ff7596; }
-.well-label { margin-bottom: 10px; font-size: 17px; font-weight: 850; }.well-label b { display: block; margin-top: 4px; font-size: 24px; }
-.well-chamber { position: relative; display: flex; width: 94%; height: 232px; flex-direction: column; align-items: center; justify-content: center; gap: 12px; border: 0; border-radius: 0; background: linear-gradient(90deg, transparent 5%, color-mix(in srgb, currentColor 6%, transparent) 23%, color-mix(in srgb, currentColor 24%, transparent) 50%, color-mix(in srgb, currentColor 6%, transparent) 77%, transparent 95%); filter: drop-shadow(0 18px 22px color-mix(in srgb, currentColor 24%, transparent)); clip-path: polygon(37% 0, 63% 0, 96% 100%, 4% 100%); overflow: hidden; }
-.well-chamber::before { position: absolute; inset: 0 16%; content: ''; opacity: .8; background: repeating-linear-gradient(90deg, transparent 0 11px, color-mix(in srgb, currentColor 19%, transparent) 12px 13px), linear-gradient(180deg, transparent, color-mix(in srgb, currentColor 25%, transparent)); transform: perspective(380px) rotateX(-8deg); }.well-chamber::after { position: absolute; right: 11%; bottom: 10px; left: 11%; height: 34px; border: 1px solid currentColor; border-radius: 50%; content: ''; opacity: .55; box-shadow: 0 0 20px currentColor, inset 0 0 16px currentColor; }.well-beam { position: absolute; width: 16%; height: 112%; background: linear-gradient(90deg, transparent, #fff, currentColor, #fff, transparent); opacity: .24; filter: blur(8px); animation: beamPulse 3.7s cubic-bezier(.32,.72,0,1) infinite; }.well-particles { position: absolute; inset: 0; opacity: .64; background-image: radial-gradient(circle, #fff 0 1px, transparent 1.7px), radial-gradient(circle, currentColor 0 1px, transparent 2px); background-position: 0 0, 7px 11px; background-size: 19px 27px, 31px 23px; animation: particlesRise 6.5s cubic-bezier(.32,.72,0,1) infinite; }
-.well-chamber em { z-index: 2; border: 1px solid currentColor; border-radius: 99px; padding: 6px 13px; color: #effdff; font-size: 11px; font-style: normal; background: rgba(2, 24, 61, .84); box-shadow: 0 0 12px color-mix(in srgb, currentColor 30%, transparent); }
-.well-base { position: relative; width: 116%; height: 58px; margin-top: -16px; border: 2px solid color-mix(in srgb, currentColor 75%, #fff); border-radius: 50%; background: repeating-radial-gradient(ellipse, #030a12 0 8px, #0d1b27 9px 12px, #02050a 13px 17px); box-shadow: 0 0 17px color-mix(in srgb, currentColor 55%, transparent), inset 0 0 24px #000, inset 0 -7px 12px color-mix(in srgb, currentColor 25%, transparent); transform: perspective(300px) rotateX(64deg); }.well-base::before, .well-base::after, .well-base i, .well-base b { position: absolute; inset: 7px 12px; border: 1px solid currentColor; border-radius: 50%; content: ''; }.well-base::after { inset: 14px 27px; border-width: 2px; }.well-base i { inset: -13px -18px; border-style: dashed; opacity: .65; animation: spin 13s linear infinite; }.well-base b { inset: 21px 43px; background: radial-gradient(ellipse, #fff, currentColor 24%, #02101a 58%); box-shadow: 0 0 19px currentColor; }
-.focused-change { position: relative; z-index: 4; min-height: 68px; border: 1px solid rgba(61, 202, 255, .25); padding: 9px 12px; background: rgba(3, 31, 73, .72); }.focused-change > span { font-size: 11px; font-weight: 900; }.focused-change p { display: inline; margin-left: 10px; color: #8fbcd5; font-size: 10px; }.focused-change div { display: flex; gap: 6px; margin-top: 7px; }.focused-change div i { border: 1px solid rgba(79, 210, 255, .28); padding: 3px 7px; color: #ccefff; font-size: 9px; font-style: normal; }
-.confidence-rail { position: relative; z-index: 4; display: flex; align-items: center; gap: 12px; margin-top: 10px; color: #82aec7; font-size: 10px; }.confidence-rail > i { height: 5px; flex: 1; overflow: hidden; background: rgba(48, 121, 173, .25); }.confidence-rail > i b { display: block; height: 100%; background: linear-gradient(90deg, #1ab6ff, #62f2ff); box-shadow: 0 0 10px #35dfff; }.confidence-rail strong { color: #48e8ff; font-size: 15px; }
-.diff-panel p { color: #91bed7; font-size: 11px; line-height: 1.6; }.diff-panel p b, .diff-panel p strong { color: #eafcff; }.diff-panel button { display: flex; width: 100%; align-items: center; gap: 10px; margin-top: 9px; border: 1px solid transparent; border-left: 2px solid currentColor; padding: 8px; color: #35efb7; text-align: left; background: rgba(4, 37, 79, .45); cursor: pointer; }.diff-panel button.mod { color: #ffc048; }.diff-panel button.remove { color: #ff7596; }.diff-panel button:hover, .diff-panel button.active { border-color: currentColor; box-shadow: inset 0 0 15px color-mix(in srgb, currentColor 12%, transparent); }.diff-panel button > i { font-size: 20px; font-style: normal; font-weight: 900; }.diff-panel button span { min-width: 0; }.diff-panel button b, .diff-panel button em { display: block; }.diff-panel button em { overflow: hidden; color: #91b9cf; font-size: 9px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
-.evidence-ring { display: grid; place-items: center; width: 112px; height: 112px; margin: 4px auto 12px; border-radius: 50%; background: radial-gradient(circle, #062452 54%, transparent 56%), conic-gradient(#28d9ff 0 var(--confidence), rgba(36, 120, 178, .18) var(--confidence)); box-shadow: 0 0 20px rgba(30, 205, 255, .28); }.evidence-ring b { color: #effdff; font-size: 24px; }.evidence-ring small { color: #80b6d2; font-size: 9px; }.evidence-bars { display: grid; gap: 7px; }.evidence-bars span { position: relative; display: flex; justify-content: flex-end; overflow: hidden; color: #8db7ce; font-size: 9px; background: rgba(55, 127, 173, .18); }.evidence-bars i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, rgba(31, 167, 255, .35), rgba(40, 229, 230, .5)); }
-.impact-panel div { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }.impact-panel span { color: #8ebbd3; font-size: 8px; }.impact-panel b { display: block; font-size: 20px; }
-.role-strip { grid-column: 1 / -1; display: flex; min-width: 0; align-items: stretch; gap: 8px; min-height: 108px; overflow: hidden; padding: 10px; }.strip-title { display: flex; width: 128px; flex: 0 0 auto; flex-direction: column; justify-content: center; }.strip-title small { color: #34d7ff; font-size: 8px; letter-spacing: .14em; }.strip-title b { color: #dff9ff; font-size: 12px; }.strip-arrow { width: 34px; flex: 0 0 auto; border: 1px solid rgba(70, 205, 255, .4); color: #70eaff; font-size: 25px; background: rgba(5, 45, 96, .6); cursor: pointer; }.role-card { display: flex; min-width: 0; flex: 1 1 0; flex-direction: column; gap: 5px; border: 1px solid rgba(63, 178, 237, .25); padding: 9px; color: #b9def0; text-align: left; background: rgba(4, 33, 75, .58); cursor: pointer; transition: .2s ease; }.role-card:hover, .role-card.active { border-color: #33d9ff; background: rgba(7, 66, 126, .68); box-shadow: inset 0 -2px #2bd9ff, 0 0 14px rgba(38, 207, 255, .17); transform: translateY(-2px); }.role-card span { overflow: hidden; color: #e3f9ff; font-size: 11px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }.role-card span i { margin-right: 6px; color: #35ddff; font-style: normal; }.role-card em { color: #66bde5; font-size: 9px; font-style: normal; }.role-card > b { color: #ffbd3e; font-size: 11px; }.role-card strong { color: #35ebb5; }.role-card > b i { color: #ff7897; font-style: normal; }
-
-.hotspot-view, .compare-view { grid-template-columns: 260px minmax(640px, 1fr) 315px; }.hot-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }.hot-summary span { position: relative; border: 1px solid rgba(55, 182, 244, .24); padding: 10px; color: #85b7d2; font-size: 9px; background: rgba(5, 47, 96, .5); }.hot-summary span > i { float: left; margin-right: 8px; color: #35ddff; font-size: 20px; font-style: normal; }.hot-summary b { display: block; color: #e9fcff; font-size: 22px; }.hot-summary em { display: block; margin-top: 3px; color: #37e8ad; font-style: normal; }.hot-summary em.down { color: #ff7895; }
-.hot-trend-panel { min-height: 195px; }.mini-echart { height: 145px; }.heat-distribution { min-height: 168px; }.heat-donut { float: left; display: grid; place-items: center; width: 96px; height: 96px; margin-right: 12px; border-radius: 50%; background: radial-gradient(circle, #052354 54%, transparent 56%), conic-gradient(#ffb52e 0 10%, #37e6a1 10% 34%, #a26cff 34% 69%, #28cfff 69%); }.heat-donut b { color: #effdff; font-size: 23px; }.heat-donut small { color: #8cb8d0; font-size: 9px; }.heat-distribution ul { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }.heat-distribution li { display: flex; align-items: center; color: #8fbad1; font-size: 9px; }.heat-distribution li i { width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: currentColor; }.heat-distribution li b { margin-left: auto; color: #dff7ff; }.insight-panel.compact { min-height: 105px; }.insight-panel.compact b { color: #48e1ff; }
-.graph-command, .domain-command { position: relative; min-width: 0; overflow: hidden; background: radial-gradient(circle at 50% 47%, rgba(0, 112, 176, .14), transparent 33%), linear-gradient(180deg, #020a13, #00050c 72%); }.graph-command { min-height: 690px; }.graph-command::after, .domain-command::after { width: auto; height: auto; inset: 0; opacity: .28; background-image: radial-gradient(circle, rgba(104, 222, 255, .52) 0 1px, transparent 1px), linear-gradient(rgba(34, 142, 217, .055) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 142, 217, .055) 1px, transparent 1px); background-size: 31px 31px, 58px 58px, 58px 58px; box-shadow: none; }.graph-title { position: absolute; z-index: 5; top: 17px; left: 21px; display: flex; right: 21px; align-items: end; justify-content: space-between; }.graph-title > span { color: #6fb9db; font-size: 9px; }.hotspot-chart { position: relative; z-index: 2; height: 640px; margin-top: 36px; }.hotspot-chart::before, .hotspot-chart::after { position: absolute; z-index: 1; top: 50%; left: 50%; border: 1px solid rgba(85, 222, 255, .22); border-radius: 50%; content: ''; pointer-events: none; }.hotspot-chart::before { width: 440px; height: 210px; box-shadow: 0 0 28px rgba(22, 165, 255, .1), inset 0 0 24px rgba(22, 165, 255, .08); transform: translate(-50%, -50%) rotate(17deg); animation: gyroA 13s cubic-bezier(.45,.05,.55,.95) infinite alternate; }.hotspot-chart::after { width: 300px; height: 520px; border-style: dashed; opacity: .68; transform: translate(-50%, -50%) rotate(-28deg); animation: gyroB 17s cubic-bezier(.45,.05,.55,.95) infinite alternate; }.active-skill-readout { position: absolute; z-index: 6; top: 79px; right: 18px; display: grid; min-width: 130px; border-right: 1px solid #83edff; padding: 7px 10px; text-align: right; background: linear-gradient(90deg, transparent, rgba(1, 22, 40, .9)); }.active-skill-readout span { color: #32dfff; font-size: 7px; letter-spacing: .18em; }.active-skill-readout b { color: #effdff; font-size: 12px; }.active-skill-readout strong { color: #45edbf; font-size: 21px; }.active-skill-readout em { color: #72aeca; font-size: 8px; font-style: normal; }.graph-legend { position: absolute; z-index: 6; bottom: 16px; left: 50%; display: flex; gap: 15px; border: 1px solid rgba(65, 193, 255, .24); padding: 7px 14px; color: #a5d5e9; font-size: 9px; background: rgba(0, 8, 19, .92); transform: translateX(-50%); }.graph-legend span::before { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 0; background: currentColor; content: ''; transform: rotate(45deg); }.level-high { color: #ffb52e !important; }.level-mid { color: #37e6a1 !important; }.level-warm { color: #a26cff !important; }.level-low { color: #28cfff !important; }
-.graph-hit-targets { position: absolute; z-index: 5; inset: 60px 0 45px; pointer-events: none; }.graph-hit-targets button { position: absolute; width: 82px; height: 82px; border: 0; background: transparent; cursor: pointer; pointer-events: auto; transform: translate(-50%, -50%); clip-path: polygon(50% 0, 92% 25%, 92% 75%, 50% 100%, 8% 75%, 8% 25%); }.graph-hit-targets button:hover { outline: 1px dashed rgba(116, 238, 255, .72); outline-offset: 4px; box-shadow: 0 0 20px rgba(50, 217, 255, .18); }
-.ranking-panel { flex: 1; }.rising-panel .panel-title h3 { color: #49ebc1; }.declining-panel .panel-title h3 { color: #ff7d9d; }.skill-chips { display: flex; flex-wrap: wrap; gap: 6px; }.skill-chips button { border: 1px solid rgba(59, 206, 255, .42); border-radius: 99px; padding: 4px 9px; color: #ccefff; font-size: 9px; background: rgba(4, 45, 93, .65); cursor: pointer; }.skill-chips button:hover { color: #fff; border-color: #4de8ff; box-shadow: 0 0 10px rgba(42, 215, 255, .25); }.sparkline { height: 45px; margin: 10px 0 3px; background: linear-gradient(170deg, transparent 0 45%, currentColor 46% 48%, transparent 49%), linear-gradient(12deg, transparent 0 52%, currentColor 53% 55%, transparent 56%); opacity: .8; filter: drop-shadow(0 0 5px currentColor); }.green-line { color: #32e8b3; }.red-line { color: #ff6d91; transform: scaleY(-1); }.ranking-list { display: grid; }.ranking-list button { display: grid; grid-template-columns: 20px minmax(0, 1fr) 44px 58px; align-items: center; gap: 5px; border: 0; border-bottom: 1px solid rgba(65, 175, 230, .16); padding: 7px 2px; color: #c8e9f6; text-align: left; background: transparent; cursor: pointer; }.ranking-list button:hover { background: rgba(20, 119, 184, .16); }.ranking-list i { color: #ffbd3b; font-style: normal; }.ranking-list span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.ranking-list b { color: #dffaff; font-size: 10px; }.ranking-list em { color: #34e6b0; font-size: 9px; font-style: normal; text-align: right; }.declining-panel .ranking-list em { color: #ff7596; }
-
-.compare-view { min-height: 690px; }.domain-stack { justify-content: space-between; }.domain-card { display: grid; grid-template-columns: 42px 82px 1fr; align-items: start; gap: 8px; min-height: 132px; padding: 14px; text-align: left; cursor: pointer; transition: .2s ease; }.domain-card:hover, .domain-card.active { border-color: #35dfff; background: linear-gradient(145deg, rgba(7, 64, 126, .94), rgba(2, 19, 51, .92)); box-shadow: inset 0 0 22px rgba(30, 186, 255, .16), 0 0 18px rgba(29, 197, 255, .16); transform: translateX(4px); }.domain-stack:last-child .domain-card:hover, .domain-stack:last-child .domain-card.active { transform: translateX(-4px); }.domain-icon { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #35dfff; border-radius: 50%; color: #6eeaff; font-size: 13px; font-weight: 900; background: rgba(8, 79, 139, .46); box-shadow: 0 0 14px rgba(39, 211, 255, .34); }.domain-card h3 { margin: 0 0 5px; color: #e9faff; font-size: 13px; }.domain-card > div > b { color: #4c8fff; font-size: 22px; }.domain-card ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }.domain-card li { display: flex; gap: 5px; color: #9bc3d8; font-size: 9px; }.domain-card li span { overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }.domain-card li em { color: #ccecff; font-style: normal; }
-.domain-command { min-height: 690px; }.domain-chart { position: relative; z-index: 2; height: 610px; margin-top: 35px; filter: drop-shadow(0 24px 26px rgba(0, 0, 0, .5)); }.domain-chart::before { position: absolute; z-index: 0; top: 47%; left: 50%; width: 510px; height: 510px; border: 18px solid rgba(16, 48, 68, .3); border-radius: 50%; content: ''; box-shadow: inset 0 0 28px #000, 0 0 18px rgba(38, 190, 255, .12); transform: translate(-50%, -50%); pointer-events: none; }.domain-focus { position: absolute; z-index: 6; top: 78px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; border-right: 1px solid #73e9ff; padding: 6px 10px; background: linear-gradient(90deg, transparent, rgba(1, 22, 40, .9)); }.domain-focus small { color: #36ddff; font-size: 7px; letter-spacing: .16em; }.domain-focus b { color: #effdff; font-size: 13px; }.domain-focus strong { color: #45eece; font-size: 24px; text-shadow: 0 0 12px currentColor; }.domain-focus span { max-width: 190px; color: #76abc5; font-size: 8px; text-align: right; }.wheel-note { position: absolute; z-index: 7; right: 10px; bottom: 9px; left: 10px; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid rgba(58, 198, 255, .22); background: rgba(0, 7, 17, .94); }.wheel-note span { padding: 9px 12px; border-right: 1px solid rgba(58, 198, 255, .13); color: #79a9c4; font-size: 8px; }.wheel-note span:last-child { border: 0; }.wheel-note b, .wheel-note em { display: block; }.wheel-note b { color: #e9fbff; font-size: 13px; }.wheel-note em { color: #39e7bb; font-size: 9px; font-style: normal; }
-
-/* Premium holographic reactor pass for version comparison */
-.version-command { background: radial-gradient(ellipse at 50% 76%, rgba(0, 106, 181, .16), transparent 43%), linear-gradient(180deg, #020914, #00040a 74%); }
-.version-lab { min-height: 390px; padding-top: 28px; }
-.version-lab::before { position: absolute; z-index: -1; right: -8%; bottom: -12px; left: -8%; height: 205px; border: 1px solid rgba(63, 180, 246, .13); border-radius: 50%; content: ''; background: repeating-radial-gradient(ellipse, transparent 0 25px, rgba(48, 157, 221, .085) 26px 27px), repeating-linear-gradient(90deg, transparent 0 46px, rgba(48, 157, 221, .055) 47px 48px); box-shadow: inset 0 -24px 42px rgba(0,0,0,.55); transform: perspective(450px) rotateX(65deg); }
-.energy-well { filter: saturate(.9); transition: transform .7s cubic-bezier(.32,.72,0,1), filter .7s cubic-bezier(.32,.72,0,1); }.energy-well:hover, .energy-well.active { filter: saturate(1.08) brightness(1.12); transform: translateY(-11px); }
-.well-label { margin-bottom: 2px; color: currentColor; font-size: 16px; letter-spacing: .04em; text-shadow: 0 0 12px color-mix(in srgb, currentColor 42%, transparent); }.well-label b { font-size: 27px; }
-.well-chamber { width: 98%; height: 255px; clip-path: polygon(42% 0, 58% 0, 97% 100%, 3% 100%); background: linear-gradient(90deg, transparent 1%, color-mix(in srgb, currentColor 3%, transparent) 18%, color-mix(in srgb, currentColor 18%, transparent) 48%, color-mix(in srgb, currentColor 3%, transparent) 82%, transparent 99%); filter: drop-shadow(0 18px 18px color-mix(in srgb, currentColor 16%, transparent)); }
-.well-chamber::before { inset: 0 11%; opacity: .58; background: repeating-linear-gradient(90deg, transparent 0 16px, color-mix(in srgb, currentColor 15%, transparent) 17px 18px), repeating-linear-gradient(0deg, transparent 0 28px, color-mix(in srgb, currentColor 12%, transparent) 29px 30px), linear-gradient(180deg, transparent, color-mix(in srgb, currentColor 24%, transparent)); }
-.well-chamber::after { right: 6%; bottom: 4px; left: 6%; height: 42px; border-color: color-mix(in srgb, currentColor 72%, #fff); opacity: .76; box-shadow: 0 0 16px currentColor, inset 0 0 17px color-mix(in srgb, currentColor 48%, transparent); }
-.well-particles { opacity: .7; background-size: 21px 28px, 34px 25px; animation-duration: 7.5s; }.well-particles--far { opacity: .22; background-size: 37px 41px, 51px 36px; filter: blur(.7px); animation-duration: 11s; animation-direction: reverse; }
-.well-beam { width: 11%; opacity: .22; filter: blur(9px); animation-duration: 4.8s; }
-.well-core { position: absolute; z-index: 1; bottom: 17px; left: 50%; width: 78px; height: 28px; border: 1px solid color-mix(in srgb, currentColor 76%, #fff); border-radius: 50%; background: radial-gradient(ellipse, #fff 0 5%, currentColor 18%, color-mix(in srgb, currentColor 36%, transparent) 42%, transparent 72%); box-shadow: 0 0 22px currentColor, inset 0 0 13px #fff; transform: translateX(-50%); }.well-core b { position: absolute; bottom: 7px; left: 50%; width: 10px; height: 170px; background: linear-gradient(180deg, transparent, currentColor 75%, #fff); opacity: .22; filter: blur(6px); transform: translateX(-50%); }
-.well-chamber em { z-index: 3; border-color: color-mix(in srgb, currentColor 54%, #fff); border-radius: 4px; padding: 6px 13px; background: linear-gradient(180deg, rgba(7, 25, 42, .92), rgba(0, 8, 17, .94)); box-shadow: inset 0 1px rgba(255,255,255,.08), 0 0 10px color-mix(in srgb, currentColor 18%, transparent); letter-spacing: .02em; }
-.well-base { width: 120%; height: 66px; margin-top: -22px; border-color: color-mix(in srgb, currentColor 65%, #dffcff); background: repeating-radial-gradient(ellipse, #010306 0 8px, #111f28 9px 12px, #020609 13px 17px); box-shadow: 0 0 15px color-mix(in srgb, currentColor 43%, transparent), inset 0 -15px 22px #000, inset 0 0 18px color-mix(in srgb, currentColor 19%, transparent); }.well-base em { position: absolute; inset: 27px 62px; border: 1px solid currentColor; border-radius: 50%; background: radial-gradient(ellipse, #fff, currentColor 18%, #02070b 58%); box-shadow: 0 0 17px currentColor; }
-.well-plinth { position: relative; z-index: 1; width: 92%; height: 28px; margin-top: -28px; border: 1px solid color-mix(in srgb, currentColor 44%, #fff); border-radius: 50%; background: linear-gradient(180deg, #182833, #020609 64%); box-shadow: inset 0 5px 9px rgba(255,255,255,.07), 0 11px 18px rgba(0,0,0,.65); transform: perspective(260px) rotateX(65deg); }.well-plinth::before, .well-plinth i { position: absolute; border-radius: 50%; content: ''; }.well-plinth::before { inset: 6px 19px; border: 1px solid color-mix(in srgb, currentColor 32%, transparent); }.well-plinth i { inset: -6px -19px; border: 1px dashed color-mix(in srgb, currentColor 28%, transparent); animation: spin 18s cubic-bezier(.45,.05,.55,.95) infinite; }
-.focused-change { border-color: rgba(78, 192, 243, .18); background: linear-gradient(90deg, rgba(2, 20, 37, .94), rgba(0, 6, 15, .94)); }
-
+.hotspot-view, .compare-view { grid-template-columns: 260px minmax(640px, 1fr) 315px; }.hot-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }.hot-summary span { position: relative; border: 1px solid rgba(55, 182, 244, .15); padding: 10px; color: #85b7d2; font-size: 9px; background: rgba(5, 47, 96, .1); backdrop-filter: blur(4px); }.hot-summary span > i { float: left; margin-right: 8px; color: #35ddff; font-size: 20px; font-style: normal; }.hot-summary b { display: block; color: #e9fcff; font-size: 22px; }.hot-summary em { display: block; margin-top: 3px; color: #37e8ad; font-style: normal; }.hot-summary em.down { color: #ff7895; }
+.hot-trend-panel { min-height: 195px; }.mini-echart { height: 145px; }.heat-distribution { min-height: 168px; }.heat-donut { float: left; display: grid; place-items: center; width: 96px; height: 96px; margin-right: 12px; border-radius: 50%; background: radial-gradient(circle, rgba(5,35,84,.15) 54%, transparent 56%), conic-gradient(#ffb52e 0 10%, #37e6a1 10% 34%, #a26cff 34% 69%, #28cfff 69%); }.heat-donut b { color: #effdff; font-size: 23px; }.heat-donut small { color: #8cb8d0; font-size: 9px; }.heat-distribution ul { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }.heat-distribution li { display: flex; align-items: center; color: #8fbad1; font-size: 9px; }.heat-distribution li i { width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: currentColor; }.heat-distribution li b { margin-left: auto; color: #dff7ff; }.insight-panel.compact { min-height: 105px; }.insight-panel.compact b { color: #48e1ff; }
+.graph-command, .domain-command { position: relative; min-width: 0; overflow: hidden; background: linear-gradient(180deg, rgba(4,18,39,.1), rgba(0,6,18,.12)); border: 1px solid rgba(83,203,255,.2); backdrop-filter: blur(6px) saturate(1.05); border-radius: 8px; }.graph-command { min-height: 690px; }.graph-command::after, .domain-command::after { width: auto; height: auto; inset: 0; opacity: .15; background-image: radial-gradient(circle, rgba(104, 222, 255, .32) 0 1px, transparent 1px), linear-gradient(rgba(34, 142, 217, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 142, 217, .03) 1px, transparent 1px); background-size: 31px 31px, 58px 58px, 58px 58px; box-shadow: none; }.graph-title { position: absolute; z-index: 5; top: 17px; left: 21px; display: flex; right: 21px; align-items: end; justify-content: space-between; }.graph-title > span { color: #6fb9db; font-size: 9px; }.hotspot-chart { position: relative; z-index: 2; height: 640px; margin-top: 36px; }.hotspot-chart::before, .hotspot-chart::after { position: absolute; z-index: 1; top: 50%; left: 50%; border: 1px solid rgba(85, 222, 255, .15); border-radius: 50%; content: ''; pointer-events: none; }.hotspot-chart::before { width: 440px; height: 210px; box-shadow: 0 0 28px rgba(22, 165, 255, .06), inset 0 0 24px rgba(22, 165, 255, .04); transform: translate(-50%, -50%) rotate(17deg); animation: gyroA 13s cubic-bezier(.45,.05,.55,.95) infinite alternate; }.hotspot-chart::after { width: 300px; height: 520px; border-style: dashed; opacity: .4; transform: translate(-50%, -50%) rotate(-28deg); animation: gyroB 17s cubic-bezier(.45,.05,.55,.95) infinite alternate; }.active-skill-readout { position: absolute; z-index: 6; top: 79px; right: 18px; display: grid; min-width: 130px; border-right: 1px solid #83edff; padding: 7px 10px; text-align: right; background: linear-gradient(90deg, transparent, rgba(1, 22, 40, .2)); backdrop-filter: blur(6px); }.active-skill-readout span { color: #32dfff; font-size: 7px; letter-spacing: .18em; }.active-skill-readout b { color: #effdff; font-size: 12px; }.active-skill-readout strong { color: #45edbf; font-size: 21px; }.active-skill-readout em { color: #72aeca; font-size: 8px; font-style: normal; }.graph-legend { position: absolute; z-index: 6; bottom: 16px; left: 50%; display: flex; gap: 15px; border: 1px solid rgba(65, 193, 255, .15); padding: 7px 14px; color: #a5d5e9; font-size: 9px; background: rgba(0, 8, 19, .2); transform: translateX(-50%); backdrop-filter: blur(6px); }.graph-legend span::before { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 0; background: currentColor; content: ''; transform: rotate(45deg); }.level-high { color: #ffb52e !important; }.level-mid { color: #37e6a1 !important; }.level-warm { color: #a26cff !important; }.level-low { color: #28cfff !important; }
+.graph-hit-targets { position: absolute; z-index: 5; inset: 60px 0 45px; pointer-events: none; }.graph-hit-targets button { position: absolute; width: 82px; height: 82px; border: 0; background: transparent; cursor: pointer; pointer-events: auto; transform: translate(-50%, -50%); clip-path: polygon(50% 0, 92% 25%, 92% 75%, 50% 100%, 8% 75%, 8% 25%); }.graph-hit-targets button:hover { outline: 1px dashed rgba(116, 238, 255, .5); outline-offset: 4px; box-shadow: 0 0 20px rgba(50, 217, 255, .1); }
+.skill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }.skill-chips button { border: 1px solid rgba(91, 214, 255, .2); padding: 4px 9px; color: #bff4ff; font-size: 10px; background: rgba(6, 45, 89, .12); cursor: pointer; backdrop-filter: blur(4px); }.skill-chips button:hover { border-color: #69efff; color: #fff; box-shadow: 0 0 10px rgba(42, 201, 255, .15); }
+.sparkline { height: 28px; margin-bottom: 10px; border-radius: 4px; background: linear-gradient(90deg, rgba(55, 232, 173, .04), transparent); }.sparkline.red-line { background: linear-gradient(90deg, rgba(255, 117, 149, .04), transparent); }
+.ranking-list { display: grid; gap: 6px; }.ranking-list button { display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; width: 100%; border: 1px solid rgba(63, 178, 237, .12); padding: 7px 9px; color: #bce4f4; font-size: 10px; text-align: left; background: rgba(3, 32, 67, .1); cursor: pointer; backdrop-filter: blur(4px); }.ranking-list button:hover { border-color: rgba(95, 222, 255, .3); background: rgba(8, 52, 99, .15); }.ranking-list button i { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 4px; color: #19d3ff; font-size: 9px; font-style: normal; background: rgba(13, 72, 118, .15); backdrop-filter: blur(4px); }.ranking-list button b { color: #e8fbff; font-weight: 800; }.ranking-list button em { color: #54d1aa; font-size: 9px; font-style: normal; }.declining-panel .ranking-list button em { color: #ff7e94; }
+.domain-command { min-height: 640px; }.domain-chart { position: relative; z-index: 2; height: 560px; margin-top: 30px; }
+.domain-focus { position: absolute; z-index: 6; top: 74px; left: 50%; display: grid; justify-items: center; gap: 2px; transform: translateX(-50%); text-align: center; }.domain-focus small { color: #3fdcff; font-size: 8px; letter-spacing: .16em; }.domain-focus b { color: #effcff; font-size: 19px; font-weight: 900; text-shadow: 0 0 12px rgba(50, 195, 255, .25); }.domain-focus strong { color: #7ef3ff; font-size: 31px; font-weight: 900; text-shadow: 0 0 16px rgba(50, 202, 255, .35); }.domain-focus span { max-width: 320px; color: #7ab0ca; font-size: 10px; line-height: 1.5; }
+.wheel-note { position: absolute; z-index: 6; right: 18px; bottom: 22px; display: grid; gap: 9px; min-width: 160px; }.wheel-note span { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #89b8cf; font-size: 10px; }.wheel-note span b { color: #dff8ff; font-weight: 800; }.wheel-note span em { color: #5fe6ff; font-weight: 800; }
+.domain-stack { gap: 11px; }.domain-card { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 12px; text-align: left; cursor: pointer; }.domain-card.active { border-color: #56e6ff; box-shadow: inset 0 0 22px rgba(14, 120, 193, .12), 0 0 16px rgba(39, 187, 255, .1); transform: translateX(-2px); }.domain-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; color: #89f2ff; font-size: 12px; font-weight: 800; background: radial-gradient(circle at 30% 30%, rgba(76, 212, 255, .12), rgba(4, 35, 75, .18) 70%); box-shadow: inset 0 0 8px rgba(99, 222, 255, .08); backdrop-filter: blur(4px); }.domain-card h3 { margin: 0 0 3px; color: #ebfbff; font-size: 13px; font-weight: 900; }.domain-card b { color: #4ee0ff; font-size: 18px; font-weight: 900; }.domain-card ul { display: grid; gap: 4px; margin: 6px 0 0; padding: 0; list-style: none; }.domain-card li { display: flex; align-items: center; justify-content: space-between; color: #97c5da; font-size: 9px; }.domain-card li em { color: #5ed2ff; font-weight: 800; font-style: normal; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes beamPulse { 50% { opacity: .4; transform: scaleX(1.45); } }
-@keyframes particlesRise { to { background-position: 0 -92px; } }
-@keyframes gyroA { to { transform: translate(-50%, -50%) rotate(48deg) scaleX(.92); opacity: .42; } }
-@keyframes gyroB { to { transform: translate(-50%, -50%) rotate(7deg) scaleY(.92); opacity: .34; } }
-.graph-command, .domain-command { background: radial-gradient(circle at 50% 47%, rgba(0, 74, 116, .08), transparent 28%), #01060c; }
-.domain-chart { filter: none; }
-@media (max-width: 1250px) { .version-view, .hotspot-view, .compare-view { grid-template-columns: 230px minmax(520px, 1fr); }.version-view > .hud-stack:nth-of-type(2), .hotspot-view > .hud-stack:nth-of-type(2), .compare-view > .domain-stack:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); }.role-strip { grid-column: 1 / -1; }.domain-stack:last-child { grid-template-columns: repeat(4, 1fr) !important; } }
-@media (max-width: 900px) { .version-view, .hotspot-view, .compare-view { display: flex; flex-direction: column; }.hud-stack, .domain-stack, .version-view > .hud-stack:nth-of-type(2), .hotspot-view > .hud-stack:nth-of-type(2), .compare-view > .domain-stack:last-child { display: grid; grid-template-columns: 1fr; }.role-strip { overflow-x: auto; }.energy-well { min-width: 150px; }.version-lab { overflow-x: auto; }.domain-stack:last-child { grid-template-columns: 1fr !important; } }
+@keyframes beamPulse { 0%, 100% { opacity: .18; transform: translateX(-40%); } 50% { opacity: .4; transform: translateX(40%); } }
+@keyframes particlesRise { 0% { transform: translateY(18px); opacity: .2; } 50% { opacity: .7; } 100% { transform: translateY(-26px); opacity: .1; } }
+@keyframes gyroA { 0% { transform: translate(-50%, -50%) rotate(12deg) scale(1); } 100% { transform: translate(-50%, -50%) rotate(22deg) scale(1.06); } }
+@keyframes gyroB { 0% { transform: translate(-50%, -50%) rotate(-32deg) scale(1); } 100% { transform: translate(-50%, -50%) rotate(-22deg) scale(1.04); } }
 </style>
