@@ -16,3 +16,13 @@ const dashboardComponent = computed(() => {
   return CandidateDashboard
 })
 </script>
+
+<style>
+html body.theme-dark .app-main .cockpit {
+  background: transparent !important;
+}
+html body.theme-dark .app-main .app-titlebar {
+  background: rgba(8, 35, 80, 0.6) !important;
+  backdrop-filter: blur(10px) !important;
+}
+</style>

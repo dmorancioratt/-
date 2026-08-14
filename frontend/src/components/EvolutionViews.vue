@@ -87,20 +87,7 @@
           </div>
         </section>
 
-        <section class="v-chart-panel v-tree-panel">
-          <div class="v-corner-tl"></div>
-          <div class="v-corner-br"></div>
-          <div class="v-panel-title">能力演化树 · SKILL EVOLUTION TREE</div>
-          <SkillEvolutionTree 
-            :added-skills="addedItems.map(i => i.name)"
-            :removed-skills="removedItems.map(i => i.name)"
-            :core-skills="coreSkills"
-            :from-version="activeCard.fromVersion || 'v1.1'"
-            :to-version="activeCard.toVersion || 'v1.2'"
-          />
-        </section>
-
-        <section class="v-chart-panel">
+        <section class="v-chart-panel" style="flex:1;">
           <div class="v-corner-tl"></div>
           <div class="v-corner-br"></div>
           <svg class="v-trend-svg" viewBox="0 0 1000 360" preserveAspectRatio="none">
@@ -227,66 +214,85 @@
     </footer>
   </section>
 
-  <section v-else-if="mode === 'hotspot'" class="evo-view hotspot-view">
-    <aside class="hud-stack">
-      <article class="hud-panel">
-        <PanelTitle title="能力热点总览" code="2026-06" />
-        <div class="hot-summary">
-          <span><i>◇</i><b>{{ Math.max(124, hotSkills.length) }}</b>能力总数<em>▲ 6.2%</em></span>
-          <span><i>♨</i><b>{{ Math.max(12, emerging.length) }}</b>高热能力<em>▲ {{ emerging.length }}</em></span>
-          <span><i>↗</i><b>{{ Math.max(28, rising.length) }}</b>升温能力<em>▲ 3</em></span>
-          <span><i>↘</i><b>{{ Math.max(18, declining.length) }}</b>降温能力<em class="down">▼ 2</em></span>
+  <section v-else-if="mode === 'hotspot'" class="hotspot-tree-view">
+    <div class="hotspot-tree-main">
+      <SkillEvolutionTree 
+        mode="hotspot"
+        :hot-skills="allHotSkills"
+        @select-fruit="onHotFruitSelect"
+      />
+    </div>
+    
+    <div class="hotspot-float-panels">
+      <div class="float-panel top-left">
+        <h3>能力热点总览</h3>
+        <div class="summary-stats">
+          <div class="stat-item">
+            <b>{{ Math.max(124, hotSkills.length) }}</b>
+            <span>能力总数</span>
+            <em class="up">▲ 6.2%</em>
+          </div>
+          <div class="stat-item">
+            <b>{{ Math.max(12, emerging.length) }}</b>
+            <span>高热能力</span>
+            <em class="up">▲ {{ emerging.length }}</em>
+          </div>
+          <div class="stat-item">
+            <b>{{ Math.max(28, rising.length) }}</b>
+            <span>升温能力</span>
+            <em class="up">▲ 3</em>
+          </div>
+          <div class="stat-item">
+            <b>{{ Math.max(18, declining.length) }}</b>
+            <span>降温能力</span>
+            <em class="down">▼ 2</em>
+          </div>
         </div>
-      </article>
-      <article class="hud-panel hot-trend-panel">
-        <PanelTitle title="能力热度趋势" code="TOP 10" />
-        <EChart :option="trendOption" class="mini-echart" />
-      </article>
-      <article class="hud-panel heat-distribution">
-        <PanelTitle title="热度分布" code="DISTRIBUTION" />
-        <div class="heat-donut"><b>{{ hotSkills.length }}</b><small>总能力</small></div>
-        <ul><li><i class="level-high"></i>高热（≥16）<b>{{ heatBuckets.high }}</b></li><li><i class="level-mid"></i>中高热（12-16）<b>{{ heatBuckets.mid }}</b></li><li><i class="level-warm"></i>中热（8-12）<b>{{ heatBuckets.warm }}</b></li><li><i class="level-low"></i>低热（&lt;8）<b>{{ heatBuckets.low }}</b></li></ul>
-      </article>
-      <article class="hud-panel insight-panel compact">
-        <PanelTitle title="洞察摘要" code="AI" />
-        <p><b>{{ activeSkill.name }}</b> 当前热度 {{ activeSkill.heat }}，{{ activeSkill.category || '核心能力' }}方向关注度持续变化，建议结合岗位需求进行课程与人才培养调整。</p>
-      </article>
-    </aside>
-
-    <main class="hud-panel graph-command">
-      <div class="graph-title"><div><small>INTERACTIVE SKILL ORBIT</small><h2>热门技能关系星图</h2></div><span>悬停查看 · 点击聚焦</span></div>
-      <EChart :option="hotspotGraphOption" class="hotspot-chart" @click="handleSkillClick" />
-      <div class="graph-hit-targets" aria-label="能力热点节点">
-        <button
-          v-for="(skill, index) in hotSkills"
-          :key="skill.name"
-          type="button"
-          :title="`聚焦 ${skill.name}`"
-          :aria-label="`聚焦 ${skill.name}`"
-          :style="hotNodeHitStyle(index)"
-          @click="selectSkill(skill.name)"
-        ></button>
       </div>
-      <div class="active-skill-readout">
-        <span>FOCUS</span><b>{{ activeSkill.name }}</b><strong>{{ activeSkill.heat }}</strong><em>{{ activeSkill.category || '能力热点' }}</em>
+      
+      <div class="float-panel bottom-left">
+        <h3>热度分布</h3>
+        <div class="heat-bars">
+          <div class="heat-bar-row">
+            <span class="bar-label hot">高热 ≥16</span>
+            <div class="bar-track"><div class="bar-fill hot" :style="{width: (heatBuckets.high / Math.max(hotSkills.length,1) * 100) + '%'}"></div></div>
+            <b>{{ heatBuckets.high }}</b>
+          </div>
+          <div class="heat-bar-row">
+            <span class="bar-label warm">中热 12-16</span>
+            <div class="bar-track"><div class="bar-fill warm" :style="{width: (heatBuckets.mid / Math.max(hotSkills.length,1) * 100) + '%'}"></div></div>
+            <b>{{ heatBuckets.mid }}</b>
+          </div>
+          <div class="heat-bar-row">
+            <span class="bar-label cool">低热 8-12</span>
+            <div class="bar-track"><div class="bar-fill cool" :style="{width: (heatBuckets.warm / Math.max(hotSkills.length,1) * 100) + '%'}"></div></div>
+            <b>{{ heatBuckets.warm }}</b>
+          </div>
+        </div>
       </div>
-      <div class="graph-legend"><span class="level-high">高热 ≥16</span><span class="level-mid">中高热 12-16</span><span class="level-warm">中热 8-12</span><span class="level-low">低热 &lt;8</span></div>
-    </main>
-
-    <aside class="hud-stack">
-      <article class="hud-panel ranking-panel rising-panel">
-        <PanelTitle title="新兴能力" code="EMERGING ↗" />
-        <div class="skill-chips"><button v-for="item in emerging.slice(0, 5)" :key="item.name" type="button" @click="selectSkill(item.name)">{{ item.name }}</button></div>
-        <div class="sparkline green-line"></div>
-        <div class="ranking-list"><button v-for="(item, index) in emergingList" :key="item.name" type="button" @click="selectSkill(item.name)"><i>{{ index + 1 }}</i><span>{{ item.name }}</span><b>{{ formatHeat(item) }}</b><em>▲ {{ growthLabel(item, index) }}</em></button></div>
-      </article>
-      <article class="hud-panel ranking-panel declining-panel">
-        <PanelTitle title="淘汰能力" code="DECLINING ↘" />
-        <div class="skill-chips"><button v-for="item in declining.slice(0, 4)" :key="item.name" type="button" @click="selectSkill(item.name)">{{ item.name }}</button></div>
-        <div class="sparkline red-line"></div>
-        <div class="ranking-list"><button v-for="(item, index) in declining.slice(0, 7)" :key="item.name" type="button" @click="selectSkill(item.name)"><i>{{ index + 1 }}</i><span>{{ item.name }}</span><b>{{ formatHeat(item) }}</b><em>▼ {{ 14 + index * 2 }}.{{ index }}%</em></button></div>
-      </article>
-    </aside>
+      
+      <div class="float-panel right-top">
+        <h3>新兴能力 TOP 5</h3>
+        <div class="mini-skill-list">
+          <button v-for="(item, index) in emerging.slice(0, 5)" :key="item.name" type="button" class="mini-skill-btn" @click="selectSkill(item.name)">
+            <i>{{ index + 1 }}</i>
+            <span>{{ item.name }}</span>
+            <em class="up">↗</em>
+          </button>
+        </div>
+      </div>
+      
+      <div class="float-panel right-bottom">
+        <h3>需要关注</h3>
+        <div class="mini-skill-list">
+          <button v-for="(item, index) in declining.slice(0, 5)" :key="item.name" type="button" class="mini-skill-btn" @click="selectSkill(item.name)">
+            <i>{{ index + 1 }}</i>
+            <span>{{ item.name }}</span>
+            <em class="down">↘</em>
+          </button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section v-else class="evo-view compare-view">
@@ -437,11 +443,37 @@ const activeSkill = computed(() => {
 })
 watch(hotSkills, (skills) => { if (!skills.some((item) => item.name === activeSkillName.value)) activeSkillName.value = skills[0]?.name || '' }, { immediate: true })
 const emergingList = computed(() => emerging.value.length ? emerging.value.slice(0, 5) : hotSkills.value.slice(0, 5))
-const heatBuckets = computed(() => hotSkills.value.reduce((acc, item) => { const heat = Number(item.heat); if (heat >= 16) acc.high++; else if (heat >= 12) acc.mid++; else if (heat >= 8) acc.warm++; else acc.low++; return acc }, { high: 0, mid: 0, warm: 0, low: 0 }))
+const heatBuckets = computed(() => allHotSkills.value.reduce((acc, item) => { const heat = Number(item.heat); if (heat >= 16) acc.high++; else if (heat >= 14) acc.mid++; else if (heat >= 12) acc.warm++; else acc.low++; return acc }, { high: 0, mid: 0, warm: 0, low: 0 }))
 
 function heatColor(heat: number) { return heat >= 16 ? '#ffb52e' : heat >= 12 ? '#37e6a1' : heat >= 8 ? '#a26cff' : '#28cfff' }
 function selectSkill(name: string) { if (name) activeSkillName.value = name }
 function handleSkillClick(params: any) { if (params?.data?.skillName) selectSkill(params.data.skillName) }
+function onHotFruitSelect(skill: any) { if (skill?.name) selectSkill(skill.name) }
+
+const allHotSkills = computed<any[]>(() => {
+  const fallbackHot = [
+    { name: '大模型', heat: 18.5, category: '人工智能', trend: 'up' },
+    { name: 'RAG', heat: 17.2, category: '人工智能', trend: 'up' },
+    { name: 'Agent', heat: 16.8, category: '人工智能', trend: 'up' },
+    { name: '多模态', heat: 15.3, category: '人工智能', trend: 'up' },
+    { name: 'Prompt工程', heat: 14.7, category: '人工智能', trend: 'up' },
+    { name: '微调', heat: 13.9, category: '人工智能', trend: 'stable' },
+    { name: 'Python', heat: 18.1, category: '编程语言', trend: 'stable' },
+    { name: 'TypeScript', heat: 16.5, category: '编程语言', trend: 'up' },
+    { name: 'Rust', heat: 12.4, category: '编程语言', trend: 'up' },
+    { name: 'Vue', heat: 15.8, category: '前端框架', trend: 'stable' },
+    { name: 'React', heat: 15.2, category: '前端框架', trend: 'stable' },
+    { name: 'Kubernetes', heat: 14.1, category: '云原生', trend: 'stable' },
+    { name: '微服务', heat: 13.3, category: '架构设计', trend: 'stable' },
+    { name: '向量数据库', heat: 15.6, category: '数据技术', trend: 'up' },
+    { name: '数据治理', heat: 11.8, category: '数据技术', trend: 'stable' },
+    { name: '安全合规', heat: 12.9, category: '安全', trend: 'up' }
+  ]
+  const merged = [...hotSkills.value, ...emerging.value, ...rising.value].filter((item, index, arr) => 
+    item?.name && arr.findIndex((row) => row.name === item.name) === index
+  )
+  return merged.length >= 8 ? merged.slice(0, 16) : fallbackHot
+})
 function hotNodeHitStyle(index: number) { const angle = index / Math.max(hotSkills.value.length, 1) * Math.PI * 2 - Math.PI / 2; return { left: `${50 + Math.cos(angle) * 36}%`, top: `${50 + Math.sin(angle) * 34}%` } }
 function formatHeat(item: any) { return Number(item.heat ?? item.growth ?? item.removed ?? 0).toFixed(2) }
 function growthLabel(_item: any, index: number) { return `${28 - index * 3}.${index}%` }
@@ -1571,4 +1603,225 @@ button { font: inherit; }
 @keyframes particlesRise { 0% { transform: translateY(18px); opacity: .2; } 50% { opacity: .7; } 100% { transform: translateY(-26px); opacity: .1; } }
 @keyframes gyroA { 0% { transform: translate(-50%, -50%) rotate(12deg) scale(1); } 100% { transform: translate(-50%, -50%) rotate(22deg) scale(1.06); } }
 @keyframes gyroB { 0% { transform: translate(-50%, -50%) rotate(-32deg) scale(1); } 100% { transform: translate(-50%, -50%) rotate(-22deg) scale(1.04); } }
+@keyframes floatIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.hotspot-tree-view {
+  position: relative;
+  width: 100%;
+  min-height: 780px;
+  height: calc(100vh - 180px);
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #041022 0%, #071a35 50%, #041022 100%);
+}
+
+.hotspot-tree-main {
+  position: absolute;
+  inset: 0;
+}
+
+.hotspot-float-panels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.float-panel {
+  position: absolute;
+  background: rgba(4, 22, 50, 0.78);
+  backdrop-filter: blur(16px) saturate(1.1);
+  border: 1px solid rgba(78, 216, 255, 0.28);
+  border-radius: 12px;
+  padding: 16px 20px;
+  pointer-events: auto;
+  animation: floatIn 0.5s ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.float-panel.top-left {
+  top: 20px;
+  left: 20px;
+  width: 220px;
+}
+
+.float-panel.bottom-left {
+  bottom: 20px;
+  left: 20px;
+  width: 240px;
+}
+
+.float-panel.right-top {
+  top: 20px;
+  right: 20px;
+  width: 200px;
+}
+
+.float-panel.right-bottom {
+  bottom: 20px;
+  right: 20px;
+  width: 200px;
+}
+
+.float-panel h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #eafcff;
+  letter-spacing: 1px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(78, 216, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.float-panel h3::before {
+  content: '';
+  width: 4px;
+  height: 14px;
+  background: linear-gradient(180deg, #4ed8ff, #37d6a5);
+  border-radius: 2px;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  background: rgba(78, 216, 255, 0.06);
+  border-radius: 8px;
+  border: 1px solid rgba(78, 216, 255, 0.1);
+}
+
+.stat-item b {
+  font-size: 22px;
+  font-weight: 900;
+  color: #eafcff;
+  text-shadow: 0 0 12px rgba(78, 216, 255, 0.5);
+}
+
+.stat-item span {
+  font-size: 11px;
+  color: #78a9c8;
+}
+
+.stat-item em {
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.stat-item em.up { color: #37d6a5; }
+.stat-item em.down { color: #ff7088; }
+
+.heat-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.heat-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.bar-label {
+  width: 70px;
+  color: #b8e0f0;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(78, 216, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.bar-fill.hot { background: linear-gradient(90deg, #ff6b35, #ffb65c); box-shadow: 0 0 8px rgba(255, 107, 53, 0.5); }
+.bar-fill.warm { background: linear-gradient(90deg, #ffb65c, #69f0ae); box-shadow: 0 0 8px rgba(105, 240, 174, 0.4); }
+.bar-fill.cool { background: linear-gradient(90deg, #69f0ae, #4ed8ff); box-shadow: 0 0 8px rgba(78, 216, 255, 0.4); }
+
+.heat-bar-row b {
+  width: 24px;
+  text-align: right;
+  color: #eafcff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mini-skill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mini-skill-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(78, 216, 255, 0.05);
+  border: 1px solid rgba(78, 216, 255, 0.12);
+  border-radius: 8px;
+  color: #b8e0f0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.mini-skill-btn:hover {
+  background: rgba(78, 216, 255, 0.12);
+  border-color: rgba(78, 216, 255, 0.35);
+  transform: translateX(4px);
+}
+
+.mini-skill-btn i {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, rgba(78, 216, 255, 0.2), rgba(55, 214, 165, 0.2));
+  color: #4ed8ff;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.mini-skill-btn span {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-skill-btn em {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.mini-skill-btn em.up { color: #37d6a5; }
+.mini-skill-btn em.down { color: #ff7088; }
 </style>

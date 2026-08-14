@@ -1,8 +1,8 @@
 .cockpit {
-  --cockpit-bg: #030a1d;
-  --cockpit-panel: rgba(5, 23, 52, 0.86);
-  --cockpit-panel-strong: rgba(7, 31, 68, 0.94);
-  --cockpit-border: rgba(71, 191, 255, 0.24);
+  --cockpit-bg: transparent;
+  --cockpit-panel: rgba(8, 42, 92, 0.35);
+  --cockpit-panel-strong: rgba(10, 52, 110, 0.45);
+  --cockpit-border: rgba(78, 200, 255, 0.18);
   --cockpit-cyan: #36d7ff;
   --cockpit-blue: #3d86ff;
   --cockpit-teal: #24d7b1;
@@ -16,9 +16,7 @@
   overflow: hidden;
   padding: 22px 24px 32px;
   color: var(--cockpit-text);
-  background:
-    radial-gradient(circle at 50% 0%, rgba(25, 116, 206, 0.16), transparent 38%),
-    linear-gradient(180deg, rgba(2, 9, 25, 0.7), rgba(3, 10, 29, 0.92));
+  background: transparent;
 }
 
 .cockpit::before {
@@ -96,8 +94,9 @@
 .cockpit-panel {
   border: 1px solid var(--cockpit-border);
   background: var(--cockpit-panel);
-  box-shadow: inset 0 1px 0 rgba(161, 231, 255, 0.05), 0 18px 44px rgba(0, 3, 18, 0.22);
-  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(161, 231, 255, 0.08), 0 8px 32px rgba(0, 10, 40, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .cockpit-kpi {

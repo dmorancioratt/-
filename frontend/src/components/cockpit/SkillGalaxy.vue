@@ -88,16 +88,17 @@
         <g class="core-ring-inner" style="animation: core-rotate 35s linear infinite; transform-origin: center;">
           <circle cx="0" cy="0" r="70" fill="none" stroke="rgba(55,214,165,0.12)" stroke-width="0.8" stroke-dasharray="3 8"/>
         </g>
-        <circle cx="0" cy="0" r="62" fill="rgba(7,17,31,0.96)" stroke="rgba(78,216,255,0.5)" stroke-width="1.5" filter="url(#softGlow)"/>
+        <circle cx="0" cy="0" r="62" fill="rgba(30, 120, 220, 0.12)" stroke="rgba(78,216,255,0.4)" stroke-width="1" filter="url(#softGlow)"/>
+        <circle cx="0" cy="0" r="62" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
         
-        <circle cx="0" cy="-22" r="22" fill="rgba(78,216,255,0.12)" stroke="rgba(78,216,255,0.6)" stroke-width="1.5" filter="url(#softGlow)"/>
+        <circle cx="0" cy="-22" r="22" fill="rgba(78,216,255,0.15)" stroke="rgba(78,216,255,0.5)" stroke-width="1.2" filter="url(#softGlow)"/>
         <text x="0" y="-16" text-anchor="middle" fill="#4ed8ff" font-size="22" font-weight="700">{{ profile.name.charAt(0) }}</text>
         
         <text x="0" y="14" text-anchor="middle" fill="#f4f7fc" font-size="17" font-weight="700">{{ profile.name }}</text>
         <text x="0" y="32" text-anchor="middle" fill="#a8b4c8" font-size="12">{{ profile.currentIdentity }}</text>
         
         <g transform="translate(0, 52)" filter="url(#softGlow)">
-          <rect x="-48" y="-11" width="96" height="22" rx="11" fill="rgba(78,216,255,0.12)" stroke="rgba(78,216,255,0.4)" stroke-width="1"/>
+          <rect x="-48" y="-11" width="96" height="22" rx="11" fill="rgba(78,216,255,0.18)" stroke="rgba(78,216,255,0.35)" stroke-width="1"/>
           <text x="0" y="4" text-anchor="middle" fill="#4ed8ff" font-size="13" font-weight="600">匹配度 {{ matchScore }}%</text>
         </g>
       </g>
@@ -166,7 +167,7 @@
          pointer-events="none"
          filter="url(#softGlow)">
         <rect x="0" y="0" width="210" height="96" rx="12"
-          fill="rgba(14,26,43,0.97)" stroke="rgba(78,216,255,0.3)" stroke-width="1"/>
+          fill="rgba(15, 75, 160, 0.75)" stroke="rgba(78,216,255,0.35)" stroke-width="1"/>
         <rect x="0" y="0" width="4" height="96" rx="2" :fill="getStatusColor(hoverSkill.status)"/>
         <text x="18" y="26" fill="#f4f7fc" font-size="14" font-weight="600">{{ hoverSkill.name }}</text>
         <text x="18" y="46" fill="#a8b4c8" font-size="12">当前 Lv.{{ hoverSkill.currentLevel }} / 要求 Lv.{{ hoverSkill.requiredLevel }}</text>
@@ -630,10 +631,10 @@ watch(() => props.selectedSkill, (val) => { currentSelectedId = val?.id || null 
 .galaxy-filter {
   font-size: 13px;
   padding: 8px 18px;
-  background: rgba(14,26,43,0.9);
-  border: 1px solid rgba(135,169,220,0.2);
+  background: rgba(20, 90, 180, 0.3);
+  border: 1px solid rgba(78,216,255,0.2);
   border-radius: 20px;
-  color: #a8b4c8;
+  color: #d0e4ff;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
@@ -641,10 +642,10 @@ watch(() => props.selectedSkill, (val) => { currentSelectedId = val?.id || null 
   font-weight: 500;
 }
 .galaxy-filter:hover {
-  background: rgba(19,36,59,0.95);
-  border-color: rgba(78,216,255,0.4);
-  color: #f4f7fc;
-  box-shadow: 0 0 16px rgba(78,216,255,0.15);
+  background: rgba(30, 110, 200, 0.45);
+  border-color: rgba(78,216,255,0.45);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(78,216,255,0.2);
 }
 .galaxy-filter.active {
   background: rgba(78,216,255,0.15);

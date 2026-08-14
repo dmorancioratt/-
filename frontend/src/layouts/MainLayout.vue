@@ -1,47 +1,7 @@
 <template>
   <div class="app-shell">
     <div class="workspace-atmosphere" aria-hidden="true">
-      <TechParticleBackground />
-      <svg class="workspace-atmosphere__svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <linearGradient id="workspaceFlow" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#0b73ff" stop-opacity="0.04" />
-            <stop offset="0.42" stop-color="#17c8ff" stop-opacity="0.88" />
-            <stop offset="0.74" stop-color="#78f5ff" stop-opacity="0.68" />
-            <stop offset="1" stop-color="#0b73ff" stop-opacity="0.04" />
-          </linearGradient>
-          <linearGradient id="workspaceFlowSoft" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#0b73ff" stop-opacity="0" />
-            <stop offset="0.5" stop-color="#2fcfff" stop-opacity="0.38" />
-            <stop offset="1" stop-color="#78f5ff" stop-opacity="0" />
-          </linearGradient>
-          <filter id="workspaceGlow" x="-30%" y="-80%" width="160%" height="260%">
-            <feGaussianBlur stdDeviation="2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        <g class="workspace-flow" filter="url(#workspaceGlow)">
-          <path class="workspace-flow__line workspace-flow__line--wide" d="M-120 820 C340 676 760 900 1118 708 C1350 584 1464 486 1720 548" />
-          <path class="workspace-flow__line workspace-flow__line--wide workspace-flow__line--second" d="M-100 868 C380 748 800 948 1170 748 C1380 636 1490 548 1720 610" />
-          <path class="workspace-flow__line workspace-flow__line--thin" d="M-40 790 C350 660 760 860 1135 716 C1370 626 1490 536 1700 584" />
-          <path class="workspace-flow__line workspace-flow__line--thin workspace-flow__line--third" d="M40 892 C430 788 820 936 1200 772 C1415 680 1510 610 1690 654" />
-          <path class="workspace-flow__line workspace-flow__line--fine" d="M-20 748 C380 632 744 810 1098 676 C1330 588 1460 492 1680 530" />
-          <path class="workspace-flow__line workspace-flow__line--aurora1" d="M-80 80 C200 180 500 40 800 160 C1100 280 1400 120 1720 200" />
-          <path class="workspace-flow__line workspace-flow__line--aurora2" d="M-60 280 C300 180 600 380 900 240 C1200 100 1500 300 1720 360" />
-          <path class="workspace-flow__line workspace-flow__line--aurora3" d="M-40 480 C250 380 550 520 850 420 C1150 320 1450 460 1720 400" />
-        </g>
-
-        <!-- network nodes removed per user request -->
-
-        <!-- background stars removed per user request -->
-      </svg>
-      <span class="workspace-haze workspace-haze--right"></span>
-      <span class="workspace-haze workspace-haze--bottom"></span>
-      <span class="workspace-haze workspace-haze--top"></span>
+      <CosmosBackground />
     </div>
 
     <header class="app-header" v-if="!$route.meta.fullscreen">
@@ -71,7 +31,6 @@
       </nav>
 
       <div class="header-actions">
-        <el-tag effect="light" type="success">SQLite 已连接</el-tag>
         <el-tag effect="light" type="primary">{{ roleLabel }}</el-tag>
         <el-dropdown trigger="click" @command="handleUserCommand">
           <button class="user-chip">
@@ -158,7 +117,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/api/http'
-import TechParticleBackground from '@/components/TechParticleBackground.vue'
+import CosmosBackground from '@/components/CosmosBackground.vue'
 
 type MenuItem = { path: string; label: string; icon: any; hint: string }
 type MenuGroup = { key: string; label: string; icon: any; items: MenuItem[] }
@@ -373,8 +332,8 @@ async function handleUserCommand(command: string) {
 <style scoped>
 .app-shell {
   position: relative;
+  z-index: 1;
   min-height: 100vh;
-  isolation: isolate;
   color: var(--text);
   background: transparent;
   display: flex;
@@ -391,13 +350,14 @@ async function handleUserCommand(command: string) {
   height: 72px;
   flex: 0 0 auto;
   overflow: visible;
-  border-bottom: 1px solid rgba(95, 211, 255, 0.28);
+  border-bottom: 1px solid rgba(100, 220, 255, 0.4);
   background:
-    radial-gradient(circle at 18% 0%, rgba(0, 200, 245, 0.18), transparent 28%),
-    radial-gradient(circle at 82% 18%, rgba(30, 123, 255, 0.18), transparent 28%),
-    linear-gradient(180deg, rgba(3, 13, 36, 0.9), rgba(5, 27, 68, 0.7));
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.26);
-  backdrop-filter: blur(18px);
+    radial-gradient(circle at 15% 0%, rgba(0, 200, 245, 0.35), transparent 35%),
+    radial-gradient(circle at 85% 20%, rgba(30, 123, 255, 0.35), transparent 35%),
+    linear-gradient(180deg, rgba(10, 40, 90, 0.92), rgba(8, 50, 110, 0.85));
+  box-shadow: 0 8px 32px rgba(0, 150, 255, 0.2), 0 0 60px rgba(0, 200, 245, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .app-header::after {
@@ -408,8 +368,8 @@ async function handleUserCommand(command: string) {
   height: 3px;
   content: "";
   border-radius: 99px;
-  background: linear-gradient(90deg, #1e7bff, #00c8f5);
-  box-shadow: 0 0 18px rgba(0, 200, 245, 0.42);
+  background: linear-gradient(90deg, #1e7bff, #00e5ff, #00c8f5);
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.6), 0 0 40px rgba(30, 123, 255, 0.4);
   animation: headerLineBreath 4.8s ease-in-out infinite;
 }
 
@@ -489,8 +449,8 @@ async function handleUserCommand(command: string) {
   border: 1px solid transparent;
   border-radius: 14px;
   padding: 0 14px;
-  background: transparent;
-  color: #ecf8ff;
+  background: rgba(30, 123, 255, 0.1);
+  color: #e0f4ff;
   font-size: 14px;
   font-weight: 850;
   white-space: nowrap;
@@ -500,26 +460,29 @@ async function handleUserCommand(command: string) {
 
 .nav-trigger .el-icon {
   font-size: 16px;
-  color: #2563eb;
+  color: #4dd0ff;
   transition: transform 200ms ease, color 200ms ease;
+  filter: drop-shadow(0 0 6px rgba(77, 208, 255, 0.5));
 }
 
 .nav-trigger:hover {
-  border-color: rgba(87, 223, 255, 0.36);
-  background: rgba(19, 127, 209, 0.24);
-  color: #fff;
+  border-color: rgba(100, 220, 255, 0.5);
+  background: linear-gradient(135deg, rgba(30, 123, 255, 0.35), rgba(0, 200, 245, 0.25));
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 180, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
 }
 
 .nav-trigger:hover .el-icon,
 .nav-trigger.active .el-icon {
-  color: #06b6d4;
+  color: #00e5ff;
+  filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
 }
 
 .nav-trigger.active {
-  border-color: rgba(87, 223, 255, 0.36);
-  background: rgba(19, 127, 209, 0.24);
-  color: #fff;
-  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.12);
+  border-color: rgba(100, 220, 255, 0.6);
+  background: linear-gradient(135deg, rgba(30, 123, 255, 0.45), rgba(0, 200, 245, 0.35));
+  color: #ffffff;
+  box-shadow: 0 6px 28px rgba(0, 180, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
 .caret {
@@ -547,15 +510,17 @@ async function handleUserCommand(command: string) {
   min-width: 280px;
   max-height: calc(100vh - 92px);
   overflow-y: auto;
-  border: 1px solid rgba(82, 192, 255, 0.42);
+  border: 1px solid rgba(100, 220, 255, 0.5);
   border-radius: 18px;
   padding: 8px;
-  background: #071d4a;
-  box-shadow: 0 20px 46px rgba(0, 4, 22, 0.58);
+  background: linear-gradient(180deg, rgba(10, 50, 110, 0.95), rgba(8, 40, 90, 0.95));
+  box-shadow: 0 20px 60px rgba(0, 100, 200, 0.4), 0 0 40px rgba(0, 200, 245, 0.15);
   animation: dropdownIn 220ms ease;
   pointer-events: auto !important;
   user-select: none;
   isolation: isolate;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .nav-dropdown::before {
@@ -565,10 +530,10 @@ async function handleUserCommand(command: string) {
   width: 12px;
   height: 12px;
   content: "";
-  border-top: 1px solid rgba(82, 192, 255, 0.42);
-  border-left: 1px solid rgba(82, 192, 255, 0.42);
+  border-top: 1px solid rgba(100, 220, 255, 0.5);
+  border-left: 1px solid rgba(100, 220, 255, 0.5);
   border-radius: 3px;
-  background: #071d4a;
+  background: rgba(10, 50, 110, 0.95);
   transform: rotate(45deg);
 }
 
@@ -593,8 +558,9 @@ async function handleUserCommand(command: string) {
 .dropdown-item .el-icon {
   flex: 0 0 auto;
   font-size: 18px;
-  color: #2563eb;
+  color: #4dd0ff;
   transition: transform 200ms ease, color 200ms ease;
+  filter: drop-shadow(0 0 4px rgba(77, 208, 255, 0.4));
 }
 
 .dropdown-item .item-copy {
@@ -606,16 +572,17 @@ async function handleUserCommand(command: string) {
 
 .dropdown-item b {
   display: block;
-  color: #e6f5ff;
+  color: #f0faff;
   font-size: 14px;
   font-weight: 850;
   line-height: 1.2;
+  text-shadow: 0 0 8px rgba(0, 200, 245, 0.3);
 }
 
 .dropdown-item small {
   display: block;
   margin-top: 3px;
-  color: #98bde2;
+  color: #8ec8f0;
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
@@ -627,37 +594,41 @@ async function handleUserCommand(command: string) {
   flex: 0 0 auto;
   margin-left: auto;
   font-size: 14px;
-  color: #8a9bb1;
+  color: #4dd0ff;
   opacity: 0;
   transition: opacity 200ms ease, transform 200ms ease;
 }
 
 .dropdown-item:hover {
-  border-color: rgba(79, 220, 255, 0.36);
-  background: rgba(18, 132, 209, 0.24);
+  border-color: rgba(100, 220, 255, 0.5);
+  background: linear-gradient(135deg, rgba(30, 123, 255, 0.35), rgba(0, 200, 245, 0.25));
   transform: translateX(3px);
+  box-shadow: 0 4px 16px rgba(0, 180, 255, 0.25), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
 .dropdown-item:hover .el-icon,
 .dropdown-item.active .el-icon {
-  color: #06b6d4;
+  color: #00e5ff;
   transform: scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.7));
 }
 
 .dropdown-item:hover .item-arrow,
 .dropdown-item.active .item-arrow {
   opacity: 1;
   transform: translateX(2px);
-  color: #2563eb;
+  color: #00e5ff;
 }
 
 .dropdown-item.active {
-  border-color: rgba(79, 220, 255, 0.36);
-  background: rgba(18, 132, 209, 0.24);
+  border-color: rgba(100, 220, 255, 0.5);
+  background: linear-gradient(135deg, rgba(30, 123, 255, 0.4), rgba(0, 200, 245, 0.3));
+  box-shadow: 0 4px 20px rgba(0, 180, 255, 0.3);
 }
 
 .dropdown-item.active b {
-  color: #e6f5ff;
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
 }
 
 .header-actions {
@@ -791,178 +762,7 @@ async function handleUserCommand(command: string) {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(78, 216, 255, 0.07), transparent 65%),
-    radial-gradient(circle at 85% 15%, rgba(78, 216, 255, 0.09), transparent 45%),
-    radial-gradient(circle at 15% 20%, rgba(143, 124, 255, 0.07), transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(55, 214, 165, 0.04), transparent 50%),
-    linear-gradient(180deg, #07111f 0%, #0a1628 50%, #07111f 100%);
-}
-
-.workspace-atmosphere::before,
-.workspace-atmosphere::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-}
-
-.workspace-atmosphere::before {
-  opacity: 0.06;
-  background: url("@/assets/login-background.png") center / cover no-repeat;
-  mix-blend-mode: screen;
-}
-
-.workspace-atmosphere::after {
-  opacity: 0.04;
-  background:
-    linear-gradient(rgba(135, 169, 220, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(135, 169, 220, 0.05) 1px, transparent 1px);
-  background-size: 54px 54px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.2), transparent 80%);
-}
-
-.workspace-atmosphere__svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.workspace-flow__line {
-  fill: none;
-  stroke: url(#workspaceFlowSoft);
-  stroke-linecap: round;
-  stroke-dasharray: 740 360;
-  animation: workspaceFlowTravel 20s linear infinite;
-}
-
-.workspace-flow__line--wide {
-  stroke-width: 2.5;
-  opacity: 0.12;
-}
-
-.workspace-flow__line--second {
-  stroke-width: 2;
-  opacity: 0.09;
-  animation-delay: -5s;
-  animation-duration: 24s;
-}
-
-.workspace-flow__line--thin {
-  stroke-width: 1.2;
-  opacity: 0.14;
-  animation-delay: -2s;
-  animation-duration: 16s;
-}
-
-.workspace-flow__line--third {
-  opacity: 0.1;
-  animation-delay: -9s;
-  animation-duration: 22s;
-}
-
-.workspace-flow__line--fine {
-  stroke: url(#workspaceFlowSoft);
-  stroke-width: 1;
-  opacity: 0.11;
-  animation-delay: -4s;
-  animation-duration: 14s;
-}
-
-.workspace-flow__line--aurora1 {
-  stroke: url(#workspaceFlowSoft);
-  stroke-width: 4;
-  opacity: 0.08;
-  animation-duration: 28s;
-  animation-delay: -7s;
-}
-
-.workspace-flow__line--aurora2 {
-  stroke: url(#workspaceFlowSoft);
-  stroke-width: 3;
-  opacity: 0.06;
-  animation-duration: 30s;
-  animation-delay: -3s;
-}
-
-.workspace-flow__line--aurora3 {
-  stroke: url(#workspaceFlowSoft);
-  stroke-width: 2.5;
-  opacity: 0.06;
-  animation-duration: 26s;
-  animation-delay: -11s;
-}
-
-.workspace-network {
-  opacity: 0.85;
-  transform-origin: 1440px 300px;
-  animation: workspaceNetworkPulse 7.5s ease-in-out infinite;
-}
-
-.workspace-network path {
-  fill: none;
-  stroke: rgba(56, 211, 255, 0.55);
-  stroke-width: 1.6;
-  stroke-dasharray: 6 14;
-  animation: workspaceNetworkTrace 12s linear infinite;
-}
-
-.workspace-network circle,
-.workspace-stars circle {
-  fill: #d2fcff;
-  filter: drop-shadow(0 0 4px rgba(56, 211, 255, 0.8));
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: workspaceNodePulse 4.4s ease-in-out infinite;
-}
-
-.workspace-network circle:nth-of-type(2n),
-.workspace-stars circle:nth-of-type(3n) {
-  animation-delay: -1.4s;
-}
-
-.workspace-network circle:nth-of-type(3n),
-.workspace-stars circle:nth-of-type(4n) {
-  animation-delay: -2.6s;
-}
-
-.workspace-stars {
-  opacity: 0.8;
-}
-
-.workspace-haze {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  mix-blend-mode: screen;
-}
-
-.workspace-haze--right {
-  right: -10vw;
-  top: 8vh;
-  width: 45vw;
-  height: 40vw;
-  background: radial-gradient(circle, rgba(78, 216, 255, 0.1), transparent 70%);
-  animation: workspaceHazeMove 12s ease-in-out infinite;
-}
-
-.workspace-haze--bottom {
-  left: 5vw;
-  bottom: -12vw;
-  width: 55vw;
-  height: 35vw;
-  background: radial-gradient(ellipse, rgba(78, 216, 255, 0.06), rgba(143, 124, 255, 0.05), transparent 70%);
-  animation: workspaceHazeMove 15s ease-in-out infinite reverse;
-}
-
-.workspace-haze--top {
-  left: 15vw;
-  top: -8vw;
-  width: 45vw;
-  height: 32vw;
-  background: radial-gradient(circle, rgba(143, 124, 255, 0.08), transparent 70%);
-  animation: workspaceHazeMove 18s ease-in-out infinite;
+  background: transparent;
 }
 
 @media (max-width: 1380px) {
@@ -992,36 +792,6 @@ async function handleUserCommand(command: string) {
   }
 }
 
-@keyframes workspaceFlowTravel {
-  from { stroke-dashoffset: 0; }
-  to { stroke-dashoffset: -1100; }
-}
-
-@keyframes workspaceNetworkTrace {
-  from { stroke-dashoffset: 0; }
-  to { stroke-dashoffset: -160; }
-}
-
-@keyframes workspaceNetworkPulse {
-  0%, 100% { opacity: 0.42; transform: scale(0.985); }
-  50% { opacity: 0.92; transform: scale(1.015); }
-}
-
-@keyframes workspaceNodePulse {
-  0%, 100% { opacity: 0.44; transform: scale(0.78); }
-  50% { opacity: 1; transform: scale(1.36); }
-}
-
-@keyframes workspaceHazeMove {
-  0%, 100% { opacity: 0.58; transform: translate3d(0, 0, 0) scale(1); }
-  50% { opacity: 1; transform: translate3d(-4vw, 3vh, 0) scale(1.12); }
-}
-
-@keyframes workspaceBackgroundDrift {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05) translate3d(-1%, 1%, 0); }
-}
-
 @keyframes dropdownIn {
   from {
     opacity: 0;
@@ -1044,5 +814,11 @@ async function handleUserCommand(command: string) {
     opacity: 1;
     width: 236px;
   }
+}
+</style>
+
+<style>
+html body.theme-dark .app-main {
+  background: transparent !important;
 }
 </style>

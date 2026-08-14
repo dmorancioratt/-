@@ -1,282 +1,1061 @@
 <template>
-  <section class="timeline-workbench">
-    <div class="metric-deck">
-      <button
-        v-for="metric in metrics"
-        :key="metric.key"
-        type="button"
-        class="metric-module"
-        :class="[`metric-module--${metric.key}`, { active: activeMetric === metric.key }]"
-        @click="activeMetric = metric.key"
-      >
-        <span class="metric-cube"><i>{{ metric.symbol }}</i></span>
-        <span class="metric-copy"><small>{{ metric.label }}</small><b>{{ metric.value }}</b><em>较上月 <strong>{{ metric.delta }}</strong></em></span>
-        <i class="metric-scan"></i>
-      </button>
-    </div>
+  <section class="evo-dashboard">
+    <div class="scanline-global"></div>
 
-    <div class="timeline-grid">
-      <main class="hud-shell timeline-command">
-        <div class="particle-field" aria-hidden="true"><i v-for="particle in particles" :key="particle.id" :style="particle.style"></i></div>
-        <div class="command-head">
-          <div><small>EVOLUTION ENERGY CHANNEL</small><h2>能力演化时间线</h2></div>
-          <div class="stream-legend"><button v-for="item in streamLegend" :key="item.key" type="button" :class="[`legend-${item.key}`, { active: activeMetric === item.key }]" @click="activeMetric = item.key"><i></i>{{ item.label }}</button></div>
-          <span class="live-state"><i></i>LIVE DATA</span>
+    <section class="summary-row">
+      <div v-for="(item, i) in summaryCards" :key="i" class="summary-card">
+        <div class="frame"></div>
+        <div class="inner">
+          <div class="num" :data-target="item.value">{{ item.value }}</div>
+          <div class="label">{{ item.label }}</div>
         </div>
+      </div>
+    </section>
 
-        <div class="energy-stage">
-          <svg class="energy-streams" viewBox="0 0 1000 430" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <linearGradient id="flowAdd" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2af0b6" stop-opacity=".05"/><stop offset=".48" stop-color="#58ffd2"/><stop offset="1" stop-color="#2af0b6" stop-opacity=".05"/></linearGradient>
-              <linearGradient id="flowRemove" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff648a" stop-opacity=".05"/><stop offset=".48" stop-color="#ff96ad"/><stop offset="1" stop-color="#ff648a" stop-opacity=".05"/></linearGradient>
-              <linearGradient id="flowModify" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffb637" stop-opacity=".05"/><stop offset=".48" stop-color="#ffd16a"/><stop offset="1" stop-color="#ffb637" stop-opacity=".05"/></linearGradient>
-              <filter id="flowGlow" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            </defs>
-            <g class="flow-group flow-group--add" :class="{ muted: activeMetric !== 'all' && activeMetric !== 'add' }">
-              <path class="flow-haze" d="M245 155 C360 84 420 219 500 164 S650 92 755 145" stroke="url(#flowAdd)"/>
-              <path class="flow-band" d="M245 155 C360 84 420 219 500 164 S650 92 755 145" stroke="url(#flowAdd)"/>
-              <path class="flow-filament" transform="translate(0 -8)" d="M245 155 C360 84 420 219 500 164 S650 92 755 145" stroke="url(#flowAdd)"/>
-              <path class="flow-filament" transform="translate(0 8)" d="M245 155 C360 84 420 219 500 164 S650 92 755 145" stroke="url(#flowAdd)"/>
-              <path class="flow-line" d="M245 155 C360 84 420 219 500 164 S650 92 755 145" stroke="url(#flowAdd)"/>
-              <circle r="5" fill="#71ffda" filter="url(#flowGlow)"><animateMotion dur="3.3s" repeatCount="indefinite" path="M245 155 C360 84 420 219 500 164 S650 92 755 145"/></circle>
-              <circle r="3" fill="#d7fff5"><animateMotion dur="4.7s" begin="-1.8s" repeatCount="indefinite" path="M245 155 C360 84 420 219 500 164 S650 92 755 145"/></circle>
-            </g>
-            <g class="flow-group flow-group--remove" :class="{ muted: activeMetric !== 'all' && activeMetric !== 'remove' }">
-              <path class="flow-haze" d="M245 230 C355 285 421 169 505 222 S644 284 755 224" stroke="url(#flowRemove)"/>
-              <path class="flow-band" d="M245 230 C355 285 421 169 505 222 S644 284 755 224" stroke="url(#flowRemove)"/>
-              <path class="flow-filament" transform="translate(0 -8)" d="M245 230 C355 285 421 169 505 222 S644 284 755 224" stroke="url(#flowRemove)"/>
-              <path class="flow-filament" transform="translate(0 8)" d="M245 230 C355 285 421 169 505 222 S644 284 755 224" stroke="url(#flowRemove)"/>
-              <path class="flow-line" d="M245 230 C355 285 421 169 505 222 S644 284 755 224" stroke="url(#flowRemove)"/>
-              <circle r="5" fill="#ff9ab0" filter="url(#flowGlow)"><animateMotion dur="3.9s" repeatCount="indefinite" path="M245 230 C355 285 421 169 505 222 S644 284 755 224"/></circle>
-              <circle r="3" fill="#ffe1e8"><animateMotion dur="5.1s" begin="-2.4s" repeatCount="indefinite" path="M245 230 C355 285 421 169 505 222 S644 284 755 224"/></circle>
-            </g>
-            <g class="flow-group flow-group--modify" :class="{ muted: activeMetric !== 'all' && activeMetric !== 'modify' }">
-              <path class="flow-haze" d="M245 304 C348 260 423 346 505 294 S650 266 755 300" stroke="url(#flowModify)"/>
-              <path class="flow-band" d="M245 304 C348 260 423 346 505 294 S650 266 755 300" stroke="url(#flowModify)"/>
-              <path class="flow-filament" transform="translate(0 -8)" d="M245 304 C348 260 423 346 505 294 S650 266 755 300" stroke="url(#flowModify)"/>
-              <path class="flow-filament" transform="translate(0 8)" d="M245 304 C348 260 423 346 505 294 S650 266 755 300" stroke="url(#flowModify)"/>
-              <path class="flow-line" d="M245 304 C348 260 423 346 505 294 S650 266 755 300" stroke="url(#flowModify)"/>
-              <circle r="5" fill="#ffd575" filter="url(#flowGlow)"><animateMotion dur="3.5s" repeatCount="indefinite" path="M245 304 C348 260 423 346 505 294 S650 266 755 300"/></circle>
-              <circle r="3" fill="#fff0c7"><animateMotion dur="4.4s" begin="-1.2s" repeatCount="indefinite" path="M245 304 C348 260 423 346 505 294 S650 266 755 300"/></circle>
-            </g>
-          </svg>
-
-          <div class="delta-stack">
-            <span class="delta-add"><small>新增</small><b>{{ signedDelta('added') }}</b></span>
-            <span class="delta-remove"><small>淘汰</small><b>{{ signedDelta('removed') }}</b></span>
-            <span class="delta-modify"><small>修改</small><b>{{ signedDelta('modified') }}</b></span>
+    <section class="middle-row">
+      <div class="panel matrix" @mousemove="onPanelMouseMove" @mouseleave="onPanelMouseLeave">
+        <div class="panel-title">能力分析矩阵</div>
+        <i class="panel-glint"></i>
+        <div class="matrix-body">
+          <div class="matrix-scale">
+            <span v-for="n in 6" :key="n">{{ n }}</span>
           </div>
-
-          <button
-            v-for="(period, index) in periods"
-            :key="`${period.date}-${index}`"
-            type="button"
-            class="energy-tower"
-            :class="[{ active: activePeriodIndex === index }, index === 0 ? 'tower-left' : 'tower-right']"
-            @click="activePeriodIndex = index"
-          >
-            <span class="tower-date"><small>TIME NODE 0{{ index + 1 }}</small><b>{{ period.date }}</b></span>
-            <span class="tower-cap"><i></i><b></b></span>
-            <span class="tower-glass">
-              <i class="glass-grid"></i><i class="glass-scan"></i><i class="glass-beam"></i><i class="glass-reflection reflection-a"></i><i class="glass-reflection reflection-b"></i>
-              <span class="tower-stat stat-add"><i>+</i><small>新增</small><b>{{ period.added }}</b></span>
-              <span class="tower-stat stat-remove"><i>×</i><small>淘汰</small><b>{{ period.removed }}</b></span>
-              <span class="tower-stat stat-modify"><i>✦</i><small>修改</small><b>{{ period.modified }}</b></span>
-            </span>
-            <span class="tower-base"><i></i><b></b><em></em></span><span class="tower-plinth"><i></i></span>
-            <span class="tower-total">TOTAL <b>{{ period.total }}</b></span>
-          </button>
-
-          <div class="time-scale"><i></i><button v-for="(period, index) in periods" :key="period.date" type="button" :class="{ active: activePeriodIndex === index }" @click="activePeriodIndex = index"><span></span>{{ period.date }}</button></div>
+          <div class="bars3d">
+            <div v-for="(h, i) in barHeights" :key="i" class="bar3d" :style="{ '--h': h }"></div>
+          </div>
+          <div class="radar">
+            <svg viewBox="0 0 100 100">
+              <g fill="none" stroke="#53e8ff">
+                <circle cx="50" cy="50" r="36"/>
+                <circle cx="50" cy="50" r="27"/>
+                <circle cx="50" cy="50" r="18"/>
+                <circle cx="50" cy="50" r="9"/>
+                <path d="M50 10V90M10 50H90M22 22L78 78M78 22L22 78"/>
+                <polygon points="50,20 72,37 68,65 45,75 25,54 32,33" fill="rgba(76,230,255,.08)"/>
+              </g>
+            </svg>
+          </div>
+          <div class="platform"></div>
+          <div class="matrix-progress"><i></i></div>
         </div>
+      </div>
 
-        <div class="selected-event" v-if="selectedEvent">
-          <span class="selected-icon">{{ eventIcon(selectedEventIndex) }}</span>
-          <div><small>SELECTED EVENT · {{ selectedEvent.version || 'LATEST' }}</small><b>{{ selectedEvent.jobName }}</b><p>{{ selectedEvent.note || '该岗位能力画像已完成版本更新。' }}</p></div>
-          <div class="selected-tags"><i v-for="skill in selectedEvent.added?.slice(0, 2) || []" :key="skill" class="tag-add">+ {{ skill }}</i><i v-for="skill in selectedEvent.removed?.slice(0, 1) || []" :key="skill" class="tag-remove">− {{ skill }}</i><i v-for="skill in selectedEvent.modified?.slice(0, 1) || []" :key="skill.name" class="tag-modify">~ {{ skill.name }}</i></div>
-          <strong>{{ Math.round((selectedEvent.confidence || 0) * 100) }}<small>%</small></strong>
+      <div class="panel trend" @mousemove="onPanelMouseMove" @mouseleave="onPanelMouseLeave">
+        <div class="panel-title">能力演化战场态势</div>
+        <i class="panel-glint"></i>
+        <svg viewBox="0 0 560 300" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="blueArea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#51e9ff" stop-opacity=".72"/>
+              <stop offset="1" stop-color="#0972ab" stop-opacity=".05"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g stroke="rgba(73,207,244,.14)" stroke-width="1">
+            <path v-for="x in [45,125,205,285,365,445,525]" :key="'vx'+x" :d="`M${x} 30V260`"/>
+            <path v-for="y in [45,85,125,165,205,245]" :key="'hy'+y" :d="`M45 ${y}H535`"/>
+          </g>
+          <path d="M45 240 C90 210 115 195 150 205 S220 235 270 205 S335 115 390 132 S450 180 535 142 L535 260 L45 260Z" fill="url(#blueArea)"/>
+          <path d="M45 239 C92 210 112 198 150 206 S226 235 274 205 S335 115 391 132 S451 180 535 142" fill="none" stroke="#57eaff" stroke-width="2.4" filter="url(#glow)" class="trend-line cyan-line"/>
+          <path d="M45 222 C95 190 110 165 155 150 S215 115 272 105 S345 78 395 69 S455 61 535 48" fill="none" stroke="#ffd778" stroke-width="3" filter="url(#glow)" class="trend-line gold-line"/>
+          <g fill="#fff4c4" stroke="#ffd778" stroke-width="2" class="dot-group">
+            <circle cx="92" cy="193" r="6"/>
+            <circle cx="230" cy="123" r="6"/>
+            <circle cx="330" cy="90" r="6"/>
+            <circle cx="475" cy="58" r="6"/>
+          </g>
+          <g fill="#f3f9f9" font-size="13" font-weight="700">
+            <text x="74" y="182">2024</text>
+            <text x="213" y="112">2025</text>
+            <text x="312" y="79">2026</text>
+            <text x="458" y="46">2027</text>
+          </g>
+          <g fill="#91b7c7" font-size="9">
+            <text x="28" y="248">0</text>
+            <text x="20" y="208">30</text>
+            <text x="20" y="168">60</text>
+            <text x="20" y="128">90</text>
+            <text x="16" y="88">120</text>
+            <text x="16" y="48">150</text>
+            <text x="42" y="280">2024-01</text>
+            <text x="122" y="280">2024-07</text>
+            <text x="202" y="280">2025-01</text>
+            <text x="282" y="280">2025-07</text>
+            <text x="362" y="280">2026-01</text>
+            <text x="442" y="280">2026-07</text>
+          </g>
+        </svg>
+        <div class="legend">
+          <span><b class="c"></b>能力基线</span>
+          <span><b class="g"></b>演化趋势</span>
         </div>
+      </div>
 
-        <div class="analysis-deck">
-          <div class="analysis-copy"><span class="analysis-radar"><i></i></span><p><b>分析摘要</b>当前选中 {{ periods[activePeriodIndex]?.date }} 节点，本期能力变更以新增与调整为主，三路粒子流展示技能迁移方向与强度。</p></div>
-          <div class="analysis-cell"><small>净变化</small><b>{{ netChange >= 0 ? '+' : '' }}{{ netChange }}</b><em>新增 − 淘汰</em></div>
-          <div class="analysis-cell tone-add"><small>新增占比</small><b>{{ percentages.add }}%</b><em>持续扩展</em></div>
-          <div class="analysis-cell tone-remove"><small>淘汰占比</small><b>{{ percentages.remove }}%</b><em>及时收敛</em></div>
-          <div class="analysis-cell tone-modify"><small>修改占比</small><b>{{ percentages.modify }}%</b><em>结构优化</em></div>
+      <div class="panel growth" @mousemove="onPanelMouseMove" @mouseleave="onPanelMouseLeave">
+        <div class="panel-title">能力成长路径</div>
+        <i class="panel-glint"></i>
+        <div class="steps">
+          <template v-for="(stepItem, idx) in growthSteps" :key="idx">
+            <div class="step" :class="{ gold: stepItem.gold }" :style="{ '--x': stepItem.x, '--b': stepItem.b }">
+              {{ stepItem.name }}
+            </div>
+            <div v-if="stepItem.score" class="score" :style="{ '--b': stepItem.b }">
+              {{ stepItem.score }}
+            </div>
+          </template>
         </div>
-      </main>
+      </div>
 
-      <aside class="hud-shell event-console">
-        <div class="console-head"><div><small>EVENT LOG</small><h3>更新事件明细</h3></div><button type="button">全部角色⌄</button></div>
-        <div class="console-filter"><button type="button" :class="{ active: eventFilter === 'all' }" @click="eventFilter = 'all'">全部</button><button type="button" :class="{ active: eventFilter === 'high' }" @click="eventFilter = 'high'">高置信</button><span>{{ filteredEvents.length }} EVENTS</span></div>
-        <div class="event-list">
-          <button
-            v-for="(event, index) in visibleEvents"
-            :key="`${event.jobName}-${index}`"
-            type="button"
-            class="event-card"
-            :class="{ active: selectedEvent === event }"
-            @click="selectEvent(event)"
-          >
-            <span class="event-icon">{{ eventIcon(index) }}</span>
-            <span class="event-body">
-              <span class="event-title"><b>{{ event.jobName }}</b><i>{{ event.version || 'v1.0' }}</i><time>{{ event.date }}</time></span>
-              <p>{{ event.note || '岗位能力画像发生更新，证据链已同步。' }}</p>
-              <span class="event-tags"><i v-for="skill in event.added?.slice(0, 2) || []" :key="`a-${skill}`" class="tag-add">+{{ skill }}</i><i v-for="skill in event.removed?.slice(0, 1) || []" :key="`r-${skill}`" class="tag-remove">−{{ skill }}</i><i v-for="skill in event.modified?.slice(0, 1) || []" :key="`m-${skill.name}`" class="tag-modify">~{{ skill.name }}</i></span>
-              <span class="confidence"><small>置信度 {{ Math.round((event.confidence || 0) * 100) }}%</small><i><b :style="{ width: `${Math.round((event.confidence || 0) * 100)}%` }"></b></i></span>
-            </span>
-          </button>
-          <div v-if="!visibleEvents.length" class="empty-log">暂无符合条件的更新事件</div>
+      <div class="panel timeline" @mousemove="onPanelMouseMove" @mouseleave="onPanelMouseLeave">
+        <div class="panel-title">关键演化事件</div>
+        <i class="panel-glint"></i>
+        <div class="viewbtn">查看全部</div>
+        <div class="line"></div>
+        <div class="datebox"><b>2026-07</b>模型迭代完成</div>
+        <div v-for="(evt, i) in events" :key="i" class="event" :class="[evt.gold ? 'gold' : '', 'e' + (i+1)]">
+          {{ evt.text }}
         </div>
-        <button class="expand-events" type="button" @click="showAll = !showAll">{{ showAll ? '收起事件' : '查看全部事件' }} <span>{{ showAll ? '↑' : '↓' }}</span></button>
-      </aside>
-    </div>
+      </div>
+    </section>
+
+    <section class="bottom-row">
+      <div v-for="(g, i) in gauges" :key="i" class="gauge-card" :class="g.gold ? 'gold' : ''">
+        <div class="gauge" :style="{ '--v': g.value, '--accent': g.color }"></div>
+        <div class="gauge-center">{{ g.valueText }}</div>
+        <div class="gauge-label">{{ g.label }}</div>
+        <div class="gauge-bar" :style="{ '--v': g.value + '%' }"><i></i></div>
+      </div>
+    </section>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+const summaryCards = [
+  { value: 12, label: '能力维度' },
+  { value: 24, label: '成长节点' },
+  { value: 12, label: '关键跃迁' },
+  { value: 12, label: '优化方向' }
+]
 
-const props = defineProps<{ timeline: any }>()
-type EvolutionPeriod = { date: string; added: number; removed: number; modified: number; total: number }
+const barHeights = ['88%', '98%', '83%']
 
-const activeMetric = ref('all')
-const activePeriodIndex = ref(1)
-const eventFilter = ref('all')
-const showAll = ref(false)
-const selectedEventIndex = ref(0)
+const growthSteps = [
+  { name: '演化能力', x: '0%', b: '0%', score: 15 },
+  { name: '创新能力', x: '10%', b: '12%', score: 30 },
+  { name: '创新驱动力', x: '20%', b: '24%', score: 45 },
+  { name: '决策能力', x: '30%', b: '36%', score: 60 },
+  { name: '决策协同力', x: '40%', b: '48%', score: 75, gold: true },
+  { name: '协同能力', x: '50%', b: '60%', score: 90, gold: true },
+  { name: '推理能力', x: '60%', b: '72%', gold: true }
+]
 
-const particles = Array.from({ length: 34 }, (_, index) => ({
-  id: index,
-  style: {
-    '--x': `${(index * 37) % 97}%`, '--y': `${(index * 61) % 91}%`, '--s': `${2 + (index % 3)}px`,
-    '--delay': `${-(index % 8) * .7}s`, '--duration': `${4.5 + (index % 5)}s`
-  }
-}))
-const streamLegend = [{ key: 'add', label: '新增' }, { key: 'remove', label: '淘汰' }, { key: 'modify', label: '修改' }]
+const events = [
+  { text: '模型迭代提升' },
+  { text: '策略优化生成', gold: true },
+  { text: '核心指标提升' },
+  { text: '系统稳定性增强', gold: true },
+  { text: '系统鲁棒性增强' }
+]
 
-const periods = computed<EvolutionPeriod[]>(() => {
-  const rows = props.timeline?.timeline || []
-  const source = rows.length >= 2 ? rows.slice(-2) : rows
-  const fallback = [{ date: '2026-06', added: 12, removed: 6, modified: 8 }, { date: '2026-07', added: 12, removed: 6, modified: 6 }]
-  return (source.length >= 2 ? source : fallback).map((row: any) => ({
-    date: row.date || '当前', added: Number(row.added || 0), removed: Number(row.removed || 0), modified: Number(row.modified || 0),
-    total: Number(row.added || 0) + Number(row.removed || 0) + Number(row.modified || 0)
-  }))
-})
-watch(periods, (rows) => { activePeriodIndex.value = Math.max(0, rows.length - 1) }, { immediate: true })
+const gauges = [
+  { value: 84.6, valueText: '84.6', label: '综合能力', color: '#64efff' },
+  { value: 92, valueText: '92%', label: '稳定性', color: '#68f2ff' },
+  { value: 92, valueText: '92%', label: '可靠性', color: '#67ecff' },
+  { value: 91, valueText: '91%', label: '响应效率', color: '#66efff' },
+  { value: 87, valueText: '87%', label: '演化效率', color: '#ffd46f', gold: true },
+  { value: 87, valueText: '87%', label: '优化效率', color: '#72f0ff' }
+]
 
-const allEvents = computed<any[]>(() => props.timeline?.events || [])
-const fallbackEvent = computed(() => ({ jobName: 'AI 产品经理', version: 'v1.2', date: periods.value.at(-1)?.date, note: '岗位画像更强调业务场景、证据来源和可落地成果。', added: ['Milvus', 'Faiss'], removed: ['旧版流程'], modified: [{ name: 'OpenAPI' }], confidence: .91 }))
-const filteredEvents = computed(() => {
-  const source = allEvents.value.length ? allEvents.value : [fallbackEvent.value]
-  return eventFilter.value === 'high' ? source.filter((item) => Number(item.confidence || 0) >= .8) : source
-})
-const visibleEvents = computed(() => filteredEvents.value.slice(0, showAll.value ? 8 : 4))
-const selectedEvent = computed(() => {
-  const source = allEvents.value.length ? allEvents.value : [fallbackEvent.value]
-  return source[selectedEventIndex.value] || source[0]
-})
+let rafId: number | null = null
+let ctx: CanvasRenderingContext2D | null = null
+let W = 0, H = 0, dpr = 1
+let pts: Array<{x:number,y:number,r:number,v:number,a:number,p:number}> = []
 
-const total = computed(() => periods.value.reduce((sum, row) => sum + row.total, 0))
-const added = computed(() => periods.value.reduce((sum, row) => sum + row.added, 0))
-const removed = computed(() => periods.value.reduce((sum, row) => sum + row.removed, 0))
-const modified = computed(() => periods.value.reduce((sum, row) => sum + row.modified, 0))
-const netChange = computed(() => added.value - removed.value)
-const percentages = computed(() => {
-  const denominator = added.value + removed.value + modified.value || 1
-  return { add: (added.value / denominator * 100).toFixed(0), remove: (removed.value / denominator * 100).toFixed(0), modify: (modified.value / denominator * 100).toFixed(0) }
-})
-const metrics = computed(() => [
-  { key: 'all', symbol: '↻', label: '更新事件', value: props.timeline?.total || allEvents.value.length || total.value, delta: '9.1%' },
-  { key: 'add', symbol: '+', label: '新增技能', value: added.value, delta: '14.3%' },
-  { key: 'remove', symbol: '×', label: '淘汰技能', value: removed.value, delta: '4.8%' },
-  { key: 'modify', symbol: '✦', label: '修改技能', value: modified.value, delta: '6.7%' }
-])
-
-function signedDelta(key: 'added' | 'removed' | 'modified') {
-  const first = periods.value[0]?.[key] || 0; const last = periods.value.at(-1)?.[key] || 0; const value = last - first
-  return `${value > 0 ? '+' : ''}${value}`
+function onPanelMouseMove(e: MouseEvent) {
+  const el = e.currentTarget as HTMLElement
+  const r = el.getBoundingClientRect()
+  el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%')
+  el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%')
 }
-function selectEvent(event: any) {
-  const source = allEvents.value.length ? allEvents.value : [fallbackEvent.value]
-  selectedEventIndex.value = Math.max(0, source.indexOf(event))
-  const periodIndex = periods.value.findIndex((period) => period.date === event.date)
-  if (periodIndex >= 0) activePeriodIndex.value = periodIndex
+
+function onPanelMouseLeave(e: MouseEvent) {
+  const el = e.currentTarget as HTMLElement
+  el.style.setProperty('--mx', '50%')
+  el.style.setProperty('--my', '50%')
 }
-function eventIcon(index: number) { return ['◇', 'AI', '▦', '✦', '⌁'][index % 5] }
 </script>
 
 <style scoped>
-.timeline-workbench { --cyan: #2bdcff; --panel-line: rgba(49, 195, 255, .34); display: flex; flex-direction: column; gap: 14px; color: #c9edff; }
-button { font: inherit; }
-.metric-deck { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
-.metric-module { position: relative; display: flex; min-height: 116px; align-items: center; gap: 14px; overflow: hidden; border: 1px solid rgba(55, 197, 255, .34); padding: 15px 18px; color: inherit; text-align: left; background: linear-gradient(135deg, rgba(5, 47, 102, .88), rgba(2, 17, 51, .88)); clip-path: polygon(0 11px, 11px 0, calc(100% - 25px) 0, 100% 24px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 13px 100%, 0 calc(100% - 13px)); cursor: pointer; transition: .22s ease; }
-.metric-module::before { position: absolute; top: 0; left: 20px; width: 46%; height: 2px; content: ''; background: #32dfff; box-shadow: 0 0 12px #24ceff; }.metric-module:hover, .metric-module.active { border-color: #48e5ff; transform: translateY(-3px); box-shadow: inset 0 0 28px rgba(27, 153, 237, .15), 0 10px 26px rgba(0, 7, 35, .3); }
-.metric-cube { position: relative; display: grid; width: 68px; height: 68px; flex: 0 0 auto; place-items: center; border: 1px solid #36dfff; color: #70edff; background: radial-gradient(circle, rgba(20, 154, 255, .38), rgba(2, 27, 70, .72) 64%); clip-path: polygon(25% 7%, 75% 7%, 100% 50%, 75% 93%, 25% 93%, 0 50%); box-shadow: inset 0 0 20px rgba(38, 210, 255, .25); }.metric-cube::before, .metric-cube::after { position: absolute; inset: 8px; border: 1px solid currentColor; content: ''; clip-path: inherit; opacity: .4; }.metric-cube::after { inset: 18px; opacity: .75; }.metric-cube i { z-index: 2; font-size: 30px; font-style: normal; font-weight: 900; text-shadow: 0 0 12px currentColor; }
-.metric-copy { display: flex; flex-direction: column; }.metric-copy small { color: #b8e4f5; font-size: 12px; font-weight: 800; }.metric-copy b { color: #f0fdff; font-size: 32px; line-height: 1.15; }.metric-copy em { color: #78aac7; font-size: 10px; font-style: normal; }.metric-copy strong { color: #37eab2; }.metric-scan { position: absolute; right: 0; bottom: 6px; left: 0; height: 1px; background: linear-gradient(90deg, transparent, #32dfff, transparent); animation: metricScan 3.8s linear infinite; }
-.metric-module--remove .metric-cube { border-color: #ff7195; color: #ff8ea9; background: radial-gradient(circle, rgba(255, 50, 106, .3), rgba(45, 5, 38, .7) 65%); }.metric-module--remove::before, .metric-module--remove .metric-scan { background: #ff7195; box-shadow: 0 0 12px #ff547f; }.metric-module--remove .metric-copy strong { color: #ff7898; }.metric-module--modify .metric-cube { border-color: #ffc14b; color: #ffd06c; background: radial-gradient(circle, rgba(255, 171, 33, .28), rgba(55, 28, 4, .72) 65%); }.metric-module--modify::before, .metric-module--modify .metric-scan { background: #ffc14b; box-shadow: 0 0 12px #ffb52e; }
-.timeline-grid { display: grid; grid-template-columns: minmax(700px, 1fr) 340px; gap: 14px; min-height: 720px; }
-.hud-shell { position: relative; overflow: hidden; border: 1px solid var(--panel-line); background: linear-gradient(145deg, rgba(4, 31, 75, .9), rgba(2, 14, 43, .9)); clip-path: polygon(0 14px, 14px 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 13px), calc(100% - 13px) 100%, 13px 100%, 0 calc(100% - 13px)); box-shadow: inset 0 0 40px rgba(12, 107, 183, .08), 0 18px 38px rgba(0, 5, 29, .3); }.hud-shell::before, .hud-shell::after { position: absolute; z-index: 8; width: 48px; height: 2px; content: ''; background: #31dcff; box-shadow: 0 0 12px #21cfff; }.hud-shell::before { top: 0; left: 25px; }.hud-shell::after { right: 25px; bottom: 0; }
-.timeline-command { min-width: 0; padding: 18px 20px 14px; }.particle-field { position: absolute; inset: 0; pointer-events: none; }.particle-field::before { position: absolute; inset: 0; content: ''; opacity: .45; background-image: linear-gradient(rgba(39, 148, 219, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(39, 148, 219, .07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, transparent, #000 38%, #000); }.particle-field i { position: absolute; top: var(--y); left: var(--x); width: var(--s); height: var(--s); border-radius: 50%; background: #55e8ff; box-shadow: 0 0 9px #2acfff; animation: drift var(--duration) ease-in-out var(--delay) infinite; }
-.command-head { position: relative; z-index: 10; display: flex; align-items: center; gap: 18px; }.command-head small { color: #39dfff; font-size: 8px; font-weight: 850; letter-spacing: .17em; }.command-head h2 { margin: 2px 0 0; color: #eefcff; font-size: 18px; }.stream-legend { display: flex; gap: 7px; margin-left: auto; }.stream-legend button { border: 1px solid rgba(69, 191, 247, .28); padding: 5px 9px; color: #8fbad1; font-size: 9px; background: rgba(4, 40, 85, .55); cursor: pointer; }.stream-legend button i { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 2px; background: currentColor; }.stream-legend button.active { border-color: currentColor; color: #fff; box-shadow: 0 0 10px color-mix(in srgb, currentColor 35%, transparent); }.legend-add { color: #35edb6 !important; }.legend-remove { color: #ff7796 !important; }.legend-modify { color: #ffc04a !important; }.live-state { color: #62dfff; font-size: 8px; font-weight: 800; letter-spacing: .12em; }.live-state i { display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: #2ef0b3; box-shadow: 0 0 9px #2ef0b3; animation: pulse 1.5s ease-in-out infinite; }
-.energy-stage { position: relative; z-index: 3; min-height: 470px; margin-top: 5px; }.energy-stage::after { position: absolute; right: 5%; bottom: 27px; left: 5%; height: 135px; border: 1px solid rgba(30, 156, 255, .24); border-radius: 50%; content: ''; background: repeating-radial-gradient(ellipse, transparent 0 21px, rgba(31, 147, 230, .13) 22px 23px), linear-gradient(180deg, transparent, rgba(4, 66, 126, .19)); box-shadow: 0 0 35px rgba(22, 127, 218, .18); transform: perspective(500px) rotateX(66deg); }
-.energy-streams { position: absolute; z-index: 3; inset: 12px 0 auto; width: 100%; height: 420px; overflow: visible; }.flow-haze, .flow-line { fill: none; stroke-linecap: round; }.flow-haze { stroke-width: 18; opacity: .17; filter: blur(7px); }.flow-line { stroke-width: 3; stroke-dasharray: 14 9; filter: url(#flowGlow); animation: flowDash 2.2s linear infinite; }.flow-group { transition: opacity .25s ease; }.flow-group.muted { opacity: .12; }.flow-group--remove .flow-line { animation-delay: -.8s; }.flow-group--modify .flow-line { animation-delay: -1.4s; }
-.delta-stack { position: absolute; z-index: 8; top: 122px; left: 50%; display: grid; gap: 45px; transform: translateX(-50%); }.delta-stack span { display: grid; grid-template-columns: 35px 48px; align-items: center; border: 1px solid currentColor; color: #36efb8; background: rgba(3, 34, 72, .92); box-shadow: 0 0 18px color-mix(in srgb, currentColor 30%, transparent); clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%); }.delta-stack small { padding-left: 9px; color: #8fbcd2; font-size: 7px; }.delta-stack b { padding: 5px 8px; color: #effdff; font-size: 15px; text-align: center; }.delta-stack .delta-remove { color: #ff7797; }.delta-stack .delta-modify { color: #ffc04a; }
-.energy-tower { position: absolute; z-index: 7; top: 45px; display: flex; width: 235px; flex-direction: column; align-items: center; border: 0; color: #39dfff; background: transparent; cursor: pointer; transition: transform .28s ease, filter .28s ease; }.energy-tower:hover, .energy-tower.active { filter: brightness(1.23); transform: translateY(-7px); }.tower-left { left: 3%; }.tower-right { right: 3%; }
-.tower-date { position: absolute; z-index: 8; top: -32px; display: flex; flex-direction: column; align-items: center; }.tower-date small { color: #4bccea; font-size: 7px; letter-spacing: .15em; }.tower-date b { color: #effdff; font-size: 17px; text-shadow: 0 0 10px #32cfff; }
-.tower-cap { position: relative; z-index: 4; width: 158px; height: 48px; border: 2px solid currentColor; border-radius: 50%; background: rgba(4, 39, 88, .82); box-shadow: 0 0 22px currentColor, inset 0 0 18px rgba(50, 216, 255, .4); transform: translateY(18px); }.tower-cap::before, .tower-cap::after, .tower-cap i, .tower-cap b { position: absolute; inset: 7px 14px; border: 1px solid currentColor; border-radius: 50%; content: ''; }.tower-cap::after { inset: 13px 32px; }.tower-cap i { inset: -8px -16px; border-style: dashed; animation: spin 9s linear infinite; }.tower-cap b { inset: 18px 51px; background: currentColor; box-shadow: 0 0 13px currentColor; }
-.tower-glass { position: relative; z-index: 3; display: flex; width: 150px; height: 300px; flex-direction: column; align-items: center; justify-content: center; gap: 9px; border-right: 2px solid rgba(69, 221, 255, .8); border-left: 2px solid rgba(69, 221, 255, .8); background: linear-gradient(90deg, rgba(23, 147, 255, .06), rgba(40, 194, 255, .22) 48%, rgba(23, 147, 255, .06)); box-shadow: inset 18px 0 25px rgba(20, 138, 255, .12), inset -18px 0 25px rgba(20, 138, 255, .12), 0 0 25px rgba(29, 189, 255, .35); clip-path: polygon(4% 0, 96% 0, 88% 100%, 12% 100%); }.tower-glass::before, .tower-glass::after { position: absolute; inset: 0 18px; border-right: 1px solid rgba(99, 233, 255, .38); border-left: 1px solid rgba(99, 233, 255, .38); content: ''; }.tower-glass::after { inset: 0 36px; opacity: .48; }
-.glass-grid { position: absolute; inset: 0; opacity: .42; background: repeating-linear-gradient(0deg, transparent 0 24px, rgba(72, 204, 255, .16) 25px 26px); }.glass-scan { position: absolute; z-index: 1; right: 0; left: 0; height: 4px; background: #72efff; box-shadow: 0 0 18px #48ddff; animation: scanTower 3.6s ease-in-out infinite; }.glass-beam { position: absolute; top: 0; bottom: 0; width: 35px; background: linear-gradient(90deg, transparent, rgba(89, 226, 255, .5), transparent); filter: blur(5px); animation: beamPulse 2.8s ease-in-out infinite; }
-.tower-stat { position: relative; z-index: 4; display: grid; grid-template-columns: 21px 43px 32px; align-items: center; border: 1px solid rgba(65, 226, 255, .24); padding: 6px 7px; background: rgba(2, 34, 73, .72); }.tower-stat > i { color: #37efb7; font-size: 16px; font-style: normal; font-weight: 900; }.tower-stat small { color: #9cc9dc; font-size: 10px; }.tower-stat b { color: #effdff; font-size: 22px; }.stat-remove > i { color: #ff7898; }.stat-modify > i { color: #ffc04a; }
-.tower-base { position: relative; z-index: 5; width: 218px; height: 64px; margin-top: -21px; border: 3px solid currentColor; border-radius: 50%; background: rgba(3, 31, 73, .94); box-shadow: 0 0 25px currentColor, inset 0 0 22px rgba(41, 211, 255, .55); transform: perspective(300px) rotateX(64deg); }.tower-base::before, .tower-base::after, .tower-base i, .tower-base b, .tower-base em { position: absolute; border: 1px solid currentColor; border-radius: 50%; content: ''; }.tower-base::before { inset: 8px 15px; }.tower-base::after { inset: 17px 35px; }.tower-base i { inset: -13px -18px; border-style: dashed; animation: spin 12s linear infinite reverse; }.tower-base b { inset: 23px 58px; background: rgba(48, 211, 255, .34); box-shadow: inset 0 0 11px currentColor; }.tower-base em { inset: 30px 84px; background: currentColor; box-shadow: 0 0 18px currentColor; }
-.tower-total { margin-top: -6px; color: #5acfe9; font-size: 8px; letter-spacing: .14em; }.tower-total b { color: #effdff; font-size: 15px; }
-.time-scale { position: absolute; z-index: 10; right: 12%; bottom: 1px; left: 12%; display: flex; justify-content: space-between; }.time-scale > i { position: absolute; top: 7px; right: 0; left: 0; height: 1px; background: linear-gradient(90deg, transparent, #36cbff, transparent); }.time-scale button { z-index: 2; display: flex; align-items: center; gap: 6px; border: 0; color: #75a9c5; font-size: 9px; background: transparent; cursor: pointer; }.time-scale button span { width: 9px; height: 9px; border: 2px solid #37dfff; border-radius: 50%; background: #04275c; box-shadow: 0 0 8px #2bd7ff; }.time-scale button.active { color: #e4faff; }
-.selected-event { position: relative; z-index: 9; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto 66px; align-items: center; gap: 11px; min-height: 82px; border: 1px solid rgba(57, 198, 255, .3); padding: 10px 13px; background: linear-gradient(90deg, rgba(7, 71, 133, .66), rgba(3, 32, 76, .74)); }.selected-icon { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #43dfff; border-radius: 50%; color: #76eeff; font-weight: 900; background: rgba(12, 103, 176, .35); box-shadow: 0 0 15px rgba(39, 210, 255, .38); }.selected-event small { color: #48dfff; font-size: 7px; letter-spacing: .13em; }.selected-event div b { display: block; color: #effdff; font-size: 12px; }.selected-event p { margin: 3px 0 0; color: #8dbbd3; font-size: 9px; }.selected-tags { display: flex; gap: 5px; }.selected-tags i { padding: 3px 6px; font-size: 8px; font-style: normal; }.selected-event > strong { color: #41e7ff; font-size: 25px; text-align: center; }.selected-event > strong small { font-size: 10px; }
-.tag-add { border: 1px solid rgba(49, 235, 177, .4); color: #63f5c7; background: rgba(25, 137, 106, .2); }.tag-remove { border: 1px solid rgba(255, 106, 143, .4); color: #ff99b0; background: rgba(150, 32, 67, .2); }.tag-modify { border: 1px solid rgba(255, 189, 62, .4); color: #ffd078; background: rgba(149, 92, 15, .2); }
-.analysis-deck { position: relative; z-index: 9; display: grid; grid-template-columns: 1.8fr repeat(4, 1fr); margin-top: 10px; border: 1px solid rgba(56, 191, 255, .28); background: rgba(3, 30, 70, .72); }.analysis-copy { display: flex; align-items: center; gap: 10px; padding: 10px; border-right: 1px solid rgba(59, 191, 247, .2); }.analysis-radar { display: grid; width: 44px; height: 44px; flex: 0 0 auto; place-items: center; border: 1px solid #34dfff; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 7px, rgba(53, 216, 255, .3) 8px 9px); }.analysis-radar i { width: 2px; height: 22px; background: #61eaff; transform-origin: bottom; animation: radar 2.4s linear infinite; }.analysis-copy p { margin: 0; color: #87b2cb; font-size: 9px; line-height: 1.5; }.analysis-copy p b { display: block; color: #dff8ff; font-size: 11px; }.analysis-cell { display: flex; flex-direction: column; justify-content: center; border-right: 1px solid rgba(59, 191, 247, .16); padding: 10px; }.analysis-cell small, .analysis-cell em { color: #7faac3; font-size: 8px; font-style: normal; }.analysis-cell b { color: #effdff; font-size: 22px; }.tone-add b { color: #34efb7; }.tone-remove b { color: #ff7898; }.tone-modify b { color: #ffc04a; }
-.event-console { display: flex; min-height: 0; flex-direction: column; padding: 15px; }.console-head { display: flex; align-items: center; justify-content: space-between; }.console-head small { color: #3cddff; font-size: 8px; letter-spacing: .15em; }.console-head h3 { margin: 2px 0 0; color: #effcff; font-size: 16px; }.console-head button { border: 1px solid rgba(66, 193, 250, .34); padding: 5px 8px; color: #b5dcec; font-size: 9px; background: rgba(4, 42, 89, .7); cursor: pointer; }.console-filter { display: flex; align-items: center; gap: 5px; margin: 12px 0; border-bottom: 1px solid rgba(61, 186, 239, .2); padding-bottom: 8px; }.console-filter button { border: 1px solid transparent; padding: 4px 8px; color: #76a8c3; font-size: 9px; background: transparent; cursor: pointer; }.console-filter button.active { border-color: #32d9ff; color: #ddfaff; background: rgba(18, 114, 175, .23); }.console-filter span { margin-left: auto; color: #3bcfff; font-size: 8px; letter-spacing: .1em; }
-.event-list { display: flex; min-height: 0; flex: 1; flex-direction: column; gap: 9px; overflow-y: auto; padding-right: 3px; }.event-card { display: flex; gap: 9px; border: 1px solid rgba(52, 172, 232, .2); padding: 10px; color: inherit; text-align: left; background: linear-gradient(135deg, rgba(4, 29, 58, .86), rgba(0, 8, 22, .9)); cursor: pointer; transition: transform .55s cubic-bezier(.32,.72,0,1), border-color .55s cubic-bezier(.32,.72,0,1), box-shadow .55s cubic-bezier(.32,.72,0,1); }.event-card:hover, .event-card.active { border-color: #73eaff; box-shadow: inset 0 0 24px rgba(27, 190, 255, .08), 0 0 18px rgba(27, 190, 255, .1); transform: translateX(-5px); }.event-icon { display: grid; width: 39px; height: 39px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(113, 231, 255, .58); border-radius: 0; color: #a4f3ff; font-size: 11px; font-weight: 900; background: linear-gradient(145deg, rgba(15, 91, 137, .3), rgba(0, 8, 18, .8)); box-shadow: inset 0 0 12px rgba(51, 202, 255, .1); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }.event-body { min-width: 0; flex: 1; }.event-title { display: flex; align-items: center; gap: 6px; }.event-title b { overflow: hidden; color: #effcff; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }.event-title i { border: 1px solid rgba(65, 196, 250, .28); border-radius: 0; padding: 2px 5px; color: #8fd8ef; font-size: 7px; font-style: normal; }.event-title time { margin-left: auto; color: #75a2bc; font-size: 7px; }.event-card p { margin: 5px 0; color: #8fb7cd; font-size: 8px; line-height: 1.45; }.event-tags { display: flex; flex-wrap: wrap; gap: 4px; }.event-tags i { padding: 2px 4px; font-size: 7px; font-style: normal; }.confidence { display: flex; align-items: center; gap: 7px; margin-top: 6px; color: #4fcae8; }.confidence small { width: 63px; font-size: 7px; }.confidence > i { height: 2px; flex: 1; overflow: hidden; background: rgba(48, 125, 174, .2); }.confidence > i b { display: block; height: 100%; background: linear-gradient(90deg, #1e9cff, #a3f8ff); box-shadow: 0 0 7px #2bdcff; }.empty-log { display: grid; flex: 1; place-items: center; color: #739cb4; font-size: 11px; }.expand-events { border: 0; padding: 10px 0 0; color: #40dcff; font-size: 9px; font-weight: 800; background: transparent; cursor: pointer; }.expand-events span { margin-left: 5px; }
+.evo-dashboard {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 78vh;
+  min-height: 650px;
+  padding: 8px 7px 7px;
+  display: grid;
+  grid-template-rows: 20% 56% 24%;
+  gap: 7px;
+  background: rgba(4, 22, 50, 0.06);
+  color: #edfaff;
+  font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 12px;
+  backdrop-filter: blur(6px) saturate(1.05);
+  border: 1px solid rgba(70, 200, 255, 0.15);
+}
 
-/* Cinematic industrial material pass */
-.timeline-workbench { background: radial-gradient(circle at 50% 42%, rgba(0, 105, 178, .085), transparent 31%), linear-gradient(180deg, rgba(0, 5, 15, .2), rgba(0, 3, 10, .58)); }
-.metric-module { border-color: rgba(93, 210, 255, .22); background: linear-gradient(145deg, rgba(5, 22, 43, .96), rgba(0, 7, 19, .98)); box-shadow: inset 0 1px rgba(207, 247, 255, .07), inset 0 -18px 32px rgba(0, 0, 0, .22); }
-.metric-cube { width: 62px; height: 62px; border-color: rgba(126, 232, 255, .66); color: #b2f5ff; background: radial-gradient(circle at 42% 32%, rgba(112, 229, 255, .24), rgba(4, 27, 50, .78) 48%, #01050b 76%); box-shadow: inset 0 0 20px rgba(38, 210, 255, .11), 0 0 12px rgba(41, 205, 255, .1); }
-.timeline-command { background: radial-gradient(ellipse at 50% 71%, rgba(0, 108, 188, .14), transparent 42%), linear-gradient(180deg, #020b16, #00050c 68%, #010814); }
-.event-console { background: linear-gradient(160deg, rgba(3, 18, 35, .99), rgba(0, 5, 15, .99)); }
-.energy-stage::after { height: 176px; border-color: rgba(72, 191, 255, .17); background: repeating-radial-gradient(ellipse, transparent 0 21px, rgba(31, 147, 230, .1) 22px 23px), repeating-linear-gradient(90deg, transparent 0 52px, rgba(47, 158, 223, .075) 53px 54px), linear-gradient(180deg, transparent, rgba(1, 42, 77, .2)); box-shadow: 0 0 54px rgba(22, 127, 218, .11), inset 0 -22px 42px rgba(0, 0, 0, .5); }
-.flow-haze { stroke-width: 26; opacity: .13; filter: blur(11px); }.flow-line { stroke-width: 2.2; stroke-dasharray: 3 7; }
-.tower-cap { border-color: rgba(162, 245, 255, .82); background: repeating-radial-gradient(ellipse, #020910 0 7px, #0b2635 8px 10px, #02070c 11px 15px); box-shadow: 0 0 18px rgba(72, 220, 255, .55), inset 0 -9px 18px #000, inset 0 0 13px rgba(84, 229, 255, .24); }
-.tower-glass { width: 158px; border-color: rgba(148, 239, 255, .64); background: linear-gradient(90deg, rgba(255,255,255,.02), rgba(44, 173, 226, .08) 18%, rgba(170, 244, 255, .22) 49%, rgba(44, 173, 226, .08) 81%, rgba(255,255,255,.02)), linear-gradient(180deg, rgba(67, 211, 255, .08), rgba(2, 26, 47, .22)); box-shadow: inset 18px 0 31px rgba(21, 129, 193, .08), inset -18px 0 31px rgba(21, 129, 193, .08), 0 0 17px rgba(29, 189, 255, .22); }
-.tower-glass::before { border-color: rgba(207, 250, 255, .24); }.tower-glass::after { border-color: rgba(121, 225, 255, .17); }
-.glass-grid { opacity: .28; background: repeating-linear-gradient(0deg, transparent 0 23px, rgba(157, 236, 255, .12) 24px 25px), repeating-linear-gradient(90deg, transparent 0 29px, rgba(157, 236, 255, .065) 30px 31px); }
-.tower-stat { border-color: rgba(136, 229, 255, .13); background: linear-gradient(90deg, rgba(0, 8, 17, .6), rgba(3, 38, 65, .72), rgba(0, 8, 17, .6)); }
-.tower-base { width: 232px; height: 72px; border-color: rgba(157, 241, 255, .78); background: repeating-radial-gradient(ellipse, #010408 0 8px, #10202a 9px 12px, #020609 13px 17px); box-shadow: 0 0 20px rgba(52, 218, 255, .52), inset 0 -13px 24px #000, inset 0 0 16px rgba(96, 229, 255, .24); }
-.selected-event, .analysis-deck { background: linear-gradient(90deg, rgba(3, 25, 45, .92), rgba(0, 7, 18, .94)); border-color: rgba(72, 196, 244, .2); }
-.flow-band, .flow-filament { fill: none; stroke-linecap: round; pointer-events: none; }
-.flow-band { stroke-width: 12; opacity: .17; filter: url(#flowGlow); }
-.flow-filament { stroke-width: 1.1; opacity: .42; stroke-dasharray: 2 11; animation: flowDash 4.8s cubic-bezier(.32,.72,0,1) infinite; }
-.flow-line { stroke-width: 3.2; stroke-dasharray: 2 8; opacity: .92; }
-.flow-haze { stroke-width: 34; opacity: .13; filter: blur(14px); }
-.energy-streams { height: 438px; }
-.energy-tower { width: 260px; }
-.tower-left { left: 1.5%; }.tower-right { right: 1.5%; }
-.tower-cap { width: 184px; height: 56px; }
-.tower-glass { width: 176px; height: 318px; background: linear-gradient(90deg, rgba(255,255,255,.015), rgba(33, 142, 194, .055) 16%, rgba(196, 249, 255, .2) 48%, rgba(33, 142, 194, .055) 84%, rgba(255,255,255,.015)), linear-gradient(180deg, rgba(100, 229, 255, .07), rgba(0, 19, 35, .3)); box-shadow: inset 24px 0 38px rgba(11, 90, 139, .08), inset -24px 0 38px rgba(11, 90, 139, .08), 0 0 18px rgba(45, 207, 255, .19); }
-.glass-reflection { position: absolute; z-index: 2; top: 0; bottom: 0; width: 10px; background: linear-gradient(180deg, transparent, rgba(219, 252, 255, .34) 25%, rgba(95, 223, 255, .08) 70%, transparent); filter: blur(.3px); transform: skewX(-6deg); }.reflection-a { left: 24px; opacity: .7; }.reflection-b { right: 33px; width: 4px; opacity: .42; }
-.tower-stat { width: 122px; grid-template-columns: 20px 1fr 30px; border-color: rgba(142, 231, 255, .1); background: linear-gradient(90deg, transparent, rgba(3, 37, 62, .72), transparent); }
-.tower-base { width: 248px; height: 78px; margin-top: -24px; }
-.tower-plinth { position: relative; z-index: 4; width: 198px; height: 28px; margin-top: -25px; border: 1px solid rgba(121, 230, 255, .48); border-radius: 50%; background: linear-gradient(180deg, #152a34, #02070b 62%); box-shadow: inset 0 5px 10px rgba(148, 238, 255, .12), 0 9px 16px rgba(0, 0, 0, .65); transform: perspective(250px) rotateX(62deg); }.tower-plinth::before, .tower-plinth::after, .tower-plinth i { position: absolute; border-radius: 50%; content: ''; }.tower-plinth::before { inset: 5px 15px; border: 1px solid rgba(135, 232, 255, .25); }.tower-plinth::after { inset: 10px 34px; background: #010408; box-shadow: inset 0 0 8px #000; }.tower-plinth i { inset: -5px -18px; border: 1px dashed rgba(85, 215, 255, .24); animation: spin 16s cubic-bezier(.45,.05,.55,.95) infinite; }
-.delta-stack span { min-width: 94px; grid-template-columns: 42px 1fr; border-color: color-mix(in srgb, currentColor 62%, #fff); background: linear-gradient(180deg, rgba(7, 29, 45, .96), rgba(0, 7, 16, .96)); box-shadow: inset 0 1px rgba(255,255,255,.08), 0 0 12px color-mix(in srgb, currentColor 16%, transparent); }
-.metric-module { transition: transform .65s cubic-bezier(.32,.72,0,1), border-color .65s cubic-bezier(.32,.72,0,1), box-shadow .65s cubic-bezier(.32,.72,0,1); }
-@keyframes metricScan { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
-@keyframes drift { 50% { opacity: .25; transform: translate(12px, -18px) scale(.6); } }
-@keyframes pulse { 50% { opacity: .35; transform: scale(.7); } }
-@keyframes flowDash { to { stroke-dashoffset: -46; } }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes scanTower { 0%, 100% { top: 8%; opacity: .2; } 50% { top: 88%; opacity: 1; } }
-@keyframes beamPulse { 50% { opacity: .35; transform: scaleX(1.5); } }
-@keyframes radar { to { transform: rotate(360deg); } }
-@media (max-width: 1200px) { .timeline-grid { grid-template-columns: 1fr; }.event-console { max-height: 520px; }.metric-deck { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 760px) { .metric-deck { grid-template-columns: 1fr; }.timeline-command { overflow-x: auto; }.energy-stage { min-width: 720px; }.selected-event { grid-template-columns: 44px 1fr; }.selected-tags, .selected-event > strong { display: none; }.analysis-deck { grid-template-columns: 1fr 1fr; }.analysis-copy { grid-column: 1 / -1; }.command-head { min-width: 700px; } }
+.evo-dashboard::before,
+.evo-dashboard::after {
+  content: "";
+  position: absolute;
+  left: 1.2%;
+  right: 1.2%;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg,transparent,#2bcfec 8%,transparent 22%,transparent 78%,#2bcfec 92%,transparent);
+  opacity: .38;
+  z-index: 10;
+}
+.evo-dashboard::before { top: 2px; }
+.evo-dashboard::after { bottom: 3px; }
+
+.scanline-global {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8%;
+  height: 7%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(180deg,transparent,rgba(87,239,255,.035),transparent);
+  animation: globalScan 9s linear infinite;
+  mix-blend-mode: screen;
+}
+@keyframes globalScan { to { top: 108%; } }
+
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 20px;
+  align-items: center;
+  padding: 0 22px;
+  position: relative;
+  z-index: 2;
+}
+.summary-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: repeating-linear-gradient(90deg,#ff5e64 0 2px,transparent 2px 37px);
+  opacity: .45;
+}
+
+.summary-card {
+  height: 78%;
+  min-height: 70px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: skewX(-9deg);
+  filter: drop-shadow(0 0 8px rgba(43,226,255,.26));
+  transition: transform .35s cubic-bezier(.2,.75,.2,1),filter .35s;
+  will-change: transform;
+}
+.summary-card:hover {
+  transform: skewX(-9deg) translateY(-3px) scale(1.012);
+  filter: drop-shadow(0 0 14px rgba(58,229,255,.46));
+}
+.summary-card .frame {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,rgba(18,86,116,.12),rgba(2,18,33,.18)),
+    repeating-linear-gradient(90deg,transparent 0 24px,rgba(96,240,255,.02) 25px 26px);
+  clip-path: polygon(7% 4%,88% 0,97% 18%,100% 82%,91% 97%,10% 91%,0 74%,2% 19%);
+  border: 1px solid transparent;
+  box-shadow: inset 0 0 30px rgba(22,187,229,.05);
+  backdrop-filter: blur(8px);
+}
+.summary-card .frame::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  clip-path: inherit;
+  border: 1px solid rgba(135,248,255,.73);
+  box-shadow: inset 0 0 22px rgba(61,233,255,.12),0 0 3px rgba(74,231,255,.4);
+}
+.summary-card::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: 8%;
+  right: 8%;
+  top: 12%;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,#95faff,transparent);
+  opacity: .5;
+  animation: summarySweep 4.8s ease-in-out infinite;
+  transform: skewX(9deg);
+}
+.summary-card:nth-child(2)::before { animation-delay: .7s; }
+.summary-card:nth-child(3)::before { animation-delay: 1.4s; }
+.summary-card:nth-child(4)::before { animation-delay: 2.1s; }
+@keyframes summarySweep {
+  0%,100% { transform: skewX(9deg) translateX(-28%); opacity: .06; }
+  50% { transform: skewX(9deg) translateX(28%); opacity: .72; }
+}
+.summary-card .inner {
+  position: relative;
+  z-index: 2;
+  transform: skewX(9deg);
+  text-align: center;
+  text-shadow: 0 0 10px rgba(128,245,255,.65);
+}
+.summary-card .inner::before {
+  content: "SYSTEM / CAPABILITY";
+  display: block;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #5fcbe3;
+  opacity: .64;
+  margin-bottom: 3px;
+  font-family: Consolas,monospace;
+}
+.summary-card .num {
+  font-size: clamp(22px,2.8vw,44px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(131,247,255,.62),0 0 22px rgba(35,213,255,.28);
+}
+.summary-card .label {
+  font-size: clamp(11px,1.1vw,17px);
+  font-weight: 800;
+  margin-top: 6px;
+  letter-spacing: .8px;
+}
+.summary-card::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 3px;
+  background: #ff5560;
+  right: 16%;
+  top: 22%;
+  box-shadow: 0 0 8px #ff5560;
+  transform: skewX(9deg);
+}
+
+.middle-row {
+  display: grid;
+  grid-template-columns: 20% 32% 24% 24%;
+  gap: 8px;
+  min-height: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.panel {
+  position: relative;
+  background:
+    radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(73,225,255,.04),transparent 28%),
+    linear-gradient(180deg,rgba(6,32,49,.12),rgba(2,13,24,.15));
+  border: 1px solid rgba(110,240,255,.28);
+  box-shadow: inset 0 0 34px rgba(24,157,192,.05),inset 0 0 0 1px rgba(90,229,255,.03),0 0 8px rgba(37,221,255,.04);
+  overflow: hidden;
+  transition: border-color .25s,box-shadow .25s,transform .25s;
+  backdrop-filter: blur(8px) saturate(1.05);
+  --mx: 50%;
+  --my: 50%;
+}
+.panel:hover {
+  border-color: rgba(142,248,255,.98);
+  box-shadow: inset 0 0 38px rgba(32,178,216,.13),0 0 14px rgba(38,219,255,.12);
+}
+.panel::before,
+.panel::after {
+  content: "";
+  position: absolute;
+  width: 25px;
+  height: 17px;
+  z-index: 4;
+}
+.panel::before {
+  left: -1px;
+  top: -1px;
+  border-top: 2px solid #74f5ff;
+  border-left: 2px solid #74f5ff;
+  filter: drop-shadow(0 0 4px #4eeaff);
+}
+.panel::after {
+  right: -1px;
+  bottom: -1px;
+  border-right: 2px solid #74f5ff;
+  border-bottom: 2px solid #74f5ff;
+  filter: drop-shadow(0 0 4px #4eeaff);
+}
+
+.panel-glint {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  inset: 0;
+  background: linear-gradient(90deg,transparent,rgba(125,245,255,.04),transparent) 0 0/180px 100% no-repeat;
+  animation: panelGlint 8s linear infinite;
+  mix-blend-mode: screen;
+}
+.panel-glint::before,
+.panel-glint::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  width: 52px;
+  height: 6px;
+  border-top: 1px solid rgba(100,239,255,.28);
+}
+.panel-glint::before {
+  left: 42px;
+  border-left: 1px solid rgba(100,239,255,.22);
+  transform: skewX(-35deg);
+}
+.panel-glint::after {
+  right: 42px;
+  border-right: 1px solid rgba(100,239,255,.22);
+  transform: skewX(35deg);
+}
+@keyframes panelGlint {
+  0% { background-position: -220px 0; }
+  100% { background-position: calc(100% + 220px) 0; }
+}
+
+.panel-title {
+  position: absolute;
+  top: 11px;
+  left: 14px;
+  right: 80px;
+  font-weight: 900;
+  font-size: clamp(11px,1vw,15px);
+  z-index: 4;
+  text-shadow: 0 0 8px rgba(96,238,255,.52),0 0 18px rgba(23,187,226,.17);
+  letter-spacing: .4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.panel-title::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 13px;
+  margin-right: 7px;
+  vertical-align: -2px;
+  background: linear-gradient(#b6fdff,#39dff9);
+  box-shadow: 0 0 7px #56edff;
+}
+.panel-title::after {
+  content: "  /  REAL-TIME";
+  font: 500 8px/1 Consolas,monospace;
+  letter-spacing: 1px;
+  color: #5fa9bc;
+  opacity: .62;
+}
+
+.matrix { padding-top: 40px; }
+.matrix-body {
+  position: absolute;
+  inset: 46px 12px 10px 10px;
+}
+.matrix-body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,transparent 45%,rgba(38,216,255,.035));
+  pointer-events: none;
+}
+.matrix-scale {
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 23%;
+  width: 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  font-size: 10px;
+  color: #dffaff;
+}
+.matrix-scale span { position: relative; padding-left: 3px; }
+.matrix-scale span::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  width: 28px;
+  height: 2px;
+  background: linear-gradient(90deg,#58edff,transparent);
+  box-shadow: 0 0 5px #58edff;
+}
+.bars3d {
+  position: absolute;
+  left: 24%;
+  bottom: 16%;
+  width: 42%;
+  height: 61%;
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  perspective: 400px;
+  filter: drop-shadow(0 0 9px rgba(60,232,255,.28));
+}
+.bar3d {
+  width: 26%;
+  height: var(--h);
+  position: relative;
+  background: linear-gradient(90deg,rgba(33,184,226,.07),rgba(129,250,255,.42) 50%,rgba(39,190,230,.08));
+  border: 1px solid #80f7ff;
+  box-shadow: 0 0 12px rgba(52,231,255,.42),inset 0 0 9px rgba(89,240,255,.18);
+  animation: barBreath 3.8s ease-in-out infinite;
+  overflow: visible;
+}
+.bar3d:nth-child(2) { animation-delay: .65s; }
+.bar3d:nth-child(3) { animation-delay: 1.3s; }
+.bar3d::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: -8px;
+  top: -8px;
+  height: 8px;
+  border: 1px solid #81f8ff;
+  transform: skewX(-35deg);
+  background: rgba(90,238,255,.08);
+}
+.bar3d::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -1px;
+  right: -9px;
+  width: 8px;
+  border: 1px solid #75efff;
+  transform: skewY(-45deg);
+  background: rgba(85,230,255,.08);
+}
+@keyframes barBreath {
+  50% { box-shadow: 0 0 19px rgba(65,235,255,.55),inset 0 0 14px rgba(112,249,255,.25); }
+}
+.radar {
+  position: absolute;
+  right: 6%;
+  top: 28%;
+  width: 45%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(87,220,255,.42);
+  background: radial-gradient(circle at center,rgba(0,127,179,.12),transparent 68%);
+  box-shadow: inset 0 0 20px rgba(26,176,212,.08);
+}
+.radar svg {
+  width: 100%;
+  height: 100%;
+  opacity: .55;
+  animation: radarPulse 5s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes radarPulse {
+  0%,100% { opacity: .42; transform: scale(.98); }
+  50% { opacity: .72; transform: scale(1.01); }
+}
+.platform {
+  position: absolute;
+  left: 13%;
+  right: 12%;
+  bottom: 5%;
+  height: 17%;
+  border-radius: 50%;
+  border: 2px solid #8af7ff;
+  box-shadow: 0 0 18px #29d9f4,inset 0 0 18px rgba(100,244,255,.25);
+  animation: platformPulse 3.2s ease-in-out infinite;
+}
+.platform::before,
+.platform::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(89,238,255,.85);
+  left: 10%;
+  right: 10%;
+  top: 22%;
+  bottom: 22%;
+}
+.platform::after {
+  left: 25%;
+  right: 25%;
+  top: 35%;
+  bottom: 35%;
+  box-shadow: 0 0 8px #59efff;
+  animation: ringPulse 2.5s .5s ease-in-out infinite;
+}
+.platform::before { animation: ringPulse 2.5s ease-in-out infinite; }
+@keyframes platformPulse { 50% { filter: brightness(1.22); } }
+@keyframes ringPulse { 50% { transform: scale(1.06); opacity: .48; } }
+.matrix-progress {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 0;
+  height: 4px;
+  border: 1px solid rgba(95,235,255,.35);
+  background: rgba(12,48,63,.6);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.matrix-progress i {
+  display: block;
+  width: 74%;
+  height: 100%;
+  background: linear-gradient(90deg,#59efff 0 75%,#ffd568 100%);
+  box-shadow: 0 0 7px rgba(93,240,255,.42);
+  position: relative;
+  border-radius: 5px;
+}
+.matrix-progress i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,transparent,white,transparent);
+  animation: barSweep 2.2s linear infinite;
+}
+@keyframes barSweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+.trend { padding: 0; }
+.trend svg {
+  position: absolute;
+  inset: 52px 12px 34px 16px;
+  width: calc(100% - 28px);
+  height: calc(100% - 86px);
+  filter: drop-shadow(0 0 1px rgba(83,230,255,.2));
+}
+.trend-line.cyan-line {
+  stroke-dasharray: 900;
+  stroke-dashoffset: 900;
+  animation: drawLine 2.6s 1.1s ease forwards;
+}
+.trend-line.gold-line {
+  stroke-dasharray: 900;
+  stroke-dashoffset: 900;
+  animation: drawLine 2.8s .65s ease forwards;
+}
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+.dot-group circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dotPulse 2.3s ease-in-out infinite;
+}
+@keyframes dotPulse { 50% { transform: scale(1.35); filter: drop-shadow(0 0 5px #ffd778); } }
+.legend {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  font-size: 10px;
+  color: #cbeef7;
+  letter-spacing: .4px;
+}
+.legend span {
+  padding: 3px 8px;
+  border: 1px solid rgba(83,221,255,.18);
+  background: rgba(4,35,49,.25);
+  backdrop-filter: blur(6px);
+}
+.legend b {
+  display: inline-block;
+  width: 23px;
+  height: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+  box-shadow: 0 0 4px currentColor;
+}
+.legend .c { color: #52e9ff; background: #52e9ff; }
+.legend .g { color: #ffd875; background: #ffd875; }
+
+.growth { overflow: hidden; }
+.growth::before {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 3%;
+  bottom: 5%;
+  height: 27%;
+  background:
+    repeating-linear-gradient(90deg,rgba(71,220,255,.08) 0 1px,transparent 1px 29px),
+    repeating-linear-gradient(0deg,rgba(71,220,255,.08) 0 1px,transparent 1px 22px);
+  transform: perspective(260px) rotateX(64deg);
+  transform-origin: bottom;
+  opacity: .45;
+}
+.growth::after {
+  content: "";
+  position: absolute;
+  right: -24%;
+  top: -16%;
+  width: 92%;
+  height: 90%;
+  background: radial-gradient(circle at 55% 52%,rgba(255,198,74,.32),transparent 52%);
+  filter: blur(5px);
+  animation: goldAura 3.5s ease-in-out infinite;
+}
+@keyframes goldAura { 50% { opacity: .62; transform: scale(1.04); } }
+.steps {
+  position: absolute;
+  left: 6%;
+  right: 22%;
+  bottom: 8%;
+  height: 76%;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  perspective: 500px;
+  transform: skewY(-2deg);
+}
+.step {
+  position: absolute;
+  left: var(--x);
+  bottom: var(--b);
+  width: 38%;
+  height: 13%;
+  border: 1px solid rgba(121,244,255,.86);
+  background: linear-gradient(90deg,rgba(31,181,227,.42),rgba(75,231,255,.13));
+  box-shadow: inset 0 0 16px rgba(83,235,255,.10),0 6px 18px rgba(1,7,15,.28);
+  padding: 4px 6px;
+  font-weight: 800;
+  font-size: 9px;
+  color: #eaffff;
+  transform: skewY(2deg);
+  transition: transform .25s,filter .25s;
+  clip-path: polygon(0 10%,90% 0,100% 12%,100% 100%,0 100%);
+}
+.step::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 10%;
+  top: 3px;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,currentColor,transparent);
+  opacity: .48;
+}
+.step:hover { transform: skewY(2deg) translateY(-2px); filter: brightness(1.16); }
+.step.gold {
+  border-color: #ffe79d;
+  background: linear-gradient(90deg,rgba(255,195,67,.42),rgba(255,229,143,.12));
+  box-shadow: 0 0 15px rgba(255,198,82,.35);
+  color: #fff0b2;
+  text-shadow: 0 0 6px rgba(255,220,117,.45);
+}
+.step::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: 4px;
+  width: 40px;
+  height: 1px;
+  border-top: 1px dashed rgba(210,232,239,.45);
+}
+.score {
+  position: absolute;
+  right: 2%;
+  bottom: calc(var(--b) + 1%);
+  font-size: 8px;
+  border: 1px solid rgba(159,225,243,.4);
+  padding: 2px 3px;
+  border-radius: 2px;
+  color: #f4ffff;
+  background: rgba(4,21,31,.15);
+  box-shadow: inset 0 0 8px rgba(69,217,255,.04);
+  z-index: 3;
+  backdrop-filter: blur(4px);
+}
+
+.timeline { padding: 0; }
+.viewbtn {
+  position: absolute;
+  right: 8px;
+  top: 36px;
+  border: 1px solid rgba(86,222,255,.4);
+  padding: 3px 6px;
+  font-size: 8px;
+  color: #9dd7eb;
+  background: linear-gradient(180deg,rgba(13,75,99,.12),rgba(2,31,44,.12));
+  box-shadow: inset 0 0 8px rgba(77,225,255,.04);
+  cursor: pointer;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+}
+.line {
+  position: absolute;
+  left: 40%;
+  top: 25%;
+  bottom: 8%;
+  width: 1px;
+  background: linear-gradient(transparent,#8af6ff 7%,#5fe9ff 92%,transparent);
+  box-shadow: 0 0 8px rgba(86,238,255,.85);
+}
+.line::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: -4px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid #67edff;
+}
+.datebox {
+  position: absolute;
+  top: 20%;
+  left: 6%;
+  width: 34%;
+  padding: 6px 4px;
+  border: 1px solid #65efff;
+  border-radius: 4px;
+  text-align: center;
+  background: rgba(2,35,50,.15);
+  box-shadow: inset 0 0 14px rgba(58,217,255,.04),0 0 13px rgba(77,234,255,.12);
+  font-size: 9px;
+  font-weight: 800;
+  clip-path: polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);
+  backdrop-filter: blur(6px);
+}
+.datebox b {
+  display: block;
+  color: #74ecff;
+  font-size: 11px;
+}
+.datebox::after {
+  content: "";
+  position: absolute;
+  right: -21%;
+  bottom: -11px;
+  width: 21%;
+  height: 1px;
+  background: #71efff;
+}
+.datebox::before {
+  content: "";
+  position: absolute;
+  right: -21%;
+  bottom: -20px;
+  width: 1px;
+  height: 10px;
+  background: #71efff;
+}
+.event {
+  position: absolute;
+  left: 45%;
+  width: 48%;
+  padding: 5px 6px;
+  border: 1px solid rgba(70,222,255,.4);
+  border-radius: 3px;
+  background: linear-gradient(90deg,rgba(5,40,57,.18),rgba(2,21,34,.18));
+  font-size: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: inset 0 0 12px rgba(59,210,245,.03);
+  transition: transform .2s,border-color .2s;
+  backdrop-filter: blur(6px);
+}
+.event::before {
+  content: "";
+  position: absolute;
+  left: -15px;
+  top: 50%;
+  width: 12px;
+  height: 1px;
+  background: rgba(88,231,255,.3);
+}
+.event::after {
+  content: "";
+  position: absolute;
+  left: -19px;
+  top: calc(50% - 4px);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 2px solid #62efff;
+  background: transparent;
+  box-shadow: 0 0 7px #62efff;
+  animation: nodePulse 2.2s ease-in-out infinite;
+}
+.event.gold::after {
+  border-color: #ffe07e;
+  box-shadow: 0 0 7px #ffe07e;
+}
+.event.e2::after { animation-delay: .4s; }
+.event.e3::after { animation-delay: .8s; }
+.event.e4::after { animation-delay: 1.2s; }
+.event.e5::after { animation-delay: 1.6s; }
+@keyframes nodePulse {
+  50% { box-shadow: 0 0 14px currentColor; transform: scale(1.18); }
+}
+.event:hover { transform: translateX(3px); border-color: #8af6ff; }
+.event.e1 { top: 31%; }
+.event.e2 { top: 46%; }
+.event.e3 { top: 61%; }
+.event.e4 { top: 78%; }
+.event.e5 { top: 90%; transform: translateY(-100%); }
+
+.bottom-row {
+  position: relative;
+  border: 1px solid rgba(99,235,255,.28);
+  display: grid;
+  grid-template-columns: repeat(6,1fr);
+  gap: 1px;
+  background: linear-gradient(180deg,rgba(4,24,38,.1),rgba(2,13,24,.15));
+  overflow: hidden;
+  z-index: 2;
+  box-shadow: inset 0 0 24px rgba(20,137,172,.04);
+  backdrop-filter: blur(8px) saturate(1.05);
+  border-radius: 8px;
+}
+.bottom-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%,rgba(24,91,124,.14),transparent 40%);
+  pointer-events: none;
+}
+.bottom-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,#67efff 15%,transparent 50%,#67efff 85%,transparent);
+  opacity: .55;
+}
+.gauge-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid rgba(61,171,205,.18);
+  transition: background .2s;
+}
+.gauge-card:hover {
+  background: radial-gradient(circle at 50% 43%,rgba(56,224,255,.07),transparent 48%);
+}
+.gauge {
+  width: min(9vw,102px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--accent,#5ceeff) calc(var(--v)*1%),rgba(63,133,157,.22) 0);
+  mask: radial-gradient(circle,transparent 0 54%,#000 56%);
+  filter: drop-shadow(0 0 7px rgba(62,225,255,.22));
+  animation: gaugeIn 1.3s ease both;
+}
+.gauge::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 2px dashed rgba(126,240,255,.35);
+}
+.gauge::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  border: 1px dashed rgba(89,229,255,.20);
+  animation: spinRing 16s linear infinite;
+}
+.gauge-card:nth-child(even) .gauge::after { animation-direction: reverse; }
+@keyframes gaugeIn {
+  from { transform: scale(.75) rotate(-28deg); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes spinRing { to { transform: rotate(360deg); } }
+.gauge-center {
+  position: absolute;
+  top: 33%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(15px,1.6vw,26px);
+  text-shadow: 0 0 8px rgba(114,244,255,.45),0 0 24px rgba(51,221,255,.12);
+}
+.gauge-label {
+  position: absolute;
+  top: 70%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-weight: 800;
+  font-size: clamp(9px,.9vw,13px);
+  letter-spacing: .5px;
+}
+.gauge-label::before {
+  display: inline-block;
+  margin-right: 6px;
+  color: #5eeeff;
+  text-shadow: 0 0 5px #45e3ff;
+  font-weight: 400;
+}
+.gauge-card:nth-child(1) .gauge-label::before { content: "▥"; }
+.gauge-card:nth-child(2) .gauge-label::before { content: "◇"; }
+.gauge-card:nth-child(3) .gauge-label::before { content: "ϟ"; }
+.gauge-card:nth-child(4) .gauge-label::before { content: "◷"; }
+.gauge-card:nth-child(5) .gauge-label::before { content: "↗"; }
+.gauge-card:nth-child(6) .gauge-label::before { content: "⬡"; }
+.gauge-bar {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 8%;
+  height: 4px;
+  border: 1px solid rgba(72,220,255,.25);
+  background: rgba(7,38,52,.55);
+  overflow: hidden;
+  border-radius: 4px;
+}
+.gauge-bar i {
+  display: block;
+  height: 100%;
+  width: var(--v);
+  background: linear-gradient(90deg,#46e8ff,#8dfcff 75%,#ffd369);
+  box-shadow: 0 0 6px rgba(85,238,255,.4);
+  position: relative;
+  border-radius: 4px;
+}
+.gauge-bar i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);
+  animation: barSweep 2.8s linear infinite;
+}
+
+@media (max-width: 1200px) {
+  .evo-dashboard { grid-template-rows: 18% 56% 26%; }
+  .summary-row { gap: 10px; padding: 0 10px; }
+  .middle-row { grid-template-columns: 22% 34% 20% 24%; }
+  .event { font-size: 8px; }
+  .step { font-size: 9px; padding: 5px 7px; }
+}
 </style>

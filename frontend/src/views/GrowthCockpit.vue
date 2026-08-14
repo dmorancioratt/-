@@ -1,1458 +1,1556 @@
 <template>
-  <div class="cockpit-root">
-    <header class="cockpit-nav">
-      <div class="nav-left">
-        <button class="nav-back" @click="goBack">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
+  <div class="growth-cockpit">
+    <div class="gc-page-header">
+      <h1 class="gc-page-title">个人成长驾驶舱</h1>
+      <p class="gc-page-subtitle">探索能力边界 · 成就职业未来</p>
+    </div>
+    <div class="gc-content">
+      <div class="gc-left">
+        <div class="gc-card match-card animate-card" style="--delay:0.1s">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow"></div>
+          <div class="card-scan"></div>
+          <div class="card-header">
+            <h3><span class="header-bar"></span>目标岗位匹配度</h3>
+          </div>
+          <div class="match-role">
+            <div class="role-name">{{ targetRole.name }}</div>
+            <div class="role-meta">{{ targetRole.level }} · {{ targetRole.city }}</div>
+          </div>
+          <div class="match-circle-wrap">
+            <div class="match-circle-outer-glow"></div>
+            <svg class="match-circle" viewBox="0 0 200 200">
+              <defs>
+                <linearGradient id="matchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4ed8ff"/>
+                  <stop offset="30%" stop-color="#00ffff"/>
+                  <stop offset="70%" stop-color="#7c3aed"/>
+                  <stop offset="100%" stop-color="#4ed8ff"/>
+                </linearGradient>
+                <filter id="matchGlow">
+                  <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <filter id="matchNumGlow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(78,216,255,0.03)" stroke-width="2"/>
+              <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(78,216,255,0.08)" stroke-width="10" stroke-dasharray="2 6"/>
+              <circle cx="100" cy="100" r="72" fill="none" stroke="rgba(78,216,255,0.05)" stroke-width="1"/>
+              <circle cx="100" cy="100" r="82" fill="none" stroke="url(#matchGrad)" stroke-width="10" stroke-linecap="round"
+                :stroke-dasharray="matchDash" stroke-dashoffset="0" transform="rotate(-90 100 100)" filter="url(#matchGlow)" class="match-progress-circle"/>
+              <g v-for="i in 36" :key="'tick'+i">
+                <line :x1="100 + Math.cos((i*10-90)*Math.PI/180)*88" :y1="100 + Math.sin((i*10-90)*Math.PI/180)*88"
+                  :x2="100 + Math.cos((i*10-90)*Math.PI/180)*(i%3===0?92:90)" :y2="100 + Math.sin((i*10-90)*Math.PI/180)*(i%3===0?92:90)"
+                  :stroke="i%3===0?'rgba(78,216,255,0.4)':'rgba(78,216,255,0.2)'" stroke-width="1"/>
+              </g>
+            </svg>
+            <div class="match-num">
+              <span class="num-big" filter="url(#matchNumGlow)">{{ targetRole.score }}</span>
+              <span class="num-pct">%</span>
+              <span class="num-label">综合匹配度</span>
+              <div class="num-particles">
+                <span v-for="n in 8" :key="'np'+n" class="num-particle" :style="{delay: n*0.3+'s', angle: n*45+'deg'}"></span>
+              </div>
+            </div>
+          </div>
+          <div class="match-trend up">
+            <span class="trend-arrow">↑</span>
+            <span class="trend-val">{{ targetRole.improve }}%</span>
+            <label>较上次提升</label>
+          </div>
+        </div>
+
+        <div class="gc-card radar-card animate-card" style="--delay:0.2s">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow"></div>
+          <div class="card-scan"></div>
+          <div class="card-header">
+            <h3><span class="header-bar"></span>能力雷达</h3>
+          </div>
+          <svg class="radar-chart" viewBox="0 0 240 240">
+            <defs>
+              <filter id="radarGlow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <radialGradient id="radarBg" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="rgba(78,216,255,0.08)"/>
+                <stop offset="100%" stop-color="transparent"/>
+              </radialGradient>
+            </defs>
+            <circle cx="120" cy="120" r="100" fill="url(#radarBg)"/>
+            <g v-for="n in 5" :key="'grid'+n">
+              <polygon :points="hexPoints(240, 240, 25 + n*18)" fill="none" :stroke="n===5?'rgba(78,216,255,0.2)':'rgba(78,216,255,0.06)'" stroke-width="1"/>
+            </g>
+            <line v-for="(axis, i) in radarAxes" :key="'axis'+i" 
+              x1="120" y1="120" :x2="axis.x" :y2="axis.y" stroke="rgba(78,216,255,0.12)" stroke-width="1"/>
+            <polygon :points="requiredRadarPoints" fill="rgba(255,182,92,0.04)" stroke="rgba(255,182,92,0.3)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <polygon :points="currentRadarPoints" fill="rgba(78,216,255,0.15)" stroke="#4ed8ff" stroke-width="2.5" filter="url(#radarGlow)" class="radar-polygon-anim"/>
+            <circle v-for="(p, i) in currentRadarPointsArr" :key="'pt'+i" :cx="p.x" :cy="p.y" r="6" fill="#061830" stroke="#4ed8ff" stroke-width="2" filter="url(#radarGlow)"/>
+            <circle v-for="(p, i) in currentRadarPointsArr" :key="'pt-core'+i" :cx="p.x" :cy="p.y" r="2.5" fill="#4ed8ff"/>
+            <text v-for="(axis, i) in radarAxes" :key="'label'+i" :x="axis.lx" :y="axis.ly" fill="#8fa4c0" font-size="11" text-anchor="middle" font-weight="500">{{ radarLabels[i] }}</text>
+            <text v-for="(v, i) in radarVals" :key="'val'+i" :x="currentRadarPointsArr[i].x" :y="currentRadarPointsArr[i].y - 14" fill="#4ed8ff" font-size="11" text-anchor="middle" font-weight="700" filter="url(#radarGlow)">{{ v }}</text>
           </svg>
-          返回
-        </button>
-        <div class="nav-title-group">
-          <h1 class="nav-title">个人成长驾驶舱</h1>
-          <div class="nav-meta">
-            <span class="nav-stage">{{ profile.growthStage }}</span>
-            <span class="nav-sep">·</span>
-            <span>最近更新 {{ profile.updatedAt }}</span>
+          <div class="radar-legend">
+            <span class="lg-item"><i style="background:#4ed8ff;box-shadow:0 0 8px #4ed8ff"></i>当前水平</span>
+            <span class="lg-item"><i style="border-color:rgba(255,182,92,0.7)"></i>岗位要求</span>
           </div>
+        </div>
+
+        <div class="gc-card resume-card animate-card" style="--delay:0.3s">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow"></div>
+          <div class="card-scan"></div>
+          <div class="card-header">
+            <h3><span class="header-bar"></span>简历解析</h3>
+            <span class="resume-score">{{ resume.score }}<em>分</em><label>{{ resume.grade }}</label></span>
+          </div>
+          <div class="resume-meta">最近更新：{{ resume.updatedAt }}</div>
+          <div class="resume-desc">{{ resume.comment }}</div>
+          <button class="resume-detail">
+            <span>查看详情</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         </div>
       </div>
-      <div class="nav-right">
-        <div class="role-switcher" @click="showRoleSwitch = !showRoleSwitch">
-          <span class="role-icon">{{ currentRole.icon }}</span>
-          <span class="role-name">{{ currentRole.name }}</span>
-          <span class="role-arrow">▼</span>
-          <div v-if="showRoleSwitch" class="role-dropdown" @click.stop>
-            <div v-for="r in targetRoles" :key="r.id"
-              class="role-option" :class="{active: r.id === currentRole.id}"
-              @click="switchRole(r)">
-              <span class="ro-icon">{{ r.icon }}</span>
-              <div class="ro-info">
-                <div class="ro-name">{{ r.name }}</div>
-                <div class="ro-meta">{{ r.level }} · {{ r.city }} · {{ r.matchScore }}%</div>
-              </div>
-              <span v-if="r.id === currentRole.id" class="ro-check">✓</span>
-            </div>
-          </div>
-        </div>
-        <button class="nav-btn">更新简历</button>
-        <button class="nav-btn primary">重新分析</button>
-        <div class="nav-avatar">{{ profile.name.charAt(0) }}</div>
-      </div>
-    </header>
 
-    <main class="first-screen">
-      <aside class="left-col">
-        <div class="panel">
-          <div class="panel-header">
-            <h2 class="panel-title">岗位匹配概览</h2>
-          </div>
-          <div class="match-overview">
-            <div class="match-target">
-              <div class="match-role-name">{{ currentRole.name }}</div>
-              <div class="match-role-meta">{{ currentRole.level }} · {{ currentRole.city }}</div>
+      <div class="gc-center">
+        <div class="galaxy-card animate-card" style="--delay:0.15s">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow galaxy-border-glow"></div>
+          <div class="galaxy-header">
+            <div>
+              <h2><span class="title-deco"></span>我的能力星系</h2>
+              <p>点击探索技能详情与成长建议</p>
             </div>
-            <div class="match-score-block">
-              <div class="match-score-num">{{ currentRole.matchScore }}<span class="pct">%</span></div>
-              <div class="match-score-label">综合匹配度</div>
-              <div class="match-change up">
-                <span class="change-icon">↑</span>
-                较上次提升 {{ currentRole.matchChange }}%
-              </div>
-            </div>
-            <div class="match-estimate">
-              <svg class="clock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-              预计准备时间：{{ currentRole.estimatedReadyDays }} 天
+            <div class="galaxy-stats">
+              <span><strong>{{ galaxySkills.filter(s=>s.status==='mastered').length }}</strong> 已掌握</span>
+              <span><strong>{{ galaxySkills.length }}</strong> 技能点</span>
             </div>
           </div>
-          <div class="match-dimensions">
-            <div v-for="dim in matchDimensions" :key="dim.key" class="dim-row">
-              <span class="dim-name">{{ dim.name }}</span>
-              <div class="dim-bar-wrap">
-                <div class="dim-bar" :style="{width: dim.val+'%', background: dim.color}"></div>
-              </div>
-              <span class="dim-val">{{ dim.val }}</span>
+          <div class="galaxy-scene" ref="galaxyRef">
+            <div class="galaxy-bg-radial"></div>
+            <div class="galaxy-bg">
+              <div v-for="s in 50" :key="'gstar'+s" class="star" :class="{'star-bright': s%20===0}" :style="starStyle(s)"></div>
             </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-header">
-            <h2 class="panel-title">核心技能差距</h2>
-            <span class="panel-hint">Top 3 最需关注</span>
-          </div>
-          <div class="gap-list">
-            <div v-for="gap in coreGaps" :key="gap.id" class="gap-item">
-              <div class="gap-header">
-                <span class="gap-name">{{ gap.name }}</span>
-                <span class="gap-impact">{{ gap.impact }}</span>
-              </div>
-              <div class="gap-levels">
-                <span class="gap-level current">Lv.{{ gap.current }}</span>
-                <span class="gap-arrow">→</span>
-                <span class="gap-level required">Lv.{{ gap.required }}</span>
-                <span class="gap-badge">差 {{ gap.gap }} 级</span>
-              </div>
-              <div class="gap-desc">{{ gap.desc }}</div>
-              <button class="gap-action">加入学习路径</button>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <section class="center-col">
-        <SkillGalaxy
-          :skills="skills"
-          :profile="profile"
-          :selected-skill="selectedSkill"
-          :filter="skillFilter"
-          :match-score="currentRole.matchScore"
-          @select="onSelectSkill"
-          @filter-change="skillFilter = $event"
-        />
-      </section>
-
-      <aside class="right-col">
-        <div class="panel next-task-panel">
-          <div class="panel-header">
-            <h2 class="panel-title">下一步最值得做</h2>
-          </div>
-          <div class="next-task-card">
-            <div class="nt-title">{{ nextTask.title }}</div>
-            <div class="nt-reason">{{ nextTask.reason }}</div>
-            <div class="nt-meta">
-              <div class="nt-meta-item">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                预计耗时 {{ nextTask.duration }}
+            <div class="orbit-ring orbit-ring-1"></div>
+            <div class="orbit-ring orbit-ring-2"></div>
+            <div class="orbit-ring orbit-ring-3"></div>
+            <div class="core-user">
+              <div class="core-shockwave"></div>
+              <div class="core-energy-ring core-energy-ring-1"></div>
+              <div class="core-energy-ring core-energy-ring-2"></div>
+              <div class="core-glow-outer"></div>
+              <div class="core-glow"></div>
+              <div class="core-glow-inner"></div>
+              <div class="core-avatar-ring"></div>
+              <div class="core-avatar">{{ user.name.charAt(0) }}</div>
+              <div class="core-info">
+                <div class="core-name">{{ user.name }}</div>
+                <div class="core-meta">{{ user.edu }}</div>
               </div>
             </div>
-            <div class="nt-skills">
-              <span class="nt-skills-label">关联技能：</span>
-              <span v-for="(sk, i) in nextTask.skills" :key="i" class="nt-skill-tag">{{ sk }}</span>
+            <div v-for="(skill, i) in galaxySkills" :key="skill.name" 
+              class="skill-node" :class="[skill.status, {'pulse-node': i%5===0, 'big-node': skill.level>=15}]"
+              :style="skillPosStyle(i, galaxySkills.length)"
+              @click="selectSkill(skill)">
+              <div class="node-bg"></div>
+              <div class="node-ring"></div>
+              <div class="node-pulse"></div>
+              <div class="node-short">{{ skill.short }}</div>
+              <div class="node-label">{{ skill.name }}</div>
             </div>
-            <div class="nt-impact">
-              <div class="nt-impact-label">完成后预计匹配度</div>
-              <div class="nt-impact-values">
-                <span class="nt-val from">{{ nextTask.currentMatch }}%</span>
-                <span class="nt-arrow">→</span>
-                <span class="nt-val to">{{ nextTask.expectedMatch }}%</span>
-              </div>
-            </div>
-            <button class="nt-start-btn">开始任务</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-header">
-            <h2 class="panel-title">本周成长计划</h2>
-          </div>
-          <div class="week-plan">
-            <div class="wp-stats">
-              <div class="wp-stat">
-                <div class="wp-num">{{ weekPlan.tasksLeft }}</div>
-                <div class="wp-label">待完成任务</div>
-              </div>
-              <div class="wp-stat">
-                <div class="wp-num">{{ weekPlan.hoursNeeded }}<span class="wp-unit">h</span></div>
-                <div class="wp-label">预计投入</div>
-              </div>
-              <div class="wp-stat">
-                <div class="wp-num">{{ weekPlan.skillsBoosted }}</div>
-                <div class="wp-label">提升技能</div>
-              </div>
-              <div class="wp-stat highlight">
-                <div class="wp-num">+{{ weekPlan.matchBoost }}<span class="wp-unit">%</span></div>
-                <div class="wp-label">匹配度</div>
-              </div>
-            </div>
-            <button class="wp-view-btn">查看学习路径 →</button>
-          </div>
-        </div>
-      </aside>
-    </main>
-
-    <section class="second-screen">
-      <div class="section-header">
-        <h2 class="section-title">成长路线</h2>
-        <p class="section-desc">从基础补齐到求职冲刺的完整路径</p>
-      </div>
-      <div class="learning-path-container">
-        <div class="path-main">
-          <div class="path-track">
-            <div v-for="(stage, idx) in growthStages" :key="stage.id"
-              class="path-node" :class="stage.status">
-              <div class="node-dot">
-                <span v-if="stage.status === 'completed'" class="dot-check">✓</span>
-                <span v-else-if="stage.status === 'in-progress'" class="dot-spinner"></span>
-                <span v-else class="dot-num">{{ idx + 1 }}</span>
-              </div>
-              <div class="node-content">
-                <div class="node-icon">{{ stage.icon }}</div>
-                <div class="node-name">{{ stage.name }}</div>
-                <div class="node-desc">{{ stage.description }}</div>
-                <div v-if="stage.status === 'in-progress'" class="node-progress">
-                  <div class="progress-bar">
-                    <div class="progress-fill" :style="{width: stage.progress+'%'}"></div>
-                  </div>
-                  <span class="progress-text">{{ stage.progress }}%</span>
+            <div v-if="selectedSkill" class="skill-tip" :style="tipPosStyle(selectedSkill)">
+              <div class="tip-arrow"></div>
+              <div class="tip-inner">
+                <div class="tip-header">
+                  <span class="tip-status-dot" :class="selectedSkill.status"></span>
+                  <span class="tip-name">{{ selectedSkill.name }}</span>
                 </div>
-                <div v-if="stage.status !== 'locked'" class="node-meta">
-                  <span>预计 {{ stage.estimatedDays }} 天</span>
-                  <span v-if="stage.expectedMatchIncrease">匹配度 +{{ stage.expectedMatchIncrease }}%</span>
+                <div class="tip-cat">{{ selectedSkill.category }}</div>
+                <div class="tip-level-row">
+                  <span class="tip-level-val">Lv.{{ selectedSkill.level }}</span>
+                  <div class="tip-bar"><div class="tip-bar-fill" :class="selectedSkill.status" :style="{width: selectedSkill.level*5+'%'}"></div></div>
                 </div>
               </div>
-              <div v-if="idx < growthStages.length - 1" class="node-connector" :class="{done: stage.status === 'completed'}"></div>
             </div>
           </div>
-        </div>
-        <div class="path-side">
-          <div class="panel" style="height: 100%;">
-            <div class="panel-header">
-              <h3 class="panel-title-sm">简历能力证据库</h3>
-            </div>
-            <div class="resume-info">
-              <div class="resume-file">{{ resume.fileName }}</div>
-              <div class="resume-version">版本 {{ resume.version }} · {{ resume.updatedDays }} 天前更新</div>
-            </div>
-            <div class="resume-mini-stats">
-              <div class="rms-item">
-                <div class="rms-num">{{ resume.skillsExtracted }}</div>
-                <div class="rms-label">提取技能</div>
-              </div>
-              <div class="rms-item">
-                <div class="rms-num">{{ resume.projectsExtracted }}</div>
-                <div class="rms-label">项目</div>
-              </div>
-              <div class="rms-item">
-                <div class="rms-num">{{ resume.quantifiedAchievements }}</div>
-                <div class="rms-label">量化成果</div>
-              </div>
-            </div>
-            <div class="resume-recent">
-              <div class="rr-title">最近更新</div>
-              <div v-for="(u, i) in resume.recentUpdates" :key="i" class="rr-item">
-                <span class="rr-date">{{ u.date }}</span>
-                <span class="rr-text">{{ u.detail }}</span>
-              </div>
-            </div>
-            <button class="resume-action">查看解析详情</button>
-            <button class="resume-action secondary">补充缺失证据</button>
+          <div class="galaxy-legend">
+            <span class="gl-item mastered"><i></i>已掌握</span>
+            <span class="gl-item improve"><i></i>待提升</span>
+            <span class="gl-item missing"><i></i>缺失</span>
+            <span class="gl-item transfer"><i></i>可迁移</span>
           </div>
         </div>
-      </div>
-    </section>
 
-    <section class="third-screen">
-      <div class="section-header">
-        <h2 class="section-title">能力演化与机会</h2>
+        <div class="learning-path-wrap animate-card" style="--delay:0.35s">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow"></div>
+          <div class="lp-header">
+            <h2><span class="title-deco"></span>学习路径</h2>
+            <p>登山式成长轨迹 · 你的专属攀登计划</p>
+          </div>
+          <div class="lp-mountain">
+            <svg class="lp-svg" viewBox="0 0 1000 320" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="mtnGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="rgba(26,74,122,0.6)"/>
+                  <stop offset="100%" stop-color="rgba(8,26,53,0.3)"/>
+                </linearGradient>
+                <linearGradient id="mtnGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="rgba(42,106,170,0.5)"/>
+                  <stop offset="100%" stop-color="rgba(10,42,85,0.2)"/>
+                </linearGradient>
+                <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#4ed8ff"/>
+                  <stop offset="20%" stop-color="#00ffff"/>
+                  <stop offset="45%" stop-color="#4ed8ff"/>
+                  <stop offset="55%" stop-color="#ffb65c"/>
+                  <stop offset="80%" stop-color="#ff7088"/>
+                  <stop offset="100%" stop-color="#8f7cff"/>
+                </linearGradient>
+                <filter id="pathGlow">
+                  <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                  <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <path d="M0,320 L0,260 L80,220 L160,240 L240,180 L320,200 L400,140 L480,160 L560,100 L640,120 L720,70 L800,90 L880,50 L960,70 L1000,40 L1000,320 Z" fill="url(#mtnGrad2)"/>
+              <path d="M0,320 L0,280 L100,250 L200,270 L300,210 L400,230 L500,170 L600,190 L700,130 L800,150 L900,100 L1000,120 L1000,320 Z" fill="url(#mtnGrad1)"/>
+              <path d="M0,320 L0,290 L200,275 L400,250 L600,220 L800,180 L1000,150 L1000,320 Z" fill="rgba(7,20,40,0.8)"/>
+              <path class="lp-path" d="M50,290 C150,270 200,250 300,230 S450,180 500,170 S650,130 700,110 S850,70 950,50" fill="none" stroke="url(#pathGrad)" stroke-width="4" stroke-linecap="round" filter="url(#pathGlow)" stroke-dasharray="2000" stroke-dashoffset="0"/>
+              <path class="lp-path-glow" d="M50,290 C150,270 200,250 300,230 S450,180 500,170 S650,130 700,110 S850,70 950,50" fill="none" stroke="url(#pathGrad)" stroke-width="8" stroke-linecap="round" opacity="0.3" filter="url(#pathGlow)"/>
+            </svg>
+            <div v-for="(stop, i) in learningStops" :key="stop.name" class="lp-stop" :class="{done: stop.done, current: stop.current, locked: !stop.done && !stop.current}" :style="{left: stop.x+'%', bottom: stop.y+'%'}">
+              <div class="stop-pulse" v-if="stop.current"></div>
+              <div class="stop-glow"></div>
+              <div class="stop-dot">{{ i+1 }}</div>
+              <div class="stop-label">{{ stop.name }}</div>
+            </div>
+            <div class="lp-current-pos">
+              <div class="pos-ping"></div>
+              <div class="pos-dot"></div>
+              <div class="pos-label">当前位置</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="third-grid">
-        <div class="panel">
-          <div class="panel-header">
-            <h3 class="panel-title-sm">模拟面试成长轨迹</h3>
+
+      <div class="gc-right">
+        <div class="gc-card next-action animate-card" style="--delay:0.12s">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow action-glow"></div>
+          <div class="card-scan"></div>
+          <div class="card-header">
+            <h3><span class="header-bar"></span>下一步行动</h3>
+            <span class="action-badge">AI推荐</span>
+          </div>
+          <div class="action-priority">
+            <span class="prio-label">优先级</span>
+            <span class="prio-high">最高</span>
+          </div>
+          <div class="action-title">{{ nextAction.title }}</div>
+          <div class="action-desc">{{ nextAction.desc }}</div>
+          <div class="action-meta">
+            <div class="meta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {{ nextAction.duration }}
+            </div>
+            <div class="meta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              预计提升 {{ nextAction.impact }}%
+            </div>
+          </div>
+          <button class="action-start">
+            <span class="btn-shine"></span>
+            <span class="btn-text">立即开始</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <div class="gc-card plan-card animate-card" style="--delay:0.22s">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow"></div>
+          <div class="card-scan"></div>
+          <div class="card-header">
+            <h3><span class="header-bar"></span>本周成长计划</h3>
+            <span class="progress-label">{{ weekPlan.done }}/{{ weekPlan.total }}</span>
+          </div>
+          <div class="plan-progress">
+            <div class="pp-bar"><div class="pp-fill" :style="{width: (weekPlan.done/weekPlan.total*100)+'%'}"></div></div>
+          </div>
+          <div class="plan-list">
+            <div v-for="item in weekPlan.items" :key="item.title" class="plan-item" :class="{done: item.done}">
+              <div class="pi-check">
+                <svg v-if="item.done" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#061830" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="pi-content">
+                <div class="pi-title">{{ item.title }}</div>
+                <div class="pi-time">{{ item.time }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gc-card interview-card animate-card" style="--delay:0.28s">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow"></div>
+          <div class="card-scan"></div>
+          <div class="card-header">
+            <h3><span class="header-bar"></span>模拟面试</h3>
+            <span class="interview-trend up">↑{{ interview.improve }}%</span>
+          </div>
+          <div class="interview-score-wrap">
+            <div class="is-glow"></div>
+            <div class="is-num">{{ interview.score }}</div>
+            <div class="is-label">综合得分</div>
           </div>
           <div class="interview-stats">
-            <div class="is-row">
-              <div class="is-item">
-                <div class="is-num">{{ interviews.length }}</div>
-                <div class="is-label">模拟面试</div>
-              </div>
-              <div class="is-item">
-                <div class="is-num">{{ latestInterview?.totalScore || 0 }}</div>
-                <div class="is-label">最近得分</div>
-              </div>
-              <div class="is-item">
-                <div class="is-num">{{ avgInterviewScore }}</div>
-                <div class="is-label">平均分</div>
-              </div>
+            <div class="stat-item">
+              <div class="stat-val" style="color:#37d6a5">{{ interview.correctRate }}%</div>
+              <div class="stat-lbl">正确率</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-val" style="color:#4ed8ff">{{ interview.avgTime }}s</div>
+              <div class="stat-lbl">平均用时</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-val" style="color:#ffb65c">{{ interview.count }}</div>
+              <div class="stat-lbl">已完成</div>
             </div>
           </div>
-          <div v-if="latestInterview" class="latest-interview">
-            <div class="li-header">
-              <span class="li-date">{{ latestInterview.date }}</span>
-              <span class="li-score">{{ latestInterview.totalScore }} 分</span>
-            </div>
-            <div class="li-section">
-              <div class="li-sec-title strengths">主要优势</div>
-              <div class="li-tags">
-                <span v-for="(s, i) in latestInterview.strengths.slice(0,3)" :key="i" class="li-tag strength">{{ s }}</span>
-              </div>
-            </div>
-            <div class="li-section">
-              <div class="li-sec-title weaknesses">待改进</div>
-              <div class="li-tags">
-                <span v-for="(w, i) in latestInterview.weaknesses.slice(0,2)" :key="i" class="li-tag weakness">{{ w }}</span>
-              </div>
-            </div>
-          </div>
+          <button class="interview-btn">开始新面试 ></button>
         </div>
-        <div class="panel">
-          <div class="panel-header">
-            <h3 class="panel-title-sm">推荐岗位</h3>
-          </div>
-          <div class="recommend-list">
-            <div v-for="r in recommendedRoles.slice(0,3)" :key="r.id" class="rec-item">
-              <div class="rec-top">
-                <div>
-                  <div class="rec-name">{{ r.name }}</div>
-                  <div class="rec-company">{{ r.company }}</div>
-                </div>
-                <div class="rec-match">
-                  <div class="rec-score" :class="r.currentMatch >= 80 ? 'high' : r.currentMatch >= 70 ? 'mid' : 'low'">{{ r.currentMatch }}%</div>
-                  <div class="rec-change up" v-if="r.matchChange >= 0">↑{{ r.matchChange }}%</div>
-                </div>
-              </div>
-              <div class="rec-reason">{{ r.recommendReason }}</div>
-              <div class="rec-footer">
-                <span class="rec-gap">差距：{{ r.skillGaps.join('、') }}</span>
-                <span class="rec-days">{{ r.estimatedDays }} 天</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <section class="fourth-screen">
-      <div class="section-header">
-        <h2 class="section-title">个人成长时间线</h2>
-        <button v-if="!showAllTimeline" class="section-more" @click="showAllTimeline = true">查看全部</button>
-      </div>
-      <div class="timeline-full">
-        <div v-for="(ev, i) in displayedEvents" :key="ev.id" class="tl-item" :class="{milestone: i === 0 || ev.matchScoreChange >= 5}">
-          <div class="tl-line">
-            <div class="tl-dot" :class="ev.matchScoreChange > 0 ? 'up' : ''"></div>
-            <div v-if="i < displayedEvents.length - 1" class="tl-connector"></div>
+        <div class="gc-card timeline-card animate-card" style="--delay:0.38s">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow"></div>
+          <div class="card-header">
+            <h3><span class="header-bar"></span>成长时间线</h3>
           </div>
-          <div class="tl-content">
-            <div class="tl-date">{{ ev.date }}</div>
-            <div class="tl-title">{{ ev.title }}</div>
-            <div class="tl-desc">{{ ev.description }}</div>
-            <div class="tl-footer">
-              <span class="tl-source">{{ ev.source }}</span>
-              <span v-if="ev.matchScoreChange > 0" class="tl-match-up">+{{ ev.matchScoreChange }}%</span>
+          <div class="timeline">
+            <div v-for="(item, i) in timeline" :key="item.date" class="tl-item" :class="{first: i===0}">
+              <div class="tl-dot"></div>
+              <div class="tl-line" v-if="i < timeline.length-1"></div>
+              <div class="tl-content">
+                <div class="tl-date">{{ item.date }}</div>
+                <div class="tl-text">{{ item.text }}</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
-
-    <SkillDetailDrawer
-      v-model="drawerVisible"
-      :skill="selectedSkill"
-    />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import SkillGalaxy from '@/components/cockpit/SkillGalaxy.vue'
-import SkillDetailDrawer from '@/components/cockpit/SkillDetailDrawer.vue'
-import {
-  mockProfile, mockTargetRoles, mockSkills,
-  mockGrowthStages, mockInterviews, mockGrowthEvents, mockRecommendedRoles,
-  mockResumeStats, mockNextTask, mockWeekPlan, mockCoreGaps, getMatchDimensions
-} from '@/components/cockpit/mockData'
-import type { Skill, TargetRole } from '@/components/cockpit/types'
-import '@/components/cockpit/cockpit.css'
 
-const router = useRouter()
+const activeTab = ref('overview')
 
-const profile = ref(mockProfile)
-const targetRoles = ref(mockTargetRoles)
-const skills = ref(mockSkills)
-const growthStages = ref(mockGrowthStages)
-const interviews = ref(mockInterviews)
-const growthEvents = ref(mockGrowthEvents)
-const recommendedRoles = ref(mockRecommendedRoles)
-const resume = ref(mockResumeStats)
-const nextTask = ref(mockNextTask)
-const weekPlan = ref(mockWeekPlan)
-const coreGaps = ref(mockCoreGaps)
+const navTabs = [
+  { id: 'overview', name: '概览', icon: '📊' },
+  { id: 'value', name: '个人价值成长仓', icon: '💎' },
+  { id: 'match', name: '人岗匹配', icon: '🎯' },
+  { id: 'ai', name: 'AI互动', icon: '🤖' },
+  { id: 'settings', name: '设置', icon: '⚙️' }
+]
 
-const currentRole = ref<TargetRole>(mockTargetRoles[0])
-const selectedSkill = ref<Skill | null>(null)
-const drawerVisible = ref(false)
-const showRoleSwitch = ref(false)
-const showAllTimeline = ref(false)
-const skillFilter = ref({ status: 'all' as string, category: 'all', showCoreOnly: false })
+const user = { name: '张同学', edu: '计算机科学与技术 · 大三', targetRole: 'AI算法工程师' }
+const targetRole = { name: 'AI算法工程师', level: '中级', city: '北京', score: 72, improve: 4 }
+const resume = { score: 85, grade: '优秀', updatedAt: '2天前', comment: '简历结构清晰，项目经历突出，建议补充量化成果和技术栈深度描述。' }
+const nextAction = { title: '深入学习RAG知识库问答系统', desc: '掌握检索增强生成核心技术，完成一个端到端的问答项目', duration: '预计14天', impact: 8 }
+const weekPlan = { done: 3, total: 5, items: [
+  { title: '完成Transformer架构学习', time: '周一', done: true },
+  { title: '动手实现Attention机制', time: '周二', done: true },
+  { title: '学习向量数据库Milvus', time: '周三', done: true },
+  { title: '完成RAG项目demo', time: '周四', done: false },
+  { title: '撰写技术博客总结', time: '周五', done: false }
+]}
+const interview = { score: 78, improve: 12, correctRate: 72, avgTime: 45, count: 15 }
+const timeline = [
+  { date: '08-12', text: '完成深度学习基础课程，掌握CNN/RNN核心原理' },
+  { date: '08-08', text: 'Python编程技能达到Lv.15，进入熟练阶段' },
+  { date: '08-01', text: '匹配度提升4%，算法基础能力显著增强' }
+]
 
-const matchDimensions = computed(() => getMatchDimensions(currentRole.value))
+const radarVals = [80, 65, 55, 70, 60, 75]
+const radarLabels = ['算法', '编程', '工程', '数学', '沟通', '业务']
+const radarAxes = computed(() => {
+  const pts: any[] = []
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * 60 - 90) * Math.PI / 180
+    pts.push({ x: 120 + Math.cos(angle) * 100, y: 120 + Math.sin(angle) * 100, lx: 120 + Math.cos(angle) * 115, ly: 120 + Math.sin(angle) * 115 + 4 })
+  }
+  return pts
+})
 
-const latestInterview = computed(() => interviews.value[interviews.value.length - 1])
-const avgInterviewScore = computed(() => Math.round(interviews.value.reduce((s, i) => s + i.totalScore, 0) / interviews.value.length))
+function hexPoints(cx: number, cy: number, r: number) {
+  return radarAxes.value.map(a => `${cx + (a.x-cx)/100*r},${cy + (a.y-cy)/100*r}`).join(' ')
+}
+function radarPoints(vals: number[]) {
+  return vals.map((v, i) => {
+    const angle = (i * 60 - 90) * Math.PI / 180
+    const r = v
+    return `${120 + Math.cos(angle) * r},${120 + Math.sin(angle) * r}`
+  }).join(' ')
+}
+function radarPointsArr(vals: number[]) {
+  return vals.map((v, i) => {
+    const angle = (i * 60 - 90) * Math.PI / 180
+    return { x: 120 + Math.cos(angle) * v, y: 120 + Math.sin(angle) * v }
+  })
+}
+const currentRadarPoints = computed(() => radarPoints(radarVals))
+const requiredRadarPoints = computed(() => radarPoints([85,80,75,80,70,75]))
+const currentRadarPointsArr = computed(() => radarPointsArr(radarVals))
+const matchDash = computed(() => `${targetRole.score * 5.15} ${515 - targetRole.score * 5.15}`)
 
-const displayedEvents = computed(() => showAllTimeline.value ? growthEvents.value : growthEvents.value.slice(-6))
+const galaxySkills = ref([
+  { name: 'Python', short: 'Py', level: 18, status: 'mastered', category: '编程语言' },
+  { name: '机器学习', short: 'ML', level: 16, status: 'mastered', category: 'AI核心' },
+  { name: '深度学习', short: 'DL', level: 14, status: 'improve', category: 'AI核心' },
+  { name: 'PyTorch', short: 'PT', level: 15, status: 'mastered', category: '框架工具' },
+  { name: 'NLP', short: 'NLP', level: 12, status: 'improve', category: 'AI领域' },
+  { name: 'CV', short: 'CV', level: 10, status: 'improve', category: 'AI领域' },
+  { name: 'TensorFlow', short: 'TF', level: 11, status: 'transfer', category: '框架工具' },
+  { name: 'RAG', short: 'RAG', level: 6, status: 'missing', category: '前沿技术' },
+  { name: 'LangChain', short: 'LC', level: 5, status: 'missing', category: '前沿技术' },
+  { name: '向量数据库', short: 'VDB', level: 8, status: 'improve', category: '工程能力' },
+  { name: '数据结构', short: 'DS', level: 17, status: 'mastered', category: '计算机基础' },
+  { name: 'SQL', short: 'SQL', level: 14, status: 'mastered', category: '工程能力' },
+  { name: 'Linux', short: 'LX', level: 13, status: 'improve', category: '工程能力' },
+  { name: 'Git', short: 'Git', level: 15, status: 'mastered', category: '工程能力' },
+  { name: 'Docker', short: 'Doc', level: 9, status: 'improve', category: '工程能力' },
+  { name: '算法', short: 'Alg', level: 16, status: 'mastered', category: '计算机基础' },
+  { name: '大模型', short: 'LLM', level: 7, status: 'missing', category: '前沿技术' },
+  { name: 'Prompt工程', short: 'PR', level: 11, status: 'transfer', category: '前沿技术' },
+  { name: 'MLOps', short: 'MLO', level: 6, status: 'missing', category: '工程能力' },
+  { name: '统计学', short: 'Sta', level: 13, status: 'improve', category: '数学基础' },
+])
+const selectedSkill = ref<any>(null)
 
-function goBack() {
-  router.push('/overview')
+function skillPosStyle(i: number, total: number) {
+  const layerCount = [6, 7, 7]
+  const layerRadii = [90, 145, 195]
+  let layer = 0
+  let idxInLayer = i
+  for (let l = 0; l < layerCount.length; l++) {
+    if (idxInLayer < layerCount[l]) { layer = l; break }
+    idxInLayer -= layerCount[l]
+  }
+  const count = layerCount[layer]
+  const angle = (idxInLayer / count) * Math.PI * 2 - Math.PI / 2 + (layer * 0.25)
+  const r = layerRadii[layer]
+  const x = Math.cos(angle) * r
+  const y = Math.sin(angle) * r
+  return { '--x': `${x}px`, '--y': `${y}px` } as any
 }
 
-function onSelectSkill(skill: Skill) {
-  selectedSkill.value = skill
-  drawerVisible.value = true
+function connectorStyle(i: number, total: number) {
+  return {} as any
 }
 
-function switchRole(role: TargetRole) {
-  currentRole.value = role
-  showRoleSwitch.value = false
-  profile.value.targetRoleId = role.id
+function tipPosStyle(skill: any) {
+  const i = galaxySkills.value.indexOf(skill)
+  const layerCount = [6, 7, 7]
+  const layerRadii = [90, 145, 195]
+  let layer = 0
+  let idxInLayer = i
+  for (let l = 0; l < layerCount.length; l++) {
+    if (idxInLayer < layerCount[l]) { layer = l; break }
+    idxInLayer -= layerCount[l]
+  }
+  const count = layerCount[layer]
+  const angle = (idxInLayer / count) * Math.PI * 2 - Math.PI / 2 + (layer * 0.25)
+  const r = layerRadii[layer] + 55
+  let x = Math.cos(angle) * r
+  let y = Math.sin(angle) * r
+  return { left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px - 50px)` }
 }
+
+function selectSkill(skill: any) { selectedSkill.value = skill }
+
+function bgParticleStyle(s: number) {
+  const size = 1 + (s%2)*0.5
+  return {
+    left: (Math.sin(s * 127.1) * 0.5 + 0.5) * 100 + '%',
+    top: (Math.cos(s * 311.7) * 0.5 + 0.5) * 100 + '%',
+    width: size + 'px',
+    height: size + 'px',
+    animationDelay: (s * 0.2) % 10 + 's',
+    animationDuration: (8 + (s%6)) + 's'
+  } as any
+}
+
+function orbStyle(o: number) {
+  const colors = ['rgba(78,216,255,0.08)', 'rgba(143,124,255,0.06)', 'rgba(0,255,255,0.05)', 'rgba(55,214,165,0.06)', 'rgba(255,182,92,0.05)', 'rgba(78,216,255,0.07)']
+  return {
+    left: (10 + o*15) + '%',
+    top: (15 + (o%3)*25) + '%',
+    width: (200 + o*80) + 'px',
+    height: (200 + o*80) + 'px',
+    background: `radial-gradient(circle, ${colors[o-1]} 0%, transparent 70%)`,
+    animationDelay: o*2 + 's',
+    animationDuration: (10 + o*3) + 's'
+  } as any
+}
+
+function starStyle(s: number) {
+  return {
+    left: (Math.sin(s * 73.3) * 0.5 + 0.5) * 100 + '%',
+    top: (Math.cos(s * 197.7) * 0.5 + 0.5) * 100 + '%',
+    animationDelay: (s * 0.07) % 5 + 's',
+    animationDuration: (2 + (s%3)) + 's'
+  } as any
+}
+
+const learningStops = [
+  { name: '基础巩固', x: 8, y: 12, done: true, current: false },
+  { name: '算法进阶', x: 25, y: 28, done: true, current: false },
+  { name: 'ML实战', x: 42, y: 45, done: true, current: false },
+  { name: 'DL专精', x: 58, y: 58, done: false, current: true },
+  { name: '大模型', x: 75, y: 72, done: false, current: false },
+  { name: '就业准备', x: 92, y: 88, done: false, current: false }
+]
 
 onMounted(() => {
+  setTimeout(() => { if (!selectedSkill.value) selectSkill(galaxySkills.value[7]) }, 800)
 })
 </script>
 
 <style scoped>
-.cockpit-root {
+.growth-cockpit {
+  width: 100%;
   min-height: 100vh;
   background: transparent;
-  color: #f4f7fc;
-  font-size: 14px;
-  line-height: 1.6;
-  padding-bottom: 60px;
-}
-
-.cockpit-nav {
-  height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  background: rgba(10, 20, 35, 0.92);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(78, 216, 255, 0.12);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.3), 0 1px 0 rgba(78,216,255,0.08) inset;
-}
-
-.nav-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.nav-back {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: rgba(135, 169, 220, 0.08);
-  border: 1px solid rgba(135, 169, 220, 0.16);
-  border-radius: 10px;
-  color: #a8b4c8;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.nav-back:hover {
-  background: rgba(78, 216, 255, 0.12);
-  border-color: rgba(78, 216, 255, 0.35);
-  color: #f4f7fc;
-  box-shadow: 0 0 12px rgba(78,216,255,0.15);
-}
-
-.nav-title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.nav-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-  color: #f4f7fc;
-}
-.nav-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #68768d;
-}
-.nav-stage {
-  padding: 2px 8px;
-  background: rgba(78, 216, 255, 0.12);
-  border-radius: 6px;
-  color: #4ed8ff;
-  font-size: 11px;
-}
-.nav-sep {
-  color: rgba(135, 169, 220, 0.3);
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.role-switcher {
+  color: #e8f4ff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  overflow-x: hidden;
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: rgba(135, 169, 220, 0.08);
-  border: 1px solid rgba(135, 169, 220, 0.16);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.role-switcher:hover {
-  border-color: rgba(78, 216, 255, 0.3);
-}
-.role-icon { font-size: 16px; }
-.role-name { font-size: 13px; color: #f4f7fc; }
-.role-arrow { font-size: 9px; color: #68768d; }
-
-.role-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 260px;
-  background: rgba(14, 26, 43, 0.98);
-  border: 1px solid rgba(135, 169, 220, 0.2);
-  border-radius: 12px;
-  overflow: hidden;
-  z-index: 200;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-}
-.role-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.role-option:hover { background: rgba(78, 216, 255, 0.08); }
-.role-option.active { background: rgba(78, 216, 255, 0.12); }
-.ro-icon { font-size: 18px; }
-.ro-info { flex: 1; }
-.ro-name { font-size: 13px; color: #f4f7fc; }
-.ro-meta { font-size: 11px; color: #68768d; margin-top: 2px; }
-.ro-check { color: #4ed8ff; font-size: 14px; }
-
-.nav-btn {
-  padding: 8px 16px;
-  background: rgba(135, 169, 220, 0.08);
-  border: 1px solid rgba(135, 169, 220, 0.16);
-  border-radius: 10px;
-  color: #a8b4c8;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.nav-btn:hover {
-  border-color: rgba(78, 216, 255, 0.3);
-  color: #f4f7fc;
-}
-.nav-btn.primary {
-  background: linear-gradient(135deg, rgba(78,216,255,0.2), rgba(143,124,255,0.15));
-  border-color: rgba(78, 216, 255, 0.45);
-  color: #4ed8ff;
-  box-shadow: 0 0 16px rgba(78,216,255,0.15), inset 0 1px 0 rgba(78,216,255,0.15);
-}
-.nav-btn.primary:hover {
-  background: linear-gradient(135deg, rgba(78,216,255,0.3), rgba(143,124,255,0.22));
-  box-shadow: 0 0 24px rgba(78,216,255,0.25), inset 0 1px 0 rgba(78,216,255,0.25);
-  color: #fff;
 }
 
-.nav-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(78,216,255,0.25), rgba(143,124,255,0.25));
-  border: 1.5px solid rgba(78, 216, 255, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  font-weight: 700;
-  color: #4ed8ff;
-  box-shadow: 0 0 16px rgba(78,216,255,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
-}
-
-.first-screen {
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) 320px;
-  gap: 20px;
-  padding: 24px;
-  min-height: 780px;
-}
-
-.left-col, .right-col {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.center-col {
-  background: 
-    radial-gradient(ellipse 80% 70% at center, rgba(78,216,255,0.08) 0%, rgba(143,124,255,0.04) 30%, transparent 70%);
-  border-radius: 16px;
+.gc-page-header {
   position: relative;
-  min-height: 760px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.panel {
-  background: rgba(12, 24, 42, 0.85);
-  border: 1px solid rgba(135, 169, 220, 0.14);
-  border-radius: 16px;
-  padding: 20px;
-  backdrop-filter: blur(20px);
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 16px;
-  right: 16px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(78,216,255,0.2), transparent);
-  border-radius: 16px 16px 0 0;
-  pointer-events: none;
-}
-.panel:hover {
-  border-color: rgba(78, 216, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 20px rgba(78,216,255,0.06);
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-.panel-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
-  color: #f4f7fc;
-}
-.panel-title-sm {
-  font-size: 14px;
-  font-weight: 600;
-  margin: 0;
-  color: #f4f7fc;
-}
-.panel-hint {
-  font-size: 12px;
-  color: #68768d;
-}
-
-.match-overview {
-  margin-bottom: 20px;
-}
-.match-target {
-  margin-bottom: 16px;
-}
-.match-role-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: #f4f7fc;
-}
-.match-role-meta {
-  font-size: 12px;
-  color: #68768d;
-  margin-top: 2px;
-}
-.match-score-block {
+  z-index: 10;
   text-align: center;
-  padding: 16px 0;
-  border-top: 1px solid rgba(135, 169, 220, 0.1);
-  border-bottom: 1px solid rgba(135, 169, 220, 0.1);
-  margin-bottom: 12px;
+  padding: 24px 24px 8px;
 }
-.match-score-num {
-  font-size: 52px;
-  font-weight: 700;
-  color: #4ed8ff;
-  line-height: 1;
-  text-shadow: 0 0 30px rgba(78,216,255,0.4), 0 0 60px rgba(78,216,255,0.15);
-  filter: drop-shadow(0 0 8px rgba(78,216,255,0.3));
+.gc-page-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #4ed8ff 50%, #8f7cff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+  text-shadow: 0 0 30px rgba(78,216,255,0.3);
 }
-.pct {
-  font-size: 20px;
-  font-weight: 500;
-  color: #a8b4c8;
-}
-.match-score-label {
+.gc-page-subtitle {
+  margin: 6px 0 0;
   font-size: 13px;
-  color: #68768d;
-  margin-top: 4px;
-}
-.match-change {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  margin-top: 8px;
-  padding: 3px 10px;
-  border-radius: 8px;
-}
-.match-change.up {
-  color: #37d6a5;
-  background: rgba(55, 214, 165, 0.1);
-}
-.change-icon { font-size: 10px; }
-.match-estimate {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #ffb65c;
-}
-.clock-icon { opacity: 0.8; }
-
-.match-dimensions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.dim-row {
-  display: grid;
-  grid-template-columns: 70px 1fr 32px;
-  gap: 10px;
-  align-items: center;
-  font-size: 12px;
-}
-.dim-name { color: #a8b4c8; }
-.dim-bar-wrap {
-  height: 6px;
-  background: rgba(135, 169, 220, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.dim-bar {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.5s ease;
-}
-.dim-val {
-  text-align: right;
-  color: #f4f7fc;
-  font-weight: 500;
+  color: rgba(168,180,200,0.7);
+  letter-spacing: 3px;
 }
 
-.gap-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.gap-item {
-  padding: 14px;
-  background: rgba(255, 112, 136, 0.04);
-  border: 1px solid rgba(255, 112, 136, 0.15);
-  border-radius: 12px;
-}
-.gap-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.gap-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #f4f7fc;
-}
-.gap-impact {
-  font-size: 12px;
-  color: #37d6a5;
-  font-weight: 500;
-}
-.gap-levels {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 12px;
-}
-.gap-level {
-  padding: 2px 8px;
-  border-radius: 6px;
-}
-.gap-level.current {
-  background: rgba(168, 180, 200, 0.1);
-  color: #a8b4c8;
-}
-.gap-level.required {
-  background: rgba(78, 216, 255, 0.12);
-  color: #4ed8ff;
-}
-.gap-arrow { color: #68768d; }
-.gap-badge {
-  margin-left: auto;
-  padding: 2px 8px;
-  background: rgba(255, 112, 136, 0.12);
-  border-radius: 6px;
-  color: #ff7088;
-  font-size: 11px;
-}
-.gap-desc {
-  font-size: 12px;
-  color: #68768d;
-  line-height: 1.5;
-  margin-bottom: 10px;
-}
-.gap-action {
-  width: 100%;
-  padding: 8px;
-  background: transparent;
-  border: 1px solid rgba(78, 216, 255, 0.3);
-  border-radius: 8px;
-  color: #4ed8ff;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.gap-action:hover {
-  background: rgba(78, 216, 255, 0.1);
-}
-
-.next-task-panel {
-  border-color: rgba(78, 216, 255, 0.28);
-  background: linear-gradient(180deg, rgba(78,216,255,0.08) 0%, rgba(12,24,42,0.9) 100%);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 30px rgba(78,216,255,0.08), inset 0 1px 0 rgba(78,216,255,0.15);
-}
-.next-task-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.nt-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #f4f7fc;
-  line-height: 1.4;
-}
-.nt-reason {
-  font-size: 13px;
-  color: #a8b4c8;
-  line-height: 1.5;
-}
-.nt-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #a8b4c8;
-}
-.nt-meta-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.nt-skills {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-}
-.nt-skills-label { color: #68768d; }
-.nt-skill-tag {
-  padding: 2px 8px;
-  background: rgba(143, 124, 255, 0.12);
-  border-radius: 6px;
-  color: #8f7cff;
-  font-size: 11px;
-}
-.nt-impact {
-  padding: 12px;
-  background: rgba(14, 26, 43, 0.6);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.nt-impact-label {
-  font-size: 12px;
-  color: #68768d;
-}
-.nt-impact-values {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.nt-val {
-  font-size: 20px;
-  font-weight: 700;
-}
-.nt-val.from { color: #a8b4c8; }
-.nt-val.to { color: #37d6a5; }
-.nt-arrow { color: #68768d; font-size: 14px; }
-.nt-start-btn {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #4ed8ff 0%, #8f7cff 100%);
-  border: none;
-  border-radius: 12px;
-  color: #07111f;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-top: 4px;
-  box-shadow: 0 4px 20px rgba(78,216,255,0.3), 0 0 40px rgba(143,124,255,0.15), inset 0 1px 0 rgba(255,255,255,0.25);
+.gc-content {
   position: relative;
-  overflow: hidden;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 16px;
+  padding: 16px 20px 30px;
+  max-width: 1920px;
+  margin: 0 auto;
 }
-.nt-start-btn::before {
-  content: '';
+.gc-left, .gc-center, .gc-right { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+.gc-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(8,20,45,0.45) 0%, rgba(5,12,30,0.55) 100%);
+  border: 1px solid rgba(78,216,255,0.12);
+  border-radius: 12px;
+  padding: 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.gc-card:hover {
+  border-color: rgba(78,216,255,0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(78,216,255,0.08);
+  transform: translateY(-2px);
+}
+
+.card-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: rgba(78,216,255,0.4);
+  z-index: 5;
+}
+.card-corner-tl { top: 6px; left: 6px; border-top: 1.5px solid; border-left: 1.5px solid; border-radius: 3px 0 0 0; }
+.card-corner-tr { top: 6px; right: 6px; border-top: 1.5px solid; border-right: 1.5px solid; border-radius: 0 3px 0 0; }
+.card-corner-bl { bottom: 6px; left: 6px; border-bottom: 1.5px solid; border-left: 1.5px solid; border-radius: 0 0 0 3px; }
+.card-corner-br { bottom: 6px; right: 6px; border-bottom: 1.5px solid; border-right: 1.5px solid; border-radius: 0 0 3px 0; }
+
+.card-border-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent 30%, rgba(78,216,255,0.15) 50%, transparent 70%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: borderGlowRotate 6s linear infinite;
+  opacity: 0.6;
+}
+.galaxy-border-glow { opacity: 1; }
+.action-glow { background: linear-gradient(135deg, transparent 20%, rgba(78,216,255,0.25) 50%, rgba(143,124,255,0.15) 70%, transparent 90%); }
+@keyframes borderGlowRotate {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 200%; }
+}
+
+.card-scan {
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  transition: left 0.6s;
+  background: linear-gradient(90deg, transparent, rgba(78,216,255,0.03), transparent);
+  animation: cardScan 8s ease-in-out infinite;
+  pointer-events: none;
 }
-.nt-start-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(78,216,255,0.45), 0 0 60px rgba(143,124,255,0.25), inset 0 1px 0 rgba(255,255,255,0.35);
-}
-.nt-start-btn:hover::before {
-  left: 100%;
+@keyframes cardScan {
+  0%, 100% { left: -100%; }
+  50% { left: 100%; }
 }
 
-.week-plan {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.wp-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.wp-stat {
-  padding: 12px;
-  background: rgba(135, 169, 220, 0.05);
-  border-radius: 10px;
-  text-align: center;
-}
-.wp-stat.highlight {
-  background: rgba(55, 214, 165, 0.08);
-}
-.wp-num {
-  font-size: 24px;
-  font-weight: 700;
-  color: #f4f7fc;
-}
-.wp-stat.highlight .wp-num { color: #37d6a5; }
-.wp-unit {
-  font-size: 12px;
-  font-weight: 500;
-  color: #a8b4c8;
-}
-.wp-label {
-  font-size: 11px;
-  color: #68768d;
-  margin-top: 2px;
-}
-.wp-view-btn {
-  width: 100%;
-  padding: 10px;
-  background: transparent;
-  border: 1px solid rgba(135, 169, 220, 0.2);
-  border-radius: 10px;
-  color: #a8b4c8;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.wp-view-btn:hover {
-  border-color: rgba(78, 216, 255, 0.3);
-  color: #4ed8ff;
-}
-
-.second-screen, .third-screen, .fourth-screen {
-  padding: 40px 24px 24px;
-}
-
-.section-header {
+.card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
-.section-title {
-  font-size: 22px;
-  font-weight: 700;
+.card-header h3 {
   margin: 0;
-  color: #f4f7fc;
+  font-size: 14px;
+  font-weight: 600;
+  color: #c8d8ee;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
 }
-.section-desc {
-  font-size: 13px;
-  color: #68768d;
-  margin: 6px 0 0;
+.header-bar {
+  width: 3px;
+  height: 14px;
+  background: linear-gradient(180deg, #4ed8ff, #8f7cff);
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(78,216,255,0.5);
 }
-.section-more {
-  padding: 6px 14px;
-  background: rgba(135, 169, 220, 0.08);
-  border: 1px solid rgba(135, 169, 220, 0.16);
-  border-radius: 8px;
-  color: #a8b4c8;
-  font-size: 12px;
-  cursor: pointer;
+.title-deco {
+  width: 18px;
+  height: 18px;
+  background: conic-gradient(from 0deg, transparent, #4ed8ff, transparent, #8f7cff, transparent);
+  border-radius: 3px;
+  animation: titleDecoSpin 4s linear infinite;
+  opacity: 0.7;
+}
+@keyframes titleDecoSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.learning-path-container {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 20px;
+.animate-card {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardEnter 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: var(--delay);
 }
-.path-main {
-  background: rgba(14, 26, 43, 0.82);
-  border: 1px solid rgba(135, 169, 220, 0.16);
-  border-radius: 16px;
-  padding: 28px;
-  backdrop-filter: blur(16px);
+@keyframes cardEnter {
+  to { opacity: 1; transform: translateY(0); }
 }
-.path-track {
-  display: flex;
-  align-items: flex-start;
-  gap: 0;
-  overflow-x: auto;
-  padding-bottom: 10px;
+
+.match-role { margin-bottom: 12px; }
+.role-name { font-size: 18px; font-weight: 700; color: #fff; text-shadow: 0 0 20px rgba(78,216,255,0.3); }
+.role-meta { font-size: 12px; color: rgba(168,180,200,0.7); margin-top: 3px; }
+
+.match-circle-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 12px;
 }
-.path-node {
+.match-circle-outer-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(78,216,255,0.08) 0%, transparent 60%);
+  animation: matchOuterGlow 3s ease-in-out infinite;
+}
+@keyframes matchOuterGlow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+.match-circle { width: 100%; height: 100%; }
+.match-progress-circle {
+  animation: progressReveal 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes progressReveal {
+  from { stroke-dashoffset: 515; }
+}
+.match-num {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  min-width: 140px;
-  flex: 1;
+  justify-content: center;
 }
-.node-dot {
-  width: 40px;
-  height: 40px;
+.num-big {
+  font-size: 56px;
+  font-weight: 900;
+  background: linear-gradient(180deg, #ffffff 0%, #00f5ff 40%, #4ed8ff 70%, #8f7cff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  filter: drop-shadow(0 0 20px rgba(0,245,255,0.6)) drop-shadow(0 0 40px rgba(78,216,255,0.3));
+  animation: numGlow 2s ease-in-out infinite;
+}
+@keyframes numGlow {
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(0,245,255,0.5)) drop-shadow(0 0 30px rgba(78,216,255,0.2)); }
+  50% { filter: drop-shadow(0 0 30px rgba(0,245,255,0.8)) drop-shadow(0 0 60px rgba(78,216,255,0.5)); }
+}
+.num-pct { font-size: 20px; font-weight: 600; color: #4ed8ff; margin-left: 2px; margin-top: 8px; }
+.num-label { font-size: 11px; color: rgba(168,180,200,0.7); margin-top: 4px; letter-spacing: 1px; }
+.num-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.num-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #4ed8ff;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  animation: numParticleBurst 3s ease-out infinite;
+  animation-delay: var(--delay);
+  box-shadow: 0 0 6px #4ed8ff;
+}
+@keyframes numParticleBurst {
+  0% { transform: translate(-50%,-50%) rotate(var(--angle)) translateY(30px) scale(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translate(-50%,-50%) rotate(var(--angle)) translateY(70px) scale(0); opacity: 0; }
+}
+.match-trend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  padding: 8px;
+  background: rgba(55,214,165,0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(55,214,165,0.15);
+}
+.match-trend.up { color: #37d6a5; }
+.trend-arrow { font-size: 14px; font-weight: 700; }
+.trend-val { font-size: 15px; font-weight: 700; }
+.match-trend label { font-size: 11px; color: rgba(168,180,200,0.7); font-weight: 400; }
+
+.radar-chart { width: 100%; max-width: 260px; margin: 0 auto; }
+.radar-polygon-anim { animation: radarPulse 4s ease-in-out infinite; }
+@keyframes radarPulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; filter: url(#radarGlow) drop-shadow(0 0 8px rgba(78,216,255,0.4)); }
+}
+.radar-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.lg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(168,180,200,0.8); }
+.lg-item i { width: 8px; height: 8px; border-radius: 2px; }
+.lg-item i[style*="background"] { border-radius: 50%; }
+.lg-item i:not([style*="background"]) { background: transparent; border: 1.5px solid; border-radius: 50%; }
+
+.resume-score {
+  font-size: 22px;
+  font-weight: 800;
+  color: #37d6a5;
+  text-shadow: 0 0 12px rgba(55,214,165,0.4);
+}
+.resume-score em { font-size: 12px; font-style: normal; font-weight: 500; }
+.resume-score label { font-size: 11px; color: rgba(168,180,200,0.7); margin-left: 6px; padding: 2px 8px; background: rgba(55,214,165,0.1); border-radius: 4px; font-weight: 400; }
+.resume-meta { font-size: 11px; color: rgba(168,180,200,0.6); margin-bottom: 10px; }
+.resume-desc { font-size: 12px; color: rgba(200,216,238,0.85); line-height: 1.7; margin-bottom: 14px; }
+.resume-detail {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(78,216,255,0.12), rgba(0,200,255,0.06));
+  border: 1px solid rgba(78,216,255,0.2);
+  border-radius: 8px;
+  color: #4ed8ff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s;
+}
+.resume-detail:hover { background: linear-gradient(135deg, rgba(78,216,255,0.2), rgba(0,200,255,0.1)); box-shadow: 0 0 20px rgba(78,216,255,0.15); }
+
+.galaxy-card { padding: 20px; }
+.galaxy-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.galaxy-header h2 {
+  margin: 0 0 2px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-shadow: 0 0 30px rgba(78,216,255,0.3);
+}
+.galaxy-header p { margin: 0; font-size: 12px; color: rgba(168,180,200,0.6); margin-left: 28px; }
+.galaxy-stats { display: flex; gap: 16px; }
+.galaxy-stats span { font-size: 11px; color: rgba(168,180,200,0.7); }
+.galaxy-stats strong { color: #4ed8ff; font-size: 16px; font-weight: 700; margin-right: 3px; text-shadow: 0 0 8px rgba(78,216,255,0.5); }
+
+.galaxy-scene {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, rgba(8,20,50,0.3) 0%, rgba(4,10,25,0.5) 100%);
+  border: 1px solid rgba(78,216,255,0.08);
+}
+.galaxy-bg-radial {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at center, rgba(78,216,255,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 30% 40%, rgba(143,124,255,0.04) 0%, transparent 40%);
+  pointer-events: none;
+}
+.galaxy-bg { position: absolute; inset: 0; }
+.star {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  animation: starTwinkle ease-in-out infinite;
+}
+.star-bright {
+  width: 2px;
+  height: 2px;
+  background: #4ed8ff;
+  box-shadow: 0 0 4px #4ed8ff;
+}
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.orbit-particles {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.orbit-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #4ed8ff;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  margin: -1.5px 0 0 -1.5px;
+  box-shadow: 0 0 6px #4ed8ff;
+  animation: orbitParticleMove linear infinite;
+}
+.orbit-particles-1 { width: 290px; height: 290px; margin: -145px 0 0 -145px; animation: orbitRotate 30s linear infinite; }
+.orbit-particles-1 .orbit-particle { animation-duration: 30s; }
+.orbit-particles-2 { width: 210px; height: 210px; margin: -105px 0 0 -105px; animation: orbitRotateRev 22s linear infinite; }
+.orbit-particles-2 .orbit-particle { background: rgba(143,124,255,0.8); box-shadow: 0 0 6px #8f7cff; animation-duration: 22s; }
+.orbit-particles-3 { width: 130px; height: 130px; margin: -65px 0 0 -65px; animation: orbitRotate 15s linear infinite; }
+.orbit-particles-3 .orbit-particle { background: rgba(55,214,165,0.7); box-shadow: 0 0 5px #37d6a5; animation-duration: 15s; }
+@keyframes orbitParticleMove {
+  0% { transform: rotate(var(--angle)) translateX(0) scale(0); opacity: 0; }
+  10% { transform: rotate(calc(var(--angle) + 36deg)) translateX(0) scale(1); opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: rotate(calc(var(--angle) + 324deg)) translateX(0) scale(0); opacity: 0; }
+}
+@keyframes orbitRotate { to { transform: rotate(360deg); } }
+@keyframes orbitRotateRev { to { transform: rotate(-360deg); } }
+
+.orbit-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 1px dashed;
+  pointer-events: none;
+}
+.orbit-ring-1 { width: 390px; height: 390px; margin: -195px 0 0 -195px; border-color: rgba(78,216,255,0.1); animation: orbitRotate 80s linear infinite; }
+.orbit-ring-2 { width: 290px; height: 290px; margin: -145px 0 0 -145px; border-color: rgba(143,124,255,0.1); animation: orbitRotateRev 60s linear infinite; }
+.orbit-ring-3 { width: 180px; height: 180px; margin: -90px 0 0 -90px; border-color: rgba(55,214,165,0.1); animation: orbitRotate 40s linear infinite; }
+
+.core-user {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+}
+.core-shockwave {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70px;
+  height: 70px;
+  margin: -35px 0 0 -35px;
+  border-radius: 50%;
+  border: 1px solid rgba(78,216,255,0.3);
+  animation: shockwave 4s ease-out infinite;
+}
+@keyframes shockwave {
+  0% { width: 70px; height: 70px; margin: -35px 0 0 -35px; opacity: 0.6; }
+  100% { width: 160px; height: 160px; margin: -80px 0 0 -80px; opacity: 0; }
+}
+.core-energy-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 1px solid;
+  animation: energyRingRotate linear infinite;
+}
+.core-energy-ring-1 {
+  width: 85px; height: 85px; margin: -42px 0 0 -42px;
+  border-color: rgba(78,216,255,0.2) transparent rgba(78,216,255,0.2) transparent;
+  animation-duration: 8s;
+}
+.core-energy-ring-2 {
+  width: 105px; height: 105px; margin: -52px 0 0 -52px;
+  border-color: transparent rgba(143,124,255,0.15) transparent rgba(143,124,255,0.15);
+  animation-duration: 12s;
+  animation-direction: reverse;
+}
+@keyframes energyRingRotate { to { transform: rotate(360deg); } }
+.core-glow-outer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 110px;
+  height: 110px;
+  margin: -55px 0 0 -55px;
+  background: radial-gradient(circle, rgba(78,216,255,0.12) 0%, rgba(78,216,255,0.03) 40%, transparent 70%);
+  border-radius: 50%;
+  animation: corePulse 4s ease-in-out infinite;
+}
+.core-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 85px;
+  height: 85px;
+  margin: -42px 0 0 -42px;
+  background: radial-gradient(circle, rgba(78,216,255,0.2) 0%, rgba(0,200,255,0.06) 40%, transparent 70%);
+  border-radius: 50%;
+  animation: corePulse 3s ease-in-out infinite 0.8s;
+}
+.core-glow-inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(78,216,255,0.06) 50%, transparent 70%);
+  border-radius: 50%;
+  animation: corePulse 2.5s ease-in-out infinite 1.5s;
+}
+@keyframes corePulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.9; }
+}
+.core-avatar-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(78,216,255,0.6);
+  animation: ringRotate 6s linear infinite;
+}
+@keyframes ringRotate { to { transform: rotate(360deg); } }
+.core-avatar {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ed8ff 0%, #00a8cc 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #041220;
+  z-index: 2;
+  margin: 0 auto;
+  box-shadow: 0 0 24px rgba(78,216,255,0.4), inset 0 1px 2px rgba(255,255,255,0.3);
+}
+.core-info { margin-top: 12px; }
+.core-name { font-size: 14px; font-weight: 600; color: #e8f4ff; text-shadow: 0 0 12px rgba(78,216,255,0.3); letter-spacing: 0.5px; }
+.core-meta { font-size: 10px; color: rgba(140,165,195,0.8); margin-top: 3px; }
+
+.skill-node {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
+  text-align: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.skill-node.big-node .node-bg { width: 52px; height: 52px; }
+.skill-node.big-node .node-ring { width: 58px; height: 58px; margin: -55px 0 0 -29px; }
+.skill-node.big-node .node-short { font-size: 13px; }
+.skill-node.big-node .node-label { font-size: 10px; }
+.skill-node:hover { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.15); z-index: 20; }
+.skill-node:hover .node-ring { border-width: 2px; }
+.skill-node:hover .node-label { opacity: 1; }
+.node-bg {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(6,18,40,0.9);
+  margin: 0 auto 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.mastered .node-bg { background: linear-gradient(135deg, rgba(55,214,165,0.15), rgba(6,18,40,0.95)); }
+.improve .node-bg { background: linear-gradient(135deg, rgba(143,124,255,0.15), rgba(6,18,40,0.95)); }
+.missing .node-bg { background: linear-gradient(135deg, rgba(255,112,136,0.15), rgba(6,18,40,0.95)); }
+.transfer .node-bg { background: linear-gradient(135deg, rgba(255,182,92,0.15), rgba(6,18,40,0.95)); }
+.node-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 50px;
+  height: 50px;
+  margin: -50px 0 0 -25px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  transition: all 0.3s;
+}
+.mastered .node-ring { border-color: rgba(55,214,165,0.5); box-shadow: 0 0 8px rgba(55,214,165,0.2); }
+.improve .node-ring { border-color: rgba(143,124,255,0.5); box-shadow: 0 0 8px rgba(143,124,255,0.2); }
+.missing .node-ring { border-color: rgba(255,112,136,0.5); box-shadow: 0 0 8px rgba(255,112,136,0.2); }
+.transfer .node-ring { border-color: rgba(255,182,92,0.5); box-shadow: 0 0 8px rgba(255,182,92,0.2); }
+.node-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 50px;
+  height: 50px;
+  margin: -25px 0 0 -25px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+.pulse-node .node-pulse {
+  animation: nodePulse 3s ease-out infinite;
+}
+.mastered.pulse-node .node-pulse { border: 1px solid rgba(55,214,165,0.4); }
+.improve.pulse-node .node-pulse { border: 1px solid rgba(143,124,255,0.4); }
+.missing.pulse-node .node-pulse { border: 1px solid rgba(255,112,136,0.4); }
+.transfer.pulse-node .node-pulse { border: 1px solid rgba(255,182,92,0.4); }
+@keyframes nodePulse {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.node-short {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
+}
+.mastered .node-short { color: #5ae8bc; text-shadow: 0 0 8px rgba(55,214,165,0.4); }
+.improve .node-short { color: #b0a0ff; text-shadow: 0 0 8px rgba(143,124,255,0.4); }
+.missing .node-short { color: #ff9aab; text-shadow: 0 0 8px rgba(255,112,136,0.4); }
+.transfer .node-short { color: #ffcc88; text-shadow: 0 0 8px rgba(255,182,92,0.4); }
+.node-label {
+  font-size: 9px;
+  color: rgba(180,200,225,0.7);
+  white-space: nowrap;
+  font-weight: 500;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+
+.skill-tip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  z-index: 30;
+  animation: tipIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes tipIn {
+  from { opacity: 0; transform: translate(-50%, -90%) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+}
+.tip-arrow {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background: rgba(10,28,55,0.98);
+  border-right: 1px solid rgba(78,216,255,0.25);
+  border-bottom: 1px solid rgba(78,216,255,0.25);
+}
+.tip-inner {
+  background: linear-gradient(180deg, rgba(12,32,62,0.97) 0%, rgba(8,22,48,0.98) 100%);
+  border: 1px solid rgba(78,216,255,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-width: 130px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(78,216,255,0.08);
+}
+.tip-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 3px;
+}
+.tip-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tip-status-dot.mastered { background: #37d6a5; box-shadow: 0 0 6px #37d6a5; }
+.tip-status-dot.improve { background: #8f7cff; box-shadow: 0 0 6px #8f7cff; }
+.tip-status-dot.missing { background: #ff7088; box-shadow: 0 0 6px #ff7088; }
+.tip-status-dot.transfer { background: #ffb65c; box-shadow: 0 0 6px #ffb65c; }
+.tip-name { font-size: 13px; font-weight: 600; color: #fff; }
+.tip-cat { font-size: 10px; color: rgba(140,165,195,0.7); margin-bottom: 8px; padding-left: 14px; }
+.tip-level-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tip-level-val { font-size: 11px; font-weight: 700; color: rgba(78,216,255,0.9); flex-shrink: 0; }
+.tip-bar { flex: 1; height: 4px; background: rgba(78,216,255,0.1); border-radius: 2px; overflow: hidden; }
+.tip-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.tip-bar-fill.mastered { background: linear-gradient(90deg, #37d6a5, #5ae8bc); box-shadow: 0 0 6px rgba(55,214,165,0.5); }
+.tip-bar-fill.improve { background: linear-gradient(90deg, #8f7cff, #b0a0ff); box-shadow: 0 0 6px rgba(143,124,255,0.5); }
+.tip-bar-fill.missing { background: linear-gradient(90deg, #ff7088, #ff9aab); box-shadow: 0 0 6px rgba(255,112,136,0.5); }
+.tip-bar-fill.transfer { background: linear-gradient(90deg, #ffb65c, #ffcc88); box-shadow: 0 0 6px rgba(255,182,92,0.5); }
+
+.galaxy-legend {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(78,216,255,0.06);
+}
+.gl-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: rgba(140,165,195,0.8); }
+.gl-item i { width: 7px; height: 7px; border-radius: 50%; }
+.gl-item.mastered i { background: #37d6a5; box-shadow: 0 0 5px #37d6a5; }
+.gl-item.improve i { background: #8f7cff; box-shadow: 0 0 5px #8f7cff; }
+.gl-item.missing i { background: #ff7088; box-shadow: 0 0 5px #ff7088; }
+.gl-item.transfer i { background: #ffb65c; box-shadow: 0 0 5px #ffb65c; }
+
+.lp-header { margin-bottom: 12px; }
+.lp-header h2 { margin: 0 0 2px; font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+.lp-header p { margin: 0; font-size: 12px; color: rgba(168,180,200,0.6); margin-left: 28px; }
+
+.lp-mountain {
+  position: relative;
+  height: 200px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(8,20,45,0.2) 0%, rgba(4,12,30,0.4) 100%);
+  border: 1px solid rgba(78,216,255,0.08);
+}
+.lp-svg { width: 100%; height: 100%; }
+.lp-path {
+  stroke-dasharray: 2000;
+  animation: pathDraw 3s ease-out forwards;
+}
+@keyframes pathDraw { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
+.lp-stop {
+  position: absolute;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.stop-pulse {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  margin: -4px 0 0 -14px;
+  border-radius: 50%;
+  border: 2px solid #ffb65c;
+  animation: stopPulse 2s ease-out infinite;
+}
+@keyframes stopPulse {
+  0% { transform: translateX(-50%) scale(1); opacity: 1; }
+  100% { transform: translateX(-50%) scale(2.5); opacity: 0; }
+}
+.stop-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  margin: -6px 0 0 -16px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.lp-stop.current .stop-glow { background: radial-gradient(circle, rgba(255,182,92,0.4) 0%, transparent 60%); }
+.lp-stop.done .stop-glow { background: radial-gradient(circle, rgba(55,214,165,0.3) 0%, transparent 60%); }
+.stop-dot {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  margin: 0 auto 4px;
+  position: relative;
+}
+.lp-stop.done .stop-dot {
+  background: linear-gradient(135deg, #37d6a5, #2ab890);
+  color: #041210;
+  box-shadow: 0 0 12px rgba(55,214,165,0.5);
+}
+.lp-stop.current .stop-dot {
+  background: linear-gradient(135deg, #ffb65c, #ff9500);
+  color: #1a0f00;
+  box-shadow: 0 0 16px rgba(255,182,92,0.6);
+  animation: stopCurrentPulse 1.5s ease-in-out infinite;
+}
+.lp-stop.locked .stop-dot {
+  background: rgba(30,50,80,0.8);
+  color: rgba(168,180,200,0.5);
+  border: 1px solid rgba(78,216,255,0.15);
+}
+@keyframes stopCurrentPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(255,182,92,0.5); }
+  50% { box-shadow: 0 0 24px rgba(255,182,92,0.8); }
+}
+.stop-label { font-size: 10px; color: rgba(168,180,200,0.7); white-space: nowrap; }
+.lp-stop.current .stop-label { color: #ffb65c; font-weight: 600; }
+.lp-stop.done .stop-label { color: #37d6a5; }
+.lp-current-pos {
+  position: absolute;
+  left: 58%;
+  bottom: 58%;
+  transform: translate(-50%, 50%);
+}
+.pos-ping {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  background: rgba(255,182,92,0.3);
+  animation: posPing 1.5s ease-out infinite;
+}
+@keyframes posPing {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+.pos-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffb65c;
+  box-shadow: 0 0 12px #ffb65c;
+  position: relative;
   z-index: 2;
 }
-.path-node.completed .node-dot {
-  background: rgba(55, 214, 165, 0.15);
-  border: 2px solid #37d6a5;
-  color: #37d6a5;
-}
-.path-node.in-progress .node-dot {
-  background: rgba(78, 216, 255, 0.15);
-  border: 2px solid #4ed8ff;
-  color: #4ed8ff;
-}
-.path-node.available .node-dot {
-  background: rgba(143, 124, 255, 0.1);
-  border: 2px solid rgba(143, 124, 255, 0.5);
-  color: #8f7cff;
-}
-.path-node.locked .node-dot {
-  background: rgba(104, 118, 141, 0.1);
-  border: 2px solid rgba(104, 118, 141, 0.3);
-  color: #68768d;
-}
-.dot-spinner {
-  width: 12px;
-  height: 12px;
-  border: 2px solid transparent;
-  border-top-color: #4ed8ff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.node-content {
-  text-align: center;
-  padding: 0 8px;
-}
-.node-icon {
-  font-size: 24px;
-  margin-bottom: 6px;
-}
-.node-name {
-  font-size: 14px;
+.pos-label {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #ffb65c;
+  white-space: nowrap;
   font-weight: 600;
-  color: #f4f7fc;
-  margin-bottom: 4px;
 }
-.node-desc {
-  font-size: 11px;
-  color: #68768d;
-  line-height: 1.4;
-  margin-bottom: 8px;
+
+.action-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, rgba(143,124,255,0.2), rgba(78,216,255,0.2));
+  border: 1px solid rgba(143,124,255,0.3);
+  border-radius: 4px;
+  color: #a78bfa;
+  font-weight: 600;
 }
-.node-progress {
+.action-priority { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.prio-label { font-size: 11px; color: rgba(168,180,200,0.6); }
+.prio-high {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  background: rgba(255,112,136,0.1);
+  border: 1px solid rgba(255,112,136,0.3);
+  border-radius: 4px;
+  color: #ff7088;
+  letter-spacing: 1px;
+}
+.action-title { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.4; margin-bottom: 8px; text-shadow: 0 0 20px rgba(78,216,255,0.2); }
+.action-desc { font-size: 12px; color: rgba(200,216,238,0.75); line-height: 1.6; margin-bottom: 14px; }
+.action-meta { display: flex; gap: 14px; margin-bottom: 14px; }
+.meta-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(168,180,200,0.7); }
+.meta-item svg { color: #4ed8ff; }
+.action-start {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #4ed8ff 0%, #00e5ff 30%, #00b8d4 60%, #8f7cff 100%);
+  border: none;
+  border-radius: 12px;
+  color: #041020;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-.progress-bar {
-  flex: 1;
-  height: 4px;
-  background: rgba(135, 169, 220, 0.1);
-  border-radius: 2px;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
   overflow: hidden;
+  transition: all 0.3s;
+  box-shadow: 
+    0 0 20px rgba(78,216,255,0.5), 
+    0 0 40px rgba(78,216,255,0.25),
+    0 4px 15px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+  letter-spacing: 1px;
 }
-.progress-fill {
+.action-start:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 0 30px rgba(78,216,255,0.7), 
+    0 0 60px rgba(78,216,255,0.4),
+    0 8px 25px rgba(0,0,0,0.4);
+}
+.btn-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: btnShine 3s ease-in-out infinite;
+}
+@keyframes btnShine {
+  0%, 100% { left: -100%; }
+  50% { left: 100%; }
+}
+
+.progress-label { font-size: 13px; font-weight: 700; color: #4ed8ff; }
+.plan-progress { margin-bottom: 14px; }
+.pp-bar { height: 6px; background: rgba(78,216,255,0.08); border-radius: 3px; overflow: hidden; }
+.pp-fill {
   height: 100%;
   background: linear-gradient(90deg, #4ed8ff, #8f7cff);
-  border-radius: 2px;
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(78,216,255,0.4);
+  animation: ppFill 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-.progress-text {
-  font-size: 10px;
-  color: #4ed8ff;
-  min-width: 28px;
-}
-.node-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 10px;
-  color: #68768d;
-}
-
-.node-connector {
-  position: absolute;
-  top: 20px;
-  left: calc(50% + 20px);
-  right: calc(-50% + 20px);
-  height: 2px;
-  background: rgba(135, 169, 220, 0.15);
-  z-index: 1;
-}
-.node-connector.done {
-  background: linear-gradient(90deg, #37d6a5, rgba(55, 214, 165, 0.3));
-}
-
-.resume-info {
-  margin-bottom: 16px;
-}
-.resume-file {
-  font-size: 13px;
-  color: #f4f7fc;
-  font-weight: 500;
-  word-break: break-all;
-}
-.resume-version {
-  font-size: 11px;
-  color: #68768d;
-  margin-top: 4px;
-}
-.resume-mini-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-  padding: 12px;
-  background: rgba(135, 169, 220, 0.04);
-  border-radius: 10px;
-}
-.rms-item { text-align: center; }
-.rms-num {
-  font-size: 20px;
-  font-weight: 700;
-  color: #4ed8ff;
-}
-.rms-label {
-  font-size: 10px;
-  color: #68768d;
-}
-.resume-recent {
-  margin-bottom: 16px;
-}
-.rr-title {
-  font-size: 12px;
-  color: #a8b4c8;
-  margin-bottom: 10px;
-}
-.rr-item {
-  display: flex;
-  gap: 8px;
-  font-size: 11px;
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
-.rr-date {
-  color: #ffb65c;
+@keyframes ppFill { from { width: 0; } }
+.plan-list { display: flex; flex-direction: column; gap: 8px; }
+.plan-item { display: flex; align-items: flex-start; gap: 10px; }
+.pi-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(78,216,255,0.3);
   flex-shrink: 0;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
 }
-.rr-text { color: #a8b4c8; }
+.plan-item.done .pi-check {
+  background: linear-gradient(135deg, #37d6a5, #2ab890);
+  border-color: #37d6a5;
+  box-shadow: 0 0 8px rgba(55,214,165,0.4);
+}
+.pi-title { font-size: 12px; color: #c8d8ee; line-height: 1.4; }
+.plan-item.done .pi-title { color: rgba(168,180,200,0.5); text-decoration: line-through; }
+.pi-time { font-size: 10px; color: rgba(168,180,200,0.5); margin-top: 2px; }
 
-.resume-action {
-  width: 100%;
-  padding: 8px;
-  background: rgba(78, 216, 255, 0.1);
-  border: 1px solid rgba(78, 216, 255, 0.25);
-  border-radius: 8px;
-  color: #4ed8ff;
-  font-size: 12px;
-  cursor: pointer;
-  margin-bottom: 8px;
-  transition: all 0.2s;
-}
-.resume-action:hover { background: rgba(78, 216, 255, 0.18); }
-.resume-action.secondary {
-  background: transparent;
-  border-color: rgba(135, 169, 220, 0.2);
-  color: #a8b4c8;
-}
-.resume-action.secondary:hover {
-  border-color: rgba(78, 216, 255, 0.3);
-  color: #4ed8ff;
-}
-
-.third-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-.interview-stats {
-  margin-bottom: 16px;
-}
-.is-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-.is-item {
-  padding: 14px;
-  background: rgba(135, 169, 220, 0.04);
-  border-radius: 10px;
+.interview-trend.up { color: #37d6a5; font-size: 12px; font-weight: 700; }
+.interview-score-wrap {
+  position: relative;
   text-align: center;
+  padding: 16px 0;
+  margin-bottom: 12px;
+}
+.is-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(78,216,255,0.15) 0%, transparent 60%);
+  border-radius: 50%;
+  animation: isGlow 3s ease-in-out infinite;
+}
+@keyframes isGlow {
+  0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.5; }
+  50% { transform: translate(-50%,-50%) scale(1.3); opacity: 1; }
 }
 .is-num {
-  font-size: 28px;
-  font-weight: 700;
-  color: #f4f7fc;
+  font-size: 48px;
+  font-weight: 900;
+  background: linear-gradient(180deg, #fff, #4ed8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  filter: drop-shadow(0 0 15px rgba(78,216,255,0.4));
 }
-.is-label {
-  font-size: 11px;
-  color: #68768d;
-  margin-top: 4px;
+.is-label { font-size: 11px; color: rgba(168,180,200,0.6); margin-top: 4px; letter-spacing: 1px; }
+.interview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 12px 8px;
+  background: rgba(7,20,40,0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(78,216,255,0.06);
 }
-
-.latest-interview {
-  padding: 14px;
-  background: rgba(135, 169, 220, 0.04);
-  border-radius: 10px;
-}
-.li-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(135, 169, 220, 0.1);
-}
-.li-date { font-size: 12px; color: #68768d; }
-.li-score { font-size: 18px; font-weight: 700; color: #4ed8ff; }
-.li-section { margin-bottom: 10px; }
-.li-sec-title {
-  font-size: 12px;
-  font-weight: 500;
-  margin-bottom: 6px;
-}
-.li-sec-title.strengths { color: #37d6a5; }
-.li-sec-title.weaknesses { color: #ff7088; }
-.li-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.li-tag {
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-}
-.li-tag.strength {
-  background: rgba(55, 214, 165, 0.1);
-  color: #37d6a5;
-}
-.li-tag.weakness {
-  background: rgba(255, 112, 136, 0.1);
-  color: #ff7088;
-}
-
-.recommend-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.rec-item {
-  padding: 14px;
-  background: rgba(135, 169, 220, 0.04);
-  border: 1px solid rgba(135, 169, 220, 0.1);
-  border-radius: 10px;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-.rec-item:hover {
-  border-color: rgba(78, 216, 255, 0.3);
-  background: rgba(78, 216, 255, 0.04);
-}
-.rec-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
-.rec-name {
-  font-size: 14px;
+.stat-item { text-align: center; }
+.stat-val { font-size: 18px; font-weight: 700; }
+.stat-lbl { font-size: 10px; color: rgba(168,180,200,0.6); margin-top: 2px; }
+.interview-btn {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(143,124,255,0.15), rgba(78,216,255,0.1));
+  border: 1px solid rgba(143,124,255,0.25);
+  border-radius: 8px;
+  color: #a78bfa;
+  font-size: 13px;
   font-weight: 600;
-  color: #f4f7fc;
+  cursor: pointer;
+  transition: all 0.3s;
 }
-.rec-company {
-  font-size: 11px;
-  color: #68768d;
-  margin-top: 2px;
-}
-.rec-match { text-align: right; }
-.rec-score {
-  font-size: 22px;
-  font-weight: 700;
-}
-.rec-score.high { color: #37d6a5; }
-.rec-score.mid { color: #4ed8ff; }
-.rec-score.low { color: #ffb65c; }
-.rec-change {
-  font-size: 11px;
-  margin-top: 2px;
-}
-.rec-change.up { color: #37d6a5; }
-.rec-reason {
-  font-size: 12px;
-  color: #a8b4c8;
-  line-height: 1.5;
-  margin-bottom: 8px;
-}
-.rec-footer {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #68768d;
-}
-.rec-gap { color: #ff7088; }
-.rec-days { color: #ffb65c; }
+.interview-btn:hover { background: linear-gradient(135deg, rgba(143,124,255,0.25), rgba(78,216,255,0.15)); box-shadow: 0 0 20px rgba(143,124,255,0.15); }
 
-.timeline-full {
+.timeline { padding: 4px 0; }
+.tl-item {
   position: relative;
   padding-left: 20px;
+  padding-bottom: 16px;
 }
-.tl-item {
-  display: flex;
-  gap: 20px;
-  padding-bottom: 24px;
-  position: relative;
+.tl-item.first .tl-dot { background: #4ed8ff; box-shadow: 0 0 10px #4ed8ff; }
+.tl-dot {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(78,216,255,0.3);
+  border: 2px solid rgba(78,216,255,0.5);
 }
 .tl-line {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-}
-.tl-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: rgba(135, 169, 220, 0.3);
-  border: 2px solid rgba(135, 169, 220, 0.2);
-  flex-shrink: 0;
-  z-index: 2;
-}
-.tl-dot.up {
-  background: #4ed8ff;
-  border-color: #4ed8ff;
-  box-shadow: 0 0 10px rgba(78, 216, 255, 0.4);
-}
-.tl-item.milestone .tl-dot {
-  background: #37d6a5;
-  border-color: #37d6a5;
-  width: 16px;
-  height: 16px;
-  box-shadow: 0 0 12px rgba(55, 214, 165, 0.4);
-}
-.tl-connector {
+  position: absolute;
+  left: 4px;
+  top: 16px;
+  bottom: 0;
   width: 2px;
-  flex: 1;
-  background: rgba(135, 169, 220, 0.12);
-  margin-top: 4px;
+  background: linear-gradient(180deg, rgba(78,216,255,0.2), rgba(78,216,255,0.05));
 }
-.tl-content {
-  flex: 1;
-  padding-bottom: 4px;
-}
-.tl-date {
-  font-size: 12px;
-  color: #68768d;
-  margin-bottom: 4px;
-}
-.tl-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #f4f7fc;
-  margin-bottom: 4px;
-}
-.tl-desc {
-  font-size: 13px;
-  color: #a8b4c8;
-  line-height: 1.5;
-  margin-bottom: 6px;
-}
-.tl-footer {
-  display: flex;
-  gap: 12px;
-  font-size: 11px;
-}
-.tl-source { color: #68768d; }
-.tl-match-up {
-  color: #37d6a5;
-  font-weight: 500;
-}
+.tl-date { font-size: 10px; color: #4ed8ff; font-weight: 600; margin-bottom: 3px; }
+.tl-text { font-size: 11px; color: rgba(200,216,238,0.75); line-height: 1.5; }
 
-@media (max-width: 1440px) {
-  .first-screen {
-    grid-template-columns: 260px minmax(0, 1fr) 300px;
-    gap: 16px;
-    padding: 20px;
-  }
+@media (max-width: 1400px) {
+  .gc-content { grid-template-columns: 260px 1fr 290px; gap: 14px; padding: 14px 16px; }
 }
-
 @media (max-width: 1200px) {
-  .first-screen {
-    grid-template-columns: 1fr;
-  }
-  .center-col { min-height: 500px; }
-  .learning-path-container {
-    grid-template-columns: 1fr;
-  }
-  .third-grid {
-    grid-template-columns: 1fr;
-  }
+  .gc-content { grid-template-columns: 1fr; max-width: 700px; }
+  .galaxy-scene { height: 400px; }
 }
 </style>

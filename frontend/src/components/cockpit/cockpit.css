@@ -16,8 +16,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
@@ -36,14 +37,16 @@
   width: 420px;
   max-width: 90vw;
   height: 100vh;
-  background: rgba(14, 26, 43, 0.98);
+  background: rgba(10, 60, 140, 0.65);
   backdrop-filter: blur(20px);
-  border-left: 1px solid rgba(135, 169, 220, 0.16);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(78, 216, 255, 0.2);
   z-index: 1001;
   transform: translateX(100%);
   transition: transform 0.3s ease;
   overflow-y: auto;
   padding: 24px;
+  box-shadow: -4px 0 30px rgba(0, 50, 120, 0.2);
 }
 
 .skill-drawer.active {
