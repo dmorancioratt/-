@@ -292,7 +292,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.life-tree { position: relative; width: 100%; height: 100%; min-height: 560px; overflow: hidden; background: #020816; box-shadow: inset 0 0 140px rgba(20, 128, 191, .1); }
+.life-tree { position: relative; width: 100%; height: 100%; min-height: 560px; overflow: hidden; background: transparent; box-shadow: none; }
 .life-tree__flow-shell { position: absolute; inset: 12px clamp(220px, 18vw, 278px) 42px; min-width: 0; overflow: hidden; }
 .life-tree :deep(.vue-flow) { background: transparent; }
 .life-tree :deep(.vue-flow__pane) { cursor: grab; }
@@ -300,7 +300,7 @@ onBeforeUnmount(() => {
 .life-tree :deep(.vue-flow__node) { border: 0; padding: 0; background: transparent; box-shadow: none; }
 .life-tree :deep(.vue-flow__edge) { pointer-events: none; }
 .life-tree :deep(.vue-flow__selectionpane) { cursor: grab; }
-.life-tree__controls { position: absolute; bottom: 0; left: 50%; z-index: 5; display: flex; overflow: hidden; border: 1px solid rgba(69, 197, 245, .2); border-radius: 6px; background: rgba(3, 17, 35, .88); transform: translateX(-50%); }
+.life-tree__controls { position: absolute; bottom: 0; left: 50%; z-index: 5; display: flex; overflow: hidden; border: 1px solid rgba(78, 200, 255, .15); border-radius: 6px; background: rgba(8, 42, 92, 0.4); transform: translateX(-50%); backdrop-filter: blur(6px); }
 .life-tree__controls button { display: grid; place-items: center; width: 34px; height: 32px; border: 0; border-right: 1px solid rgba(69, 197, 245, .15); color: #6eabc6; background: transparent; cursor: pointer; }
 .life-tree__controls button:last-child { border-right: 0; }
 .life-tree__controls button:hover { color: #71e9ff; background: rgba(31, 139, 191, .18); }

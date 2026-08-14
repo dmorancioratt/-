@@ -1,5 +1,6 @@
 <template>
   <div class="page evolution-page">
+    <WaveGridBackground />
     <PageHeader title="能力演化" desc="岗位能力随时间的新增、淘汰与迁移趋势分析">
       <el-radio-group v-model="tab" @change="onTabChange">
         <el-radio-button value="timeline">演化时间线</el-radio-button>
@@ -164,6 +165,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import EChart from '@/components/EChart.vue'
 import EvolutionTimeline from '@/components/EvolutionTimeline.vue'
 import EvolutionViews from '@/components/EvolutionViews.vue'
+import WaveGridBackground from '@/components/WaveGridBackground.vue'
 import { api } from '@/api/http'
 
 const tab = ref('timeline')
@@ -293,31 +295,33 @@ onMounted(loadAll)
 .evolution-page {
   min-width: 0;
   overflow-x: clip;
+  position: relative;
+  z-index: 2;
 }
 
 .evolution-page :deep(.page-toolbar) {
   min-height: 42px;
   margin-bottom: 14px;
-  border-color: rgba(57, 196, 255, 0.22);
+  border: 1px solid rgba(57, 196, 255, 0.18);
   border-radius: 10px;
   padding: 6px 10px;
-  background: linear-gradient(90deg, rgba(3, 29, 70, 0.2), rgba(6, 58, 112, 0.5));
-  box-shadow: inset 0 0 24px rgba(29, 150, 230, 0.08);
-  backdrop-filter: none;
+  background: linear-gradient(90deg, rgba(3, 29, 70, 0.08), rgba(6, 58, 112, 0.12));
+  box-shadow: inset 0 0 24px rgba(29, 150, 230, 0.04);
+  backdrop-filter: blur(8px) saturate(1.05);
 }
 
 .evolution-page :deep(.page-toolbar .el-radio-button__inner) {
   min-width: 86px;
-  border-color: rgba(67, 183, 238, 0.26);
+  border-color: rgba(67, 183, 238, 0.2);
   color: #a7cde1;
-  background: rgba(3, 29, 67, 0.78);
+  background: rgba(3, 29, 67, 0.25);
   box-shadow: none;
 }
 
 .evolution-page :deep(.page-toolbar .el-radio-button__original-radio:checked + .el-radio-button__inner) {
   color: #effdff;
-  background: linear-gradient(180deg, rgba(31, 155, 255, 0.94), rgba(5, 82, 171, 0.92));
-  box-shadow: inset 0 -2px #55e8ff, 0 0 16px rgba(35, 190, 255, 0.4);
+  background: linear-gradient(180deg, rgba(31, 155, 255, 0.65), rgba(5, 82, 171, 0.55));
+  box-shadow: inset 0 -2px #55e8ff, 0 0 12px rgba(35, 190, 255, 0.3);
 }
 
 .evo-metrics {
