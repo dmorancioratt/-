@@ -104,12 +104,20 @@
             </div>
           </div>
           <div ref="threeContainer" class="panorama-canvas"></div>
-          <div class="panorama-metrics">
-            <div v-for="metric in panoramaMetrics" :key="metric.label" class="panorama-metric">
-              <div class="panorama-metric__label">
-                <el-icon><component :is="metric.icon" /></el-icon><span>{{ metric.label }}</span>
+          <div class="panorama-metrics panorama-metrics--supply">
+            <div v-for="(m, i) in panoramaMetrics" :key="i" class="pano-kpi">
+              <div class="pano-kpi__title">{{ m.label }}</div>
+              <div class="pano-kpi__row">
+                <div class="font-digits pano-kpi__value">
+                  {{ m.value }}<span v-if="m.unit" class="pano-kpi__unit">{{ m.unit }}</span>
+                </div>
               </div>
-              <div class="font-digits panorama-metric__value">{{ metric.value }} <span>{{ metric.unit }}</span></div>
+              <div v-if="m.variant === 'ratio'" class="pano-kpi__sub pano-kpi__sub--info">{{ m.sub }}</div>
+              <div v-else class="pano-kpi__delta" :class="m.deltaTone">
+                <span class="pano-kpi__delta-prefix">较上周</span>
+                <el-icon><Top v-if="m.deltaTone === 'up'" /><Bottom v-else /></el-icon>
+                <span class="font-digits">{{ m.delta }}</span>
+              </div>
             </div>
           </div>
         </article>
@@ -217,6 +225,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import {
   Aim,
+  Bottom,
   Briefcase,
   ChatLineRound,
   DataAnalysis,
@@ -228,6 +237,7 @@ import {
   Promotion,
   Refresh,
   Tickets,
+  Top,
   TrendCharts,
   User,
   UserFilled,
@@ -292,11 +302,11 @@ const recruitmentActions = [
 ]
 
 const panoramaMetrics = [
-  { label: '活跃候选人', value: '680', unit: '人', icon: UserFilled, tone: 'cyan' },
-  { label: '新入库本周', value: '156', unit: '人', icon: Plus, tone: 'blue' },
-  { label: '面试中', value: '245', unit: '人', icon: ChatLineRound, tone: 'sky' },
-  { label: '已入职', value: '98', unit: '人', icon: Briefcase, tone: 'teal' },
-  { label: '人才流失率', value: '1.32', unit: '%', icon: DataAnalysis, tone: 'indigo' }
+  { label: '供需比', value: '6.74', unit: '', variant: 'ratio', sub: '供给 / 需求' },
+  { label: '需求总量', value: '46,521', unit: '人', delta: '8.3%', deltaTone: 'up' },
+  { label: '供给总量', value: '34,267', unit: '人', delta: '7.1%', deltaTone: 'up' },
+  { label: '缺口总量', value: '12,254', unit: '人', delta: '1.2%', deltaTone: 'down' },
+  { label: '平均匹配度', value: '68.45', unit: '%', delta: '6.3%', deltaTone: 'up' }
 ]
 
 const priorityTalents = [
@@ -891,11 +901,51 @@ onBeforeUnmount(() => {
 .panorama-canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; z-index: 0; pointer-events: auto; }
 .panorama-canvas:active { cursor: grabbing; }
 
-.panorama-metrics { position: relative; z-index: 2; margin: auto 16px 16px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 10px; background: rgba(8, 42, 92, .6); border: 1px solid rgba(78, 200, 255, .2); border-radius: 10px; backdrop-filter: blur(8px); }
-.panorama-metric + .panorama-metric { border-left: 1px solid rgba(78, 200, 255, .12); padding-left: 8px; }
-.panorama-metric__label { color: #88a9c4; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 4px; }
-.panorama-metric__value { color: #36d7ff; font-size: 14px; font-weight: 700; margin-top: 4px; text-align: center; }
-.panorama-metric__value span { color: #88a9c4; font-size: 10px; font-weight: 400; }
+.panorama-metrics--supply { position: relative; z-index: 2; margin: auto 16px 18px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 12px; background: linear-gradient(135deg, rgba(4, 26, 58, 0.72), rgba(8, 42, 92, 0.58)); border: 1px solid rgba(78, 200, 255, 0.22); border-radius: 14px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 8px 30px rgba(0, 80, 160, 0.18), inset 0 1px 0 rgba(160, 220, 255, 0.08); }
+.pano-kpi {
+  position: relative;
+  padding: 10px 14px 12px;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(30, 120, 220, 0.06), rgba(4, 26, 58, 0.3)),
+    radial-gradient(circle at 50% 0%, rgba(54, 215, 255, 0.12), transparent 60%);
+  border: 1px solid rgba(78, 200, 255, 0.14);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+.pano-kpi:hover { transform: translateY(-2px); border-color: rgba(54, 215, 255, 0.35); box-shadow: 0 8px 22px rgba(54, 215, 255, 0.15); }
+.pano-kpi::before {
+  position: absolute; top: 0; left: 14px; right: 14px; height: 2px;
+  content: "";
+  border-radius: 99px;
+  background: linear-gradient(90deg, transparent, rgba(54, 215, 255, 0.6), transparent);
+  opacity: 0.8;
+}
+.pano-kpi__title { font-size: 11px; font-weight: 700; color: #8ab9dd; letter-spacing: 0.02em; }
+.pano-kpi__row { margin-top: 6px; }
+.pano-kpi__value {
+  font-size: 24px; font-weight: 900; letter-spacing: -0.01em;
+  color: #eaf6ff;
+  text-shadow: 0 0 14px rgba(54, 215, 255, 0.35);
+}
+.pano-kpi__unit {
+  margin-left: 4px;
+  font-size: 12px; font-weight: 500; color: #7aa7cf;
+}
+.pano-kpi__delta {
+  margin-top: 5px;
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10.5px; font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(78, 200, 255, 0.12);
+}
+.pano-kpi__delta-prefix { color: #7aa7cf; font-weight: 500; margin-right: 2px; }
+.pano-kpi__delta.up   { color: #22d3ee; border-color: rgba(34, 211, 238, 0.25); }
+.pano-kpi__delta.down { color: #fca5a5; border-color: rgba(252, 165, 165, 0.22); }
+.pano-kpi__delta .el-icon { font-size: 10px; }
+.pano-kpi__sub { margin-top: 5px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; }
+.pano-kpi__sub--info { color: #94a3b8; padding: 2px 2px; }
 
 .dual-charts { display: grid; grid-template-columns: 1fr; gap: 14px; height: 350px; }
 @media (min-width: 768px) { .dual-charts { grid-template-columns: 1fr 1fr; } }
