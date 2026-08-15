@@ -24,7 +24,15 @@
 
     <!-- KPI Strip -->
     <section class="kpi-strip">
-      <div v-for="card in kpiCards" :key="card.key" class="kpi-card cockpit-kpi">
+      <div
+        v-for="card in kpiCards"
+        :key="card.key"
+        class="kpi-card cockpit-kpi"
+        role="button"
+        tabindex="0"
+        @click="goKpi(card)"
+        @keydown.enter="goKpi(card)"
+      >
         <div class="kpi-icon" :class="`kpi-icon--${card.tone}`">
           <el-icon><component :is="card.icon" /></el-icon>
         </div>
@@ -35,7 +43,7 @@
           </div>
           <div class="kpi-foot">
             <span class="kpi-foot__hint">{{ card.hint }}</span>
-            <span class="kpi-foot__delta" :class="card.delta.startsWith('↑') ? 'up' : 'down'">{{ card.delta }}</span>
+            <span class="kpi-foot__delta" :class="card.delta && card.delta.startsWith('↑') ? 'up' : 'down'">{{ card.delta }}</span>
           </div>
         </div>
       </div>
@@ -58,7 +66,7 @@
             <h2><span class="title-bar"></span><span>技能缺口 TOP5</span></h2>
             <span class="panel-head__hint">单位：人</span>
           </div>
-          <div class="gap-circles">
+          <div v-if="hasGapData" class="gap-circles">
             <div v-for="gap in gapTop5" :key="gap.name" class="gap-circle" :class="`gap-circle--${gap.tone}`">
               <div class="gap-circle__inner">
                 <span class="gap-circle__hint">{{ gap.name }}</span>
@@ -67,6 +75,7 @@
               <span class="gap-circle__caption">{{ gap.name }}</span>
             </div>
           </div>
+          <div v-else class="empty-chart">暂无技能缺口数据</div>
         </article>
 
         <article class="cockpit-panel panel-actions">
@@ -84,7 +93,7 @@
                   <div class="action-row__desc">{{ action.desc }}</div>
                 </div>
               </div>
-              <button class="action-row__btn" @click="openModal(action.modalTitle, action.modalContent)">
+              <button class="action-row__btn" @click="goAction(action)">
                 {{ action.cta }} &gt;
               </button>
             </div>
@@ -149,10 +158,10 @@
         <article class="cockpit-panel panel-priority">
           <div class="panel-head">
             <h2><span class="title-bar"></span><span>优先联系人才</span></h2>
-            <button class="text-link" @click="openModal('查看更多人才', '正在调取全球高匹配人才库信息...')">查看更多</button>
+            <button class="text-link" @click="goPath('/hr-candidates')">查看更多</button>
           </div>
           <div class="talent-list">
-            <div v-for="talent in priorityTalents" :key="talent.name" class="talent-row">
+            <div v-for="talent in priorityTalents" :key="talent.id" class="talent-row">
               <div class="talent-row__lead">
                 <div class="talent-row__avatar" :style="{ background: avatarGradient(talent.name) }">{{ surnameChar(talent.name) }}</div>
                 <div class="talent-row__meta">
@@ -165,10 +174,11 @@
               </div>
               <div class="talent-row__score">
                 <div class="talent-row__score-label">匹配度</div>
-                <div class="talent-row__score-value font-digits">{{ talent.match }}%</div>
-                <button class="talent-row__contact" @click="openModal(`与${talent.name}沟通`, '正在为您发起加密即时沟通会话...')">立即沟通</button>
+                <div class="talent-row__score-value font-digits">{{ talent.match ? `${talent.match}%` : '—' }}</div>
+                <button class="talent-row__contact" @click="contactTalent(talent)">立即沟通</button>
               </div>
             </div>
+            <div v-if="priorityTalents.length === 0" class="empty-chart">暂无候选人数据</div>
           </div>
         </article>
 
@@ -223,6 +233,8 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import {
   Aim,
   Bottom,
@@ -247,23 +259,74 @@ import * as THREE from 'three'
 import * as echarts from 'echarts'
 import chinaGeo from '@/assets/china.json'
 import EChart from '@/components/EChart.vue'
+import { api } from '@/api/http'
+import {
+  readDashboardSnapshot,
+  writeDashboardSnapshot,
+  settledValue,
+  formatSnapshotTime
+} from '@/utils/dashboardCache'
+import {
+  aggregateByProvince,
+  hotspotsFromProvinces,
+  aggregateSkillDemand,
+  aggregateEmergingByCategory
+} from '@/utils/cityAggregate'
+import { useAuthStore } from '@/stores/auth'
 
-// 注册中国地图（DataV.GeoAtlas geojson）
 echarts.registerMap('china', chinaGeo as any)
 
-// ======== Mock Data ========
-const totalTalent = 6260
+const router = useRouter()
+const auth = useAuthStore()
 
-const kpiCards = [
-  { key: 'kpi1', label: '人才库低偏重覆盖', value: '107', unit: '个', hint: '覆盖率 73.5%', delta: '↑ 16', tone: 'cyan', icon: UserFilled },
-  { key: 'kpi2', label: '人才库可筛选', value: '6,260', unit: '人', hint: '较上期 ↑ 8.6%', delta: '↑ 8.6%', tone: 'blue', icon: Aim },
-  { key: 'kpi3', label: '关键技能缺口', value: '10', unit: '项', hint: '较上期 ↑ 2', delta: '↑ 2', tone: 'sky', icon: Tickets },
-  { key: 'kpi4', label: '岗位画像覆盖', value: '107', unit: '个', hint: '较上期 ↑ 16', delta: '↑ 16', tone: 'indigo', icon: User },
-  { key: 'kpi5', label: '新兴岗位信号', value: '17', unit: '个', hint: '较上期 ↑ 5', delta: '↑ 5', tone: 'teal', icon: TrendCharts },
-  { key: 'kpi6', label: '人才匹配成功率', value: '68.45', unit: '%', hint: '较上期 ↑ 6.3%', delta: '↑ 6.3%', tone: 'cyan-bright', icon: Aim }
+// ======== State ========
+type HrModel = {
+  overview: any
+  candidates: any[]
+  emerging: any[]
+  hotspot: { rising: any[]; declining: any[]; emerging: any[] }
+  graph: { nodes: any[]; edges: any[] }
+  skillDemand: { names: string[]; demand: number[]; supply: number[] }
+  provinces: { name: string; value: number }[]
+  hotspots: { name: string; value: [number, number, number] }[]
+  emergingLegend: { name: string; count: number; percent: number; color: string }[]
+  gapTop5: { name: string; value: number; tone: string }[]
+  topRisingSkills: string[]
+}
+
+const EMPTY_MODEL: HrModel = {
+  overview: {},
+  candidates: [],
+  emerging: [],
+  hotspot: { rising: [], declining: [], emerging: [] },
+  graph: { nodes: [], edges: [] },
+  skillDemand: { names: [], demand: [], supply: [] },
+  provinces: [],
+  hotspots: [],
+  emergingLegend: [],
+  gapTop5: [],
+  topRisingSkills: []
+}
+
+const model = ref<HrModel>({ ...EMPTY_MODEL })
+const loading = ref(true)
+const refreshing = ref(false)
+const updatedAt = ref('')
+const cacheKey = computed(() => `hr-dashboard:${auth.user?.id || auth.user?.username || 'default'}`)
+
+// ======== Mock Fallback（无真实数据时填充，保证大屏视觉完整） ========
+const MOCK_TOTAL_TALENT = 6260
+
+const MOCK_KPI = [
+  { key: 'kpi1', label: '人才库低偏重覆盖', value: '107', unit: '个', hint: '覆盖率 73.5%', delta: '↑ 16', tone: 'cyan', icon: UserFilled, route: '/skill-graph' },
+  { key: 'kpi2', label: '人才库可筛选', value: '6,260', unit: '人', hint: '较上期 ↑ 8.6%', delta: '↑ 8.6%', tone: 'blue', icon: Aim, route: '/hr-candidates' },
+  { key: 'kpi3', label: '关键技能缺口', value: '10', unit: '项', hint: '较上期 ↑ 2', delta: '↑ 2', tone: 'sky', icon: Tickets, route: '/skill-graph' },
+  { key: 'kpi4', label: '岗位画像覆盖', value: '107', unit: '个', hint: '较上期 ↑ 16', delta: '↑ 16', tone: 'indigo', icon: User, route: '/jobs' },
+  { key: 'kpi5', label: '新兴岗位信号', value: '17', unit: '个', hint: '较上期 ↑ 5', delta: '↑ 5', tone: 'teal', icon: TrendCharts, route: '/emerging-jobs' },
+  { key: 'kpi6', label: '人才匹配成功率', value: '68.45', unit: '%', hint: '较上期 ↑ 6.3%', delta: '↑ 6.3%', tone: 'cyan-bright', icon: Aim, route: '/skill-graph' }
 ]
 
-const gapTop5 = [
+const MOCK_GAP = [
   { name: 'Linux', value: 7129, tone: 'cyan' },
   { name: 'SQL', value: 5931, tone: 'blue' },
   { name: 'Python', value: 4667, tone: 'sky' },
@@ -271,37 +334,13 @@ const gapTop5 = [
   { name: '安全合规', value: 2842, tone: 'teal' }
 ]
 
-const recruitmentActions = [
-  {
-    title: '优先补充数据分析人才',
-    desc: '当前数据分析人才供给不足，建议优先招聘',
-    cta: '查看人才',
-    modalTitle: '查看人才',
-    modalContent: '优先补充数据分析人才：正在筛选符合条件的124名高匹配数据分析专家...',
-    tone: 'cyan',
-    icon: Plus
-  },
-  {
-    title: '围绕 Linux 技能扩大人才储备',
-    desc: 'Linux 技能缺口较大，建议加大挖掘力度',
-    cta: '查看策略',
-    modalTitle: '查看策略',
-    modalContent: 'Linux技能人才储备策略：启动针对Linux内核与云计算运维方向的定向挖角计划...',
-    tone: 'blue',
-    icon: ZoomIn
-  },
-  {
-    title: '完善 SQL 技能人才的画像',
-    desc: '建议完善 SQL 技能人才画像，提高匹配精度',
-    cta: '进入画像',
-    modalTitle: '进入画像',
-    modalContent: 'SQL技能人才画像配置：系统已自动根据最新业务场景更新SQL调优与架构能力模型...',
-    tone: 'indigo',
-    icon: DataBoard
-  }
+const MOCK_ACTIONS = [
+  { title: '优先补充数据分析人才', desc: '当前数据分析人才供给不足，建议优先招聘', cta: '查看人才', route: '/hr-candidates', query: { skill: '数据分析' }, tone: 'cyan', icon: Plus },
+  { title: '围绕 Linux 技能扩大人才储备', desc: 'Linux 技能缺口较大，建议加大挖掘力度', cta: '查看策略', route: '/emerging-jobs', query: undefined, tone: 'blue', icon: ZoomIn },
+  { title: '完善 SQL 技能人才的画像', desc: '建议完善 SQL 技能人才画像，提高匹配精度', cta: '进入画像', route: '/skill-graph', query: { keyword: 'SQL' }, tone: 'indigo', icon: DataBoard }
 ]
 
-const panoramaMetrics = [
+const MOCK_PANORAMA = [
   { label: '供需比', value: '6.74', unit: '', variant: 'ratio', sub: '供给 / 需求' },
   { label: '需求总量', value: '46,521', unit: '人', delta: '8.3%', deltaTone: 'up' },
   { label: '供给总量', value: '34,267', unit: '人', delta: '7.1%', deltaTone: 'up' },
@@ -309,17 +348,134 @@ const panoramaMetrics = [
   { label: '平均匹配度', value: '68.45', unit: '%', delta: '6.3%', deltaTone: 'up' }
 ]
 
-const priorityTalents = [
-  { name: '李明宇', role: '数据分析师', experience: '5年经验', tags: ['Python', 'SQL', '数据可视化'], match: 92 },
-  { name: '张晓雨', role: '数据工程师', experience: '4年经验', tags: ['Linux', 'SQL', '数据仓库'], match: 89 },
-  { name: '王思语', role: '后端开发工程师', experience: '3年经验', tags: ['Java', 'Docker', '微服务'], match: 87 }
+const MOCK_TALENTS = [
+  { id: 1, name: '李明宇', role: '数据分析师', experience: '5年经验', tags: ['Python', 'SQL', '数据可视化'], match: 92 },
+  { id: 2, name: '张晓雨', role: '数据工程师', experience: '4年经验', tags: ['Linux', 'SQL', '数据仓库'], match: 89 },
+  { id: 3, name: '王思语', role: '后端开发工程师', experience: '3年经验', tags: ['Java', 'Docker', '微服务'], match: 87 }
 ]
 
-// 姓氏汉字头像（取第一个字）
+const MOCK_EMERGING = [
+  { name: '人工智能工程师', count: 6, percent: 35, color: '#1e3a8a' },
+  { name: '数据安全工程师', count: 4, percent: 24, color: '#1d4ed8' },
+  { name: '机器学习工程师', count: 3, percent: 18, color: '#3b82f6' },
+  { name: '云原生工程师', count: 2, percent: 12, color: '#60a5fa' },
+  { name: '其他', count: 2, percent: 11, color: '#93c5fd' }
+]
+
+const MOCK_TOP_CITIES = [
+  { name: '北京', count: 1265 }, { name: '上海', count: 1023 }, { name: '广东', count: 856 }, { name: '浙江', count: 654 }, { name: '四川', count: 521 }
+]
+
+const MOCK_PROVINCES = [
+  { name: '北京市', value: 1265 }, { name: '上海市', value: 1023 }, { name: '广东省', value: 856 }, { name: '浙江省', value: 654 },
+  { name: '四川省', value: 521 }, { name: '江苏省', value: 432 }, { name: '山东省', value: 398 }, { name: '湖北省', value: 312 },
+  { name: '陕西省', value: 256 }, { name: '福建省', value: 198 }, { name: '安徽省', value: 176 }, { name: '河南省', value: 154 },
+  { name: '湖南省', value: 132 }, { name: '辽宁省', value: 118 }, { name: '重庆市', value: 96 }, { name: '天津市', value: 82 }
+]
+
+const MOCK_HOTSPOTS = [
+  { name: '北京', value: [116.4074, 39.9042, 1265] as [number, number, number] },
+  { name: '上海', value: [121.4737, 31.2304, 1023] as [number, number, number] },
+  { name: '广州', value: [113.2644, 23.1291, 856] as [number, number, number] },
+  { name: '杭州', value: [120.1535, 30.2874, 654] as [number, number, number] },
+  { name: '成都', value: [104.0657, 30.6594, 521] as [number, number, number] }
+]
+
+const MOCK_SKILLS = ['云原生', '板块管理', '机器学习', '数据可视化', 'Docker', '安全合规', 'Python', 'SQL', 'Linux', '数据分析']
+const MOCK_DEMAND = [1562, 2269, 3125, 4215, 4325, 5232, 6985, 8326, 9865, 18562]
+const MOCK_SUPPLY = [1100, 1800, 2400, 3100, 3400, 3900, 5200, 6100, 7200, 12400]
+
+const MOCK_TREND_LABELS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月']
+const MOCK_TREND_VALUES = [700, 800, 900, 1000, 1150, 1300, 1500, 1800]
+
+// 真实数据是否就绪（用于决定走真实 vs mock）
+const hasOverview = computed(() => !!model.value.overview && (model.value.overview.resume_count != null || model.value.overview.job_count != null))
+const hasCandidates = computed(() => model.value.candidates.length > 0)
+const hasEmerging = computed(() => model.value.emerging.length > 0)
+const hasRising = computed(() => model.value.hotspot.rising.length > 0)
+const hasTrend = computed(() => Array.isArray(model.value.overview?.trend) && model.value.overview.trend.length > 0)
+const hasSkills = computed(() => model.value.skillDemand.names.length > 0)
+
+// ======== Derived view-model ========
+const totalTalent = computed(() => {
+  const v = model.value.overview?.resume_count
+  return v != null ? Number(v) : MOCK_TOTAL_TALENT
+})
+
+const kpiCards = computed(() => {
+  if (!hasOverview.value) return MOCK_KPI
+  const o = model.value.overview
+  const num = (v: any) => (v == null ? '—' : Number(v).toLocaleString())
+  return [
+    { key: 'kpi1', label: '权威数据源覆盖', value: o.unit_test_coverage != null ? `${o.unit_test_coverage}%` : '—', unit: '', hint: '覆盖率', delta: o.business_case_pass_rate != null ? `↑ ${o.business_case_pass_rate}%` : '—', tone: 'cyan', icon: UserFilled, route: '/skill-graph' },
+    { key: 'kpi2', label: '人才库可筛选', value: num(o.resume_count), unit: '人', hint: '当前在册简历', delta: o.job_count != null ? `岗位 ${num(o.job_count)}` : '—', tone: 'blue', icon: Aim, route: '/hr-candidates' },
+    { key: 'kpi3', label: '关键技能缺口', value: num(o.skill_count), unit: '项', hint: '已建立技能实体', delta: o.evolution_event_count != null ? `事件 ${num(o.evolution_event_count)}` : '—', tone: 'sky', icon: Tickets, route: '/skill-graph' },
+    { key: 'kpi4', label: '岗位画像覆盖', value: num(o.parsed_jd_count), unit: '个', hint: '已解析 JD', delta: o.jd_count != null ? `原始 ${num(o.jd_count)}` : '—', tone: 'indigo', icon: User, route: '/jobs' },
+    { key: 'kpi5', label: '新兴岗位信号', value: num(o.emerging_job_count), unit: '个', hint: '能力图谱识别', delta: '实时', tone: 'teal', icon: TrendCharts, route: '/emerging-jobs' },
+    { key: 'kpi6', label: '人才匹配成功率', value: o.match_accuracy != null ? String(o.match_accuracy) : '—', unit: '%', hint: '评测准确率', delta: o.benchmark_sample_count != null ? `样本 ${num(o.benchmark_sample_count)}` : '—', tone: 'cyan-bright', icon: Aim, route: '/skill-graph' }
+  ]
+})
+
+const gapTop5 = computed(() => hasRising.value && model.value.gapTop5.length > 0 ? model.value.gapTop5 : MOCK_GAP)
+const hasGapData = computed(() => gapTop5.value.length > 0)
+
+const recruitmentActions = computed(() => {
+  if (!hasRising.value) return MOCK_ACTIONS
+  const [s1, s2, s3] = model.value.topRisingSkills
+  return [
+    {
+      title: s1 ? `优先补充 ${s1} 人才` : '优先补充关键技能人才',
+      desc: s1 ? `当前 ${s1} 人才需求旺盛，建议优先招聘` : '当前关键技能人才供给不足，建议优先招聘',
+      cta: '查看人才', route: '/hr-candidates', query: s1 ? { skill: s1 } : undefined, tone: 'cyan', icon: Plus
+    },
+    {
+      title: s2 ? `围绕 ${s2} 技能扩大人才储备` : '围绕关键技能扩大人才储备',
+      desc: s2 ? `${s2} 技能需求增长明显，建议加大挖掘力度` : '关键技能需求增长明显，建议加大挖掘力度',
+      cta: '查看策略', route: '/emerging-jobs', query: undefined, tone: 'blue', icon: ZoomIn
+    },
+    {
+      title: s3 ? `完善 ${s3} 技能人才画像` : '完善关键技能人才画像',
+      desc: s3 ? `建议完善 ${s3} 技能人才画像，提高匹配精度` : '建议完善技能人才画像，提高匹配精度',
+      cta: '进入画像', route: '/skill-graph', query: s3 ? { keyword: s3 } : undefined, tone: 'indigo', icon: DataBoard
+    }
+  ]
+})
+
+const panoramaMetrics = computed(() => {
+  if (!hasOverview.value) return MOCK_PANORAMA
+  const o = model.value.overview
+  const demand = Number(o.job_count || 0) * 10
+  const supply = Number(o.resume_count || 0)
+  const gap = Math.max(demand - supply, 0)
+  const ratio = supply > 0 && demand > 0 ? (supply / demand).toFixed(2) : '—'
+  const fmt = (v: number) => v > 0 ? v.toLocaleString() : '—'
+  return [
+    { label: '供需比', value: ratio, unit: '', variant: 'ratio', sub: '供给 / 需求' },
+    { label: '需求总量', value: fmt(demand), unit: '人', delta: '—', deltaTone: 'up' },
+    { label: '供给总量', value: fmt(supply), unit: '人', delta: '—', deltaTone: 'up' },
+    { label: '缺口总量', value: fmt(gap), unit: '人', delta: '—', deltaTone: 'down' },
+    { label: '平均匹配度', value: o.match_accuracy != null ? String(o.match_accuracy) : '—', unit: '%', delta: '—', deltaTone: 'up' }
+  ]
+})
+
+const priorityTalents = computed(() => {
+  if (!hasCandidates.value) return MOCK_TALENTS
+  return model.value.candidates.slice(0, 3).map((c, i) => {
+    const u = c?.user || {}
+    const p = c?.profile || {}
+    const name = u.display_name || u.username || `候选人${i + 1}`
+    const role = p.target_role || '—'
+    const years = p.years_experience
+    const experience = years != null ? `${years}年经验` : '经验待评估'
+    const skills = (p.skills || []).slice(0, 3)
+    const id = u.id ?? c?.user_id ?? i
+    return { id, name, role, experience, tags: skills, match: 0 }
+  })
+})
+
 function surnameChar(name: string) {
   return name ? name.charAt(0) : '·'
 }
-// 根据姓名生成渐变背景（稳定哈希）
 function avatarGradient(name: string) {
   const palettes = [
     ['#14426b', '#36d7ff'],
@@ -334,130 +490,111 @@ function avatarGradient(name: string) {
   return `linear-gradient(135deg, ${c1}, ${c2})`
 }
 
-const emergingLegend = [
-  { name: '人工智能工程师', count: 6, percent: 35, color: '#1e3a8a' },
-  { name: '数据安全工程师', count: 4, percent: 24, color: '#1d4ed8' },
-  { name: '机器学习工程师', count: 3, percent: 18, color: '#3b82f6' },
-  { name: '云原生工程师', count: 2, percent: 12, color: '#60a5fa' },
-  { name: '其他', count: 2, percent: 11, color: '#93c5fd' }
-]
+const emergingLegend = computed(() => hasEmerging.value && model.value.emergingLegend.length > 0 ? model.value.emergingLegend : MOCK_EMERGING)
 
-const topCities = [
-  { name: '北京', count: 1265 },
-  { name: '上海', count: 1023 },
-  { name: '广东', count: 856 },
-  { name: '浙江', count: 654 },
-  { name: '四川', count: 521 }
-]
+const topCities = computed(() => {
+  if (!hasCandidates.value) return MOCK_TOP_CITIES
+  const list = model.value.provinces.slice(0, 5).map((p) => ({ name: p.name.replace(/[省市区]$/, ''), count: p.value }))
+  return list.length ? list : MOCK_TOP_CITIES
+})
 
-// 省份维度的人才分布（用于中国地图着色）
-const talentByProvince = [
-  { name: '北京市', value: 1265 },
-  { name: '上海市', value: 1023 },
-  { name: '广东省', value: 856 },
-  { name: '浙江省', value: 654 },
-  { name: '四川省', value: 521 },
-  { name: '江苏省', value: 432 },
-  { name: '山东省', value: 398 },
-  { name: '湖北省', value: 312 },
-  { name: '陕西省', value: 256 },
-  { name: '福建省', value: 198 },
-  { name: '安徽省', value: 176 },
-  { name: '河南省', value: 154 },
-  { name: '湖南省', value: 132 },
-  { name: '辽宁省', value: 118 },
-  { name: '重庆市', value: 96 },
-  { name: '天津市', value: 82 }
-]
+const talentByProvince = computed(() => model.value.provinces.length > 0 ? model.value.provinces : MOCK_PROVINCES)
 
-// TOP 省份经纬度（用于 effectScatter 涟漪散点，突出直辖市/小面积省份）
-const topHotspots = [
-  { name: '北京', value: [116.4074, 39.9042, 1265] },
-  { name: '上海', value: [121.4737, 31.2304, 1023] },
-  { name: '广州', value: [113.2644, 23.1291, 856] },
-  { name: '杭州', value: [120.1535, 30.2874, 654] },
-  { name: '成都', value: [104.0657, 30.6594, 521] }
-]
+const topHotspots = computed(() => model.value.hotspots.length > 0 ? model.value.hotspots : MOCK_HOTSPOTS)
+
+const skillsList = computed(() => hasSkills.value ? model.value.skillDemand.names : MOCK_SKILLS)
+const demandData = computed(() => hasSkills.value ? model.value.skillDemand.demand : MOCK_DEMAND)
+const supplyData = computed(() => hasSkills.value ? model.value.skillDemand.supply : MOCK_SUPPLY)
+const hasSkillData = computed(() => skillsList.value.length > 0)
 
 // ======== ECharts options ========
-const skillsList = ['云原生', '板块管理', '机器学习', '数据可视化', 'Docker', '安全合规', 'Python', 'SQL', 'Linux', '数据分析']
-const demandData = [1562, 2269, 3125, 4215, 4325, 5232, 6985, 8326, 9865, 18562]
-const supplyData = [1100, 1800, 2400, 3100, 3400, 3900, 5200, 6100, 7200, 12400]
-
-const demandSupplyOption = computed(() => ({
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: { type: 'shadow' },
-    backgroundColor: 'rgba(10, 20, 42, 0.9)',
-    borderColor: '#38bdf8',
-    textStyle: { color: '#e2e8f0', fontSize: 11 }
-  },
-  legend: {
-    data: ['岗位需求', '人才供给'],
-    textStyle: { color: '#94a3b8', fontSize: 10 },
-    right: 0, top: -5, itemWidth: 10, itemHeight: 10
-  },
-  grid: { top: 25, left: '2%', right: '12%', bottom: '2%', containLabel: true },
-  xAxis: {
-    type: 'value',
-    axisLabel: { color: '#64748b', fontSize: 9, formatter: (val: number) => (val >= 1000 ? `${val / 1000}K` : val) },
-    splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)', type: 'dashed' } }
-  },
-  yAxis: {
-    type: 'category',
-    data: skillsList,
-    axisLabel: { color: '#cbd5e1', fontSize: 10 },
-    axisLine: { lineStyle: { color: '#334155' } }
-  },
-  series: [
-    {
-      name: '岗位需求', type: 'bar', barWidth: 6,
-      data: demandData,
-      itemStyle: {
-        color: { type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: '#3b82f6' }, { offset: 1, color: '#1e3a8a' }] },
-        borderRadius: [0, 4, 4, 0]
-      }
+const demandSupplyOption = computed(() => {
+  const names = skillsList.value
+  const demand = demandData.value
+  const supply = supplyData.value
+  return {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      backgroundColor: 'rgba(10, 20, 42, 0.9)',
+      borderColor: '#38bdf8',
+      textStyle: { color: '#e2e8f0', fontSize: 11 }
     },
-    {
-      name: '人才供给', type: 'bar', barWidth: 6,
-      data: supplyData,
-      itemStyle: {
-        color: { type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: '#06b6d4' }, { offset: 1, color: '#083344' }] },
-        borderRadius: [0, 4, 4, 0]
-      }
-    }
-  ]
-}))
-
-const industryTrendOption = computed(() => ({
-  tooltip: {
-    trigger: 'axis',
-    backgroundColor: 'rgba(10, 20, 42, 0.9)',
-    borderColor: '#38bdf8',
-    textStyle: { color: '#e2e8f0', fontSize: 11 }
-  },
-  grid: { top: 20, left: '2%', right: '4%', bottom: '5%', containLabel: true },
-  xAxis: {
-    type: 'category', boundaryGap: false,
-    data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
-    axisLabel: { color: '#64748b', fontSize: 9 },
-    axisLine: { lineStyle: { color: '#334155' } }
-  },
-  yAxis: {
-    type: 'value', min: 0, max: 2000, interval: 500,
-    axisLabel: { color: '#64748b', fontSize: 9 },
-    splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)', type: 'dashed' } }
-  },
-  series: [{
-    name: '人才需求值', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6,
-    itemStyle: { color: '#38bdf8', borderWidth: 2, borderColor: '#ffffff' },
-    lineStyle: { width: 3, color: '#0284c7' },
-    areaStyle: {
-      color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(56, 189, 248, 0.4)' }, { offset: 1, color: 'rgba(56, 189, 248, 0.0)' }] }
+    legend: {
+      data: ['岗位需求', '人才供给'],
+      textStyle: { color: '#94a3b8', fontSize: 10 },
+      right: 0, top: -5, itemWidth: 10, itemHeight: 10
     },
-    data: [700, 800, 900, 1000, 1150, 1300, 1500, 1800]
-  }]
-}))
+    grid: { top: 25, left: '2%', right: '12%', bottom: '2%', containLabel: true },
+    xAxis: {
+      type: 'value',
+      axisLabel: { color: '#64748b', fontSize: 9, formatter: (val: number) => (val >= 1000 ? `${val / 1000}K` : val) },
+      splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)', type: 'dashed' } }
+    },
+    yAxis: {
+      type: 'category',
+      data: names,
+      axisLabel: { color: '#cbd5e1', fontSize: 10 },
+      axisLine: { lineStyle: { color: '#334155' } }
+    },
+    series: [
+      {
+        name: '岗位需求', type: 'bar', barWidth: 6,
+        data: demand,
+        itemStyle: {
+          color: { type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: '#3b82f6' }, { offset: 1, color: '#1e3a8a' }] },
+          borderRadius: [0, 4, 4, 0]
+        }
+      },
+      {
+        name: '人才供给', type: 'bar', barWidth: 6,
+        data: supply,
+        itemStyle: {
+          color: { type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: '#06b6d4' }, { offset: 1, color: '#083344' }] },
+          borderRadius: [0, 4, 4, 0]
+        }
+      }
+    ]
+  }
+})
+
+const industryTrendOption = computed(() => {
+  const trend = model.value.overview?.trend || []
+  const useReal = hasTrend.value
+  const labels = useReal ? trend.map((t: any) => t.date || t.period || '') : MOCK_TREND_LABELS
+  const values = useReal ? trend.map((t: any) => Number(t.value ?? t.amount ?? 0)) : MOCK_TREND_VALUES
+  const maxVal = values.length ? Math.max(...values, 100) : 2000
+  return {
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(10, 20, 42, 0.9)',
+      borderColor: '#38bdf8',
+      textStyle: { color: '#e2e8f0', fontSize: 11 }
+    },
+    grid: { top: 20, left: '2%', right: '4%', bottom: '5%', containLabel: true },
+    xAxis: {
+      type: 'category', boundaryGap: false,
+      data: labels,
+      axisLabel: { color: '#64748b', fontSize: 9 },
+      axisLine: { lineStyle: { color: '#334155' } }
+    },
+    yAxis: {
+      type: 'value', min: 0, max: maxVal,
+      axisLabel: { color: '#64748b', fontSize: 9 },
+      splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)', type: 'dashed' } }
+    },
+    series: [{
+      name: '软件人才需求', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6,
+      itemStyle: { color: '#38bdf8', borderWidth: 2, borderColor: '#ffffff' },
+      lineStyle: { width: 3, color: '#0284c7' },
+      areaStyle: {
+        color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(56, 189, 248, 0.4)' }, { offset: 1, color: 'rgba(56, 189, 248, 0.0)' }] }
+      },
+      data: values
+    }],
+    graphic: values.length ? undefined : { type: 'text', left: 'center', top: 'middle', style: { text: '暂无趋势数据', fill: '#88a9c4', fontSize: 12 } }
+  }
+})
 
 const gapTrendOption = computed(() => ({
   tooltip: {
@@ -494,127 +631,139 @@ const gapTrendOption = computed(() => ({
   ]
 }))
 
-const emergingRolesOption = computed(() => ({
-  tooltip: {
-    trigger: 'item',
-    backgroundColor: 'rgba(10, 20, 42, 0.9)',
-    borderColor: '#1d4ed8',
-    textStyle: { color: '#e2e8f0', fontSize: 11 }
-  },
-  series: [{
-    name: '新兴岗位', type: 'pie',
-    radius: ['55%', '80%'], center: ['50%', '50%'], avoidLabelOverlap: false,
-    label: {
-      show: true, position: 'center',
-      formatter: '{title|17个}\n{sub|新兴岗位}',
-      rich: {
-        title: { fontSize: 16, fontWeight: 'bold', color: '#3b82f6', fontFamily: 'Orbitron' },
-        sub: { fontSize: 10, color: '#94a3b8', padding: [4, 0, 0, 0] }
-      }
+const emergingRolesOption = computed(() => {
+  const total = emergingLegend.value.reduce((s, x) => s + x.count, 0)
+  const data = emergingLegend.value.map((item) => ({ value: item.count, name: item.name, itemStyle: { color: item.color } }))
+  return {
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(10, 20, 42, 0.9)',
+      borderColor: '#1d4ed8',
+      textStyle: { color: '#e2e8f0', fontSize: 11 }
     },
-    labelLine: { show: false },
-    data: emergingLegend.map((item) => ({ value: item.count, name: item.name, itemStyle: { color: item.color } }))
-  }]
-}))
+    series: [{
+      name: '新兴岗位',
+      type: 'pie',
+      radius: ['55%', '80%'], center: ['50%', '50%'], avoidLabelOverlap: false,
+      label: {
+        show: true, position: 'center',
+        formatter: total > 0 ? `{title|${total}个}\n{sub|新兴岗位}` : `{title|—}\n{sub|暂无新兴岗位}`,
+        rich: {
+          title: { fontSize: 16, fontWeight: 'bold', color: '#3b82f6', fontFamily: 'Orbitron' },
+          sub: { fontSize: 10, color: '#94a3b8', padding: [4, 0, 0, 0] }
+        }
+      },
+      labelLine: { show: false },
+      data
+    }]
+  }
+})
 
 // ======== Region Map (ECharts 中国地图) ========
-const regionMapOption = computed(() => ({
-  tooltip: {
-    trigger: 'item',
-    backgroundColor: 'rgba(8, 42, 92, 0.92)',
-    borderColor: 'rgba(54, 215, 255, 0.45)',
-    borderWidth: 1,
-    textStyle: { color: '#eefaff', fontSize: 11 },
-    formatter: (params: any) => {
-      if (params.seriesType === 'effectScatter') {
-        return `<b style="color:#36d7ff">${params.name}</b><br/>人才：<b>${params.value?.[2] ?? 0}</b> 人`
-      }
-      if (params.data == null) return `${params.name}<br/><span style="color:#88a9c4">暂无数据</span>`
-      return `${params.name}<br/><span style="color:#36d7ff;font-weight:700">${params.value}</span> 人`
-    }
-  },
-  visualMap: {
-    type: 'continuous',
-    min: 0,
-    max: 1300,
-    left: 14,
-    bottom: 14,
-    text: ['高', '低'],
-    textGap: 8,
-    textStyle: { color: '#c2dceb', fontSize: 11, fontWeight: 600 },
-    inRange: { color: ['#061b36', '#0f3d72', '#1a66b0', '#2b96d9', '#36d7ff'] },
-    calculable: false,
-    itemWidth: 10,
-    itemHeight: 70
-  },
-  series: [
-    {
-      name: '人才分布',
-      type: 'map',
-      map: 'china',
-      roam: false,
-      zoom: 1.1,
-      aspectScale: 0.85,
-      layoutCenter: ['50%', '50%'],
-      layoutSize: '102%',
-      itemStyle: {
-        areaColor: 'rgba(8, 42, 92, 0.25)',
-        borderColor: 'rgba(78, 200, 255, 0.3)',
-        borderWidth: 0.5
-      },
-      emphasis: {
-        itemStyle: {
-          areaColor: 'rgba(54, 215, 255, 0.35)',
-          borderColor: '#36d7ff',
-          borderWidth: 1.2
-        },
-        label: { show: true, color: '#eefaff', fontSize: 10, fontWeight: 600 }
-      },
-      select: { disabled: true },
-      data: talentByProvince,
-      regions: [
-        {
-          name: '南海诸岛',
-          itemStyle: { areaColor: 'transparent', borderColor: 'transparent', opacity: 0 },
-          label: { show: false },
-          emphasis: { disabled: true }
+const regionMapOption = computed(() => {
+  const provinces = talentByProvince.value || []
+  const hotspots = topHotspots.value || []
+  const maxVal = provinces.length ? Math.max(...provinces.map((p: any) => p.value || 0), 1) : 1
+  return {
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(8, 42, 92, 0.92)',
+      borderColor: 'rgba(54, 215, 255, 0.45)',
+      borderWidth: 1,
+      textStyle: { color: '#eefaff', fontSize: 11 },
+      formatter: (params: any) => {
+        if (params.seriesType === 'effectScatter') {
+          return `<b style="color:#36d7ff">${params.name}</b><br/>人才：<b>${params.value?.[2] ?? 0}</b> 人`
         }
-      ]
+        if (params.data == null) return `${params.name}<br/><span style="color:#88a9c4">暂无数据</span>`
+        return `${params.name}<br/><span style="color:#36d7ff;font-weight:700">${params.value}</span> 人`
+      }
     },
-    {
-      name: '热点城市',
-      type: 'effectScatter',
-      coordinateSystem: 'geo',
-      data: topHotspots,
-      symbolSize: (val: any) => 5 + Math.pow(val[2] / 1300, 0.5) * 10,
-      showEffectOn: 'render',
-      rippleEffect: {
-        brushType: 'stroke',
-        scale: 2.2,
-        period: 2.4
+    visualMap: {
+      type: 'continuous',
+      min: 0,
+      max: maxVal,
+      left: 14,
+      bottom: 14,
+      text: ['高', '低'],
+      textGap: 8,
+      textStyle: { color: '#c2dceb', fontSize: 11, fontWeight: 600 },
+      inRange: { color: ['#061b36', '#0f3d72', '#1a66b0', '#2b96d9', '#36d7ff'] },
+      calculable: false,
+      itemWidth: 10,
+      itemHeight: 70,
+      show: provinces.length > 0
+    },
+    graphic: provinces.length ? undefined : { type: 'text', left: 'center', top: 'middle', style: { text: '当前样本量过小，暂无区域分布', fill: '#88a9c4', fontSize: 12 } },
+    series: [
+      {
+        name: '人才分布',
+        type: 'map',
+        map: 'china',
+        roam: false,
+        zoom: 1.1,
+        aspectScale: 0.85,
+        layoutCenter: ['50%', '50%'],
+        layoutSize: '102%',
+        itemStyle: {
+          areaColor: 'rgba(8, 42, 92, 0.25)',
+          borderColor: 'rgba(78, 200, 255, 0.3)',
+          borderWidth: 0.5
+        },
+        emphasis: {
+          itemStyle: {
+            areaColor: 'rgba(54, 215, 255, 0.35)',
+            borderColor: '#36d7ff',
+            borderWidth: 1.2
+          },
+          label: { show: true, color: '#eefaff', fontSize: 10, fontWeight: 600 }
+        },
+        select: { disabled: true },
+        data: provinces,
+        regions: [
+          {
+            name: '南海诸岛',
+            itemStyle: { areaColor: 'transparent', borderColor: 'transparent', opacity: 0 },
+            label: { show: false },
+            emphasis: { disabled: true }
+          }
+        ]
       },
-      label: {
-        show: true,
-        position: 'right',
-        formatter: '{b}',
-        color: '#eefaff',
-        fontSize: 10,
-        fontWeight: 700,
-        textBorderColor: 'rgba(8, 42, 92, 0.9)',
-        textBorderWidth: 2,
-        offset: [6, 0]
-      },
-      itemStyle: {
-        color: '#36d7ff',
-        borderColor: '#a5f3fc',
-        borderWidth: 1,
-        shadowBlur: 16,
-        shadowColor: 'rgba(54, 215, 255, 0.9)'
-      },
-      zlevel: 2
-    }
-  ]
-}))
+      {
+        name: '热点城市',
+        type: 'effectScatter',
+        coordinateSystem: 'geo',
+        data: hotspots,
+        symbolSize: (val: any) => 5 + Math.pow(val[2] / Math.max(maxVal, 1), 0.5) * 10,
+        showEffectOn: 'render',
+        rippleEffect: {
+          brushType: 'stroke',
+          scale: 2.2,
+          period: 2.4
+        },
+        label: {
+          show: true,
+          position: 'right',
+          formatter: '{b}',
+          color: '#eefaff',
+          fontSize: 10,
+          fontWeight: 700,
+          textBorderColor: 'rgba(8, 42, 92, 0.9)',
+          textBorderWidth: 2,
+          offset: [6, 0]
+        },
+        itemStyle: {
+          color: '#36d7ff',
+          borderColor: '#a5f3fc',
+          borderWidth: 1,
+          shadowBlur: 16,
+          shadowColor: 'rgba(54, 215, 255, 0.9)'
+        },
+        zlevel: 2
+      }
+    ]
+  }
+})
 
 function regionRankClass(idx: number) {
   if (idx === 0) return 'region-rank--gold'
@@ -632,6 +781,28 @@ function updateClock() {
   liveClock.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
 }
 
+// ======== Navigation ========
+function goKpi(card: any) {
+  if (!card?.route) return
+  router.push(card.route)
+}
+function goAction(action: any) {
+  if (!action?.route) return
+  router.push({ path: action.route, query: action.query || undefined })
+}
+function goPath(path: string) {
+  router.push(path)
+}
+function contactTalent(talent: any) {
+  router.push({
+    path: '/match-analysis',
+    query: {
+      candidateId: String(talent?.id ?? ''),
+      name: talent?.name || ''
+    }
+  })
+}
+
 // ======== Modal ========
 const modalOpen = ref(false)
 const modalTitle = ref('操作提示')
@@ -645,18 +816,73 @@ function closeModal() {
   modalOpen.value = false
 }
 
-// ======== Refresh (simulate) ========
-const refreshing = ref(false)
+// ======== Refresh ========
+async function refresh(force = false) {
+  if (!force) {
+    const cached = readDashboardSnapshot<HrModel>(cacheKey.value)
+    if (cached) {
+      model.value = cached.data
+      updatedAt.value = cached.updatedAt
+      return
+    }
+  }
+  loading.value = !force
+  refreshing.value = force
+  try {
+    const results = await Promise.allSettled([
+      api.overview(),
+      api.hrCandidates(),
+      api.emergingJobs(),
+      api.evolutionHotspot(),
+      api.skillGraph(),
+      api.jobs()
+    ])
+    const overview = settledValue(results[0], {}) as any
+    const candidates = settledValue(results[1], []) as any[]
+    const emerging = settledValue(results[2], []) as any[]
+    const hotspot = settledValue(results[3], { rising: [], declining: [], emerging: [] }) as { rising: any[]; declining: any[]; emerging: any[] }
+    const graph = settledValue(results[4], { nodes: [], edges: [] }) as { nodes: any[]; edges: any[] }
+    const jobs = settledValue(results[5], []) as any[]
+
+    const skillDemand = aggregateSkillDemand(jobs, candidates, graph)
+    const provinces = aggregateByProvince(candidates)
+    const hotspots = hotspotsFromProvinces(provinces, 5)
+    const emergingLegendData = aggregateEmergingByCategory(emerging)
+    const gapTop5Data = (hotspot.rising || []).slice(0, 5).map((r: any, i: number) => ({
+      name: r.name || `技能${i + 1}`,
+      value: Number(r.demand ?? r.heat ?? 0),
+      tone: ['cyan', 'blue', 'sky', 'indigo', 'teal'][i] || 'cyan'
+    }))
+    const topRisingSkills = (hotspot.rising || []).slice(0, 3).map((r: any) => r.name).filter(Boolean) as string[]
+
+    const next: HrModel = {
+      overview,
+      candidates,
+      emerging,
+      hotspot,
+      graph,
+      skillDemand,
+      provinces,
+      hotspots,
+      emergingLegend: emergingLegendData,
+      gapTop5: gapTop5Data,
+      topRisingSkills
+    }
+    const snap = writeDashboardSnapshot(cacheKey.value, next)
+    model.value = snap.data
+    updatedAt.value = snap.updatedAt
+    if (force) ElMessage.success('HR 大屏数据已更新')
+  } catch (err: any) {
+    ElMessage.error(err?.response?.data?.detail || 'HR 大屏加载失败')
+  } finally {
+    loading.value = false
+    refreshing.value = false
+    window.dispatchEvent(new Event('resize'))
+  }
+}
+
 async function triggerDataRefresh() {
-  refreshing.value = true
-  await new Promise((resolve) => setTimeout(resolve, 600))
-  // 模拟 KPI 微抖
-  const kpi2 = kpiCards.find((c) => c.key === 'kpi2')
-  if (kpi2) kpi2.value = (6200 + Math.floor(Math.random() * 120)).toLocaleString()
-  const kpi6 = kpiCards.find((c) => c.key === 'kpi6')
-  if (kpi6) kpi6.value = (68 + Math.random() * 1.5).toFixed(2)
-  window.dispatchEvent(new Event('resize'))
-  refreshing.value = false
+  await refresh(true)
 }
 
 // ======== Three.js particle wave ========
@@ -762,6 +988,7 @@ onMounted(() => {
   updateClock()
   clockTimer = setInterval(updateClock, 1000)
   initThree()
+  refresh(false)
 })
 
 onBeforeUnmount(() => {
@@ -823,7 +1050,9 @@ onBeforeUnmount(() => {
 @media (min-width: 640px) { .kpi-strip { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 1100px) { .kpi-strip { grid-template-columns: repeat(6, 1fr); } }
 
-.kpi-card { position: relative; overflow: hidden; min-height: 94px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.kpi-card { position: relative; overflow: hidden; min-height: 94px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color .2s, background .2s, transform .15s; }
+.kpi-card:hover { transform: translateY(-2px); }
+.kpi-card:focus-visible { outline: 2px solid rgba(54, 215, 255, .65); outline-offset: 2px; }
 .kpi-card::after { position: absolute; right: 14px; bottom: 0; width: 72px; height: 24px; border-top-left-radius: 14px; pointer-events: none; content: ""; background: linear-gradient(135deg, transparent 50%, rgba(54, 215, 255, .14) 50%); }
 .kpi-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 .kpi-icon--cyan { background: rgba(54, 215, 255, .14); color: #36d7ff; border: 1px solid rgba(54, 215, 255, .28); }
@@ -1000,6 +1229,9 @@ onBeforeUnmount(() => {
 
 .modal-enter-active, .modal-leave-active { transition: opacity .25s ease; }
 .modal-enter-from, .modal-leave-to { opacity: 0; }
+
+/* ============ Empty chart placeholder ============ */
+.empty-chart { padding: 24px 16px; color: #7394af; font-size: 12px; text-align: center; }
 
 /* ============ Font digit token ============ */
 .font-digits { font-family: 'Orbitron', 'JetBrains Mono', 'Consolas', monospace; }
