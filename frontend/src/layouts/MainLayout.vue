@@ -124,6 +124,9 @@ type MenuGroup = { key: string; label: string; icon: any; items: MenuItem[] }
 
 const rawMenus: MenuItem[] = [
   { path: '/overview', label: '系统概览', icon: Histogram, hint: '指标概览' },
+  { path: '/dashboards/candidate', label: '求职者大屏', icon: Monitor, hint: '我的求职进度全景' },
+  { path: '/dashboards/hr', label: 'HR 大屏', icon: Histogram, hint: '岗位供需 候选人匹配' },
+  { path: '/dashboards/admin', label: '管理员大屏', icon: Setting, hint: '平台治理 风险与发布' },
   { path: '/growth-cockpit', label: '成长驾驶舱', icon: Monitor, hint: '技能星系 成长全景' },
   { path: '/personal-center', label: '个人中心', icon: User, hint: '画像 能力 证书' },
   { path: '/hr-candidates', label: '候选人管理', icon: User, hint: '候选人 简历 画像' },
@@ -146,17 +149,17 @@ const rawMenus: MenuItem[] = [
 
 const roleRouteMap: Record<string, string[]> = {
   candidate: [
-    '/overview', '/growth-cockpit', '/personal-center', '/skill-graph', '/capability-evolution',
+    '/overview', '/dashboards/candidate', '/growth-cockpit', '/personal-center', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/learning-path', '/digital-interviewer', '/account-settings'
   ],
   hr: [
-    '/overview', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
+    '/overview', '/dashboards/hr', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
     '/emerging-jobs', '/job-evolution', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/digital-interviewer',
     '/review-tasks', '/evaluation', '/settings', '/account-settings'
   ],
   admin: [
-    '/overview', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
+    '/overview', '/dashboards/admin', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
     '/emerging-jobs', '/job-evolution', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/digital-interviewer',
     '/review-tasks', '/evaluation', '/settings', '/account-settings'
@@ -164,7 +167,7 @@ const roleRouteMap: Record<string, string[]> = {
 }
 
 const groupDefs: Array<{ key: string; label: string; icon: any; items: string[] }> = [
-  { key: 'overview', label: '概览', icon: Histogram, items: ['/overview', '/growth-cockpit', '/hr-candidates', '/personal-center'] },
+  { key: 'overview', label: '概览', icon: Histogram, items: ['/overview', '/dashboards/candidate', '/dashboards/hr', '/dashboards/admin', '/growth-cockpit', '/hr-candidates', '/personal-center'] },
   { key: 'jobs', label: '岗位管理', icon: Management, items: ['/datasets', '/jd-parser', '/jobs', '/emerging-jobs', '/job-evolution'] },
   { key: 'graph', label: '能力分析', icon: Connection, items: ['/skill-graph', '/capability-evolution'] },
   { key: 'match', label: '人岗匹配', icon: Aim, items: ['/resume-parser', '/match-analysis', '/learning-path'] },
@@ -272,6 +275,9 @@ async function navigateTo(path: string) {
 const headerSubtitle = computed(() => {
   const map: Record<string, string> = {
     '/overview': '查看岗位数据、能力图谱、解析质量和系统运行概况',
+    '/dashboards/candidate': '我的求职进度全景:准备度、能力差距、本周任务与下一步行动',
+    '/dashboards/hr': '岗位供需、人才优先联系、招聘动作与产业趋势全景',
+    '/dashboards/admin': '数据源质量、治理重点、评测基线与可信发布链路',
     '/growth-cockpit': '360°技能星系全景，掌握能力现状、成长路径与岗位匹配',
     '/personal-center': '维护个人画像，查看匹配分析、学习路径和面试练习',
     '/hr-candidates': '查看求职者提交的个人画像、简历、技能证书和匹配准备情况',
