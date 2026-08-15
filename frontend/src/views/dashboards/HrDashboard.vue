@@ -901,51 +901,51 @@ onBeforeUnmount(() => {
 .panorama-canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; z-index: 0; pointer-events: auto; }
 .panorama-canvas:active { cursor: grabbing; }
 
-.panorama-metrics--supply { position: relative; z-index: 2; margin: auto 16px 18px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 12px; background: linear-gradient(135deg, rgba(4, 26, 58, 0.72), rgba(8, 42, 92, 0.58)); border: 1px solid rgba(78, 200, 255, 0.22); border-radius: 14px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 8px 30px rgba(0, 80, 160, 0.18), inset 0 1px 0 rgba(160, 220, 255, 0.08); }
+.panorama-metrics--supply { position: relative; z-index: 2; margin: auto 20px 8px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 8px 10px; background: linear-gradient(135deg, rgba(4, 26, 58, 0.42), rgba(8, 42, 92, 0.32)); border: 1px solid rgba(78, 200, 255, 0.12); border-radius: 14px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgba(0, 80, 160, 0.08); }
 .pano-kpi {
   position: relative;
-  padding: 10px 14px 12px;
+  padding: 8px 12px 10px;
   border-radius: 12px;
   background:
-    linear-gradient(180deg, rgba(30, 120, 220, 0.06), rgba(4, 26, 58, 0.3)),
-    radial-gradient(circle at 50% 0%, rgba(54, 215, 255, 0.12), transparent 60%);
-  border: 1px solid rgba(78, 200, 255, 0.14);
+    linear-gradient(180deg, rgba(30, 120, 220, 0.03), rgba(4, 26, 58, 0.16)),
+    radial-gradient(circle at 50% 0%, rgba(54, 215, 255, 0.07), transparent 60%);
+  border: 1px solid rgba(78, 200, 255, 0.09);
   transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
 }
-.pano-kpi:hover { transform: translateY(-2px); border-color: rgba(54, 215, 255, 0.35); box-shadow: 0 8px 22px rgba(54, 215, 255, 0.15); }
+.pano-kpi:hover { transform: translateY(-2px); border-color: rgba(54, 215, 255, 0.26); box-shadow: 0 6px 16px rgba(54, 215, 255, 0.1); }
 .pano-kpi::before {
-  position: absolute; top: 0; left: 14px; right: 14px; height: 2px;
+  position: absolute; top: 0; left: 14px; right: 14px; height: 1.5px;
   content: "";
   border-radius: 99px;
-  background: linear-gradient(90deg, transparent, rgba(54, 215, 255, 0.6), transparent);
-  opacity: 0.8;
+  background: linear-gradient(90deg, transparent, rgba(54, 215, 255, 0.42), transparent);
+  opacity: 0.7;
 }
-.pano-kpi__title { font-size: 11px; font-weight: 700; color: #8ab9dd; letter-spacing: 0.02em; }
-.pano-kpi__row { margin-top: 6px; }
+.pano-kpi__title { font-size: 10.5px; font-weight: 700; color: #89b2d6; letter-spacing: 0.02em; }
+.pano-kpi__row { margin-top: 4px; }
 .pano-kpi__value {
-  font-size: 24px; font-weight: 900; letter-spacing: -0.01em;
-  color: #eaf6ff;
-  text-shadow: 0 0 14px rgba(54, 215, 255, 0.35);
+  font-size: 22px; font-weight: 900; letter-spacing: -0.01em;
+  color: #e6f2ff;
+  text-shadow: 0 0 10px rgba(54, 215, 255, 0.22);
 }
 .pano-kpi__unit {
   margin-left: 4px;
-  font-size: 12px; font-weight: 500; color: #7aa7cf;
+  font-size: 11.5px; font-weight: 500; color: #77a0c6;
 }
 .pano-kpi__delta {
-  margin-top: 5px;
+  margin-top: 4px;
   display: inline-flex; align-items: center; gap: 3px;
-  font-size: 10.5px; font-weight: 600;
-  padding: 2px 8px;
+  font-size: 10px; font-weight: 600;
+  padding: 1px 7px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(78, 200, 255, 0.12);
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(78, 200, 255, 0.08);
 }
-.pano-kpi__delta-prefix { color: #7aa7cf; font-weight: 500; margin-right: 2px; }
-.pano-kpi__delta.up   { color: #22d3ee; border-color: rgba(34, 211, 238, 0.25); }
-.pano-kpi__delta.down { color: #fca5a5; border-color: rgba(252, 165, 165, 0.22); }
-.pano-kpi__delta .el-icon { font-size: 10px; }
-.pano-kpi__sub { margin-top: 5px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; }
-.pano-kpi__sub--info { color: #94a3b8; padding: 2px 2px; }
+.pano-kpi__delta-prefix { color: #77a0c6; font-weight: 500; margin-right: 2px; }
+.pano-kpi__delta.up   { color: #22d3ee; border-color: rgba(34, 211, 238, 0.18); }
+.pano-kpi__delta.down { color: #fca5a5; border-color: rgba(252, 165, 165, 0.16); }
+.pano-kpi__delta .el-icon { font-size: 9px; }
+.pano-kpi__sub { margin-top: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; }
+.pano-kpi__sub--info { color: #8b9cb3; padding: 1px 2px; }
 
 .dual-charts { display: grid; grid-template-columns: 1fr; gap: 14px; height: 350px; }
 @media (min-width: 768px) { .dual-charts { grid-template-columns: 1fr 1fr; } }
