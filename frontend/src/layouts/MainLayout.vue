@@ -1,8 +1,10 @@
 <template>
   <div class="app-shell">
-    <div class="workspace-atmosphere" aria-hidden="true">
-      <CosmosBackground />
-    </div>
+    <Teleport to="body">
+      <div class="workspace-atmosphere" aria-hidden="true">
+        <CosmosBackground />
+      </div>
+    </Teleport>
 
     <header class="app-header" v-if="!$route.meta.fullscreen">
       <div class="header-brand">
@@ -681,7 +683,7 @@ async function handleUserCommand(command: string) {
 
 .app-main--fullscreen {
   padding: 0;
-  min-height: 100vh;
+  height: 100vh;
   background: transparent !important;
   overflow-y: auto;
   overflow-x: hidden;
