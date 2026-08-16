@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page emerging-jobs-page">
     <PageHeader title="新岗位发现" desc="基于技能增长、多源一致性、技能组合新颖度、标题稳定性和场景扩散度计算新岗位指数">
       <div class="toolbar">
         <el-tag v-if="lastUpdated" effect="plain">上次更新 {{ formatTime(lastUpdated) }}</el-tag>
@@ -124,6 +124,68 @@ onMounted(async () => {
   await generate()
 })
 </script>
+
+<style>
+/* Unscoped glass overrides — specificity must beat theme-fixes.css (loaded after page styles).
+   theme-fixes: body.theme-dark .app-main:not(.app-main--dashboard) :is(.panel,.page-toolbar,...) { background:#0a1c2b!important; box-shadow:none!important }
+   styles.css:  body:not(.login-active) .app-main :is(.panel,.page-toolbar,...) { background:linear-gradient(...)!important }
+   Both ≈ 0-0-41. We add .page.emerging-jobs-page + per-element classes to reach 0-0-61+. */
+
+/* === 1. .page-toolbar 工具栏（生成分析按钮容器） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.emerging-jobs-page .page-toolbar,
+body:not(.login-active) .app-main .page.emerging-jobs-page .page-toolbar {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  padding: 12px 16px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.emerging-jobs-page .page-toolbar::before,
+body:not(.login-active) .app-main .page.emerging-jobs-page .page-toolbar::before {
+  display: none !important;
+}
+
+/* === 2. .panel.span-7 表格区 === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.emerging-jobs-page .panel.span-7,
+body:not(.login-active) .app-main .page.emerging-jobs-page .panel.span-7 {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.emerging-jobs-page .panel.span-7::before,
+body:not(.login-active) .app-main .page.emerging-jobs-page .panel.span-7::before {
+  display: none !important;
+}
+
+/* === 3. .panel.span-5 详情区 === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.emerging-jobs-page .panel.span-5,
+body:not(.login-active) .app-main .page.emerging-jobs-page .panel.span-5 {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.emerging-jobs-page .panel.span-5::before,
+body:not(.login-active) .app-main .page.emerging-jobs-page .panel.span-5::before {
+  display: none !important;
+}
+</style>
 
 <style scoped>
 .detail-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }

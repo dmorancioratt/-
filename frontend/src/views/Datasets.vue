@@ -296,6 +296,101 @@ async function syncAll() {
 onMounted(load)
 </script>
 
+<style>
+/* Unscoped glass overrides — specificity must beat theme-fixes.css loaded after page styles.
+   theme-fixes uses: body.theme-dark .app-main:not(.app-main--dashboard) :is(.panel,.page-toolbar,.el-alert,...) { background:#0a1c2b!important; box-shadow:none!important }
+   specificity ≈ 0-0-41. We add .page.source-page + per-element classes to reach 0-0-61+ and win. */
+
+/* === 1. .page-toolbar 工具栏（theme-fixes 将 .page-toolbar 强制 #0a1c2b） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.source-page .page-toolbar,
+body:not(.login-active) .app-main .page.source-page .page-toolbar {
+  justify-content: stretch;
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  padding: 12px 16px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.source-page .page-toolbar::before,
+body:not(.login-active) .app-main .page.source-page .page-toolbar::before {
+  display: none !important;
+}
+
+/* === 2. 4 张统计卡片 article（不在 theme-fixes 列表里，但也统一一下） === */
+body.theme-dark .page.source-page .source-summary article,
+body:not(.login-active) .app-main .page.source-page .source-summary article {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* === 3. .el-alert.provenance-alert 数据来源声明条（theme-fixes 将 .el-alert 强制 #0c2231） === */
+body.theme-dark .page.source-page .el-alert.provenance-alert,
+body:not(.login-active) .app-main .page.source-page .el-alert.provenance-alert {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+body.theme-dark .page.source-page .el-alert.provenance-alert .el-alert__title,
+body:not(.login-active) .app-main .page.source-page .el-alert.provenance-alert .el-alert__title {
+  color: #d6f1ff !important;
+}
+
+/* === 4. 两个 .panel 面板（theme-fixes 将 .panel 强制 #0a1c2b + 阴影清空 + 浮动动画） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.source-page .panel.import-history-panel,
+body:not(.login-active) .app-main .page.source-page .panel.import-history-panel {
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.source-page .panel.import-history-panel::before,
+body:not(.login-active) .app-main .page.source-page .panel.import-history-panel::before {
+  display: none !important;
+}
+
+body.theme-dark .app-main:not(.app-main--dashboard) .page.source-page .panel.source-table-panel,
+body:not(.login-active) .app-main .page.source-page .panel.source-table-panel {
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.source-page .panel.source-table-panel::before,
+body:not(.login-active) .app-main .page.source-page .panel.source-table-panel::before {
+  display: none !important;
+}
+</style>
+
 <style scoped>
 .source-page { display: grid; gap: 16px; }
 .source-page :deep(.page-toolbar) { justify-content: stretch; }
@@ -303,13 +398,10 @@ onMounted(load)
 .toolbar-actions { display: flex; align-items: center; gap: 10px; }
 .sync-note { color: #83a9c5; font-size: 12px; }
 .source-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.source-summary article { border: 1px solid rgba(77, 174, 235, .2); border-radius: 12px; padding: 16px 18px; background: linear-gradient(145deg, rgba(8, 36, 74, .92), rgba(5, 25, 54, .82)); box-shadow: inset 0 1px rgba(141, 224, 255, .06); }
+.source-summary article { padding: 16px 18px; }
 .source-summary span { display: block; color: #85a9c4; font-size: 13px; }
 .source-summary strong { display: block; margin-top: 7px; color: #effbff; font-size: 28px; line-height: 1; }
 .source-summary small { display: block; margin-top: 7px; color: #5f86a4; font-size: 11px; }
-.provenance-alert { border: 1px solid rgba(54, 215, 255, .18); background: rgba(12, 54, 92, .62); }
-.import-history-panel { overflow: hidden; padding: 0; }
-.source-table-panel { overflow: hidden; padding: 0; }
 .table-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px; border-bottom: 1px solid rgba(75, 149, 201, .14); }
 .table-head h3 { margin: 0; color: #e7f8ff; font-size: 18px; }.table-head p { margin: 5px 0 0; color: #6f95b1; font-size: 12px; }.table-head .el-input { width: 280px; }
 .source-link { border: 0; padding: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }.source-link:hover b { color: #4edcff; }
