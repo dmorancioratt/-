@@ -1,12 +1,19 @@
 <template>
   <div class="growth-cockpit">
+    <div class="gc-atmosphere" aria-hidden="true">
+      <CosmosBackground />
+    </div>
+    <button v-if="isStandalone" class="gc-back-btn" @click="goBack" title="返回">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回</span>
+    </button>
     <div class="gc-page-header">
       <h1 class="gc-page-title">个人成长驾驶舱</h1>
       <p class="gc-page-subtitle">探索能力边界 · 成就职业未来</p>
     </div>
     <div class="gc-content">
       <div class="gc-left">
-        <div class="gc-card match-card animate-card" style="--delay:0.1s">
+        <div class="gc-card match-card animate-card clickable-card" style="--delay:0.1s" @click="navigateTo('/match-analysis')" title="查看匹配详情">
           <div class="card-corner card-corner-tl"></div>
           <div class="card-corner card-corner-tr"></div>
           <div class="card-corner card-corner-bl"></div>
@@ -70,7 +77,7 @@
           </div>
         </div>
 
-        <div class="gc-card radar-card animate-card" style="--delay:0.2s">
+        <div class="gc-card radar-card animate-card clickable-card" style="--delay:0.2s" @click="navigateTo('/skill-graph')" title="查看能力图谱">
           <div class="card-corner card-corner-tl"></div>
           <div class="card-corner card-corner-tr"></div>
           <div class="card-corner card-corner-bl"></div>
@@ -110,7 +117,7 @@
           </div>
         </div>
 
-        <div class="gc-card resume-card animate-card" style="--delay:0.3s">
+        <div class="gc-card resume-card animate-card clickable-card" style="--delay:0.3s" @click="navigateTo('/resume-parser')" title="查看简历详情">
           <div class="card-corner card-corner-tl"></div>
           <div class="card-corner card-corner-tr"></div>
           <div class="card-corner card-corner-bl"></div>
@@ -123,15 +130,59 @@
           </div>
           <div class="resume-meta">最近更新：{{ resume.updatedAt }}</div>
           <div class="resume-desc">{{ resume.comment }}</div>
-          <button class="resume-detail">
+          <div class="resume-skills">
+            <span v-for="tag in resume.keySkills" :key="tag" class="resume-tag">{{ tag }}</span>
+          </div>
+          <button class="resume-detail" @click="navigateTo('/resume-parser')">
             <span>查看详情</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
+
+        <div class="gc-card recommend-card animate-card clickable-card" style="--delay:0.35s" @click="navigateTo('/match-analysis')" title="查看岗位匹配">
+          <div class="card-corner card-corner-tl"></div>
+          <div class="card-corner card-corner-tr"></div>
+          <div class="card-corner card-corner-bl"></div>
+          <div class="card-corner card-corner-br"></div>
+          <div class="card-border-glow" style="background: linear-gradient(135deg, transparent 20%, rgba(143,124,255,0.25) 50%, rgba(78,216,255,0.15) 70%, transparent 90%)"></div>
+          <div class="card-header">
+            <h3><span class="header-bar"></span>推荐岗位</h3>
+          </div>
+          <div class="recommend-list">
+            <div v-for="(job, i) in recommendJobs" :key="job.name" class="recommend-item" :class="{'top': i===0}" @click.stop="navigateTo('/match-analysis')">
+              <div class="rj-rank">{{ i+1 }}</div>
+              <div class="rj-info">
+                <div class="rj-name">{{ job.name }}</div>
+                <div class="rj-meta">{{ job.company }} · {{ job.city }} · {{ job.salary }}</div>
+              </div>
+              <div class="rj-match">
+                <div class="rj-score" :class="job.trend">{{ job.score }}%</div>
+                <div class="rj-trend" :class="job.trend">{{ job.trend === 'up' ? '↑' : job.trend === 'down' ? '↓' : '→' }}{{ Math.abs(job.change) }}%</div>
+              </div>
+            </div>
+          </div>
+          <div class="match-trend-chart">
+            <div class="trend-chart-title">匹配度变化趋势</div>
+            <svg class="trend-svg" viewBox="0 0 280 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="trendArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="rgba(78,216,255,0.2)"/>
+                  <stop offset="100%" stop-color="rgba(78,216,255,0)"/>
+                </linearGradient>
+              </defs>
+              <path :d="trendAreaPath" fill="url(#trendArea)"/>
+              <path :d="trendLinePath" fill="none" stroke="#4ed8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle v-for="(p, i) in trendPoints" :key="i" :cx="p.x" :cy="p.y" r="3" fill="#061830" stroke="#4ed8ff" stroke-width="1.5"/>
+            </svg>
+            <div class="trend-labels">
+              <span v-for="m in trendMonths" :key="m">{{ m }}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="gc-center">
-        <div class="galaxy-card animate-card" style="--delay:0.15s">
+        <div class="galaxy-card animate-card clickable-card" style="--delay:0.15s" @click="navigateTo('/skill-graph')" title="查看完整能力图谱">
           <div class="card-corner card-corner-tl"></div>
           <div class="card-corner card-corner-tr"></div>
           <div class="card-corner card-corner-bl"></div>
@@ -144,6 +195,8 @@
             </div>
             <div class="galaxy-stats">
               <span><strong>{{ galaxySkills.filter(s=>s.status==='mastered').length }}</strong> 已掌握</span>
+              <span><strong>{{ galaxySkills.filter(s=>s.status==='improve').length }}</strong> 待提升</span>
+              <span><strong>{{ galaxySkills.filter(s=>s.status==='missing').length }}</strong> 缺失</span>
               <span><strong>{{ galaxySkills.length }}</strong> 技能点</span>
             </div>
           </div>
@@ -155,6 +208,54 @@
             <div class="orbit-ring orbit-ring-1"></div>
             <div class="orbit-ring orbit-ring-2"></div>
             <div class="orbit-ring orbit-ring-3"></div>
+            
+            <svg class="skill-connectors" viewBox="-240 -240 480 480">
+              <defs>
+                <linearGradient id="connMastered" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="rgba(55,214,165,0)"/>
+                  <stop offset="100%" stop-color="rgba(55,214,165,0.5)"/>
+                </linearGradient>
+                <linearGradient id="connImprove" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="rgba(143,124,255,0)"/>
+                  <stop offset="100%" stop-color="rgba(143,124,255,0.4)"/>
+                </linearGradient>
+                <linearGradient id="connTransfer" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="rgba(255,182,92,0)"/>
+                  <stop offset="100%" stop-color="rgba(255,182,92,0.4)"/>
+                </linearGradient>
+                <linearGradient id="connMissing" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="rgba(255,112,136,0)"/>
+                  <stop offset="100%" stop-color="rgba(255,112,136,0.5)"/>
+                </linearGradient>
+              </defs>
+              <g v-for="(skill, i) in galaxySkills" :key="'conn'+i">
+                <line 
+                  :x1="0" :y1="0" 
+                  :x2="getSkillXY(i).x" :y2="getSkillXY(i).y"
+                  :stroke="getConnColor(skill.status)"
+                  stroke-width="1.2"
+                  :stroke-dasharray="skill.status==='missing' ? '6,6' : 'none'"
+                  :opacity="selectedSkill?.name===skill.name ? 1 : 0.3"
+                  class="connector-line"
+                />
+              </g>
+            </svg>
+
+            <div class="galaxy-nodes-rotator" :style="{animationDuration: orbitSpeed + 's'}">
+              <div class="galaxy-nodes-wrapper">
+                <div v-for="(skill, i) in galaxySkills" :key="skill.name" 
+                  class="skill-node" :class="[skill.status, {'pulse-node': i%5===0, 'big-node': skill.level>=15, 'selected': selectedSkill?.name===skill.name}]"
+                  :style="skillPosStyle(i, galaxySkills.length)"
+                  @click="selectSkill(skill)">
+                  <div class="node-bg"></div>
+                  <div class="node-ring"></div>
+                  <div class="node-pulse"></div>
+                  <div class="node-short">{{ skill.short }}</div>
+                  <div class="node-label">{{ skill.name }}</div>
+                </div>
+              </div>
+            </div>
+
             <div class="core-user">
               <div class="core-shockwave"></div>
               <div class="core-energy-ring core-energy-ring-1"></div>
@@ -169,40 +270,16 @@
                 <div class="core-meta">{{ user.edu }}</div>
               </div>
             </div>
-            <div v-for="(skill, i) in galaxySkills" :key="skill.name" 
-              class="skill-node" :class="[skill.status, {'pulse-node': i%5===0, 'big-node': skill.level>=15}]"
-              :style="skillPosStyle(i, galaxySkills.length)"
-              @click="selectSkill(skill)">
-              <div class="node-bg"></div>
-              <div class="node-ring"></div>
-              <div class="node-pulse"></div>
-              <div class="node-short">{{ skill.short }}</div>
-              <div class="node-label">{{ skill.name }}</div>
-            </div>
-            <div v-if="selectedSkill" class="skill-tip" :style="tipPosStyle(selectedSkill)">
-              <div class="tip-arrow"></div>
-              <div class="tip-inner">
-                <div class="tip-header">
-                  <span class="tip-status-dot" :class="selectedSkill.status"></span>
-                  <span class="tip-name">{{ selectedSkill.name }}</span>
-                </div>
-                <div class="tip-cat">{{ selectedSkill.category }}</div>
-                <div class="tip-level-row">
-                  <span class="tip-level-val">Lv.{{ selectedSkill.level }}</span>
-                  <div class="tip-bar"><div class="tip-bar-fill" :class="selectedSkill.status" :style="{width: selectedSkill.level*5+'%'}"></div></div>
-                </div>
-              </div>
-            </div>
           </div>
           <div class="galaxy-legend">
             <span class="gl-item mastered"><i></i>已掌握</span>
             <span class="gl-item improve"><i></i>待提升</span>
-            <span class="gl-item missing"><i></i>缺失</span>
+            <span class="gl-item missing"><i></i>缺失（断点）</span>
             <span class="gl-item transfer"><i></i>可迁移</span>
           </div>
         </div>
 
-        <div class="learning-path-wrap animate-card" style="--delay:0.35s">
+        <div class="learning-path-wrap animate-card clickable-card" style="--delay:0.35s" @click="navigateTo('/learning-path')" title="查看学习路径">
           <div class="card-corner card-corner-tl"></div>
           <div class="card-corner card-corner-tr"></div>
           <div class="card-corner card-corner-bl"></div>
@@ -211,6 +288,10 @@
           <div class="lp-header">
             <h2><span class="title-deco"></span>学习路径</h2>
             <p>登山式成长轨迹 · 你的专属攀登计划</p>
+          </div>
+          <div class="lp-progress-bar">
+            <div class="lp-progress-fill" :style="{width: learningProgress + '%'}"></div>
+            <span class="lp-progress-text">已完成 {{ learningProgress }}%</span>
           </div>
           <div class="lp-mountain">
             <svg class="lp-svg" viewBox="0 0 1000 320" preserveAspectRatio="none">
@@ -239,16 +320,16 @@
               <path d="M0,320 L0,260 L80,220 L160,240 L240,180 L320,200 L400,140 L480,160 L560,100 L640,120 L720,70 L800,90 L880,50 L960,70 L1000,40 L1000,320 Z" fill="url(#mtnGrad2)"/>
               <path d="M0,320 L0,280 L100,250 L200,270 L300,210 L400,230 L500,170 L600,190 L700,130 L800,150 L900,100 L1000,120 L1000,320 Z" fill="url(#mtnGrad1)"/>
               <path d="M0,320 L0,290 L200,275 L400,250 L600,220 L800,180 L1000,150 L1000,320 Z" fill="rgba(7,20,40,0.8)"/>
-              <path class="lp-path" d="M50,290 C150,270 200,250 300,230 S450,180 500,170 S650,130 700,110 S850,70 950,50" fill="none" stroke="url(#pathGrad)" stroke-width="4" stroke-linecap="round" filter="url(#pathGlow)" stroke-dasharray="2000" stroke-dashoffset="0"/>
-              <path class="lp-path-glow" d="M50,290 C150,270 200,250 300,230 S450,180 500,170 S650,130 700,110 S850,70 950,50" fill="none" stroke="url(#pathGrad)" stroke-width="8" stroke-linecap="round" opacity="0.3" filter="url(#pathGlow)"/>
+              <path class="lp-path" d="M50,290 C150,270 200,250 300,230 S450,180 500,170 S650,130 700,110 S850,70 950,50" fill="none" stroke="url(#pathGrad)" stroke-width="4" stroke-linecap="round" filter="url(#pathGlow)" stroke-dasharray="2000" :stroke-dashoffset="2000 - (2000 * learningProgress / 100)"/>
+              <path class="lp-path-glow" d="M50,290 C150,270 200,250 300,230 S450,180 500,170 S650,130 700,110 S850,70 950,50" fill="none" stroke="url(#pathGrad)" stroke-width="8" stroke-linecap="round" opacity="0.3" filter="url(#pathGlow)" stroke-dasharray="2000" :stroke-dashoffset="2000 - (2000 * learningProgress / 100)"/>
             </svg>
-            <div v-for="(stop, i) in learningStops" :key="stop.name" class="lp-stop" :class="{done: stop.done, current: stop.current, locked: !stop.done && !stop.current}" :style="{left: stop.x+'%', bottom: stop.y+'%'}">
+            <div v-for="(stop, i) in learningStops" :key="stop.name" class="lp-stop" :class="{done: stop.done, current: stop.current, locked: !stop.done && !stop.current}" :style="{left: stop.x+'%', bottom: stop.y+'%'}" @click.stop="navigateTo('/learning-path')">
               <div class="stop-pulse" v-if="stop.current"></div>
               <div class="stop-glow"></div>
               <div class="stop-dot">{{ i+1 }}</div>
               <div class="stop-label">{{ stop.name }}</div>
             </div>
-            <div class="lp-current-pos">
+            <div class="lp-current-pos" v-if="currentStop">
               <div class="pos-ping"></div>
               <div class="pos-dot"></div>
               <div class="pos-label">当前位置</div>
@@ -258,7 +339,7 @@
       </div>
 
       <div class="gc-right">
-        <div class="gc-card next-action animate-card" style="--delay:0.12s">
+        <div class="gc-card next-action animate-card clickable-card" style="--delay:0.12s" @click="navigateTo('/learning-path')" title="查看学习计划">
           <div class="card-corner card-corner-tl"></div>
           <div class="card-corner card-corner-tr"></div>
           <div class="card-corner card-corner-bl"></div>
@@ -285,14 +366,14 @@
               预计提升 {{ nextAction.impact }}%
             </div>
           </div>
-          <button class="action-start">
+          <button class="action-start" @click.stop="navigateTo('/learning-path')">
             <span class="btn-shine"></span>
             <span class="btn-text">立即开始</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
 
-        <div class="gc-card plan-card animate-card" style="--delay:0.22s">
+        <div class="gc-card plan-card animate-card clickable-card" style="--delay:0.22s" @click="navigateTo('/learning-path')" title="查看成长计划">
           <div class="card-corner card-corner-tl"></div>
           <div class="card-corner card-corner-tr"></div>
           <div class="card-corner card-corner-bl"></div>
@@ -309,7 +390,7 @@
           <div class="plan-list">
             <div v-for="item in weekPlan.items" :key="item.title" class="plan-item" :class="{done: item.done}">
               <div class="pi-check">
-                <svg v-if="item.done" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#061830" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg v-if="item.done" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#041210" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
               <div class="pi-content">
                 <div class="pi-title">{{ item.title }}</div>
@@ -319,7 +400,7 @@
           </div>
         </div>
 
-        <div class="gc-card interview-card animate-card" style="--delay:0.28s">
+        <div class="gc-card interview-card animate-card clickable-card" style="--delay:0.28s" @click="navigateTo('/digital-interviewer')" title="进入模拟面试">
           <div class="card-corner card-corner-tl"></div>
           <div class="card-corner card-corner-tr"></div>
           <div class="card-corner card-corner-bl"></div>
@@ -349,10 +430,19 @@
               <div class="stat-lbl">已完成</div>
             </div>
           </div>
-          <button class="interview-btn">开始新面试 ></button>
+          <div class="interview-history">
+            <div class="ih-title">最近能力变化</div>
+            <div class="ih-bars">
+              <div v-for="(score, i) in interview.history" :key="i" class="ih-bar-wrap">
+                <div class="ih-bar" :style="{height: score + '%'}"></div>
+                <span class="ih-label">{{ i+1 }}月</span>
+              </div>
+            </div>
+          </div>
+          <button class="interview-btn" @click.stop="navigateTo('/digital-interviewer')">开始新面试 ></button>
         </div>
 
-        <div class="gc-card timeline-card animate-card" style="--delay:0.38s">
+        <div class="gc-card timeline-card animate-card clickable-card" style="--delay:0.38s" @click="navigateTo('/capability-evolution')" title="查看能力演化">
           <div class="card-corner card-corner-tl"></div>
           <div class="card-corner card-corner-tr"></div>
           <div class="card-corner card-corner-bl"></div>
@@ -374,25 +464,91 @@
         </div>
       </div>
     </div>
+
+    <Transition name="skill-detail">
+      <div v-if="selectedSkill" class="skill-detail-overlay" @click.self="selectedSkill=null">
+        <div class="skill-detail-panel">
+          <button class="sdp-close" @click="selectedSkill=null">×</button>
+          <div class="sdp-header" :class="selectedSkill.status">
+            <div class="sdp-status-badge">
+              <span class="sdp-dot"></span>
+              {{ statusLabels[selectedSkill.status] }}
+            </div>
+            <h2>{{ selectedSkill.name }}</h2>
+            <p class="sdp-category">{{ selectedSkill.category }}</p>
+          </div>
+          <div class="sdp-level">
+            <div class="sdp-level-label">当前等级</div>
+            <div class="sdp-level-bar">
+              <div class="sdp-level-fill" :class="selectedSkill.status" :style="{width: selectedSkill.level*5+'%'}"></div>
+              <span class="sdp-level-num">Lv.{{ selectedSkill.level }}</span>
+            </div>
+          </div>
+          <div class="sdp-section">
+            <h4><span class="sdp-icon">📋</span>技能证据</h4>
+            <ul class="sdp-evidence">
+              <li v-for="(ev, i) in selectedSkill.evidence" :key="i">
+                <span class="ev-dot"></span>{{ ev }}
+              </li>
+            </ul>
+          </div>
+          <div class="sdp-section">
+            <h4><span class="sdp-icon">📚</span>能力来源</h4>
+            <div class="sdp-sources">
+              <span v-for="src in selectedSkill.sources" :key="src" class="sdp-source-tag">{{ src }}</span>
+            </div>
+          </div>
+          <div class="sdp-section sdp-suggest" v-if="selectedSkill.suggestion">
+            <h4><span class="sdp-icon">💡</span>学习建议</h4>
+            <p>{{ selectedSkill.suggestion }}</p>
+            <div v-if="selectedSkill.resources" class="sdp-resources">
+              <div v-for="res in selectedSkill.resources" :key="res.name" class="sdp-res">
+                <span class="res-type">{{ res.type }}</span>
+                <span class="res-name">{{ res.name }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="sdp-actions">
+            <button class="sdp-btn primary" @click.stop="navigateTo('/learning-path')">开始学习</button>
+            <button class="sdp-btn" @click="selectedSkill=null">关闭</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import CosmosBackground from '@/components/CosmosBackground.vue'
+import { ArrowLeft } from '@element-plus/icons-vue'
 
-const activeTab = ref('overview')
+const router = useRouter()
+const route = useRoute()
+const isStandalone = computed(() => route.meta.public === true || !route.meta.fullscreen)
 
-const navTabs = [
-  { id: 'overview', name: '概览', icon: '📊' },
-  { id: 'value', name: '个人价值成长仓', icon: '💎' },
-  { id: 'match', name: '人岗匹配', icon: '🎯' },
-  { id: 'ai', name: 'AI互动', icon: '🤖' },
-  { id: 'settings', name: '设置', icon: '⚙️' }
-]
+function goBack() {
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push('/login')
+  }
+}
+
+function navigateTo(path: string) {
+  router.push(path)
+}
 
 const user = { name: '张同学', edu: '计算机科学与技术 · 大三', targetRole: 'AI算法工程师' }
 const targetRole = { name: 'AI算法工程师', level: '中级', city: '北京', score: 72, improve: 4 }
-const resume = { score: 85, grade: '优秀', updatedAt: '2天前', comment: '简历结构清晰，项目经历突出，建议补充量化成果和技术栈深度描述。' }
+const resume = { 
+  score: 85, 
+  grade: '优秀', 
+  updatedAt: '2天前', 
+  comment: '简历结构清晰，项目经历突出，建议补充量化成果和技术栈深度描述。',
+  keySkills: ['Python', 'PyTorch', '机器学习', '深度学习', '数据结构']
+}
 const nextAction = { title: '深入学习RAG知识库问答系统', desc: '掌握检索增强生成核心技术，完成一个端到端的问答项目', duration: '预计14天', impact: 8 }
 const weekPlan = { done: 3, total: 5, items: [
   { title: '完成Transformer架构学习', time: '周一', done: true },
@@ -401,12 +557,53 @@ const weekPlan = { done: 3, total: 5, items: [
   { title: '完成RAG项目demo', time: '周四', done: false },
   { title: '撰写技术博客总结', time: '周五', done: false }
 ]}
-const interview = { score: 78, improve: 12, correctRate: 72, avgTime: 45, count: 15 }
+const interview = { score: 78, improve: 12, correctRate: 72, avgTime: 45, count: 15, history: [52, 58, 63, 60, 68, 72, 78] }
 const timeline = [
   { date: '08-12', text: '完成深度学习基础课程，掌握CNN/RNN核心原理' },
-  { date: '08-08', text: 'Python编程技能达到Lv.15，进入熟练阶段' },
-  { date: '08-01', text: '匹配度提升4%，算法基础能力显著增强' }
+  { date: '08-08', text: 'Python编程技能达到Lv.18，进入熟练阶段' },
+  { date: '08-01', text: '匹配度提升4%，算法基础能力显著增强' },
+  { date: '07-25', text: '完成第一个ML项目，鸢尾花分类准确率96%' },
+  { date: '07-15', text: '开始系统学习机器学习，完成吴恩达课程' }
 ]
+
+const recommendJobs = [
+  { name: 'AI算法工程师', company: '字节跳动', city: '北京', salary: '25-40K', score: 72, trend: 'up', change: 4 },
+  { name: 'NLP算法工程师', company: '百度', city: '北京', salary: '22-35K', score: 68, trend: 'up', change: 6 },
+  { name: '机器学习工程师', company: '美团', city: '北京', salary: '20-35K', score: 65, trend: 'up', change: 2 },
+  { name: 'CV算法工程师', company: '商汤科技', city: '上海', salary: '23-38K', score: 58, trend: 'stable', change: 0 },
+]
+
+const trendMonths = ['2月', '3月', '4月', '5月', '6月', '7月', '8月']
+const trendScores = [45, 52, 55, 60, 63, 68, 72]
+const trendPoints = computed(() => {
+  return trendScores.map((score, i) => ({
+    x: 20 + i * 40,
+    y: 50 - (score - 40) * 0.8
+  }))
+})
+const trendLinePath = computed(() => {
+  return trendPoints.value.map((p, i) => `${i===0?'M':'L'}${p.x},${p.y}`).join(' ')
+})
+const trendAreaPath = computed(() => {
+  const line = trendPoints.value.map((p, i) => `${i===0?'M':'L'}${p.x},${p.y}`).join(' ')
+  return `${line} L260,55 L20,55 Z`
+})
+
+const learningStops = [
+  { name: '基础巩固', x: 8, y: 12, done: true, current: false },
+  { name: '算法进阶', x: 25, y: 28, done: true, current: false },
+  { name: 'ML实战', x: 42, y: 45, done: true, current: false },
+  { name: 'DL专精', x: 58, y: 58, done: false, current: true },
+  { name: '大模型', x: 75, y: 72, done: false, current: false },
+  { name: '就业准备', x: 92, y: 88, done: false, current: false }
+]
+const learningProgress = computed(() => {
+  const done = learningStops.filter(s => s.done).length
+  const total = learningStops.length
+  const currentIdx = learningStops.findIndex(s => s.current)
+  return Math.round((done + (currentIdx >= 0 ? 0.5 : 0)) / total * 100)
+})
+const currentStop = computed(() => learningStops.find(s => s.current))
 
 const radarVals = [80, 65, 55, 70, 60, 75]
 const radarLabels = ['算法', '编程', '工程', '数学', '沟通', '业务']
@@ -425,8 +622,7 @@ function hexPoints(cx: number, cy: number, r: number) {
 function radarPoints(vals: number[]) {
   return vals.map((v, i) => {
     const angle = (i * 60 - 90) * Math.PI / 180
-    const r = v
-    return `${120 + Math.cos(angle) * r},${120 + Math.sin(angle) * r}`
+    return `${120 + Math.cos(angle) * v},${120 + Math.sin(angle) * v}`
   }).join(' ')
 }
 function radarPointsArr(vals: number[]) {
@@ -440,31 +636,123 @@ const requiredRadarPoints = computed(() => radarPoints([85,80,75,80,70,75]))
 const currentRadarPointsArr = computed(() => radarPointsArr(radarVals))
 const matchDash = computed(() => `${targetRole.score * 5.15} ${515 - targetRole.score * 5.15}`)
 
+const statusLabels: Record<string, string> = {
+  mastered: '已掌握',
+  improve: '待提升',
+  missing: '缺失技能',
+  transfer: '可迁移'
+}
+
 const galaxySkills = ref([
-  { name: 'Python', short: 'Py', level: 18, status: 'mastered', category: '编程语言' },
-  { name: '机器学习', short: 'ML', level: 16, status: 'mastered', category: 'AI核心' },
-  { name: '深度学习', short: 'DL', level: 14, status: 'improve', category: 'AI核心' },
-  { name: 'PyTorch', short: 'PT', level: 15, status: 'mastered', category: '框架工具' },
-  { name: 'NLP', short: 'NLP', level: 12, status: 'improve', category: 'AI领域' },
-  { name: 'CV', short: 'CV', level: 10, status: 'improve', category: 'AI领域' },
-  { name: 'TensorFlow', short: 'TF', level: 11, status: 'transfer', category: '框架工具' },
-  { name: 'RAG', short: 'RAG', level: 6, status: 'missing', category: '前沿技术' },
-  { name: 'LangChain', short: 'LC', level: 5, status: 'missing', category: '前沿技术' },
-  { name: '向量数据库', short: 'VDB', level: 8, status: 'improve', category: '工程能力' },
-  { name: '数据结构', short: 'DS', level: 17, status: 'mastered', category: '计算机基础' },
-  { name: 'SQL', short: 'SQL', level: 14, status: 'mastered', category: '工程能力' },
-  { name: 'Linux', short: 'LX', level: 13, status: 'improve', category: '工程能力' },
-  { name: 'Git', short: 'Git', level: 15, status: 'mastered', category: '工程能力' },
-  { name: 'Docker', short: 'Doc', level: 9, status: 'improve', category: '工程能力' },
-  { name: '算法', short: 'Alg', level: 16, status: 'mastered', category: '计算机基础' },
-  { name: '大模型', short: 'LLM', level: 7, status: 'missing', category: '前沿技术' },
-  { name: 'Prompt工程', short: 'PR', level: 11, status: 'transfer', category: '前沿技术' },
-  { name: 'MLOps', short: 'MLO', level: 6, status: 'missing', category: '工程能力' },
-  { name: '统计学', short: 'Sta', level: 13, status: 'improve', category: '数学基础' },
+  { name: 'Python', short: 'Py', level: 18, status: 'mastered', category: '编程语言', 
+    evidence: ['完成15个Python项目', 'LeetCode刷题200+', '技术博客12篇'],
+    sources: ['项目实践', '课程学习', '开源贡献'],
+    suggestion: '继续深入Python高级特性，关注性能优化和工程化实践。'
+  },
+  { name: '机器学习', short: 'ML', level: 16, status: 'mastered', category: 'AI核心',
+    evidence: ['完成吴恩达ML课程', '实现6种经典算法', 'Kaggle比赛铜牌'],
+    sources: ['课程认证', '竞赛经历', '项目实践'],
+    suggestion: '可以尝试更复杂的集成学习方法，参与更多实战项目。'
+  },
+  { name: '深度学习', short: 'DL', level: 14, status: 'improve', category: 'AI核心',
+    evidence: ['掌握CNN/RNN基础', '完成图像分类项目'],
+    sources: ['课程学习', '项目实践'],
+    suggestion: '建议深入学习Transformer架构，多动手复现经典论文。',
+    resources: [{type: '课程', name: '李沐深度学习'}, {type: '书籍', name: 'Dive into Deep Learning'}]
+  },
+  { name: 'PyTorch', short: 'PT', level: 15, status: 'mastered', category: '框架工具',
+    evidence: ['使用PyTorch完成8个项目', '自定义模型训练流程'],
+    sources: ['项目实践', '官方文档'],
+    suggestion: '继续探索TorchScript部署和分布式训练。'
+  },
+  { name: 'NLP', short: 'NLP', level: 12, status: 'improve', category: 'AI领域',
+    evidence: ['完成文本分类任务', '了解Word2Vec原理'],
+    sources: ['课程学习', '项目实践'],
+    suggestion: '建议系统学习Transformer和大模型相关技术。',
+    resources: [{type: '课程', name: 'CS224N'}, {type: '书籍', name: 'Speech and Language Processing'}]
+  },
+  { name: 'CV', short: 'CV', level: 10, status: 'improve', category: 'AI领域',
+    evidence: ['了解ResNet架构', '完成简单目标检测'],
+    sources: ['课程学习'],
+    suggestion: '建议学习YOLO系列和检测Transformer，多做实战项目。'
+  },
+  { name: 'TensorFlow', short: 'TF', level: 11, status: 'transfer', category: '框架工具',
+    evidence: ['有PyTorch基础可快速迁移', '了解Keras API'],
+    sources: ['迁移学习'],
+    suggestion: 'PyTorch基础扎实，TensorFlow可快速上手，建议按需学习。'
+  },
+  { name: 'RAG', short: 'RAG', level: 6, status: 'missing', category: '前沿技术',
+    evidence: [],
+    sources: [],
+    suggestion: 'RAG是当前大模型应用热门方向，建议系统学习：向量数据库、检索策略、Prompt工程。',
+    resources: [{type: '教程', name: 'LangChain官方文档'}, {type: '项目', name: '构建个人知识库问答'}]
+  },
+  { name: 'LangChain', short: 'LC', level: 5, status: 'missing', category: '前沿技术',
+    evidence: [],
+    sources: [],
+    suggestion: 'LangChain是LLM应用开发框架，建议结合RAG项目一起学习。'
+  },
+  { name: '向量数据库', short: 'VDB', level: 8, status: 'improve', category: '工程能力',
+    evidence: ['了解向量检索原理', '使用过FAISS'],
+    sources: ['技术调研'],
+    suggestion: '建议深入学习Milvus/Chroma等向量数据库，掌握索引优化技巧。'
+  },
+  { name: '数据结构', short: 'DS', level: 17, status: 'mastered', category: '计算机基础',
+    evidence: ['LeetCode刷题300+', '掌握常见数据结构'],
+    sources: ['刷题训练', '课程学习'],
+    suggestion: '基础扎实，可以开始挑战Hard题目，学习高级数据结构。'
+  },
+  { name: 'SQL', short: 'SQL', level: 14, status: 'mastered', category: '工程能力',
+    evidence: ['熟练使用SQL查询', '了解数据库索引原理'],
+    sources: ['项目实践'],
+    suggestion: '建议学习查询优化和分布式数据库相关知识。'
+  },
+  { name: 'Linux', short: 'LX', level: 13, status: 'improve', category: '工程能力',
+    evidence: ['熟悉常用Linux命令', '能在Linux环境开发'],
+    sources: ['日常使用'],
+    suggestion: '建议学习Shell脚本编程和系统性能调优。'
+  },
+  { name: 'Git', short: 'Git', level: 15, status: 'mastered', category: '工程能力',
+    evidence: ['熟练使用Git版本控制', '了解Git Flow工作流'],
+    sources: ['项目实践'],
+    suggestion: '可以学习Git高级功能，如rebase、cherry-pick等。'
+  },
+  { name: 'Docker', short: 'Doc', level: 9, status: 'improve', category: '工程能力',
+    evidence: ['了解Docker基本命令', '能编写简单Dockerfile'],
+    sources: ['技术学习'],
+    suggestion: '建议学习Docker Compose和K8s基础，掌握容器化部署。'
+  },
+  { name: '算法', short: 'Alg', level: 16, status: 'mastered', category: '计算机基础',
+    evidence: ['掌握常见算法设计模式', '算法竞赛校赛获奖'],
+    sources: ['竞赛训练', '刷题'],
+    suggestion: '继续保持刷题习惯，关注算法在实际工程中的应用。'
+  },
+  { name: '大模型', short: 'LLM', level: 7, status: 'missing', category: '前沿技术',
+    evidence: ['了解GPT基本原理'],
+    sources: ['技术阅读'],
+    suggestion: '大模型是AI核心方向，建议学习：预训练、SFT、RLHF、LoRA微调。',
+    resources: [{type: '课程', name: 'CS224W/CS229N'}, {type: '论文', name: '必读论文100篇'}]
+  },
+  { name: 'Prompt工程', short: 'PR', level: 11, status: 'transfer', category: '前沿技术',
+    evidence: ['了解基本Prompt技巧', '使用过CoT'],
+    sources: ['实践探索'],
+    suggestion: '可以系统学习Prompt工程方法论，这是大模型时代的核心技能。'
+  },
+  { name: 'MLOps', short: 'MLO', level: 6, status: 'missing', category: '工程能力',
+    evidence: [],
+    sources: [],
+    suggestion: 'MLOps是AI工程化关键能力，建议学习：MLflow、Kubeflow、CI/CD for ML。'
+  },
+  { name: '统计学', short: 'Sta', level: 13, status: 'improve', category: '数学基础',
+    evidence: ['掌握概率论基础', '了解假设检验'],
+    sources: ['课程学习'],
+    suggestion: '建议加强贝叶斯统计和实验设计能力，对数据分析和建模很有帮助。'
+  },
 ])
 const selectedSkill = ref<any>(null)
+const orbitSpeed = ref(180)
 
-function skillPosStyle(i: number, total: number) {
+function getSkillXY(i: number) {
   const layerCount = [6, 7, 7]
   const layerRadii = [90, 145, 195]
   let layer = 0
@@ -476,31 +764,22 @@ function skillPosStyle(i: number, total: number) {
   const count = layerCount[layer]
   const angle = (idxInLayer / count) * Math.PI * 2 - Math.PI / 2 + (layer * 0.25)
   const r = layerRadii[layer]
-  const x = Math.cos(angle) * r
-  const y = Math.sin(angle) * r
-  return { '--x': `${x}px`, '--y': `${y}px` } as any
+  return { x: Math.cos(angle) * r, y: Math.sin(angle) * r }
 }
 
-function connectorStyle(i: number, total: number) {
-  return {} as any
+function skillPosStyle(i: number, total: number) {
+  const pos = getSkillXY(i)
+  return { '--x': `${pos.x}px`, '--y': `${pos.y}px` } as any
 }
 
-function tipPosStyle(skill: any) {
-  const i = galaxySkills.value.indexOf(skill)
-  const layerCount = [6, 7, 7]
-  const layerRadii = [90, 145, 195]
-  let layer = 0
-  let idxInLayer = i
-  for (let l = 0; l < layerCount.length; l++) {
-    if (idxInLayer < layerCount[l]) { layer = l; break }
-    idxInLayer -= layerCount[l]
+function getConnColor(status: string) {
+  const colors: Record<string, string> = {
+    mastered: 'url(#connMastered)',
+    improve: 'url(#connImprove)',
+    missing: 'url(#connMissing)',
+    transfer: 'url(#connTransfer)'
   }
-  const count = layerCount[layer]
-  const angle = (idxInLayer / count) * Math.PI * 2 - Math.PI / 2 + (layer * 0.25)
-  const r = layerRadii[layer] + 55
-  let x = Math.cos(angle) * r
-  let y = Math.sin(angle) * r
-  return { left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px - 50px)` }
+  return colors[status] || colors.mastered
 }
 
 function selectSkill(skill: any) { selectedSkill.value = skill }
@@ -517,19 +796,6 @@ function bgParticleStyle(s: number) {
   } as any
 }
 
-function orbStyle(o: number) {
-  const colors = ['rgba(78,216,255,0.08)', 'rgba(143,124,255,0.06)', 'rgba(0,255,255,0.05)', 'rgba(55,214,165,0.06)', 'rgba(255,182,92,0.05)', 'rgba(78,216,255,0.07)']
-  return {
-    left: (10 + o*15) + '%',
-    top: (15 + (o%3)*25) + '%',
-    width: (200 + o*80) + 'px',
-    height: (200 + o*80) + 'px',
-    background: `radial-gradient(circle, ${colors[o-1]} 0%, transparent 70%)`,
-    animationDelay: o*2 + 's',
-    animationDuration: (10 + o*3) + 's'
-  } as any
-}
-
 function starStyle(s: number) {
   return {
     left: (Math.sin(s * 73.3) * 0.5 + 0.5) * 100 + '%',
@@ -538,15 +804,6 @@ function starStyle(s: number) {
     animationDuration: (2 + (s%3)) + 's'
   } as any
 }
-
-const learningStops = [
-  { name: '基础巩固', x: 8, y: 12, done: true, current: false },
-  { name: '算法进阶', x: 25, y: 28, done: true, current: false },
-  { name: 'ML实战', x: 42, y: 45, done: true, current: false },
-  { name: 'DL专精', x: 58, y: 58, done: false, current: true },
-  { name: '大模型', x: 75, y: 72, done: false, current: false },
-  { name: '就业准备', x: 92, y: 88, done: false, current: false }
-]
 
 onMounted(() => {
   setTimeout(() => { if (!selectedSkill.value) selectSkill(galaxySkills.value[7]) }, 800)
@@ -562,6 +819,42 @@ onMounted(() => {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   overflow-x: hidden;
   position: relative;
+}
+
+.gc-atmosphere {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gc-back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(10, 25, 60, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  border-radius: 8px;
+  color: #00f5ff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.15);
+}
+.gc-back-btn:hover {
+  background: rgba(0, 245, 255, 0.15);
+  border-color: rgba(0, 245, 255, 0.6);
+  box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+  transform: translateX(-2px);
 }
 
 .gc-page-header {
@@ -616,6 +909,9 @@ onMounted(() => {
   box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(78,216,255,0.08);
   transform: translateY(-2px);
 }
+
+.clickable-card { cursor: pointer; }
+.clickable-card:hover { border-color: rgba(78,216,255,0.35); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 20px rgba(78,216,255,0.1); }
 
 .card-corner {
   position: absolute;
@@ -750,12 +1046,12 @@ onMounted(() => {
 .num-big {
   font-size: 56px;
   font-weight: 900;
-  background: linear-gradient(180deg, #ffffff 0%, #00f5ff 40%, #4ed8ff 70%, #8f7cff 100%);
+  background: linear-gradient(180deg, #fff, #4ed8ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1;
-  filter: drop-shadow(0 0 20px rgba(0,245,255,0.6)) drop-shadow(0 0 40px rgba(78,216,255,0.3));
+  filter: drop-shadow(0 0 15px rgba(78,216,255,0.4));
   animation: numGlow 2s ease-in-out infinite;
 }
 @keyframes numGlow {
@@ -827,7 +1123,16 @@ onMounted(() => {
 .resume-score em { font-size: 12px; font-style: normal; font-weight: 500; }
 .resume-score label { font-size: 11px; color: rgba(168,180,200,0.7); margin-left: 6px; padding: 2px 8px; background: rgba(55,214,165,0.1); border-radius: 4px; font-weight: 400; }
 .resume-meta { font-size: 11px; color: rgba(168,180,200,0.6); margin-bottom: 10px; }
-.resume-desc { font-size: 12px; color: rgba(200,216,238,0.85); line-height: 1.7; margin-bottom: 14px; }
+.resume-desc { font-size: 12px; color: rgba(200,216,238,0.85); line-height: 1.7; margin-bottom: 10px; }
+.resume-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.resume-tag {
+  font-size: 10px;
+  padding: 3px 8px;
+  background: rgba(78,216,255,0.1);
+  border: 1px solid rgba(78,216,255,0.2);
+  border-radius: 4px;
+  color: #4ed8ff;
+}
 .resume-detail {
   width: 100%;
   padding: 10px;
@@ -846,8 +1151,53 @@ onMounted(() => {
 }
 .resume-detail:hover { background: linear-gradient(135deg, rgba(78,216,255,0.2), rgba(0,200,255,0.1)); box-shadow: 0 0 20px rgba(78,216,255,0.15); }
 
+.recommend-card {}
+.recommend-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.recommend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(7,20,40,0.4);
+  border-radius: 8px;
+  border: 1px solid rgba(78,216,255,0.08);
+  transition: all 0.3s;
+}
+.recommend-item:hover { border-color: rgba(78,216,255,0.2); background: rgba(78,216,255,0.05); }
+.recommend-item.top { border-color: rgba(255,182,92,0.3); background: rgba(255,182,92,0.05); }
+.rj-rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(78,216,255,0.15);
+  color: #4ed8ff;
+  flex-shrink: 0;
+}
+.recommend-item.top .rj-rank { background: linear-gradient(135deg, #ffb65c, #ff8c00); color: #1a0f00; }
+.rj-info { flex: 1; min-width: 0; }
+.rj-name { font-size: 13px; font-weight: 600; color: #e8f4ff; }
+.rj-meta { font-size: 10px; color: rgba(168,180,200,0.6); margin-top: 2px; }
+.rj-match { text-align: right; flex-shrink: 0; }
+.rj-score { font-size: 16px; font-weight: 700; }
+.rj-score.up { color: #37d6a5; }
+.rj-score.down { color: #ff7088; }
+.rj-score.stable { color: #4ed8ff; }
+.rj-trend { font-size: 10px; font-weight: 600; }
+.rj-trend.up { color: #37d6a5; }
+.rj-trend.down { color: #ff7088; }
+.rj-trend.stable { color: rgba(168,180,200,0.6); }
+.match-trend-chart {}
+.trend-chart-title { font-size: 11px; color: rgba(168,180,200,0.7); margin-bottom: 8px; }
+.trend-svg { width: 100%; height: 60px; }
+.trend-labels { display: flex; justify-content: space-between; font-size: 9px; color: rgba(168,180,200,0.5); margin-top: 4px; }
+
 .galaxy-card { padding: 20px; }
-.galaxy-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.galaxy-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
 .galaxy-header h2 {
   margin: 0 0 2px;
   font-size: 20px;
@@ -859,9 +1209,9 @@ onMounted(() => {
   text-shadow: 0 0 30px rgba(78,216,255,0.3);
 }
 .galaxy-header p { margin: 0; font-size: 12px; color: rgba(168,180,200,0.6); margin-left: 28px; }
-.galaxy-stats { display: flex; gap: 16px; }
+.galaxy-stats { display: flex; gap: 12px; flex-wrap: wrap; }
 .galaxy-stats span { font-size: 11px; color: rgba(168,180,200,0.7); }
-.galaxy-stats strong { color: #4ed8ff; font-size: 16px; font-weight: 700; margin-right: 3px; text-shadow: 0 0 8px rgba(78,216,255,0.5); }
+.galaxy-stats strong { color: #4ed8ff; font-size: 14px; font-weight: 700; margin-right: 3px; text-shadow: 0 0 8px rgba(78,216,255,0.5); }
 
 .galaxy-scene {
   position: relative;
@@ -900,39 +1250,19 @@ onMounted(() => {
   50% { opacity: 1; }
 }
 
-.orbit-particles {
+.skill-connectors {
   position: absolute;
   left: 50%;
   top: 50%;
-  border-radius: 50%;
+  width: 480px;
+  height: 480px;
+  margin: -240px 0 0 -240px;
+  z-index: 2;
   pointer-events: none;
 }
-.orbit-particle {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  background: #4ed8ff;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  margin: -1.5px 0 0 -1.5px;
-  box-shadow: 0 0 6px #4ed8ff;
-  animation: orbitParticleMove linear infinite;
+.connector-line {
+  transition: opacity 0.3s ease;
 }
-.orbit-particles-1 { width: 290px; height: 290px; margin: -145px 0 0 -145px; animation: orbitRotate 30s linear infinite; }
-.orbit-particles-1 .orbit-particle { animation-duration: 30s; }
-.orbit-particles-2 { width: 210px; height: 210px; margin: -105px 0 0 -105px; animation: orbitRotateRev 22s linear infinite; }
-.orbit-particles-2 .orbit-particle { background: rgba(143,124,255,0.8); box-shadow: 0 0 6px #8f7cff; animation-duration: 22s; }
-.orbit-particles-3 { width: 130px; height: 130px; margin: -65px 0 0 -65px; animation: orbitRotate 15s linear infinite; }
-.orbit-particles-3 .orbit-particle { background: rgba(55,214,165,0.7); box-shadow: 0 0 5px #37d6a5; animation-duration: 15s; }
-@keyframes orbitParticleMove {
-  0% { transform: rotate(var(--angle)) translateX(0) scale(0); opacity: 0; }
-  10% { transform: rotate(calc(var(--angle) + 36deg)) translateX(0) scale(1); opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: rotate(calc(var(--angle) + 324deg)) translateX(0) scale(0); opacity: 0; }
-}
-@keyframes orbitRotate { to { transform: rotate(360deg); } }
-@keyframes orbitRotateRev { to { transform: rotate(-360deg); } }
 
 .orbit-ring {
   position: absolute;
@@ -942,9 +1272,26 @@ onMounted(() => {
   border: 1px dashed;
   pointer-events: none;
 }
-.orbit-ring-1 { width: 390px; height: 390px; margin: -195px 0 0 -195px; border-color: rgba(78,216,255,0.1); animation: orbitRotate 80s linear infinite; }
-.orbit-ring-2 { width: 290px; height: 290px; margin: -145px 0 0 -145px; border-color: rgba(143,124,255,0.1); animation: orbitRotateRev 60s linear infinite; }
-.orbit-ring-3 { width: 180px; height: 180px; margin: -90px 0 0 -90px; border-color: rgba(55,214,165,0.1); animation: orbitRotate 40s linear infinite; }
+.orbit-ring-1 { width: 390px; height: 390px; margin: -195px 0 0 -195px; border-color: rgba(78,216,255,0.1); }
+.orbit-ring-2 { width: 290px; height: 290px; margin: -145px 0 0 -145px; border-color: rgba(143,124,255,0.1); }
+.orbit-ring-3 { width: 180px; height: 180px; margin: -90px 0 0 -90px; border-color: rgba(55,214,165,0.1); }
+
+.galaxy-nodes-rotator {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  animation: orbitRotate var(--duration, 180s) linear infinite;
+}
+.galaxy-nodes-wrapper {
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: orbitRotateRev var(--duration, 180s) linear infinite;
+}
+@keyframes orbitRotate { to { transform: rotate(360deg); } }
+@keyframes orbitRotateRev { to { transform: rotate(-360deg); } }
 
 .core-user {
   position: absolute;
@@ -1073,9 +1420,10 @@ onMounted(() => {
 .skill-node.big-node .node-ring { width: 58px; height: 58px; margin: -55px 0 0 -29px; }
 .skill-node.big-node .node-short { font-size: 13px; }
 .skill-node.big-node .node-label { font-size: 10px; }
-.skill-node:hover { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.15); z-index: 20; }
-.skill-node:hover .node-ring { border-width: 2px; }
-.skill-node:hover .node-label { opacity: 1; }
+.skill-node:hover { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.2); z-index: 20; }
+.skill-node.selected { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.15); z-index: 20; }
+.skill-node:hover .node-ring, .skill-node.selected .node-ring { border-width: 2.5px; }
+.skill-node:hover .node-label, .skill-node.selected .node-label { opacity: 1; }
 .node-bg {
   width: 44px;
   height: 44px;
@@ -1088,10 +1436,10 @@ onMounted(() => {
   justify-content: center;
   backdrop-filter: blur(4px);
 }
-.mastered .node-bg { background: linear-gradient(135deg, rgba(55,214,165,0.15), rgba(6,18,40,0.95)); }
-.improve .node-bg { background: linear-gradient(135deg, rgba(143,124,255,0.15), rgba(6,18,40,0.95)); }
-.missing .node-bg { background: linear-gradient(135deg, rgba(255,112,136,0.15), rgba(6,18,40,0.95)); }
-.transfer .node-bg { background: linear-gradient(135deg, rgba(255,182,92,0.15), rgba(6,18,40,0.95)); }
+.mastered .node-bg { background: linear-gradient(135deg, rgba(55,214,165,0.2), rgba(6,18,40,0.95)); }
+.improve .node-bg { background: linear-gradient(135deg, rgba(143,124,255,0.2), rgba(6,18,40,0.95)); }
+.missing .node-bg { background: linear-gradient(135deg, rgba(255,112,136,0.2), rgba(6,18,40,0.95)); }
+.transfer .node-bg { background: linear-gradient(135deg, rgba(255,182,92,0.2), rgba(6,18,40,0.95)); }
 .node-ring {
   position: absolute;
   left: 50%;
@@ -1103,10 +1451,14 @@ onMounted(() => {
   border: 1.5px solid;
   transition: all 0.3s;
 }
-.mastered .node-ring { border-color: rgba(55,214,165,0.5); box-shadow: 0 0 8px rgba(55,214,165,0.2); }
-.improve .node-ring { border-color: rgba(143,124,255,0.5); box-shadow: 0 0 8px rgba(143,124,255,0.2); }
-.missing .node-ring { border-color: rgba(255,112,136,0.5); box-shadow: 0 0 8px rgba(255,112,136,0.2); }
-.transfer .node-ring { border-color: rgba(255,182,92,0.5); box-shadow: 0 0 8px rgba(255,182,92,0.2); }
+.mastered .node-ring { border-color: rgba(55,214,165,0.6); box-shadow: 0 0 12px rgba(55,214,165,0.3); }
+.improve .node-ring { border-color: rgba(143,124,255,0.6); box-shadow: 0 0 12px rgba(143,124,255,0.3); }
+.missing .node-ring { border-color: rgba(255,112,136,0.6); box-shadow: 0 0 12px rgba(255,112,136,0.3); border-style: dashed; }
+.transfer .node-ring { border-color: rgba(255,182,92,0.6); box-shadow: 0 0 12px rgba(255,182,92,0.3); }
+.skill-node.selected.mastered .node-ring { box-shadow: 0 0 20px rgba(55,214,165,0.6); }
+.skill-node.selected.improve .node-ring { box-shadow: 0 0 20px rgba(143,124,255,0.6); }
+.skill-node.selected.missing .node-ring { box-shadow: 0 0 20px rgba(255,112,136,0.6); }
+.skill-node.selected.transfer .node-ring { box-shadow: 0 0 20px rgba(255,182,92,0.6); }
 .node-pulse {
   position: absolute;
   left: 50%;
@@ -1150,67 +1502,6 @@ onMounted(() => {
   text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
 
-.skill-tip {
-  position: absolute;
-  transform: translate(-50%, -100%);
-  z-index: 30;
-  animation: tipIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-@keyframes tipIn {
-  from { opacity: 0; transform: translate(-50%, -90%) scale(0.95); }
-  to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
-}
-.tip-arrow {
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%) rotate(45deg);
-  width: 10px;
-  height: 10px;
-  background: rgba(10,28,55,0.98);
-  border-right: 1px solid rgba(78,216,255,0.25);
-  border-bottom: 1px solid rgba(78,216,255,0.25);
-}
-.tip-inner {
-  background: linear-gradient(180deg, rgba(12,32,62,0.97) 0%, rgba(8,22,48,0.98) 100%);
-  border: 1px solid rgba(78,216,255,0.2);
-  border-radius: 8px;
-  padding: 10px 14px;
-  min-width: 130px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(78,216,255,0.08);
-}
-.tip-header {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 3px;
-}
-.tip-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.tip-status-dot.mastered { background: #37d6a5; box-shadow: 0 0 6px #37d6a5; }
-.tip-status-dot.improve { background: #8f7cff; box-shadow: 0 0 6px #8f7cff; }
-.tip-status-dot.missing { background: #ff7088; box-shadow: 0 0 6px #ff7088; }
-.tip-status-dot.transfer { background: #ffb65c; box-shadow: 0 0 6px #ffb65c; }
-.tip-name { font-size: 13px; font-weight: 600; color: #fff; }
-.tip-cat { font-size: 10px; color: rgba(140,165,195,0.7); margin-bottom: 8px; padding-left: 14px; }
-.tip-level-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.tip-level-val { font-size: 11px; font-weight: 700; color: rgba(78,216,255,0.9); flex-shrink: 0; }
-.tip-bar { flex: 1; height: 4px; background: rgba(78,216,255,0.1); border-radius: 2px; overflow: hidden; }
-.tip-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
-.tip-bar-fill.mastered { background: linear-gradient(90deg, #37d6a5, #5ae8bc); box-shadow: 0 0 6px rgba(55,214,165,0.5); }
-.tip-bar-fill.improve { background: linear-gradient(90deg, #8f7cff, #b0a0ff); box-shadow: 0 0 6px rgba(143,124,255,0.5); }
-.tip-bar-fill.missing { background: linear-gradient(90deg, #ff7088, #ff9aab); box-shadow: 0 0 6px rgba(255,112,136,0.5); }
-.tip-bar-fill.transfer { background: linear-gradient(90deg, #ffb65c, #ffcc88); box-shadow: 0 0 6px rgba(255,182,92,0.5); }
-
 .galaxy-legend {
   display: flex;
   justify-content: center;
@@ -1218,18 +1509,45 @@ onMounted(() => {
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid rgba(78,216,255,0.06);
+  flex-wrap: wrap;
 }
-.gl-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: rgba(140,165,195,0.8); }
-.gl-item i { width: 7px; height: 7px; border-radius: 50%; }
-.gl-item.mastered i { background: #37d6a5; box-shadow: 0 0 5px #37d6a5; }
-.gl-item.improve i { background: #8f7cff; box-shadow: 0 0 5px #8f7cff; }
-.gl-item.missing i { background: #ff7088; box-shadow: 0 0 5px #ff7088; }
-.gl-item.transfer i { background: #ffb65c; box-shadow: 0 0 5px #ffb65c; }
+.gl-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(140,165,195,0.8); }
+.gl-item i { width: 8px; height: 8px; border-radius: 50%; }
+.gl-item.mastered i { background: #37d6a5; box-shadow: 0 0 6px #37d6a5; }
+.gl-item.improve i { background: #8f7cff; box-shadow: 0 0 6px #8f7cff; }
+.gl-item.missing i { background: #ff7088; box-shadow: 0 0 6px #ff7088; border-radius: 2px; }
+.gl-item.transfer i { background: #ffb65c; box-shadow: 0 0 6px #ffb65c; }
 
 .lp-header { margin-bottom: 12px; }
 .lp-header h2 { margin: 0 0 2px; font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
 .lp-header p { margin: 0; font-size: 12px; color: rgba(168,180,200,0.6); margin-left: 28px; }
-
+.lp-progress-bar {
+  position: relative;
+  height: 20px;
+  background: rgba(7,20,40,0.5);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(78,216,255,0.1);
+}
+.lp-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ed8ff, #8f7cff);
+  border-radius: 10px;
+  transition: width 1s ease;
+  box-shadow: 0 0 10px rgba(78,216,255,0.4);
+}
+.lp-progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
 .lp-mountain {
   position: relative;
   height: 200px;
@@ -1240,10 +1558,11 @@ onMounted(() => {
 }
 .lp-svg { width: 100%; height: 100%; }
 .lp-path {
-  stroke-dasharray: 2000;
   animation: pathDraw 3s ease-out forwards;
 }
-@keyframes pathDraw { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
+@keyframes pathDraw {
+  from { stroke-dashoffset: 2000; }
+}
 .lp-stop {
   position: absolute;
   transform: translateX(-50%);
@@ -1253,17 +1572,16 @@ onMounted(() => {
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translateX(-50%);
   width: 28px;
   height: 28px;
   margin: -4px 0 0 -14px;
   border-radius: 50%;
-  border: 2px solid #ffb65c;
+  background: rgba(255,182,92,0.3);
   animation: stopPulse 2s ease-out infinite;
 }
 @keyframes stopPulse {
-  0% { transform: translateX(-50%) scale(1); opacity: 1; }
-  100% { transform: translateX(-50%) scale(2.5); opacity: 0; }
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
 }
 .stop-glow {
   position: absolute;
@@ -1288,6 +1606,7 @@ onMounted(() => {
   font-weight: 700;
   margin: 0 auto 4px;
   position: relative;
+  z-index: 2;
 }
 .lp-stop.done .stop-dot {
   background: linear-gradient(135deg, #37d6a5, #2ab890);
@@ -1314,8 +1633,6 @@ onMounted(() => {
 .lp-stop.done .stop-label { color: #37d6a5; }
 .lp-current-pos {
   position: absolute;
-  left: 58%;
-  bottom: 58%;
   transform: translate(-50%, 50%);
 }
 .pos-ping {
@@ -1341,6 +1658,7 @@ onMounted(() => {
   box-shadow: 0 0 12px #ffb65c;
   position: relative;
   z-index: 2;
+  margin: 0 auto;
 }
 .pos-label {
   position: absolute;
@@ -1469,7 +1787,7 @@ onMounted(() => {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%,-50%);
   width: 120px;
   height: 120px;
   background: radial-gradient(circle, rgba(78,216,255,0.15) 0%, transparent 60%);
@@ -1495,7 +1813,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   padding: 12px 8px;
   background: rgba(7,20,40,0.5);
   border-radius: 8px;
@@ -1504,6 +1822,18 @@ onMounted(() => {
 .stat-item { text-align: center; }
 .stat-val { font-size: 18px; font-weight: 700; }
 .stat-lbl { font-size: 10px; color: rgba(168,180,200,0.6); margin-top: 2px; }
+.interview-history { margin-bottom: 12px; }
+.ih-title { font-size: 11px; color: rgba(168,180,200,0.7); margin-bottom: 8px; }
+.ih-bars { display: flex; align-items: flex-end; gap: 6px; height: 50px; padding: 0 4px; }
+.ih-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ih-bar {
+  width: 100%;
+  background: linear-gradient(180deg, #4ed8ff, rgba(78,216,255,0.3));
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+  transition: height 0.5s ease;
+}
+.ih-label { font-size: 8px; color: rgba(168,180,200,0.5); }
 .interview-btn {
   width: 100%;
   padding: 10px;
@@ -1546,10 +1876,207 @@ onMounted(() => {
 .tl-date { font-size: 10px; color: #4ed8ff; font-weight: 600; margin-bottom: 3px; }
 .tl-text { font-size: 11px; color: rgba(200,216,238,0.75); line-height: 1.5; }
 
-@media (max-width: 1400px) {
-  .gc-content { grid-template-columns: 260px 1fr 290px; gap: 14px; padding: 14px 16px; }
+.skill-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,5,15,0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
-@media (max-width: 1200px) {
+.skill-detail-panel {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(10,25,55,0.98) 0%, rgba(5,15,35,0.99) 100%);
+  border: 1px solid rgba(78,216,255,0.25);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(78,216,255,0.1);
+}
+.sdp-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(78,216,255,0.2);
+  background: rgba(78,216,255,0.1);
+  color: #8fa4c0;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.sdp-close:hover { background: rgba(255,112,136,0.2); border-color: rgba(255,112,136,0.4); color: #ff7088; }
+.sdp-header { margin-bottom: 20px; }
+.sdp-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.sdp-status-badge.mastered { background: rgba(55,214,165,0.15); color: #37d6a5; border: 1px solid rgba(55,214,165,0.3); }
+.sdp-status-badge.improve { background: rgba(143,124,255,0.15); color: #a78bfa; border: 1px solid rgba(143,124,255,0.3); }
+.sdp-status-badge.missing { background: rgba(255,112,136,0.15); color: #ff7088; border: 1px solid rgba(255,112,136,0.3); }
+.sdp-status-badge.transfer { background: rgba(255,182,92,0.15); color: #ffb65c; border: 1px solid rgba(255,182,92,0.3); }
+.sdp-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.sdp-header h2 { margin: 0; font-size: 24px; font-weight: 700; color: #fff; }
+.sdp-category { margin: 4px 0 0; font-size: 13px; color: rgba(168,180,200,0.7); }
+.sdp-level { margin-bottom: 20px; }
+.sdp-level-label { font-size: 12px; color: rgba(168,180,200,0.7); margin-bottom: 8px; }
+.sdp-level-bar {
+  position: relative;
+  height: 24px;
+  background: rgba(7,20,40,0.6);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(78,216,255,0.1);
+}
+.sdp-level-fill {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 0.8s ease;
+}
+.sdp-level-fill.mastered { background: linear-gradient(90deg, #37d6a5, #5ae8bc); box-shadow: 0 0 10px rgba(55,214,165,0.4); }
+.sdp-level-fill.improve { background: linear-gradient(90deg, #8f7cff, #b0a0ff); box-shadow: 0 0 10px rgba(143,124,255,0.4); }
+.sdp-level-fill.missing { background: linear-gradient(90deg, #ff7088, #ff9aab); box-shadow: 0 0 10px rgba(255,112,136,0.4); }
+.sdp-level-fill.transfer { background: linear-gradient(90deg, #ffb65c, #ffcc88); box-shadow: 0 0 10px rgba(255,182,92,0.4); }
+.sdp-level-num {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.sdp-section { margin-bottom: 18px; }
+.sdp-section h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c8d8ee;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sdp-icon { font-size: 14px; }
+.sdp-evidence {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sdp-evidence li {
+  font-size: 12px;
+  color: rgba(200,216,238,0.8);
+  padding: 6px 0;
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+.ev-dot {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ed8ff;
+}
+.sdp-sources { display: flex; flex-wrap: wrap; gap: 6px; }
+.sdp-source-tag {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: rgba(78,216,255,0.1);
+  border: 1px solid rgba(78,216,255,0.2);
+  border-radius: 4px;
+  color: #4ed8ff;
+}
+.sdp-suggest p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(200,216,238,0.85);
+  line-height: 1.7;
+  padding: 12px;
+  background: rgba(143,124,255,0.08);
+  border-radius: 8px;
+  border-left: 3px solid #8f7cff;
+}
+.sdp-resources { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.sdp-res {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(7,20,40,0.5);
+  border-radius: 6px;
+  font-size: 11px;
+}
+.res-type {
+  padding: 2px 6px;
+  background: rgba(78,216,255,0.15);
+  border-radius: 3px;
+  color: #4ed8ff;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.res-name { color: rgba(200,216,238,0.8); }
+.sdp-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.sdp-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(78,216,255,0.2);
+  background: rgba(78,216,255,0.08);
+  color: #4ed8ff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.sdp-btn:hover { background: rgba(78,216,255,0.15); }
+.sdp-btn.primary {
+  background: linear-gradient(135deg, #4ed8ff, #8f7cff);
+  border: none;
+  color: #041020;
+  box-shadow: 0 4px 15px rgba(78,216,255,0.3);
+}
+.sdp-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(78,216,255,0.4); }
+
+.skill-detail-enter-active, .skill-detail-leave-active { transition: all 0.3s ease; }
+.skill-detail-enter-from, .skill-detail-leave-to { opacity: 0; }
+.skill-detail-enter-from .skill-detail-panel, .skill-detail-leave-to .skill-detail-panel { transform: scale(0.9) translateY(20px); opacity: 0; }
+
+@media (max-width: 1400px) {
+  .gc-content { grid-template-columns: 250px 1fr 280px; gap: 12px; padding: 12px 14px; }
+}
+@media (max-width: 1100px) {
+  .gc-content { grid-template-columns: 230px 1fr 260px; gap: 10px; padding: 10px 12px; }
+}
+@media (max-width: 900px) {
   .gc-content { grid-template-columns: 1fr; max-width: 700px; }
   .galaxy-scene { height: 400px; }
 }
