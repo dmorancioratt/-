@@ -6,13 +6,13 @@
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import CandidateDashboard from '@/views/dashboards/CandidateDashboard.vue'
-import HrDashboard from '@/views/dashboards/HrDashboard.vue'
+import OverviewHr from '@/views/dashboards/OverviewHr.vue'
 import AdminDashboard from '@/views/dashboards/AdminDashboard.vue'
 
 const auth = useAuthStore()
 const dashboardComponent = computed(() => {
   if (auth.role === 'admin') return AdminDashboard
-  if (auth.role === 'hr') return HrDashboard
+  if (auth.role === 'hr') return OverviewHr
   return CandidateDashboard
 })
 </script>

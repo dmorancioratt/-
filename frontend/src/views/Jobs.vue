@@ -273,6 +273,102 @@ onMounted(async () => {
 })
 </script>
 
+<style>
+/* Unscoped glass overrides — specificity must beat theme-fixes.css (loaded after page styles).
+   theme-fixes: body.theme-dark .app-main:not(.app-main--dashboard) :is(.panel,.page-toolbar,.job-summary>div,...) { background:#0a1c2b!important; box-shadow:none!important }
+   styles.css:  body:not(.login-active) .app-main :is(.panel,.page-toolbar,...) { background:linear-gradient(...)!important }
+   Both ≈ 0-0-41. We add .page.jobs-page + per-element classes to reach 0-0-61+. */
+
+/* === 1. .page-toolbar 工具栏（包裹 job-summary） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .page-toolbar,
+body:not(.login-active) .app-main .page.jobs-page .page-toolbar {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  padding: 12px 16px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .page-toolbar::before,
+body:not(.login-active) .app-main .page.jobs-page .page-toolbar::before {
+  display: none !important;
+}
+
+/* === 2. .job-summary > div 三张统计小卡（theme-fixes 将其强制 #0a1c2b） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .job-summary > div,
+body:not(.login-active) .app-main .page.jobs-page .job-summary > div {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  padding: 10px 12px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .job-summary b,
+body:not(.login-active) .app-main .page.jobs-page .job-summary b {
+  color: #effbff !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .job-summary span,
+body:not(.login-active) .app-main .page.jobs-page .job-summary span {
+  color: #85a9c4 !important;
+}
+
+/* === 3. .panel 主面板（包裹 job-toolbar + job-table） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page > .panel,
+body:not(.login-active) .app-main .page.jobs-page > .panel {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page > .panel::before,
+body:not(.login-active) .app-main .page.jobs-page > .panel::before {
+  display: none !important;
+}
+
+/* === 4. .el-select__wrapper 三个下拉筛选器（theme-fixes 将其强制 #0a1d2c 实色） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__wrapper,
+body:not(.login-active) .app-main .page.jobs-page .el-select__wrapper {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 10px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow: inset 0 1px 0 rgba(161, 231, 255, 0.08) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__wrapper:hover,
+body:not(.login-active) .app-main .page.jobs-page .el-select__wrapper:hover {
+  border-color: rgba(78, 200, 255, 0.35) !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__wrapper.is-focused,
+body:not(.login-active) .app-main .page.jobs-page .el-select__wrapper.is-focused {
+  border-color: rgba(78, 200, 255, 0.45) !important;
+  box-shadow: inset 0 1px 0 rgba(161, 231, 255, 0.08), 0 0 0 3px rgba(54, 215, 255, 0.12) !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__placeholder,
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__selected-item,
+body:not(.login-active) .app-main .page.jobs-page .el-select__placeholder,
+body:not(.login-active) .app-main .page.jobs-page .el-select__selected-item {
+  color: #d6f1ff !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__caret,
+body:not(.login-active) .app-main .page.jobs-page .el-select__caret {
+  color: #85b8d6 !important;
+}
+</style>
+
 <style scoped>
 .job-summary {
   display: grid;

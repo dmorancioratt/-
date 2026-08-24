@@ -26,7 +26,7 @@ body.theme-dark .graph-overview__item::after {
 
 body.theme-dark .app-main:not(.app-main--dashboard) {
   color: #e6f0f4;
-  background: #07111d;
+  background: transparent;
 }
 
 body.theme-dark .app-titlebar {
@@ -71,9 +71,13 @@ body.theme-dark .app-main:not(.app-main--dashboard) :is(
   .eval-card,
   .evaluation-card
 ) {
-  border-color: rgba(83, 139, 164, 0.28) !important;
-  background: #0a1c2b !important;
-  box-shadow: none !important;
+  border-color: rgba(78, 200, 255, 0.18) !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 body.theme-dark .app-main:not(.app-main--dashboard) :is(
@@ -84,8 +88,8 @@ body.theme-dark .app-main:not(.app-main--dashboard) :is(
   .candidate-section:hover,
   .graph-overview__item:hover
 ) {
-  border-color: rgba(74, 185, 202, 0.46) !important;
-  background: #0d2535 !important;
+  border-color: rgba(78, 200, 255, 0.35) !important;
+  background: rgba(12, 60, 120, 0.45) !important;
   transform: none !important;
 }
 
@@ -267,11 +271,22 @@ body.theme-dark .identity-card :is(span, p, small) { color: #8fa7b4 !important; 
 body.theme-dark .identity-card > span { background: #112b3b !important; color: #a8c2cd !important; }
 
 body.theme-dark .el-alert {
-  border: 1px solid rgba(83, 139, 164, 0.3) !important;
-  background: #0c2231 !important;
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-body.theme-dark .el-alert--warning { border-color: rgba(213, 157, 79, 0.34) !important; background: #29261e !important; }
+body.theme-dark .el-alert--warning {
+  border-color: rgba(213, 157, 79, 0.34) !important;
+  background: rgba(74, 50, 18, 0.45) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 209, 138, 0.08),
+    0 8px 32px rgba(40, 20, 0, 0.25) !important;
+}
 body.theme-dark .el-alert__title { color: #cddde2 !important; }
 body.theme-dark .el-alert__description { color: #8fa7b4 !important; }
 

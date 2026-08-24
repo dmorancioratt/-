@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page jd-parser-page">
     <PageHeader title="JD解析" desc="输入岗位 JD 文本，提取岗位名称、职责、技能、工具、证书、场景和证据来源">
       <el-button type="primary" :loading="loading" @click="submit">{{ result ? '重新解析 JD' : '解析 JD' }}</el-button>
     </PageHeader>
@@ -115,6 +115,109 @@ onMounted(async () => {
   await loadHistory()
 })
 </script>
+
+<style>
+/* Unscoped glass overrides — specificity must beat theme-fixes.css (loaded after page styles).
+   theme-fixes: body.theme-dark .app-main:not(.app-main--dashboard) :is(.panel,.page-toolbar,...) { background:#0a1c2b!important; box-shadow:none!important }
+   styles.css:  body:not(.login-active) .app-main :is(.panel,.page-toolbar,...) { background:linear-gradient(...)!important }
+   Both ≈ 0-0-41. We add .page.jd-parser-page + per-element classes to reach 0-0-61+. */
+
+/* === 1. .page-toolbar 工具栏 === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .page-toolbar,
+body:not(.login-active) .app-main .page.jd-parser-page .page-toolbar {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  padding: 12px 16px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .page-toolbar::before,
+body:not(.login-active) .app-main .page.jd-parser-page .page-toolbar::before {
+  display: none !important;
+}
+
+/* === 2. .panel.span-5 输入区 === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .panel.span-5,
+body:not(.login-active) .app-main .page.jd-parser-page .panel.span-5 {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .panel.span-5::before,
+body:not(.login-active) .app-main .page.jd-parser-page .panel.span-5::before {
+  display: none !important;
+}
+
+/* === 3. .panel.span-7 结果展示区 === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .panel.span-7,
+body:not(.login-active) .app-main .page.jd-parser-page .panel.span-7 {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .panel.span-7::before,
+body:not(.login-active) .app-main .page.jd-parser-page .panel.span-7::before {
+  display: none !important;
+}
+
+/* === 4. section.panel.history-panel 解析历史 === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .panel.history-panel,
+body:not(.login-active) .app-main .page.jd-parser-page .panel.history-panel {
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .panel.history-panel::before,
+body:not(.login-active) .app-main .page.jd-parser-page .panel.history-panel::before {
+  display: none !important;
+}
+
+/* === 5. textarea 输入框（theme-fixes 将 .el-textarea__inner 强制 #0a1d2c 实色） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .el-textarea__inner,
+body:not(.login-active) .app-main .page.jd-parser-page .el-textarea__inner {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 10px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow: inset 0 1px 0 rgba(161, 231, 255, 0.08) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #d6f1ff !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .el-textarea__inner::placeholder,
+body:not(.login-active) .app-main .page.jd-parser-page .el-textarea__inner::placeholder {
+  color: #6f91ad !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jd-parser-page .el-textarea__inner:focus,
+body:not(.login-active) .app-main .page.jd-parser-page .el-textarea__inner:focus {
+  border-color: rgba(78, 200, 255, 0.45) !important;
+  box-shadow: inset 0 1px 0 rgba(161, 231, 255, 0.08), 0 0 0 3px rgba(54, 215, 255, 0.12) !important;
+}
+</style>
 
 <style scoped>
 .history-panel { margin-top: 18px; padding: 20px; }

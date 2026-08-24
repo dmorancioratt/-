@@ -1571,6 +1571,7 @@ onBeforeUnmount(() => {
     radial-gradient(circle at 24% 78%, rgba(84, 112, 196, 0.14), transparent 28%),
     linear-gradient(145deg, #07152d 0%, #0b2244 50%, #0d2d55 100%);
   background-size: auto, auto, auto, auto;
+  background-attachment: fixed;
   box-shadow:
     inset 0 0 100px rgba(2, 11, 28, 0.38),
     inset 0 0 70px rgba(0, 200, 245, 0.08),
@@ -1985,7 +1986,7 @@ onBeforeUnmount(() => {
     0 22px 64px rgba(0, 0, 0, 0.32) !important;
 }
 
-:global(body.theme-dark) .graph-message {
+:global(body.theme-dark .graph-message) {
   background:
     radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.1), transparent 30%),
     linear-gradient(145deg, rgba(18, 38, 78, 0.88), rgba(8, 22, 48, 0.82)),
