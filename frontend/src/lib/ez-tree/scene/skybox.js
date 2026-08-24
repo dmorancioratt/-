@@ -13,22 +13,23 @@ export class Skybox extends THREE.Object3D {
     this.add(this.sky);
 
     const uniforms = this.sky.material.uniforms;
-    uniforms.sunPosition.value.set(100, 30, 100);
+    uniforms.sunPosition.value.set(80, 40, 120);
     uniforms.up.value.set(0, 1, 0);
-    uniforms.rayleigh.value = 1.2;
-    uniforms.turbidity.value = 8;
-    uniforms.mieCoefficient.value = 0.005;
-    uniforms.mieDirectionalG.value = 0.8;
+    uniforms.rayleigh.value = 2.0;
+    uniforms.turbidity.value = 6;
+    uniforms.mieCoefficient.value = 0.003;
+    uniforms.mieDirectionalG.value = 0.7;
 
-    // Ambient light
-    this.ambient = new THREE.AmbientLight(0xffffff, 1.15);
+    // Ambient light — bright enough to prevent crushed blacks
+    this.ambient = new THREE.AmbientLight(0xb0c8e0, 1.0);
     this.ambient.name = 'ambient';
     this.add(this.ambient);
 
-    // Sun (directional light)
-    this.sun = new THREE.DirectionalLight(0xffffff, 4.5);
+    // Sun (directional light) — positioned front-right-above to illuminate the
+    // face of the tree as seen from the default camera (z=+145, looking at origin)
+    this.sun = new THREE.DirectionalLight(0xfff4e0, 3.2);
     this.sun.name = 'sun';
-    this.sun.position.set(60, 80, -120);
+    this.sun.position.set(80, 75, 120);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
     this.sun.shadow.camera.near = 1;
@@ -46,8 +47,8 @@ export class Skybox extends THREE.Object3D {
     this.add(this.sunTarget);
     this.sun.target = this.sunTarget;
 
-    // Hemisphere light
-    this.hemi = new THREE.HemisphereLight(0x87ceeb, 0x556b2f, 0.3);
+    // Hemisphere light — cool blue sky above, dark ground below
+    this.hemi = new THREE.HemisphereLight(0x8fc4e8, 0x2a3a4a, 0.6);
     this.hemi.name = 'hemi';
     this.add(this.hemi);
   }

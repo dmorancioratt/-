@@ -9,7 +9,7 @@
         <div class="brand-mark"><span>SR</span></div>
         <div class="brand-copy">
           <div class="brand-name">数融智联</div>
-          <div class="brand-desc">岗位能力图谱分析系统</div>
+          <div class="brand-desc">智能驱动人才成长</div>
         </div>
       </div>
 
@@ -31,10 +31,12 @@
       </nav>
 
       <div class="header-actions">
-        <el-tag effect="light" type="primary">{{ roleLabel }}</el-tag>
+        <span class="role-tag">{{ roleLabel }}</span>
         <el-dropdown trigger="click" @command="handleUserCommand">
           <button class="user-chip">
-            <el-avatar class="user-avatar" :size="32" :src="userAvatar || undefined">{{ userAvatar ? '' : userInitial }}</el-avatar>
+            <div class="user-avatar-wrap">
+              <el-avatar class="user-avatar" :size="34" :src="userAvatar || undefined">{{ userAvatar ? '' : avatarText }}</el-avatar>
+            </div>
             <span>{{ auth.user?.display_name || auth.user?.username }}</span>
           </button>
           <template #dropdown>
@@ -219,7 +221,8 @@ const visibleGroups = computed<MenuGroup[]>(() => {
 })
 
 
-const roleLabel = computed(() => (auth.role === 'hr' ? '企业 HR' : auth.role === 'admin' ? '管理员' : '求职者/学生'))
+const roleLabel = computed(() => (auth.role === 'hr' ? '企业 HR' : auth.role === 'admin' ? '管理员' : '求职端/学生'))
+const avatarText = computed(() => (auth.role === 'hr' ? 'HR' : auth.role === 'admin' ? '管' : '学'))
 const userInitial = computed(() => (auth.user?.display_name || auth.user?.username || '用').slice(0, 1))
 const userAvatar = computed(() => (auth.role === 'candidate' ? candidateAvatar.value : ''))
 
@@ -346,31 +349,16 @@ async function handleUserCommand(command: string) {
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 18px;
-  height: 72px;
+  gap: 24px;
+  height: 70px;
   flex: 0 0 auto;
   overflow: visible;
-  border-bottom: 1px solid rgba(100, 220, 255, 0.4);
-  background:
-    radial-gradient(circle at 15% 0%, rgba(0, 200, 245, 0.35), transparent 35%),
-    radial-gradient(circle at 85% 20%, rgba(30, 123, 255, 0.35), transparent 35%),
-    linear-gradient(180deg, rgba(10, 40, 90, 0.92), rgba(8, 50, 110, 0.85));
-  box-shadow: 0 8px 32px rgba(0, 150, 255, 0.2), 0 0 60px rgba(0, 200, 245, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.app-header::after {
-  position: absolute;
-  left: 24px;
-  bottom: 0;
-  width: 176px;
-  height: 3px;
-  content: "";
-  border-radius: 99px;
-  background: linear-gradient(90deg, #1e7bff, #00e5ff, #00c8f5);
-  box-shadow: 0 0 24px rgba(0, 229, 255, 0.6), 0 0 40px rgba(30, 123, 255, 0.4);
-  animation: headerLineBreath 4.8s ease-in-out infinite;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.25);
+  background: linear-gradient(180deg, rgba(7, 20, 50, 0.98) 0%, rgba(8, 25, 60, 0.96) 100%);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  padding: 0 24px;
 }
 
 .header-brand {
@@ -378,24 +366,19 @@ async function handleUserCommand(command: string) {
   align-items: center;
   gap: 10px;
   flex: 0 0 auto;
-  padding-left: 6px;
-  padding-right: 4px;
 }
 
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 14px;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.92), transparent 28%),
-    linear-gradient(135deg, #2563eb, #06b6d4);
-  box-shadow: 0 0 24px rgba(6, 182, 212, 0.28);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #0ea5e9 100%);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
   color: #fff;
-  font-size: 15px;
-  font-weight: 950;
+  font-size: 16px;
+  font-weight: 900;
 }
 
 .brand-copy {
@@ -403,24 +386,25 @@ async function handleUserCommand(command: string) {
 }
 
 .brand-name {
-  color: #ecf8ff;
-  font-size: 17px;
-  font-weight: 950;
-  line-height: 1.1;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
 }
 
 .brand-desc {
-  margin-top: 3px;
-  color: #9cc4e8;
+  margin-top: 2px;
+  color: rgba(148, 197, 255, 0.8);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .top-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex: 1 1 auto;
   min-width: 0;
   height: 100%;
@@ -444,45 +428,57 @@ async function handleUserCommand(command: string) {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 40px;
-  border: 1px solid transparent;
-  border-radius: 14px;
-  padding: 0 14px;
-  background: rgba(30, 123, 255, 0.1);
-  color: #e0f4ff;
+  gap: 7px;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  padding: 0 18px;
+  background: transparent;
+  color: rgba(186, 220, 255, 0.85);
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition: all 200ms ease;
 }
 
 .nav-trigger .el-icon {
-  font-size: 16px;
-  color: #4dd0ff;
-  transition: transform 200ms ease, color 200ms ease;
-  filter: drop-shadow(0 0 6px rgba(77, 208, 255, 0.5));
+  font-size: 17px;
+  color: rgba(96, 165, 250, 0.9);
+  transition: all 200ms ease;
 }
 
 .nav-trigger:hover {
-  border-color: rgba(100, 220, 255, 0.5);
-  background: linear-gradient(135deg, rgba(30, 123, 255, 0.35), rgba(0, 200, 245, 0.25));
+  background: rgba(59, 130, 246, 0.12);
   color: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 180, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
 }
 
-.nav-trigger:hover .el-icon,
-.nav-trigger.active .el-icon {
-  color: #00e5ff;
-  filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
+.nav-trigger:hover .el-icon {
+  color: #60a5fa;
 }
 
 .nav-trigger.active {
-  border-color: rgba(100, 220, 255, 0.6);
-  background: linear-gradient(135deg, rgba(30, 123, 255, 0.45), rgba(0, 200, 245, 0.35));
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.6), rgba(14, 165, 233, 0.5));
   color: #ffffff;
-  box-shadow: 0 6px 28px rgba(0, 180, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.nav-trigger.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.8), 0 0 20px rgba(14, 165, 233, 0.5);
+}
+
+.nav-trigger.active .el-icon {
+  color: #93c5fd;
+  filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.6));
 }
 
 .caret {
@@ -494,7 +490,7 @@ async function handleUserCommand(command: string) {
   border-right: 4px solid transparent;
   border-top: 5px solid currentColor;
   transition: transform 200ms ease;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .caret.open {
@@ -505,22 +501,22 @@ async function handleUserCommand(command: string) {
 .nav-dropdown {
   position: fixed;
   z-index: 2147483647;
-  top: calc(100% + 2px);
+  top: calc(100% + 4px);
   left: 0;
   min-width: 280px;
   max-height: calc(100vh - 92px);
   overflow-y: auto;
-  border: 1px solid rgba(100, 220, 255, 0.5);
-  border-radius: 18px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 14px;
   padding: 8px;
-  background: linear-gradient(180deg, rgba(10, 50, 110, 0.95), rgba(8, 40, 90, 0.95));
-  box-shadow: 0 20px 60px rgba(0, 100, 200, 0.4), 0 0 40px rgba(0, 200, 245, 0.15);
+  background: linear-gradient(180deg, rgba(10, 25, 60, 0.98), rgba(8, 22, 55, 0.98));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(37, 99, 235, 0.15);
   animation: dropdownIn 220ms ease;
   pointer-events: auto !important;
   user-select: none;
   isolation: isolate;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .nav-dropdown::before {
@@ -530,10 +526,10 @@ async function handleUserCommand(command: string) {
   width: 12px;
   height: 12px;
   content: "";
-  border-top: 1px solid rgba(100, 220, 255, 0.5);
-  border-left: 1px solid rgba(100, 220, 255, 0.5);
+  border-top: 1px solid rgba(59, 130, 246, 0.3);
+  border-left: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 3px;
-  background: rgba(10, 50, 110, 0.95);
+  background: rgba(10, 25, 60, 0.98);
   transform: rotate(45deg);
 }
 
@@ -543,12 +539,12 @@ async function handleUserCommand(command: string) {
   gap: 12px;
   width: 100%;
   height: auto;
-  min-height: 48px;
+  min-height: 46px;
   border: 1px solid transparent;
-  border-radius: 13px;
+  border-radius: 10px;
   padding: 8px 12px;
   background: transparent;
-  color: #e6f5ff;
+  color: rgba(214, 233, 255, 0.9);
   text-align: left;
   text-decoration: none;
   cursor: pointer;
@@ -558,9 +554,8 @@ async function handleUserCommand(command: string) {
 .dropdown-item .el-icon {
   flex: 0 0 auto;
   font-size: 18px;
-  color: #4dd0ff;
+  color: #60a5fa;
   transition: transform 200ms ease, color 200ms ease;
-  filter: drop-shadow(0 0 4px rgba(77, 208, 255, 0.4));
 }
 
 .dropdown-item .item-copy {
@@ -572,19 +567,18 @@ async function handleUserCommand(command: string) {
 
 .dropdown-item b {
   display: block;
-  color: #f0faff;
+  color: #f0f7ff;
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 600;
   line-height: 1.2;
-  text-shadow: 0 0 8px rgba(0, 200, 245, 0.3);
 }
 
 .dropdown-item small {
   display: block;
   margin-top: 3px;
-  color: #8ec8f0;
+  color: rgba(148, 185, 230, 0.8);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -594,81 +588,102 @@ async function handleUserCommand(command: string) {
   flex: 0 0 auto;
   margin-left: auto;
   font-size: 14px;
-  color: #4dd0ff;
+  color: #60a5fa;
   opacity: 0;
   transition: opacity 200ms ease, transform 200ms ease;
 }
 
 .dropdown-item:hover {
-  border-color: rgba(100, 220, 255, 0.5);
-  background: linear-gradient(135deg, rgba(30, 123, 255, 0.35), rgba(0, 200, 245, 0.25));
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(59, 130, 246, 0.15);
   transform: translateX(3px);
-  box-shadow: 0 4px 16px rgba(0, 180, 255, 0.25), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
 .dropdown-item:hover .el-icon,
 .dropdown-item.active .el-icon {
-  color: #00e5ff;
-  transform: scale(1.1);
-  filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.7));
+  color: #93c5fd;
+  transform: scale(1.08);
 }
 
 .dropdown-item:hover .item-arrow,
 .dropdown-item.active .item-arrow {
   opacity: 1;
   transform: translateX(2px);
-  color: #00e5ff;
+  color: #93c5fd;
 }
 
 .dropdown-item.active {
-  border-color: rgba(100, 220, 255, 0.5);
-  background: linear-gradient(135deg, rgba(30, 123, 255, 0.4), rgba(0, 200, 245, 0.3));
-  box-shadow: 0 4px 20px rgba(0, 180, 255, 0.3);
+  border-color: rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.2);
 }
 
 .dropdown-item.active b {
   color: #ffffff;
-  text-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex: 0 0 auto;
-  padding-right: 4px;
 }
 
-.user-avatar {
-  background: linear-gradient(135deg, var(--primary), var(--cyan));
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25);
-  font-weight: 950;
+.role-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  background: #ffffff;
+  color: #1e40af;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .user-chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  max-width: 176px;
-  border: 1px solid rgba(99, 207, 255, 0.36);
-  border-radius: 14px;
-  padding: 4px 10px 4px 4px;
-  background: rgba(4, 27, 68, 0.66);
-  color: #eaf7ff;
-  font-weight: 850;
+  gap: 10px;
+  border: none;
+  border-radius: 999px;
+  padding: 3px 14px 3px 3px;
+  background: rgba(59, 130, 246, 0.15);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease;
+}
+
+.user-chip:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+.user-avatar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+  font-weight: 800;
+  font-size: 15px;
+  border: 2px solid rgba(255,255,255,0.2);
 }
 
 .user-chip span {
   overflow: hidden;
   min-width: 0;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .app-main {
   position: relative;
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 70px);
   padding: 18px 22px 28px;
   background: transparent !important;
 }
@@ -690,24 +705,22 @@ async function handleUserCommand(command: string) {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: rgba(10, 25, 60, 0.75);
+  background: rgba(10, 25, 60, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 245, 255, 0.3);
-  border-radius: 8px;
-  color: #00f5ff;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 10px;
+  color: #93c5fd;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 0 20px rgba(0, 245, 255, 0.15);
 }
 
 .fullscreen-exit-btn:hover {
-  background: rgba(0, 245, 255, 0.15);
-  border-color: rgba(0, 245, 255, 0.6);
-  box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
-  transform: translateX(-2px);
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(96, 165, 250, 0.6);
+  color: #ffffff;
 }
 
 .fullscreen-exit-btn .el-icon {
@@ -719,7 +732,7 @@ async function handleUserCommand(command: string) {
   z-index: 1;
   margin-bottom: 14px;
   padding: 4px 4px 14px;
-  border-bottom: 1px solid rgba(105, 213, 255, 0.26);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .app-titlebar .header-title-row {
@@ -732,22 +745,22 @@ async function handleUserCommand(command: string) {
   width: 4px;
   height: 24px;
   border-radius: 99px;
-  background: linear-gradient(180deg, #2563eb, #06b6d4);
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.3);
+  background: linear-gradient(180deg, #2563eb, #0ea5e9);
+  box-shadow: 0 0 14px rgba(14, 165, 233, 0.4);
 }
 
 .app-titlebar .header-title {
-  color: #ecf8ff;
+  color: #ffffff;
   font-size: 22px;
-  font-weight: 950;
+  font-weight: 800;
   line-height: 1.2;
 }
 
 .app-titlebar .header-desc {
   margin-top: 6px;
-  color: #9cc4e8;
+  color: rgba(148, 197, 255, 0.8);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .app-main > :deep(.RouterView),
@@ -767,12 +780,12 @@ async function handleUserCommand(command: string) {
 
 @media (max-width: 1380px) {
   .app-header {
-    gap: 10px;
+    gap: 12px;
+    padding: 0 16px;
   }
 
   .header-brand {
     gap: 8px;
-    padding-right: 0;
   }
 
   .brand-desc {
@@ -780,15 +793,15 @@ async function handleUserCommand(command: string) {
   }
 
   .header-actions {
-    gap: 6px;
-  }
-
-  .user-chip {
-    padding: 3px;
+    gap: 8px;
   }
 
   .user-chip > span {
     display: none;
+  }
+
+  .nav-trigger {
+    padding: 0 12px;
   }
 }
 
@@ -800,19 +813,6 @@ async function handleUserCommand(command: string) {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes headerLineBreath {
-  0%,
-  100% {
-    opacity: 0.72;
-    width: 176px;
-  }
-
-  50% {
-    opacity: 1;
-    width: 236px;
   }
 }
 </style>

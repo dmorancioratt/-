@@ -72,13 +72,13 @@ function initParticles() {
   const particleCount = Math.floor((width * height) / 6500)
   
   const colors = [
-    'rgba(0, 220, 255,',
-    'rgba(0, 240, 255,',
-    'rgba(100, 220, 255,',
-    'rgba(150, 230, 255,',
-    'rgba(0, 190, 255,',
-    'rgba(0, 255, 255,',
-    'rgba(255, 255, 255,',
+    'rgba(6, 182, 212,',
+    'rgba(34, 211, 238,',
+    'rgba(103, 232, 249,',
+    'rgba(125, 211, 252,',
+    'rgba(14, 165, 233,',
+    'rgba(56, 189, 248,',
+    'rgba(240, 249, 255,',
   ]
 
   for (let i = 0; i < particleCount; i++) {
@@ -116,10 +116,10 @@ function initFlowLines() {
 function initGlowOrbs() {
   glowOrbs = []
   const orbColors: [number, number, number][] = [
-    [0, 180, 255],
-    [0, 220, 255],
-    [80, 200, 255],
-    [0, 200, 230],
+    [8, 145, 178],
+    [6, 182, 212],
+    [14, 116, 144],
+    [14, 165, 233],
   ]
   
   for (let i = 0; i < 8; i++) {
@@ -185,10 +185,10 @@ function drawBackground() {
   if (!ctx) return
   
   const bgGrad = ctx.createLinearGradient(0, 0, 0, height)
-  bgGrad.addColorStop(0, '#0d5cb8')
-  bgGrad.addColorStop(0.3, '#0c52a8')
-  bgGrad.addColorStop(0.7, '#094494')
-  bgGrad.addColorStop(1, '#063880')
+  bgGrad.addColorStop(0, '#050f18')
+  bgGrad.addColorStop(0.3, '#071826')
+  bgGrad.addColorStop(0.7, '#061520')
+  bgGrad.addColorStop(1, '#040f18')
   ctx.fillStyle = bgGrad
   ctx.fillRect(0, 0, width, height)
 
@@ -196,9 +196,9 @@ function drawBackground() {
     width * 0.5, height * 0.15, 0,
     width * 0.5, height * 0.15, width * 0.9
   )
-  bgGrad2.addColorStop(0, 'rgba(40, 140, 240, 0.5)')
-  bgGrad2.addColorStop(0.4, 'rgba(25, 100, 200, 0.2)')
-  bgGrad2.addColorStop(1, 'rgba(0, 70, 160, 0)')
+  bgGrad2.addColorStop(0, 'rgba(8, 100, 130, 0.45)')
+  bgGrad2.addColorStop(0.4, 'rgba(6, 75, 100, 0.2)')
+  bgGrad2.addColorStop(1, 'rgba(4, 45, 65, 0)')
   ctx.fillStyle = bgGrad2
   ctx.fillRect(0, 0, width, height)
 
@@ -206,9 +206,9 @@ function drawBackground() {
     width * 0.2, height * 0.25, 0,
     width * 0.2, height * 0.25, width * 0.45
   )
-  glowCenter.addColorStop(0, 'rgba(0, 200, 255, 0.22)')
-  glowCenter.addColorStop(0.5, 'rgba(0, 150, 240, 0.08)')
-  glowCenter.addColorStop(1, 'rgba(0, 100, 200, 0)')
+  glowCenter.addColorStop(0, 'rgba(8, 145, 178, 0.22)')
+  glowCenter.addColorStop(0.5, 'rgba(8, 90, 120, 0.08)')
+  glowCenter.addColorStop(1, 'rgba(4, 55, 80, 0)')
   ctx.fillStyle = glowCenter
   ctx.fillRect(0, 0, width, height)
 
@@ -216,9 +216,9 @@ function drawBackground() {
     width * 0.85, height * 0.75, 0,
     width * 0.85, height * 0.75, width * 0.4
   )
-  glowCenter2.addColorStop(0, 'rgba(0, 220, 255, 0.18)')
-  glowCenter2.addColorStop(0.5, 'rgba(0, 170, 245, 0.07)')
-  glowCenter2.addColorStop(1, 'rgba(0, 120, 220, 0)')
+  glowCenter2.addColorStop(0, 'rgba(6, 160, 190, 0.18)')
+  glowCenter2.addColorStop(0.5, 'rgba(8, 100, 130, 0.07)')
+  glowCenter2.addColorStop(1, 'rgba(4, 60, 85, 0)')
   ctx.fillStyle = glowCenter2
   ctx.fillRect(0, 0, width, height)
 }
@@ -227,7 +227,7 @@ function drawHexGrid(time: number) {
   if (!ctx) return
   const size = 50
   const h = size * Math.sqrt(3) / 2
-  ctx.strokeStyle = 'rgba(100, 200, 255, 0.04)'
+  ctx.strokeStyle = 'rgba(56, 160, 190, 0.04)'
   ctx.lineWidth = 0.5
   
   for (let row = -1; row < height / h + 2; row++) {
@@ -264,7 +264,7 @@ function drawCornerFrames(time: number) {
     const dx = i < 2 ? 1 : -1
     const dy = i % 2 === 0 ? 1 : -1
     
-    ctx!.strokeStyle = `rgba(0, 220, 255, ${0.3 * pulse})`
+    ctx!.strokeStyle = `rgba(6, 182, 212, ${0.3 * pulse})`
     ctx!.lineWidth = 2
     ctx!.beginPath()
     ctx!.moveTo(c.x - dx * len, c.y)
@@ -272,12 +272,12 @@ function drawCornerFrames(time: number) {
     ctx!.lineTo(c.x, c.y - dy * len)
     ctx!.stroke()
     
-    ctx!.fillStyle = `rgba(0, 240, 255, ${0.6 * pulse})`
+    ctx!.fillStyle = `rgba(34, 211, 238, ${0.6 * pulse})`
     ctx!.beginPath()
     ctx!.arc(c.x, c.y, 3, 0, Math.PI * 2)
     ctx!.fill()
     
-    ctx!.strokeStyle = `rgba(0, 200, 255, ${0.15 * pulse})`
+    ctx!.strokeStyle = `rgba(14, 116, 144, ${0.15 * pulse})`
     ctx!.lineWidth = 1
     ctx!.beginPath()
     ctx!.moveTo(c.x - dx * (len + 25), c.y)
@@ -299,7 +299,7 @@ function drawTechRings(time: number) {
       const dir = layer % 2 === 0 ? 1 : -1
       ctx!.rotate(time * ring.rotationSpeed * dir)
       
-      ctx!.strokeStyle = `rgba(0, 210, 255, ${ring.opacity * (1 - layer * 0.28)})`
+      ctx!.strokeStyle = `rgba(6, 170, 200, ${ring.opacity * (1 - layer * 0.28)})`
       ctx!.lineWidth = 1.5 - layer * 0.35
       ctx!.setLineDash(layer === 0 ? [] : [8, 6])
       
@@ -324,7 +324,7 @@ function drawTechRings(time: number) {
       const dx = Math.cos(angle) * dr
       const dy = Math.sin(angle) * dr
       const dotAlpha = ring.opacity * 2.5 * (Math.sin(time * 0.005 + d) * 0.4 + 0.6)
-      ctx!.fillStyle = `rgba(180, 240, 255, ${dotAlpha})`
+      ctx!.fillStyle = `rgba(125, 211, 252, ${dotAlpha})`
       ctx!.beginPath()
       ctx!.arc(dx, dy, 2.5, 0, Math.PI * 2)
       ctx!.fill()
@@ -338,16 +338,16 @@ function drawScanLine(time: number) {
   const scanY = ((time * 0.15) % (height + 100)) - 50
   
   const scanGrad = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40)
-  scanGrad.addColorStop(0, 'rgba(0, 220, 255, 0)')
-  scanGrad.addColorStop(0.4, 'rgba(0, 220, 255, 0.03)')
-  scanGrad.addColorStop(0.5, 'rgba(0, 240, 255, 0.08)')
-  scanGrad.addColorStop(0.6, 'rgba(0, 220, 255, 0.03)')
-  scanGrad.addColorStop(1, 'rgba(0, 220, 255, 0)')
+  scanGrad.addColorStop(0, 'rgba(6, 182, 212, 0)')
+  scanGrad.addColorStop(0.4, 'rgba(6, 182, 212, 0.03)')
+  scanGrad.addColorStop(0.5, 'rgba(34, 211, 238, 0.08)')
+  scanGrad.addColorStop(0.6, 'rgba(6, 182, 212, 0.03)')
+  scanGrad.addColorStop(1, 'rgba(6, 182, 212, 0)')
   
   ctx.fillStyle = scanGrad
   ctx.fillRect(0, scanY - 40, width, 80)
   
-  ctx.strokeStyle = 'rgba(0, 240, 255, 0.15)'
+  ctx.strokeStyle = 'rgba(34, 211, 238, 0.15)'
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(0, scanY)
@@ -372,10 +372,10 @@ function drawGlowOrbs(time: number) {
     const [r, g, b] = orb.color
     
     const grad = ctx!.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * pulse)
-    grad.addColorStop(0, `rgba(${r + 40}, ${g + 30}, ${b}, 0.22)`)
+    grad.addColorStop(0, `rgba(${Math.min(r + 30, 255)}, ${Math.min(g + 25, 255)}, ${b}, 0.22)`)
     grad.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, 0.1)`)
-    grad.addColorStop(0.7, `rgba(${r - 20}, ${g - 20}, ${b}, 0.03)`)
-    grad.addColorStop(1, `rgba(${r - 30}, ${g - 30}, ${b}, 0)`)
+    grad.addColorStop(0.7, `rgba(${Math.max(r - 20, 0)}, ${Math.max(g - 20, 0)}, ${b}, 0.03)`)
+    grad.addColorStop(1, `rgba(${Math.max(r - 30, 0)}, ${Math.max(g - 30, 0)}, ${b}, 0)`)
     
     ctx!.fillStyle = grad
     ctx!.beginPath()
@@ -401,11 +401,11 @@ function drawFlowLines(time: number) {
     
     const grad = ctx!.createLinearGradient(line.x, line.y, endX, endY)
     const pulse = Math.sin(time * 0.003 + line.x * 0.01) * 0.3 + 0.7
-    grad.addColorStop(0, `rgba(100, 220, 255, 0)`)
-    grad.addColorStop(0.25, `rgba(150, 235, 255, ${line.opacity * pulse * 1.5})`)
-    grad.addColorStop(0.5, `rgba(200, 245, 255, ${line.opacity * pulse * 1.8})`)
-    grad.addColorStop(0.75, `rgba(150, 235, 255, ${line.opacity * pulse * 1.2})`)
-    grad.addColorStop(1, `rgba(200, 245, 255, 0)`)
+    grad.addColorStop(0, `rgba(56, 180, 200, 0)`)
+    grad.addColorStop(0.25, `rgba(103, 232, 249, ${line.opacity * pulse * 1.5})`)
+    grad.addColorStop(0.5, `rgba(186, 230, 253, ${line.opacity * pulse * 1.8})`)
+    grad.addColorStop(0.75, `rgba(103, 232, 249, ${line.opacity * pulse * 1.2})`)
+    grad.addColorStop(1, `rgba(186, 230, 253, 0)`)
     
     ctx!.strokeStyle = grad
     ctx!.lineWidth = line.width
@@ -416,7 +416,7 @@ function drawFlowLines(time: number) {
     ctx!.stroke()
     
     const headPulse = Math.sin(time * 0.005 + line.y * 0.02) * 0.4 + 0.6
-    ctx!.fillStyle = `rgba(220, 250, 255, ${headPulse * line.opacity * 2})`
+    ctx!.fillStyle = `rgba(186, 230, 253, ${headPulse * line.opacity * 2})`
     ctx!.beginPath()
     ctx!.arc(endX, endY, line.width * 1.5, 0, Math.PI * 2)
     ctx!.fill()
@@ -440,22 +440,22 @@ function drawRisingDots(time: number) {
     dot.trail.forEach((t, i) => {
       const alpha = (1 - i / dot.trail.length) * dot.opacity * 0.4
       const size = dot.size * (1 - i / dot.trail.length)
-      ctx!.fillStyle = `rgba(0, 200, 255, ${alpha})`
+      ctx!.fillStyle = `rgba(14, 116, 144, ${alpha})`
       ctx!.beginPath()
       ctx!.arc(t.x, t.y, size * 0.5, 0, Math.PI * 2)
       ctx!.fill()
     })
     
     const glowGrad = ctx!.createRadialGradient(dot.x, dot.y, 0, dot.x, dot.y, dot.size * 6)
-    glowGrad.addColorStop(0, `rgba(0, 230, 255, ${dot.opacity * 0.8})`)
-    glowGrad.addColorStop(0.3, `rgba(0, 200, 255, ${dot.opacity * 0.3})`)
-    glowGrad.addColorStop(1, 'rgba(0, 180, 255, 0)')
+    glowGrad.addColorStop(0, `rgba(6, 182, 212, ${dot.opacity * 0.8})`)
+    glowGrad.addColorStop(0.3, `rgba(14, 116, 144, ${dot.opacity * 0.3})`)
+    glowGrad.addColorStop(1, 'rgba(8, 100, 120, 0)')
     ctx!.fillStyle = glowGrad
     ctx!.beginPath()
     ctx!.arc(dot.x, dot.y, dot.size * 6, 0, Math.PI * 2)
     ctx!.fill()
     
-    ctx!.fillStyle = `rgba(255, 255, 255, ${dot.opacity})`
+    ctx!.fillStyle = `rgba(240, 249, 255, ${dot.opacity})`
     ctx!.beginPath()
     ctx!.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2)
     ctx!.fill()
@@ -495,13 +495,13 @@ function drawParticles(time: number) {
     ctx!.arc(p.x, p.y, currentRadius, 0, Math.PI * 2)
     ctx!.fill()
     
-    ctx!.fillStyle = 'rgba(255, 255, 255, ' + (currentOpacity * 0.9) + ')'
+    ctx!.fillStyle = 'rgba(240, 249, 255, ' + (currentOpacity * 0.9) + ')'
     ctx!.beginPath()
     ctx!.arc(p.x, p.y, currentRadius * 0.45, 0, Math.PI * 2)
     ctx!.fill()
     
     if (currentRadius > 2) {
-      ctx!.fillStyle = 'rgba(255, 255, 255, ' + (currentOpacity * 0.5) + ')'
+      ctx!.fillStyle = 'rgba(240, 249, 255, ' + (currentOpacity * 0.5) + ')'
       ctx!.beginPath()
       ctx!.arc(p.x - currentRadius * 0.3, p.y - currentRadius * 0.3, currentRadius * 0.2, 0, Math.PI * 2)
       ctx!.fill()
@@ -524,7 +524,7 @@ function drawConnections(time: number) {
         const opacity = (1 - dist / connectionDistance) * 0.35
         const pulse = Math.sin(time * 0.002 + i * 0.1) * 0.25 + 0.75
         
-        ctx!.strokeStyle = `rgba(100, 210, 255, ${opacity * pulse})`
+        ctx!.strokeStyle = `rgba(56, 170, 200, ${opacity * pulse})`
         ctx!.lineWidth = 0.7
         ctx!.beginPath()
         ctx!.moveTo(particles[i].x, particles[i].y)
@@ -549,9 +549,9 @@ function drawAmbientSpots(time: number) {
     const pulseY = spot.y + Math.cos(time * spot.speed * 0.7 + i * 2) * 40
     
     const grad = ctx!.createRadialGradient(pulseX, pulseY, 0, pulseX, pulseY, spot.size)
-    grad.addColorStop(0, 'rgba(0, 150, 230, 0.06)')
-    grad.addColorStop(0.5, 'rgba(0, 110, 200, 0.02)')
-    grad.addColorStop(1, 'rgba(0, 70, 170, 0)')
+    grad.addColorStop(0, 'rgba(8, 100, 130, 0.06)')
+    grad.addColorStop(0.5, 'rgba(6, 75, 100, 0.02)')
+    grad.addColorStop(1, 'rgba(4, 45, 70, 0)')
     ctx!.fillStyle = grad
     ctx!.beginPath()
     ctx!.arc(pulseX, pulseY, spot.size, 0, Math.PI * 2)
@@ -576,7 +576,7 @@ function drawDataStreams(time: number) {
       const y = ((time * 0.08 * s.direction + i * 40 + si * 200) % (height + 100)) - 50
       const char = s.chars[Math.floor((time * 0.01 + i + si) % s.chars.length)]
       const alpha = (1 - Math.abs(height / 2 - y) / (height / 2)) * 0.08
-      ctx!.fillStyle = `rgba(0, 230, 255, ${alpha})`
+      ctx!.fillStyle = `rgba(6, 182, 212, ${alpha})`
       ctx!.fillText(char, s.x, y)
     }
   })
