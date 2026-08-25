@@ -35,7 +35,7 @@ const routes = [
       { path: 'learning-path', name: 'learning-path', component: () => import('@/views/LearningPath.vue'), meta: { title: '学习路径', roles: candidateRoles } },
       { path: 'review-tasks', name: 'review-tasks', component: () => import('@/views/ReviewTasks.vue'), meta: { title: '人工审核', roles: hrRoles } },
       { path: 'evaluation', name: 'evaluation', component: () => import('@/views/Evaluation.vue'), meta: { title: '测试评估', roles: hrRoles } },
-      { path: 'rag-admin', name: 'rag-admin', component: () => import('@/views/RagAdmin.vue'), meta: { title: 'RAG 检索增强', roles: hrRoles } },
+      { path: 'rag-admin', name: 'rag-admin', component: () => import('@/views/RagWorkflowEditor.vue'), meta: { title: 'RAG 工作流编辑器', roles: hrRoles } },
       { path: 'settings', name: 'settings', component: () => import('@/views/Settings.vue'), meta: { title: '系统设置', roles: hrRoles } },
       { path: 'account-settings', name: 'account-settings', component: () => import('@/views/AccountSettings.vue'), meta: { title: '账号设置', roles: allRoles } }
     ]

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.db.init_db import seed_database
-from app.routers import graph_explore_router, rag_router, router
+from app.routers import graph_explore_router, rag_router, router, workflow_router
 from app.services.ai_provider import AIProviderError
 from app.services.xunfei_virtual_human import cleanup_stale_sessions, stop_all_sessions
 
@@ -55,3 +55,4 @@ def root():
 app.include_router(router)
 app.include_router(graph_explore_router)
 app.include_router(rag_router)
+app.include_router(workflow_router)

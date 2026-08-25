@@ -145,6 +145,30 @@ class FaissVectorStore:
         return None
 
 
+# ---------- UserDocsStore 单例 ----------
+# 用于 workflow 编辑器中用户上传到本地知识库的文档向量。
+# 与现有 SOURCE_REGISTRY 4 个数据源完全隔离，不污染 rag_index_jobs 表。
+_USER_DOCS_DIM = 512
+_user_docs_store: "FaissVectorStore | None" = None
+
+
+def get_user_docs_store() -> "FaissVectorStore":
+    global _user_docs_store
+    if _user_docs_store is None:
+        from app.services.rag.indexer import RAG_DATA_DIR
+        store = FaissVectorStore(dim=_USER_DOCS_DIM)
+        _path = RAG_DATA_DIR / "user_docs.index"
+        store.load(_path)
+        _user_docs_store = store
+    return _user_docs_store
+
+
+def save_user_docs_store() -> None:
+    if _user_docs_store is not None:
+        from app.services.rag.indexer import RAG_DATA_DIR
+        _user_docs_store.save(RAG_DATA_DIR / "user_docs.index")
+
+
 class InMemoryVectorStore:
     """测试用 fallback：纯 numpy 实现，无 faiss 依赖。"""
 

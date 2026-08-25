@@ -387,3 +387,33 @@ class RagIndexJob(Base):
     error_message: Mapped[str] = mapped_column(Text, default="")
     model_name: Mapped[str] = mapped_column(String(120), default="")
     index_path: Mapped[str] = mapped_column(String(200), default="")
+
+
+class RagDocument(Base):
+    """用户上传到本地知识库的文档记录。"""
+
+    __tablename__ = "rag_documents"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    filename: Mapped[str] = mapped_column(String(255), index=True)
+    file_type: Mapped[str] = mapped_column(String(40), default="txt")
+    char_count: Mapped[int] = mapped_column(Integer, default=0)
+    chunk_count: Mapped[int] = mapped_column(Integer, default=0)
+    indexed: Mapped[bool] = mapped_column(Boolean, default=False)
+    uploaded_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    storage_path: Mapped[str] = mapped_column(String(400), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
+class WorkflowConfig(Base):
+    """RAG 工作流可视化配置（节点位置 + 配置参数）。"""
+
+    __tablename__ = "workflow_configs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(120), unique=True, index=True)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False)
+    graph_json: Mapped[str] = mapped_column(Text, default="{}")
+    node_settings: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

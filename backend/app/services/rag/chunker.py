@@ -118,6 +118,32 @@ def _split_paragraphs(text: str, max_len: int = 500) -> list[str]:
     return parts
 
 
+def split_text(text: str, chunk_size: int = 500, chunk_overlap: int = 50) -> list[str]:
+    """通用文本切片：按段落切分后，对长段按 chunk_size 重切，相邻 chunk 重叠 chunk_overlap 字符。
+
+    供 workflow 编辑器等需要自定义切片参数的场景使用。
+    """
+    if chunk_size <= 0:
+        return [text] if text else []
+    overlap = max(0, min(chunk_overlap, chunk_size // 2))
+    paragraphs = _split_paragraphs(text, max_len=chunk_size)
+    chunks: list[str] = []
+    buffer = ""
+    for para in paragraphs:
+        candidate = (buffer + "\n" + para).strip() if buffer else para
+        if len(candidate) <= chunk_size:
+            buffer = candidate
+        else:
+            if buffer:
+                chunks.append(buffer)
+                # 截取重叠部分作为下一 chunk 起始
+                buffer = buffer[-overlap:] if overlap else ""
+            buffer = (buffer + "\n" + para).strip() if buffer else para
+    if buffer:
+        chunks.append(buffer)
+    return chunks
+
+
 def _list_from_json_field(value: object | None) -> list[str]:
     """解析 ORM 中以 JSON 字符串存储的列表字段（兼容 list / str / '[...]' / 'a,b'）。"""
     if not value:
