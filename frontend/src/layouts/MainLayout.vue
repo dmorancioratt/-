@@ -106,6 +106,7 @@ import {
   Files,
   Histogram,
   List,
+  MagicStick,
   Management,
   Monitor,
   Operation,
@@ -142,6 +143,7 @@ const rawMenus: MenuItem[] = [
   { path: '/digital-interviewer', label: '数字人面试官', icon: VideoCamera, hint: '数字人 面试' },
   { path: '/review-tasks', label: '人工审核', icon: List, hint: '人工审核' },
   { path: '/evaluation', label: '测试评估', icon: DataAnalysis, hint: '测试评估' },
+  { path: '/rag-admin', label: 'RAG 检索增强', icon: MagicStick, hint: '向量检索 知识问答' },
   { path: '/settings', label: '系统设置', icon: Setting, hint: '系统设置' },
   { path: '/account-settings', label: '账号设置', icon: Setting, hint: '账号 密码 邮箱' }
 ]
@@ -155,13 +157,15 @@ const roleRouteMap: Record<string, string[]> = {
     '/overview', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
     '/emerging-jobs', '/job-evolution', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/digital-interviewer',
-    '/review-tasks', '/evaluation', '/settings', '/account-settings'
+    '/review-tasks', '/evaluation', '/settings', '/account-settings',
+    '/rag-admin'
   ],
   admin: [
     '/overview', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
     '/emerging-jobs', '/job-evolution', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/digital-interviewer',
-    '/review-tasks', '/evaluation', '/settings', '/account-settings'
+    '/review-tasks', '/evaluation', '/settings', '/account-settings',
+    '/rag-admin'
   ]
 }
 
@@ -171,7 +175,7 @@ const groupDefs: Array<{ key: string; label: string; icon: any; items: string[] 
   { key: 'graph', label: '能力分析', icon: Connection, items: ['/skill-graph', '/capability-evolution'] },
   { key: 'match', label: '人岗匹配', icon: Aim, items: ['/resume-parser', '/match-analysis', '/learning-path'] },
   { key: 'ai', label: 'AI 互动', icon: VideoCamera, items: ['/digital-interviewer'] },
-  { key: 'ops', label: '运营管理', icon: Setting, items: ['/review-tasks', '/evaluation', '/settings', '/account-settings'] }
+  { key: 'ops', label: '运营管理', icon: Setting, items: ['/review-tasks', '/evaluation', '/rag-admin', '/settings', '/account-settings'] }
 ]
 
 const auth = useAuthStore()
