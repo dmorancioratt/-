@@ -371,3 +371,19 @@ class TestCase(Base):
     expected: Mapped[str] = mapped_column(Text)
     actual: Mapped[str] = mapped_column(Text)
     passed: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class RagIndexJob(Base):
+    """RAG 索引构建任务记录。"""
+
+    __tablename__ = "rag_index_jobs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    source_type: Mapped[str] = mapped_column(String(40), index=True)
+    status: Mapped[str] = mapped_column(String(40), default="running")
+    chunk_count: Mapped[int] = mapped_column(Integer, default=0)
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    error_message: Mapped[str] = mapped_column(Text, default="")
+    model_name: Mapped[str] = mapped_column(String(120), default="")
+    index_path: Mapped[str] = mapped_column(String(200), default="")
