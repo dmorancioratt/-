@@ -4,7 +4,7 @@ import type { FlowNode, FlowEdge, NodeStatus, StageLog, DocumentInfo, TestRunRes
 import { buildDefaultEdges, buildDefaultNodes } from '@/utils/workflowTemplate'
 import { api } from '@/api/http'
 
-const DRAFT_KEY = 'workflow_draft_v1'
+const DRAFT_KEY = 'workflow_draft_v2'
 
 interface WorkflowState {
   configId: number | null

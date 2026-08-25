@@ -4,7 +4,7 @@ const NODES_PER_ROW = 4
 const X_STEP = 240
 const Y_STEP = 160
 const X_START = 80
-const Y_START = 80
+const Y_START = 140
 
 const KIND_LIST: NodeKind[] = [
   'input',
@@ -84,11 +84,17 @@ const KIND_META: Record<NodeKind, { label: string; description: string; config: 
   },
 }
 
+// 行 0 左→右；行 1 反向（蛇形）；行 2 左→右
+function positionForIndex(idx: number): { x: number; y: number } {
+  const row = Math.floor(idx / NODES_PER_ROW)
+  const colInOrder = idx % NODES_PER_ROW
+  const col = row === 1 ? NODES_PER_ROW - 1 - colInOrder : colInOrder
+  return { x: X_START + col * X_STEP, y: Y_START + row * Y_STEP }
+}
+
 export function buildDefaultNodes(): FlowNode[] {
   return KIND_LIST.map((kind, idx) => {
     const meta = KIND_META[kind]
-    const row = Math.floor(idx / NODES_PER_ROW)
-    const col = idx % NODES_PER_ROW
     const data: FlowNodeData = {
       kind,
       label: meta.label,
@@ -99,7 +105,7 @@ export function buildDefaultNodes(): FlowNode[] {
     return {
       id: `node-${kind}`,
       type: `node-${kind}`,
-      position: { x: X_START + col * X_STEP, y: Y_START + row * Y_STEP },
+      position: positionForIndex(idx),
       data,
     }
   })
@@ -117,5 +123,25 @@ export function buildDefaultEdges(): FlowEdge[] {
   }
   return edges
 }
+
+export interface PhaseHeader {
+  id: string
+  index: number
+  label: string
+  hint: string
+  x: number
+  y: number
+  width: number
+  tone: 'blue' | 'cyan' | 'purple' | 'amber'
+}
+
+const NODE_W = 200
+
+export const PHASE_HEADERS: PhaseHeader[] = [
+  { id: 'phase-1', index: 1, label: '输入解析',   hint: '用户提问 → 意图解析',                 x: X_START,                    y: 70,  width: X_STEP * 2,           tone: 'blue' },
+  { id: 'phase-2', index: 2, label: '知识构建',   hint: '文档切片 · Embedding · 向量化',         x: X_START + X_STEP * 2,       y: 70,  width: X_STEP * 2,           tone: 'cyan' },
+  { id: 'phase-3', index: 3, label: '检索增强',   hint: 'Top-K 召回 · 相关性过滤',               x: X_START,                    y: 230, width: X_STEP * NODES_PER_ROW, tone: 'purple' },
+  { id: 'phase-4', index: 4, label: '生成校验',   hint: 'LLM 生成 · 幻觉检测 · 引用溯源',        x: X_START,                    y: 390, width: X_STEP * NODES_PER_ROW, tone: 'amber' },
+]
 
 export const NODE_KIND_META = KIND_META
