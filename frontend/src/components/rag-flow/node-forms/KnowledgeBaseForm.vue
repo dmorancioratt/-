@@ -72,7 +72,8 @@ const totalChunks = computed(() => docs.value.reduce((acc, d) => acc + d.chunk_c
 async function refreshDocs() {
   loading.value = true
   try {
-    docs.value = await store.fetchDocs()
+    await store.fetchDocs()
+    docs.value = store.docs
   } finally {
     loading.value = false
   }

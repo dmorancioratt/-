@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
-import type { FlowNode, FlowEdge, NodeStatus, StageLog, DocumentInfo, TestRunResponse, WorkflowConfig } from '@/types/workflow'
-import { buildDefaultEdges, buildDefaultNodes } from '@/utils/workflowTemplate'
+import type { FlowNode, FlowEdge, NodeStatus, StageLog, DocumentInfo, TestRunResponse, WorkflowConfig, NodeKind } from '@/types/workflow'
+import { buildDefaultEdges, buildDefaultNodes, NODE_KIND_META } from '@/utils/workflowTemplate'
 import { api } from '@/api/http'
 
-const DRAFT_KEY = 'workflow_draft_v2'
+const DRAFT_KEY = 'workflow_draft_v5'
 
 interface WorkflowState {
   configId: number | null
@@ -32,7 +32,7 @@ export const useWorkflowStore = defineStore('workflow', {
     configName: '默认 RAG 流程',
     nodes: buildDefaultNodes(),
     edges: buildDefaultEdges(),
-    selectedNodeId: null,
+    selectedNodeId: 'node-input',
     drawerOpen: false,
     docs: [],
     docsLoading: false,
@@ -65,6 +65,28 @@ export const useWorkflowStore = defineStore('workflow', {
     openDrawer(nodeId: string) {
       this.selectedNodeId = nodeId
       this.drawerOpen = true
+    },
+
+    addNode(node: FlowNode) {
+      this.nodes.push(node)
+      this.persistDraft()
+    },
+
+    addNodeByKind(kind: NodeKind, position: { x: number; y: number }) {
+      const meta = NODE_KIND_META[kind]
+      const node: FlowNode = {
+        id: `node-${kind}-${Date.now()}`,
+        type: kind,
+        position,
+        data: {
+          kind,
+          label: meta.label,
+          description: meta.description,
+          status: 'idle',
+          config: { ...meta.config },
+        },
+      }
+      this.addNode(node)
     },
 
     closeDrawer() {
@@ -268,6 +290,15 @@ export const useWorkflowStore = defineStore('workflow', {
 
     closeTestDialog() {
       this.testDialogVisible = false
+    },
+
+    exportJSON() {
+      return {
+        nodes: this.nodes,
+        edges: this.edges,
+        configName: this.configName,
+        configId: this.configId,
+      }
     },
   },
 })

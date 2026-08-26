@@ -92,8 +92,24 @@ function positionForIndex(idx: number): { x: number; y: number } {
   return { x: X_START + col * X_STEP, y: Y_START + row * Y_STEP }
 }
 
+// 默认布局：用户手动调整后保存为 #3 的节点坐标（固化为默认预设）
+const NODE_LAYOUT: Record<NodeKind, { x: number; y: number }> = {
+  input:     { x: -365, y: 406 },
+  parser:    { x: -89,  y: 402 },
+  knowledge: { x: -365, y: 554 },
+  chunker:   { x: -96,  y: 557 },
+  embedding: { x: 220,  y: 706 },
+  vector:    { x: 220,  y: 411 },
+  retrieve:  { x: 240,  y: 189 },
+  relevance: { x: 568,  y: 177 },
+  llm:       { x: 559,  y: 405 },
+  guard:     { x: 571,  y: 626 },
+  citation:  { x: 577,  y: 804 },
+  output:    { x: 924,  y: 433 },
+}
+
 export function buildDefaultNodes(): FlowNode[] {
-  return KIND_LIST.map((kind, idx) => {
+  return KIND_LIST.map((kind) => {
     const meta = KIND_META[kind]
     const data: FlowNodeData = {
       kind,
@@ -104,24 +120,35 @@ export function buildDefaultNodes(): FlowNode[] {
     }
     return {
       id: `node-${kind}`,
-      type: `node-${kind}`,
-      position: positionForIndex(idx),
+      type: kind,
+      position: { ...NODE_LAYOUT[kind] },
       data,
     }
   })
 }
 
+// 连线顺序：主线贯通 + 知识支线依次串联 + 支线汇入检索
+const EDGE_PATH: Array<[NodeKind, NodeKind]> = [
+  ['input', 'parser'],
+  ['parser', 'retrieve'],
+  ['knowledge', 'chunker'],
+  ['chunker', 'embedding'],
+  ['embedding', 'vector'],
+  ['vector', 'retrieve'],
+  ['retrieve', 'relevance'],
+  ['relevance', 'llm'],
+  ['llm', 'guard'],
+  ['guard', 'citation'],
+  ['citation', 'output'],
+]
+
 export function buildDefaultEdges(): FlowEdge[] {
-  const edges: FlowEdge[] = []
-  for (let i = 0; i < KIND_LIST.length - 1; i++) {
-    edges.push({
-      id: `edge-${i}`,
-      source: `node-${KIND_LIST[i]}`,
-      target: `node-${KIND_LIST[i + 1]}`,
-      animated: false,
-    })
-  }
-  return edges
+  return EDGE_PATH.map(([source, target], i) => ({
+    id: `edge-${i}`,
+    source: `node-${source}`,
+    target: `node-${target}`,
+    animated: false,
+  }))
 }
 
 export interface PhaseHeader {

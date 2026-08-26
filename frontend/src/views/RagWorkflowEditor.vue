@@ -1,15 +1,163 @@
 <template>
-  <div class="rag-editor-page">
-    <PageHeader title="RAG 管理驾驶舱" desc="占位页面，待重新制作" />
+  <div class="rag-admin-page">
+    <!-- 顶部工具栏 -->
+    <div class="top-bar">
+      <WorkflowToolbar />
+    </div>
+
+    <!-- 主体内容区 -->
+    <div class="main-content">
+      <!-- 左侧：节点库 -->
+      <div class="left-sidebar">
+        <NodeLibrary />
+      </div>
+
+      <!-- 中间：画布 -->
+      <div class="canvas-area">
+        <RagFlowCanvas />
+      </div>
+
+      <!-- 右侧：工作流状态 + 节点配置 -->
+      <div class="right-sidebar">
+        <div class="status-indicator">
+          <div class="status-row">
+            <span class="status-label">工作流状态</span>
+            <span class="status-group">
+              <span class="status-item active">空闲</span>
+              <span class="status-item">运行</span>
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">上次运行</span>
+            <span class="status-value">14:32:18</span>
+          </div>
+          <div class="status-link">查看日志</div>
+        </div>
+        <NodeConfigDrawer />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import PageHeader from '@/components/PageHeader.vue'
+import { onMounted } from 'vue'
+import { useWorkflowStore } from '@/stores/workflow'
+import WorkflowToolbar from '@/components/rag-flow/WorkflowToolbar.vue'
+import NodeLibrary from '@/components/rag-flow/NodeLibrary.vue'
+import RagFlowCanvas from '@/components/rag-flow/RagFlowCanvas.vue'
+import NodeConfigDrawer from '@/components/rag-flow/NodeConfigDrawer.vue'
+
+const store = useWorkflowStore()
+
+onMounted(() => {
+  store.loadDraft()
+  store.fetchDocs()
+})
 </script>
 
 <style scoped>
-.rag-editor-page {
-  min-height: 400px;
+.rag-admin-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 70px);
+  width: 100%;
+  color: #e2e8f0;
+  overflow: hidden;
+}
+
+.top-bar {
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  gap: 0;
+}
+
+.left-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  background: rgba(15, 23, 42, 0.7);
+  border-right: 1px solid rgba(91, 155, 213, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-area {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.right-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  background: rgba(15, 23, 42, 0.7);
+  border-left: 1px solid rgba(91, 155, 213, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.status-indicator {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(91, 155, 213, 0.12);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.status-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.status-label {
+  color: #64748b;
+}
+
+.status-group {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.status-item {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #64748b;
+  background: rgba(30, 41, 59, 0.6);
+  cursor: pointer;
+}
+
+.status-item.active {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+}
+
+.status-value {
+  color: #94a3b8;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+}
+
+.status-link {
+  font-size: 11px;
+  color: #60a5fa;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.status-link:hover {
+  text-decoration: underline;
 }
 </style>

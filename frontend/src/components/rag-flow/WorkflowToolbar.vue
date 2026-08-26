@@ -1,91 +1,56 @@
 <template>
   <div class="workflow-toolbar">
-    <el-button :icon="RefreshLeft" plain @click="onReset">重置布局</el-button>
-
-    <el-dropdown @command="onLoadConfig" trigger="click">
-      <el-button :icon="FolderOpened" plain>
-        加载工作流
-        <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-      </el-button>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item v-if="configs.length === 0" disabled>
-            暂无历史工作流
-          </el-dropdown-item>
-          <el-dropdown-item
-            v-for="cfg in configs"
-            :key="cfg.id"
-            :command="cfg.id"
-          >
-            #{{ cfg.id }} · {{ cfg.name }}
-            <span v-if="cfg.is_default" class="cfg-default">默认</span>
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
-
-    <el-button :icon="DocumentCopy" plain @click="onSave" :loading="store.saving">
-      保存工作流
-    </el-button>
-
-    <el-button type="primary" :icon="VideoPlay" @click="store.openTestDialog('什么是 RAG 工作流？')">
-      测试运行
-    </el-button>
-
-    <div class="toolbar-spacer" />
-
-    <div class="status-pill">
-      <el-icon><Document /></el-icon>
-      文档 <strong>{{ store.totalDocs }}</strong>
-      · chunks <strong>{{ store.totalChunks }}</strong>
+    <div class="toolbar-left">
+      <div class="workflow-title">
+        <el-icon :size="16" color="#60a5fa"><Document /></el-icon>
+        <span class="title-text">可视化 RAG 防幻觉工作流</span>
+        <el-icon :size="14" color="#fbbf24"><Warning /></el-icon>
+      </div>
+      <div class="save-indicator">
+        <span class="save-dot"></span>
+        自动保存于 {{ autoSaveTime }}
+      </div>
     </div>
-    <div class="status-pill">
-      <el-icon><Folder /></el-icon>
-      当前: <strong>{{ store.configName }}</strong>
-      <span v-if="store.configId" class="cfg-id">#{{ store.configId }}</span>
+
+    <div class="toolbar-right">
+      <el-button
+        type="primary"
+        :icon="VideoPlay"
+        @click="store.openTestDialog('什么是 RAG 工作流？')"
+      >
+        运行测试
+      </el-button>
+
+      <el-button :icon="DocumentCopy" @click="onSave" :loading="store.saving">
+        保存
+      </el-button>
+
+      <el-button :icon="Upload" plain @click="onSave">
+        更新工作流
+      </el-button>
+
+      <el-dropdown @command="onCommand" trigger="click">
+        <el-button circle :icon="MoreFilled" />
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item :command="'reset'">重置布局</el-dropdown-item>
+            <el-dropdown-item :command="'export'">导出 JSON</el-dropdown-item>
+            <el-dropdown-item :command="'import'">导入 JSON</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  ArrowDown,
-  Document,
-  DocumentCopy,
-  Folder,
-  FolderOpened,
-  RefreshLeft,
-  VideoPlay,
-} from '@element-plus/icons-vue'
+import { Document, DocumentCopy, MoreFilled, Upload, VideoPlay, Warning } from '@element-plus/icons-vue'
 import { useWorkflowStore } from '@/stores/workflow'
-import { ElDropdown, ElDropdownItem, ElDropdownMenu } from 'element-plus'
 
 const store = useWorkflowStore()
-const configs = ref<Array<{ id: number; name: string; is_default?: boolean }>>([])
-
-async function refreshConfigs() {
-  try {
-    const list = await store.listConfigs()
-    configs.value = Array.isArray(list) ? list : []
-  } catch {
-    configs.value = []
-  }
-}
-
-function onReset() {
-  ElMessageBox.confirm('重置会清空当前画布节点和连线，确定吗？', '重置布局', {
-    confirmButtonText: '重置',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(() => {
-      store.resetLayout()
-      ElMessage.success('已重置为默认布局')
-    })
-    .catch(() => {})
-}
+const autoSaveTime = ref('14:32:18')
 
 async function onSave() {
   let name = store.configName || ''
@@ -93,7 +58,7 @@ async function onSave() {
     try {
       const cfg = await store.save(name)
       ElMessage.success(`已保存为 #${cfg.id} · ${cfg.name}`)
-      refreshConfigs()
+      autoSaveTime.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
     } catch (e: any) {
       ElMessage.error(e?.message || '保存失败')
     }
@@ -108,66 +73,89 @@ async function onSave() {
     if (!value || !value.trim()) return
     const cfg = await store.save(value.trim())
     ElMessage.success(`已保存为 #${cfg.id} · ${cfg.name}`)
-    refreshConfigs()
+    autoSaveTime.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
   } catch (e: any) {
     if (e === 'cancel') return
     ElMessage.error(e?.message || '保存失败')
   }
 }
 
-async function onLoadConfig(id: number) {
-  try {
-    await store.load(id)
-    ElMessage.success(`已加载 #${id} · ${store.configName}`)
-  } catch (e: any) {
-    ElMessage.error(e?.message || '加载失败')
+function onCommand(cmd: string) {
+  if (cmd === 'reset') {
+    ElMessageBox.confirm('重置会清空当前画布节点和连线，确定吗？', '重置布局', {
+      confirmButtonText: '重置',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+      .then(() => {
+        store.resetLayout()
+        ElMessage.success('已重置为默认布局')
+      })
+      .catch(() => {})
+  } else if (cmd === 'export') {
+    const data = store.exportJSON()
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `rag-workflow-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 }
-
-onMounted(() => {
-  refreshConfigs()
-})
 </script>
 
 <style scoped>
 .workflow-toolbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(15, 23, 42, 0.7);
+  border-bottom: 1px solid rgba(91, 155, 213, 0.15);
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.workflow-title {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  background: rgba(15,23,42,0.55);
-  border: 1px solid rgba(91,155,213,0.18);
-  border-radius: 12px;
-  backdrop-filter: blur(8px);
-}
-.toolbar-spacer { flex: 1; }
-.status-pill {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 10px;
-  font-size: 12px;
-  color: #cbd5e1;
-  background: rgba(91,155,213,0.06);
-  border: 1px solid rgba(91,155,213,0.18);
-  border-radius: 999px;
-}
-.status-pill strong {
+  font-size: 16px;
+  font-weight: 600;
   color: #e2e8f0;
-  font-family: ui-monospace, Menlo, monospace;
-  margin: 0 2px;
 }
-.cfg-id {
-  margin-left: 4px;
-  color: #93c5fd;
-  font-family: ui-monospace, Menlo, monospace;
-  font-size: 11px;
+
+.title-text {
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
-.cfg-default {
-  margin-left: 6px;
-  font-size: 10px;
-  padding: 0 4px;
-  background: rgba(52,211,153,0.18);
-  color: #6ee7b7;
-  border-radius: 3px;
+
+.save-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.save-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>

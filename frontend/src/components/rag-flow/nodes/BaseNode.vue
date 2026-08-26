@@ -2,7 +2,7 @@
   <div
     class="rag-base-node"
     :class="[`tone-${data.kind}`, `status-${data.status}`, { selected: isSelected }]"
-    @click.stop="handleClick"
+    @click="handleClick"
   >
     <Handle type="target" :position="Position.Left" class="rag-handle" />
 
@@ -21,7 +21,13 @@
 
     <div class="node-desc" v-if="data.description">{{ data.description }}</div>
 
-    <div v-if="data.output" class="node-output">{{ data.output }}</div>
+    <div class="node-output" v-if="data.output">{{ data.output }}</div>
+
+    <div class="node-config-preview" v-if="data.config && Object.keys(data.config).length > 0">
+      <span v-for="(val, key) in data.config" :key="key" class="config-chip">
+        {{ key }}: {{ typeof val === 'object' ? JSON.stringify(val) : val }}
+      </span>
+    </div>
 
     <Handle type="source" :position="Position.Right" class="rag-handle" />
   </div>
@@ -204,6 +210,28 @@ function handleClick() {
   max-height: 60px;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.node-config-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.config-chip {
+  padding: 2px 6px;
+  font-size: 10px;
+  background: rgba(91,155,213,0.12);
+  border: 1px solid rgba(91,155,213,0.2);
+  border-radius: 4px;
+  color: #93c5fd;
+  font-family: ui-monospace, Menlo, monospace;
+  line-height: 1.4;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* handle 样式 */
