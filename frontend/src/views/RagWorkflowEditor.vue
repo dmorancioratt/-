@@ -33,7 +33,11 @@
           </div>
           <div class="status-link">查看日志</div>
         </div>
-        <NodeConfigDrawer />
+        <RagEngineStatus />
+        <RunStageLog />
+        <div class="config-area">
+          <NodeConfigDrawer />
+        </div>
       </div>
     </div>
   </div>
@@ -46,6 +50,8 @@ import WorkflowToolbar from '@/components/rag-flow/WorkflowToolbar.vue'
 import NodeLibrary from '@/components/rag-flow/NodeLibrary.vue'
 import RagFlowCanvas from '@/components/rag-flow/RagFlowCanvas.vue'
 import NodeConfigDrawer from '@/components/rag-flow/NodeConfigDrawer.vue'
+import RagEngineStatus from '@/components/rag-flow/RagEngineStatus.vue'
+import RunStageLog from '@/components/rag-flow/RunStageLog.vue'
 
 const store = useWorkflowStore()
 
@@ -101,6 +107,14 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.config-area {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .status-indicator {

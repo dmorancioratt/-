@@ -206,6 +206,20 @@ def stats(db: Session = Depends(get_db)) -> list[IndexStats]:
     return _stats_for(db)
 
 
+@router.get("/status")
+def status(db: Session = Depends(get_db)) -> dict:
+    """RAG 引擎综合状态：嵌入模型信息 + 各数据源索引状态。"""
+    embedder = _get_embedder()
+    return {
+        "embedder": {
+            "model_name": getattr(embedder, "model_name", ""),
+            "dim": int(getattr(embedder, "dim", 0) or 0),
+            "is_fake": isinstance(embedder, FakeEmbedder),
+        },
+        "sources": [stat.model_dump(mode="json") for stat in _stats_for(db)],
+    }
+
+
 def _do_query(
     req: RagQueryRequest,
     task_type: str,

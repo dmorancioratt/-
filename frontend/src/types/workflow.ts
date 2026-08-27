@@ -96,3 +96,21 @@ export interface StageLog {
   status: NodeStatus | string
   output: string
 }
+
+export interface RagSourceStatus {
+  source_type: string
+  status: string
+  chunk_count: number
+  started_at?: string
+  completed_at?: string | null
+  error_message?: string
+}
+
+export interface RagEngineStatus {
+  embedder: {
+    model_name: string
+    dim: number
+    is_fake: boolean
+  }
+  sources: RagSourceStatus[]
+}

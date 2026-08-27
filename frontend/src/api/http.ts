@@ -96,6 +96,7 @@ export const api = {
 
   // ---------- RAG ----------
   ragStats: () => http.get('/api/rag/stats').then((res) => res.data),
+  ragStatus: () => http.get('/api/rag/status').then((res) => res.data),
   ragIndex: (payload: { source?: string; force_rebuild?: boolean }) =>
     http.post('/api/rag/index', payload, { timeout: 180000 }).then((res) => res.data),
   ragIndexSource: (source: string, payload: { force_rebuild?: boolean }) =>
