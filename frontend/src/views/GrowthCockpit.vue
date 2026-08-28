@@ -7,27 +7,27 @@
     </button>
 
     <div class="cockpit-scene" :class="sceneClass">
-      <div class="cockpit-bg-image" :style="{ backgroundImage: `url(${cockpitBg})` }"></div>
-      <div class="hotspots">
-        <div
-          v-for="spot in hotspots"
-          :key="spot.id"
-          class="hotspot"
-          :class="spot.id"
-          :style="spotStyle(spot)"
-          @click="openPanel(spot.id)"
-        >
-          <div class="hotspot-glow"></div>
-          <div class="hotspot-ripple"></div>
-        </div>
-      </div>
+      <GrowthCockpitScene :active-module="activePanel" @focus="openPanel" />
     </div>
-    <button class="back-hint" :class="panelSide === 'left' ? 'from-right' : ''" v-if="activePanel" @click="closePanel">
+
+    <LearningPathMission
+      v-if="activeMissionPanel === 'path'"
+      @close="closePanel"
+    />
+
+    <ImmersiveMissionCabin
+      v-else-if="activeMissionPanel"
+      :module-id="activeMissionPanel"
+      @close="closePanel"
+      @primary="handlePrimaryAction"
+    />
+
+    <button v-if="false" class="back-hint" :class="panelSide === 'left' ? 'from-right' : ''" @click="closePanel">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
       返回驾驶舱
     </button>
 
-    <div class="detail-panel" :class="{ show: activePanel, 'from-left': panelSide === 'left', 'from-right': panelSide === 'right' }">
+    <div v-if="false" class="detail-panel" :class="{ show: activePanel, 'from-left': panelSide === 'left', 'from-right': panelSide === 'right' }">
       <button class="panel-back-btn" @click="closePanel">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
         <span>返回驾驶舱</span>
@@ -198,6 +198,45 @@
         </div>
 
         <!-- 推荐岗位详情 -->
+        <div v-if="activePanel === 'resource-library'" class="detail-page page-resource-library">
+          <div class="page-header">
+            <div class="header-icon resource-library__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path d="M4 19a2.5 2.5 0 0 1 2.5-2.5H20"/><path d="M9 7h7M9 10h5"/></svg>
+            </div>
+            <div class="header-titles">
+              <h2>学习资源库</h2>
+              <p>围绕当前 RAG 阶段整理的文档、课程、项目与论文</p>
+            </div>
+            <span class="resource-library__count">04 CURATED</span>
+          </div>
+
+          <section class="resource-library__brief">
+            <div>
+              <span>FOCUS COLLECTION</span>
+              <h3>RAG 知识增强实战</h3>
+              <p>从理解检索原理，到完成一个可演示的知识库项目。先读、再练、最后交付。</p>
+            </div>
+            <div class="resource-library__meter" aria-label="资源完成度 25%">
+              <strong>25%</strong><small>COLLECTED</small>
+            </div>
+          </section>
+
+          <section class="resource-library__grid">
+            <article v-for="(resource, index) in resources" :key="resource.title" class="resource-library__card" :style="{ '--resource-color': resource.color }">
+              <span class="resource-library__index">0{{ index + 1 }}</span>
+              <span class="resource-library__type">{{ resource.type }}</span>
+              <h3>{{ resource.title }}</h3>
+              <p>{{ resource.source }}</p>
+              <footer><span>★ {{ resource.rating }}</span><button type="button">加入本周计划</button></footer>
+            </article>
+          </section>
+
+          <div class="resource-library__actions">
+            <button type="button" @click="router.push('/learning-path')">进入完整学习路径</button>
+            <button type="button" class="ghost" @click="closePanel">返回资源舱</button>
+          </div>
+        </div>
+
         <div v-if="activePanel === 'jobs'" class="detail-page page-jobs">
           <div class="page-header">
             <div class="header-icon" style="background: linear-gradient(135deg, #4ed8ff20, #06b6d420); border-color: #4ed8ff60;">
@@ -298,7 +337,7 @@
           <div class="tech-section">
             <h3 class="section-title"><span class="st-line" style="background: linear-gradient(180deg, #a855f7, #7c3aed);"></span>推荐学习资源</h3>
             <div class="resource-cards">
-              <div class="res-card" v-for="r in resources" :key="r.title">
+              <div class="res-card" v-for="r in aiResources" :key="r.title">
                 <div class="rc-type" :style="{ background: r.color + '20', color: r.color }">{{ r.type }}</div>
                 <div class="rc-title">{{ r.title }}</div>
                 <div class="rc-source">{{ r.source }}</div>
@@ -573,41 +612,49 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import cockpitBg from '@/assets/images/cockpit-design.png'
+import GrowthCockpitScene from '@/components/cockpit/GrowthCockpitScene.vue'
+import ImmersiveMissionCabin from '@/components/cockpit/ImmersiveMissionCabin.vue'
+import LearningPathMission from '@/components/cockpit/LearningPathMission.vue'
+import { isMissionCabinId, type MissionCabinId } from '@/components/cockpit/missionCabinData'
 
 const router = useRouter()
 const activePanel = ref<string | null>(null)
 const panelSide = ref<'left' | 'right'>('right')
+const activeMissionPanel = computed<MissionCabinId | null>(() => {
+  return activePanel.value && isMissionCabinId(activePanel.value) ? activePanel.value : null
+})
 
-const hotspots = [
-  { id: 'match',        x: 7,   y: 9,   w: 26,   h: 21.5, side: 'left' as const },
-  { id: 'radar',        x: 3.5, y: 30,  w: 28.5, h: 30.5, side: 'left' as const },
-  { id: 'jobs',         x: 1.5, y: 60,  w: 20,   h: 33,   side: 'left' as const },
-  { id: 'ai-suggest',   x: 65,  y: 9,   w: 28,   h: 21,   side: 'right' as const },
-  { id: 'weekly-plan',  x: 67,  y: 30.5,w: 31,   h: 26,   side: 'right' as const },
-  { id: 'interview',    x: 72,  y: 55,  w: 27,   h: 22,   side: 'right' as const },
-  { id: 'timeline',     x: 72,  y: 76.5,w: 27,   h: 21,   side: 'right' as const },
-  { id: 'path',         x: 20.5,y: 62,  w: 53,   h: 29.5, side: 'left' as const },
-  { id: 'avatar',       x: 39,  y: 12,  w: 22,   h: 48,   side: 'left' as const },
+const panelSides = [
+  { id: 'radar', side: 'left' as const },
+  { id: 'path', side: 'left' as const },
+  { id: 'avatar', side: 'right' as const },
+  { id: 'resource-library', side: 'left' as const },
+  { id: 'ai-suggest', side: 'right' as const },
+  { id: 'weekly-plan', side: 'right' as const },
+  { id: 'timeline', side: 'right' as const },
 ]
 
 const sceneClass = computed(() => {
   if (!activePanel.value) return ''
-  return `scene-slide-${panelSide.value === 'left' ? 'right' : 'left'}`
+  return 'scene-immersive'
 })
 
 function openPanel(id: string) {
-  if (activePanel.value) return
-  const spot = hotspots.find(s => s.id === id)
+  if (activePanel.value || !isMissionCabinId(id)) return
+  const spot = panelSides.find(s => s.id === id)
   panelSide.value = spot?.side || 'right'
   activePanel.value = id
 }
 
-function spotStyle(spot: typeof hotspots[0]) {
-  return { left: spot.x + '%', top: spot.y + '%', width: spot.w + '%', height: spot.h + '%' }
-}
-
 function closePanel() { activePanel.value = null }
+
+function handlePrimaryAction(payload: { id: MissionCabinId; route: string }) {
+  if (payload.route === router.currentRoute.value.path) {
+    closePanel()
+    return
+  }
+  router.push(payload.route)
+}
 
 function goToOverview() {
   router.push('/overview')
@@ -695,6 +742,7 @@ const resources = [
   { type: '项目', title: 'ChatGLM3+RAG搭建企业知识库', source: 'GitHub - THUDM', rating: 4.7, color: '#a855f7' },
   { type: '论文', title: 'Retrieval-Augmented Generation', source: 'NeurIPS 2020', rating: 4.6, color: '#ffb65c' },
 ]
+const aiResources = resources.slice(0, 2)
 
 const weekStats = [
   { label: '学习时长', value: '12.5h', icon: '⏱', color: '#4ed8ff' },
@@ -883,6 +931,16 @@ for (let r = 0; r < 7; r++) {
   opacity: 0.5;
 }
 
+.scene-immersive {
+  transform: scale(1.045);
+  opacity: 0.48;
+  filter: blur(5px) saturate(0.82) brightness(0.7);
+}
+
+.panel-open .cockpit-scene {
+  pointer-events: none;
+}
+
 .back-hint {
   position: fixed;
   top: 24px;
@@ -925,15 +983,19 @@ for (let r = 0; r < 7; r++) {
 .detail-panel {
   position: absolute;
   top: 0;
-  width: 620px;
-  max-width: 48vw;
+  width: 680px;
+  max-width: 52vw;
   height: 100%;
   z-index: 30;
-  background: linear-gradient(180deg, rgba(6, 14, 38, 0.97) 0%, rgba(8, 20, 52, 0.98) 50%, rgba(5, 12, 35, 0.97) 100%);
+  background:
+    radial-gradient(130% 50% at 20% -12%, rgba(78, 216, 255, 0.07), transparent 55%),
+    radial-gradient(90% 40% at 90% -20%, rgba(143, 124, 255, 0.05), transparent 60%),
+    linear-gradient(180deg, rgba(9, 24, 58, 0.96) 0%, rgba(11, 30, 72, 0.97) 46%, rgba(7, 19, 48, 0.97) 100%);
   overflow-y: auto;
-  backdrop-filter: blur(40px);
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 60px rgba(0,0,0,0.5);
+  backdrop-filter: blur(44px) saturate(1.22);
+  -webkit-backdrop-filter: blur(44px) saturate(1.22);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 0 70px rgba(2, 8, 26, 0.55);
 }
 .detail-panel::-webkit-scrollbar { width: 6px; }
 .detail-panel::-webkit-scrollbar-track { background: transparent; }
@@ -941,15 +1003,31 @@ for (let r = 0; r < 7; r++) {
 
 .detail-panel.from-right {
   right: 0;
-  border-left: 1px solid rgba(78, 216, 255, 0.2);
+  border-left: 1px solid rgba(105, 200, 255, 0.22);
   box-shadow: -30px 0 80px rgba(0, 0, 0, 0.6), inset 1px 0 0 rgba(78, 216, 255, 0.08);
-  transform: translateX(100%);
+  transform: translateX(calc(100% + 20px));
+}
+.detail-panel.from-right::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 3%, rgba(78, 216, 255, 0.5) 28%, rgba(143, 124, 255, 0.28) 62%, transparent 97%);
+  pointer-events: none;
 }
 .detail-panel.from-left {
   left: 0;
-  border-right: 1px solid rgba(78, 216, 255, 0.2);
+  border-right: 1px solid rgba(105, 200, 255, 0.22);
   box-shadow: 30px 0 80px rgba(0, 0, 0, 0.6), inset -1px 0 0 rgba(78, 216, 255, 0.08);
-  transform: translateX(-100%);
+  transform: translateX(calc(-100% - 20px));
+}
+.detail-panel.from-left::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 3%, rgba(78, 216, 255, 0.5) 28%, rgba(143, 124, 255, 0.28) 62%, transparent 97%);
+  pointer-events: none;
 }
 .detail-panel.show { transform: translateX(0) !important; }
 
@@ -963,7 +1041,7 @@ for (let r = 0; r < 7; r++) {
   width: 100%;
   padding: 20px 32px;
   margin: 0;
-  background: linear-gradient(180deg, rgba(6,14,38,0.98) 0%, rgba(6,14,38,0.9) 80%, transparent 100%);
+  background: linear-gradient(180deg, rgba(9, 24, 58, 0.98) 0%, rgba(9, 24, 58, 0.92) 80%, transparent 100%);
   border: none;
   border-bottom: 1px solid rgba(78,216,255,0.1);
   color: #4ed8ff;
@@ -991,10 +1069,10 @@ for (let r = 0; r < 7; r++) {
   min-height: 100%;
 }
 
-.detail-page { animation: fadeInUp 0.6s ease; }
+.detail-page { animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(26px); filter: blur(10px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
 /* ============ 页面头部 ============ */
@@ -1021,11 +1099,12 @@ for (let r = 0; r < 7; r++) {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.header-icon svg { width: 24px; height: 24px; }
+.header-icon svg { width: 24px; height: 24px; filter: drop-shadow(0 0 6px rgba(78, 216, 255, 0.35)); }
 .header-titles { flex: 1; }
 .header-titles h2 {
-  margin: 0; font-size: 24px; font-weight: 700; color: #fff;
-  letter-spacing: 0.5px;
+  margin: 0; font-size: 25px; font-weight: 750; letter-spacing: 0.4px;
+  background: linear-gradient(135deg, #ffffff 40%, #a9dcff 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
 .header-titles p {
   margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.45);
@@ -1045,9 +1124,10 @@ for (let r = 0; r < 7; r++) {
   display: flex; align-items: center; gap: 10px;
 }
 .st-line {
-  width: 4px; height: 16px;
-  background: linear-gradient(180deg, #4ed8ff, #06b6d4);
+  width: 3px; height: 15px;
+  background: linear-gradient(180deg, #4ed8ff, #8f7cff);
   border-radius: 2px;
+  box-shadow: 0 0 10px rgba(78, 216, 255, 0.5);
 }
 
 /* ============ 匹配度页 ============ */
@@ -1077,11 +1157,17 @@ for (let r = 0; r < 7; r++) {
 .stats-grid-4 { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .tech-stat-card {
   padding: 14px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(78,216,255,0.15);
-  border-radius: 12px;
+  background: linear-gradient(160deg, rgba(78,216,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(78,216,255,0.16);
+  border-radius: 13px;
   position: relative;
   overflow: hidden;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+.tech-stat-card:hover {
+  border-color: rgba(78, 216, 255, 0.38);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(4, 16, 44, 0.5);
 }
 .tech-stat-card::before {
   content: '';
@@ -1109,11 +1195,12 @@ for (let r = 0; r < 7; r++) {
   display: flex; align-items: center; gap: 14px;
   padding: 16px;
   background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 13px;
   border-left: 3px solid;
-  transition: all 0.3s;
+  transition: all 0.28s;
 }
+.gap-card:hover { transform: translateX(4px); border-color: rgba(255,255,255,0.12); box-shadow: 0 8px 24px rgba(4, 16, 44, 0.45); }
 .gap-card.level-high { border-left-color: #ff6b6b; background: linear-gradient(90deg, rgba(255,107,107,0.06), transparent); }
 .gap-card.level-medium { border-left-color: #ffb65c; background: linear-gradient(90deg, rgba(255,182,92,0.06), transparent); }
 .gc-rank {
@@ -1387,6 +1474,31 @@ for (let r = 0; r < 7; r++) {
 .ls-meta { display: flex; gap: 16px; margin-top: 6px; }
 .ls-time, .ls-diff { font-size: 11px; color: rgba(255,255,255,0.35); }
 
+.page-resource-library { display: grid; gap: 18px; }
+.resource-library__icon { color: #8ae8ff; background: linear-gradient(135deg, rgba(63, 211, 255, .2), rgba(44, 106, 196, .12)); border-color: rgba(106, 224, 255, .6); }
+.resource-library__icon svg { width: 25px; height: 25px; }
+.resource-library__count { margin-left: auto; padding: 6px 9px; border: 1px solid rgba(101, 221, 255, .34); border-radius: 2px; color: #7ee9ff; font: 700 10px/1 Bahnschrift, sans-serif; letter-spacing: .11em; }
+.resource-library__brief { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 22px 24px; border: 1px solid rgba(109, 226, 255, .2); border-radius: 14px; background: linear-gradient(120deg, rgba(7, 54, 86, .76), rgba(13, 31, 59, .54) 64%, rgba(27, 89, 118, .22)); box-shadow: inset 0 1px 0 rgba(216, 249, 255, .08); }
+.resource-library__brief span { color: #7de5fb; font: 700 10px/1 Bahnschrift, sans-serif; letter-spacing: .14em; }
+.resource-library__brief h3 { margin: 8px 0 7px; color: #f3fcff; font: 700 23px/1.1 "Microsoft YaHei", sans-serif; }
+.resource-library__brief p { max-width: 420px; margin: 0; color: rgba(217, 244, 255, .68); font-size: 13px; line-height: 1.7; }
+.resource-library__meter { display: grid; min-width: 104px; min-height: 104px; place-items: center; align-content: center; border: 1px solid rgba(117, 230, 255, .65); border-radius: 50%; background: radial-gradient(circle, rgba(54, 197, 246, .28), rgba(14, 72, 104, .15) 57%, transparent 58%); box-shadow: 0 0 22px rgba(49, 207, 255, .18); }
+.resource-library__meter strong { color: #e1fbff; font: 800 26px/1 Bahnschrift, sans-serif; }
+.resource-library__meter small { margin-top: 5px; color: #83dff4; font: 700 8px/1 Bahnschrift, sans-serif; letter-spacing: .1em; }
+.resource-library__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+.resource-library__card { position: relative; min-height: 142px; padding: 18px 18px 15px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--resource-color) 34%, transparent); border-radius: 12px; background: linear-gradient(135deg, color-mix(in srgb, var(--resource-color) 12%, rgba(15, 30, 56, .92)), rgba(9, 22, 43, .88)); transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease; }
+.resource-library__card::before { position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--resource-color); content: ''; }
+.resource-library__card:hover { transform: translateY(-3px); border-color: var(--resource-color); box-shadow: 0 12px 28px color-mix(in srgb, var(--resource-color) 17%, transparent); }
+.resource-library__index { position: absolute; top: 13px; right: 16px; color: rgba(209, 242, 250, .31); font: 800 19px/1 Bahnschrift, sans-serif; }
+.resource-library__type { display: inline-block; padding: 3px 7px; border: 1px solid color-mix(in srgb, var(--resource-color) 62%, transparent); color: var(--resource-color); font: 700 10px/1 "Microsoft YaHei", sans-serif; }
+.resource-library__card h3 { max-width: 82%; margin: 11px 0 5px; color: #f1fbff; font: 700 15px/1.35 "Microsoft YaHei", sans-serif; }
+.resource-library__card p { margin: 0; color: rgba(206, 236, 247, .54); font-size: 11px; }
+.resource-library__card footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; color: #ffcc70; font-size: 12px; }
+.resource-library__card button, .resource-library__actions button { border: 0; background: none; color: #95e9ff; font: 600 11px/1 "Microsoft YaHei", sans-serif; cursor: pointer; }
+.resource-library__card button:hover, .resource-library__actions button:hover { color: #fff; }
+.resource-library__actions { display: flex; justify-content: flex-end; gap: 9px; }
+.resource-library__actions button { padding: 10px 14px; border: 1px solid rgba(100, 225, 255, .6); border-radius: 5px; background: rgba(35, 170, 218, .18); }
+.resource-library__actions button.ghost { border-color: rgba(213, 242, 255, .2); background: rgba(255, 255, 255, .025); color: rgba(221, 246, 255, .68); }
 .resource-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .res-card {
   padding: 14px;
