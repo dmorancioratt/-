@@ -497,7 +497,7 @@ function selectFruit(fruit: THREE.Object3D, scene: THREE.Scene) {
   }, 100)
 }
 
-function setupInteraction(camera: THREE.Camera, scene: THREE.Scene, controls: any) {
+function setupInteraction(camera: THREE.PerspectiveCamera, scene: THREE.Scene, controls: any) {
   if (!canvasRef.value) return
   raycaster = new THREE.Raycaster()
   mouse = new THREE.Vector2()
@@ -671,7 +671,7 @@ function updateConnectorPosition(camera: THREE.Camera) {
   svg.appendChild(circle)
 }
 
-function onResize(camera: THREE.Camera, r: THREE.WebGLRenderer) {
+function onResize(camera: THREE.PerspectiveCamera, r: THREE.WebGLRenderer) {
   if (!canvasRef.value || !containerRef.value) return
   const w = containerRef.value.clientWidth
   const h = containerRef.value.clientHeight

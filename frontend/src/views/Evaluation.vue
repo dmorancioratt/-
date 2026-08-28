@@ -2,6 +2,20 @@
   <div class="page eval-page">
     <PageHeader title="测试评估" desc="展示 JD 解析、简历解析、匹配分析、测试用例数量和可复现评测结果" />
 
+    <el-alert
+      v-if="metricsError"
+      type="warning"
+      :title="`评测指标加载失败: ${metricsError}`"
+      description="本页已以降级模式展示。请检查后端 /api/evaluation/metrics 接口,或点击下方按钮重试。"
+      show-icon
+      :closable="false"
+      class="metrics-alert"
+    >
+      <template #default>
+        <el-button size="small" type="primary" @click="loadMetrics">重新加载指标</el-button>
+      </template>
+    </el-alert>
+
     <div class="metric-grid">
       <div class="metric-card"><div class="metric-label">JD 抽取 F1</div><div class="metric-value">{{ metrics.jd_parse_accuracy }}%</div><small>{{ metrics.benchmark_samples?.jd_extraction || 0 }} 个标注样本</small></div>
       <div class="metric-card"><div class="metric-label">简历抽取 F1</div><div class="metric-value">{{ metrics.resume_parse_accuracy }}%</div><small>{{ metrics.benchmark_samples?.resume_extraction || 0 }} 个标注样本</small></div>
@@ -96,6 +110,7 @@ import { loadPageState, savePageState } from '@/utils/pageState'
 const metrics = ref<any>({})
 const report = ref<any>({ command: '', results: [] })
 const reportLoading = ref(false)
+const metricsError = ref<string | null>(null)
 
 const TASK_COLORS: Record<string, string> = {
   jd_extraction: '#2563eb',
@@ -152,13 +167,26 @@ async function loadReport() {
   try {
     report.value = await api.evaluationReport()
     savePageState('evaluation-report', { report: report.value })
+  } catch (error: any) {
+    report.value = { command: '', results: [] }
+    if (!metricsError.value) metricsError.value = error?.response?.data?.detail || error?.message || '可复现评测报告加载失败'
   } finally {
     reportLoading.value = false
   }
 }
 
+async function loadMetrics() {
+  metricsError.value = null
+  try {
+    metrics.value = await api.evaluation()
+  } catch (error: any) {
+    metricsError.value = error?.response?.data?.detail || error?.message || '评测指标加载失败'
+    metrics.value = {}
+  }
+}
+
 onMounted(async () => {
-  metrics.value = await api.evaluation()
+  await loadMetrics()
   const cached = loadPageState<{ report?: any }>('evaluation-report')
   if (cached?.report?.results?.length) report.value = cached.report
   else await loadReport()

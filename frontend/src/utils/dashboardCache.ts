@@ -4,7 +4,7 @@ export type DashboardSnapshot<T> = {
   schemaVersion: number
 }
 
-const DASHBOARD_SCHEMA_VERSION = 4
+const DASHBOARD_SCHEMA_VERSION = 5
 
 export function readDashboardSnapshot<T>(key: string): DashboardSnapshot<T> | null {
   try {

@@ -50,17 +50,17 @@
       </defs>
 
       <g class="orbit-rings">
-        <circle cx="0" cy="0" :r="ORBIT_RADII[0]-2" fill="none" stroke="rgba(78,216,255,0.04)" stroke-width="6"/>
-        <circle cx="0" cy="0" :r="ORBIT_RADII[0]" fill="none" stroke="rgba(135,169,220,0.13)" stroke-width="1"/>
-        <circle cx="0" cy="0" :r="ORBIT_RADII[0]+2" fill="none" stroke="rgba(78,216,255,0.06)" stroke-width="0.5"/>
-        <circle cx="0" cy="0" :r="ORBIT_RADII[1]" fill="none" stroke="rgba(135,169,220,0.10)" stroke-width="1" stroke-dasharray="4 6"/>
-        <circle cx="0" cy="0" :r="ORBIT_RADII[2]" fill="none" stroke="rgba(135,169,220,0.07)" stroke-width="0.8" stroke-dasharray="2 4"/>
+        <circle cx="0" cy="0" :r="ORBIT_RADII[1]-2" fill="none" stroke="rgba(78,216,255,0.04)" stroke-width="6"/>
+        <circle cx="0" cy="0" :r="ORBIT_RADII[1]" fill="none" stroke="rgba(135,169,220,0.13)" stroke-width="1"/>
+        <circle cx="0" cy="0" :r="ORBIT_RADII[1]+2" fill="none" stroke="rgba(78,216,255,0.06)" stroke-width="0.5"/>
+        <circle cx="0" cy="0" :r="ORBIT_RADII[2]" fill="none" stroke="rgba(135,169,220,0.10)" stroke-width="1" stroke-dasharray="4 6"/>
+        <circle cx="0" cy="0" :r="ORBIT_RADII[3]" fill="none" stroke="rgba(135,169,220,0.07)" stroke-width="0.8" stroke-dasharray="2 4"/>
       </g>
 
       <g class="orbit-labels">
-        <text :x="ORBIT_RADII[0] + 10" y="-8" fill="rgba(78,216,255,0.45)" font-size="11" font-weight="500">核心技能</text>
-        <text :x="ORBIT_RADII[1] + 10" y="-8" fill="rgba(143,124,255,0.35)" font-size="11" font-weight="500">工具 &amp; 项目</text>
-        <text :x="ORBIT_RADII[2] + 10" y="-8" fill="rgba(255,182,92,0.3)" font-size="11" font-weight="500">通用能力</text>
+        <text :x="ORBIT_RADII[1] + 10" y="-8" fill="rgba(78,216,255,0.45)" font-size="11" font-weight="500">核心技能</text>
+        <text :x="ORBIT_RADII[2] + 10" y="-8" fill="rgba(143,124,255,0.35)" font-size="11" font-weight="500">工具 &amp; 项目</text>
+        <text :x="ORBIT_RADII[3] + 10" y="-8" fill="rgba(255,182,92,0.3)" font-size="11" font-weight="500">通用能力</text>
       </g>
 
       <g class="core-links">

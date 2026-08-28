@@ -1528,32 +1528,65 @@ def _apply_review_decision(db: Session, task: ReviewTask, decision: str) -> str:
 def evaluation_metrics(db: Session = Depends(get_db)):
     from app.evaluation.run_eval import run as run_evaluation
 
-    results = {item.task: item for item in run_evaluation()}
-    jd_result = results["jd_extraction"]
-    resume_result = results["resume_extraction"]
-    match_result = results["job_match"]
-    coverage = _coverage_summary()
-    total = db.scalar(select(func.count(TestCase.id))) or 0
-    passed = db.scalar(select(func.count(TestCase.id)).where(TestCase.passed.is_(True))) or 0
-    return {
-        "jd_parse_accuracy": round((jd_result.f1 or 0) * 100, 2),
-        "resume_parse_accuracy": round((resume_result.f1 or 0) * 100, 2),
-        "match_accuracy": round((match_result.accuracy or 0) * 100, 2),
-        "benchmark_sample_count": sum(item.samples for item in results.values()),
-        "benchmark_samples": {key: item.samples for key, item in results.items()},
-        "test_case_count": total,
-        "business_case_pass_rate": round(passed / total * 100, 1) if total else 0,
-        "unit_test_coverage": coverage["coverage"],
-        "unit_test_coverage_note": coverage["note"],
-        "unit_test_coverage_generated_at": coverage["generated_at"],
-        "unit_test_coverage_command": coverage["command"],
+    empty = {
+        "jd_parse_accuracy": 0,
+        "resume_parse_accuracy": 0,
+        "match_accuracy": 0,
+        "benchmark_sample_count": 0,
+        "benchmark_samples": {},
+        "test_case_count": 0,
+        "business_case_pass_rate": 0,
+        "unit_test_coverage": None,
+        "unit_test_coverage_note": "尚未生成覆盖率报告，请先运行 python -m app.evaluation.run_coverage",
+        "unit_test_coverage_generated_at": None,
+        "unit_test_coverage_command": "python -m app.evaluation.run_coverage",
         "competition_thresholds": {
             "accuracy_target": 90,
             "jd_sample_target": 100,
             "unit_test_coverage_target": 60,
         },
-        "cases": [to_dict(row) for row in db.scalars(select(TestCase).limit(12)).all()],
+        "cases": [],
+        "evaluation_error": None,
     }
+
+    try:
+        results = {item.task: item for item in run_evaluation()}
+        jd_result = results["jd_extraction"]
+        resume_result = results["resume_extraction"]
+        match_result = results["job_match"]
+        empty.update({
+            "jd_parse_accuracy": round((jd_result.f1 or 0) * 100, 2),
+            "resume_parse_accuracy": round((resume_result.f1 or 0) * 100, 2),
+            "match_accuracy": round((match_result.accuracy or 0) * 100, 2),
+            "benchmark_sample_count": sum(item.samples for item in results.values()),
+            "benchmark_samples": {key: item.samples for key, item in results.items()},
+        })
+    except Exception as exc:  # pragma: no cover - degrade to zero metrics on failure
+        empty["evaluation_error"] = f"评测脚本执行失败: {exc}"
+
+    try:
+        coverage = _coverage_summary()
+        empty.update({
+            "unit_test_coverage": coverage["coverage"],
+            "unit_test_coverage_note": coverage["note"],
+            "unit_test_coverage_generated_at": coverage["generated_at"],
+            "unit_test_coverage_command": coverage["command"],
+        })
+    except Exception as exc:  # pragma: no cover
+        empty["unit_test_coverage_note"] = f"覆盖率读取失败: {exc}"
+
+    try:
+        total = db.scalar(select(func.count(TestCase.id))) or 0
+        passed = db.scalar(select(func.count(TestCase.id)).where(TestCase.passed.is_(True))) or 0
+        empty.update({
+            "test_case_count": total,
+            "business_case_pass_rate": round(passed / total * 100, 1) if total else 0,
+            "cases": [to_dict(row) for row in db.scalars(select(TestCase).limit(12)).all()],
+        })
+    except Exception as exc:  # pragma: no cover
+        empty["evaluation_error"] = (empty.get("evaluation_error") or "") + f"; 测试用例查询失败: {exc}"
+
+    return empty
 
 
 @router.get("/resumes")

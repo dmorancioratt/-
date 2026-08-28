@@ -591,10 +591,20 @@ def evaluation_report():
     """可复现评测报告：现场运行 run_eval，返回三条能力的指标与错误案例。"""
     from app.evaluation.run_eval import run as run_evaluation
 
-    results = run_evaluation()
-    return {
-        "command": "python -m app.evaluation.run_eval",
-        "taskCount": len(results),
-        "totalSamples": sum(r.samples for r in results),
-        "results": [asdict(r) for r in results],
-    }
+    try:
+        results = run_evaluation()
+        return {
+            "command": "python -m app.evaluation.run_eval",
+            "taskCount": len(results),
+            "totalSamples": sum(r.samples for r in results),
+            "results": [asdict(r) for r in results],
+            "error": None,
+        }
+    except Exception as exc:  # pragma: no cover - degrade to empty report
+        return {
+            "command": "python -m app.evaluation.run_eval",
+            "taskCount": 0,
+            "totalSamples": 0,
+            "results": [],
+            "error": f"评测脚本执行失败: {exc}",
+        }
