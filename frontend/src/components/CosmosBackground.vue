@@ -185,10 +185,10 @@ function drawBackground() {
   if (!ctx) return
   
   const bgGrad = ctx.createLinearGradient(0, 0, 0, height)
-  bgGrad.addColorStop(0, '#072a2c')
-  bgGrad.addColorStop(0.3, '#0a2e42')
-  bgGrad.addColorStop(0.7, '#092b3a')
-  bgGrad.addColorStop(1, '#062320')
+  bgGrad.addColorStop(0, '#020814')
+  bgGrad.addColorStop(0.3, '#041231')
+  bgGrad.addColorStop(0.7, '#030d25')
+  bgGrad.addColorStop(1, '#01050d')
   ctx.fillStyle = bgGrad
   ctx.fillRect(0, 0, width, height)
 
