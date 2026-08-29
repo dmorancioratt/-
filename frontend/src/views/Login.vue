@@ -7,149 +7,166 @@
     <div class="particle-field">
       <i v-for="item in 54" :key="item" :style="particleStyle(item)"></i>
     </div>
+    <span class="meteor meteor-a" aria-hidden="true"></span>
+    <span class="meteor meteor-b" aria-hidden="true"></span>
+    <span class="meteor meteor-c" aria-hidden="true"></span>
 
     <main class="login-stage">
-      <div class="orbit-shell" aria-hidden="true">
-        <span class="orbit-ring ring-outer"></span>
-        <span class="orbit-ring ring-middle"></span>
-        <span class="orbit-ring ring-dashed"></span>
-        <span class="orbit-ring ring-inner"></span>
-        <span class="orbit-runner runner-a"><i></i></span>
-        <span class="orbit-runner runner-b"><i></i></span>
-        <span class="orbit-runner runner-c"><i></i></span>
-        <span class="orbit-dot dot-a"></span>
-        <span class="orbit-dot dot-b"></span>
-        <span class="orbit-dot dot-c"></span>
-        <span class="orbit-cross cross-a"></span>
-        <span class="orbit-cross cross-b"></span>
-      </div>
-
-      <section class="auth-card" :class="{ 'auth-register': mode === 'register', 'auth-login': mode === 'login' }" :style="cardTiltStyle">
-        <span class="card-halo" aria-hidden="true"></span>
-        <header class="auth-head">
-          <h1>{{ mode === 'login' ? '欢迎登录' : '创建账号' }}</h1>
-          <p>{{ mode === 'login' ? '请使用您的账号登录系统' : '填写以下信息完成注册' }}</p>
-        </header>
-
-        <div class="mode-switch" :class="{ 'is-register': mode === 'register' }" role="tablist" aria-label="登录方式切换">
-          <span class="switch-thumb" aria-hidden="true"></span>
-          <button type="button" role="tab" :aria-selected="mode === 'login'" :class="{ active: mode === 'login' }" @click="mode = 'login'">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-              <polyline points="10 17 15 12 10 7" />
-              <line x1="15" y1="12" x2="3" y2="12" />
-            </svg>
-            <span>登录</span>
-          </button>
-          <button type="button" role="tab" :aria-selected="mode === 'register'" :class="{ active: mode === 'register' }" @click="mode = 'register'">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="8.5" cy="7" r="4" />
-              <line x1="20" y1="8" x2="20" y2="14" />
-              <line x1="23" y1="11" x2="17" y2="11" />
-            </svg>
-            <span>注册</span>
-          </button>
+      <div class="card-zone">
+        <div class="orbit-shell" aria-hidden="true">
+          <span class="orbit-ring ring-outer"></span>
+          <span class="orbit-ring ring-middle"></span>
+          <span class="orbit-ring ring-dashed"></span>
+          <span class="orbit-ring ring-inner"></span>
+          <span class="orbit-runner runner-a"><i></i></span>
+          <span class="orbit-runner runner-b"><i></i></span>
+          <span class="orbit-runner runner-c"><i></i></span>
+          <span class="orbit-dot dot-a"></span>
+          <span class="orbit-dot dot-b"></span>
+          <span class="orbit-dot dot-c"></span>
+          <span class="orbit-cross cross-a"></span>
+          <span class="orbit-cross cross-b"></span>
         </div>
 
-        <transition name="panel-fade" mode="out-in">
-          <div v-if="mode === 'login'" key="login" class="auth-form">
-            <div class="input-wrap">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+        <section ref="cardEl" class="auth-card" :class="{ 'auth-register': mode === 'register', 'auth-login': mode === 'login' }" :style="cardTiltStyle">
+          <span class="card-halo" aria-hidden="true"></span>
+          <span class="fx-grid" aria-hidden="true"></span>
+          <span class="fx-nebula" aria-hidden="true"></span>
+          <span class="fx-pointer" aria-hidden="true"></span>
+          <span class="fx-sweep" aria-hidden="true"></span>
+          <span class="fx-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="fx-head" aria-hidden="true"></span>
+          <span class="fx-head-b" aria-hidden="true"></span>
+
+          <header class="auth-head">
+            <div class="brand-chip">
+              <img src="/logo.png" alt="" />
+              <span>数融智联</span>
+            </div>
+            <h1>{{ mode === 'login' ? '欢迎登录' : '创建账号' }}</h1>
+            <p>{{ mode === 'login' ? '请使用您的账号登录系统' : '填写以下信息完成注册' }}</p>
+          </header>
+
+          <div class="mode-switch" :class="{ 'is-register': mode === 'register' }" role="tablist" aria-label="登录方式切换">
+            <span class="switch-thumb" aria-hidden="true"></span>
+            <button type="button" role="tab" :aria-selected="mode === 'login'" :class="{ active: mode === 'login' }" @click="mode = 'login'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
               </svg>
-              <input v-model="loginForm.username" type="text" placeholder="用户名" class="form-input" />
-            </div>
-            <div class="input-wrap">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              <input v-model="loginForm.password" :type="showPwd ? 'text' : 'password'" placeholder="密码" class="form-input" @keyup.enter="submitLogin" />
-              <button type="button" class="eye-toggle" @click="showPwd = !showPwd">
-                <svg v-if="!showPwd" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                  <line x1="1" y1="1" x2="23" y2="23"/>
-                </svg>
-              </button>
-            </div>
-            <div class="form-options">
-              <label class="remember-me">
-                <input type="checkbox" v-model="rememberMe" />
-                <span class="check-box"></span>
-                <span>记住我</span>
-              </label>
-              <a href="#" class="forgot-link">忘记密码？</a>
-            </div>
-            <button type="button" class="submit-button" :disabled="loading" @click="submitLogin">
-              <span>{{ loading ? '登录中...' : '登　录' }}</span>
+              <span>登录</span>
             </button>
-            <div class="alt-login">
-              <span class="alt-divider"><i>其他登录方式</i></span>
-              <div class="alt-icons">
-                <button type="button" title="账号登录" @click="otherLogin('账号登录')">
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                    <line x1="8" y1="21" x2="16" y2="21"/>
-                    <line x1="12" y1="17" x2="12" y2="21"/>
+            <button type="button" role="tab" :aria-selected="mode === 'register'" :class="{ active: mode === 'register' }" @click="mode = 'register'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="8.5" cy="7" r="4" />
+                <line x1="20" y1="8" x2="20" y2="14" />
+                <line x1="23" y1="11" x2="17" y2="11" />
+              </svg>
+              <span>注册</span>
+            </button>
+          </div>
+
+          <transition name="panel-fade" mode="out-in">
+            <div v-if="mode === 'login'" key="login" class="auth-form">
+              <div class="input-wrap">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input v-model="loginForm.username" type="text" placeholder="用户名" class="form-input" />
+              </div>
+              <div class="input-wrap">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <input v-model="loginForm.password" :type="showPwd ? 'text' : 'password'" placeholder="密码" class="form-input" @keyup.enter="submitLogin" />
+                <button type="button" class="eye-toggle" @click="showPwd = !showPwd">
+                  <svg v-if="!showPwd" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
                   </svg>
-                </button>
-                <button type="button" title="安全密钥" @click="otherLogin('安全密钥')">
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    <path d="M9 12l2 2 4-4"/>
-                  </svg>
-                </button>
-                <button type="button" title="消息登录" @click="otherLogin('消息登录')">
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                  <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
                   </svg>
                 </button>
               </div>
+              <div class="form-options">
+                <label class="remember-me">
+                  <input type="checkbox" v-model="rememberMe" />
+                  <span class="check-box"></span>
+                  <span>记住我</span>
+                </label>
+                <a href="#" class="forgot-link">忘记密码？</a>
+              </div>
+              <button type="button" class="submit-button" :disabled="loading" @click="submitLogin">
+                <span>{{ loading ? '登录中...' : '登　录' }}</span>
+              </button>
+              <div class="alt-login">
+                <span class="alt-divider"><i>其他登录方式</i></span>
+                <div class="alt-icons">
+                  <button type="button" title="账号登录" @click="otherLogin('账号登录')">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                      <line x1="8" y1="21" x2="16" y2="21"/>
+                      <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                  </button>
+                  <button type="button" title="安全密钥" @click="otherLogin('安全密钥')">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      <path d="M9 12l2 2 4-4"/>
+                    </svg>
+                  </button>
+                  <button type="button" title="消息登录" @click="otherLogin('消息登录')">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="role-tip">支持学生 · 求职者 · HR 多角色登录</div>
             </div>
-            <div class="role-tip">支持学生 · 求职者 · HR 多角色登录</div>
-          </div>
 
-          <div v-else key="register" class="auth-form">
-            <div class="input-wrap">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              <input v-model="registerForm.username" type="text" placeholder="用户名" class="form-input" />
+            <div v-else key="register" class="auth-form">
+              <div class="input-wrap">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input v-model="registerForm.username" type="text" placeholder="用户名" class="form-input" />
+              </div>
+              <div class="input-wrap">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                <input v-model="registerForm.email" type="email" placeholder="邮箱" class="form-input" />
+              </div>
+              <div class="input-wrap">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <input v-model="registerForm.password" type="password" placeholder="设置密码" class="form-input" />
+              </div>
+              <div class="input-wrap">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <path d="M9 12l2 2 4-4"/>
+                </svg>
+                <input v-model="registerForm.confirmPassword" type="password" placeholder="确认密码" class="form-input" @keyup.enter="submitRegister" />
+              </div>
+              <button type="button" class="submit-button" :disabled="loading" @click="submitRegister">
+                <span>{{ loading ? '注册中...' : '注　册' }}</span>
+              </button>
             </div>
-            <div class="input-wrap">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-              </svg>
-              <input v-model="registerForm.email" type="email" placeholder="邮箱" class="form-input" />
-            </div>
-            <div class="input-wrap">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              <input v-model="registerForm.password" type="password" placeholder="设置密码" class="form-input" />
-            </div>
-            <div class="input-wrap">
-              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <path d="M9 12l2 2 4-4"/>
-              </svg>
-              <input v-model="registerForm.confirmPassword" type="password" placeholder="确认密码" class="form-input" @keyup.enter="submitRegister" />
-            </div>
-            <button type="button" class="submit-button" :disabled="loading" @click="submitRegister">
-              <span>{{ loading ? '注册中...' : '注　册' }}</span>
-            </button>
-          </div>
-        </transition>
-      </section>
+          </transition>
+        </section>
+      </div>
     </main>
   </div>
 </template>
@@ -166,6 +183,8 @@ const showPwd = ref(false)
 const rememberMe = ref(false)
 const cardTiltX = ref(0)
 const cardTiltY = ref(0)
+const cardEl = ref<HTMLElement | null>(null)
+const pointerGlow = reactive({ x: 0, y: 0, o: 0 })
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
@@ -179,7 +198,10 @@ const registerForm = reactive({
 })
 
 const cardTiltStyle = computed(() => ({
-  transform: `perspective(1100px) rotateX(${cardTiltX.value}deg) rotateY(${cardTiltY.value}deg)`
+  transform: `perspective(1100px) rotateX(${cardTiltX.value}deg) rotateY(${cardTiltY.value}deg)`,
+  '--mx': `${pointerGlow.x}px`,
+  '--my': `${pointerGlow.y}px`,
+  '--go': pointerGlow.o
 }))
 
 function particleStyle(i: number) {
@@ -201,15 +223,23 @@ function particleStyle(i: number) {
 }
 
 function handlePointerMove(e: MouseEvent) {
-  const x = (e.clientX / window.innerWidth - 0.5) * 4
-  const y = (e.clientY / window.innerHeight - 0.5) * -4
+  const x = (e.clientX / window.innerWidth - 0.5) * 5
+  const y = (e.clientY / window.innerHeight - 0.5) * -5
   cardTiltX.value = y
   cardTiltY.value = x
+  const el = cardEl.value
+  if (el) {
+    const rect = el.getBoundingClientRect()
+    pointerGlow.x = e.clientX - rect.left
+    pointerGlow.y = e.clientY - rect.top
+    pointerGlow.o = 1
+  }
 }
 
 function resetTilt() {
   cardTiltX.value = 0
   cardTiltY.value = 0
+  pointerGlow.o = 0
 }
 
 function otherLogin(name: string) {
@@ -291,8 +321,8 @@ async function submitRegister() {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(120deg, rgba(2, 8, 24, 0.18) 0%, rgba(3, 12, 34, 0.22) 45%, rgba(2, 10, 28, 0.42) 100%),
-    radial-gradient(circle at 28% 42%, transparent 0%, rgba(1, 6, 20, 0.3) 78%);
+    linear-gradient(120deg, rgba(2, 8, 24, 0.14) 0%, rgba(3, 12, 34, 0.18) 45%, rgba(2, 10, 28, 0.38) 100%),
+    radial-gradient(circle at 28% 42%, transparent 0%, rgba(1, 6, 20, 0.26) 78%);
 }
 
 .aurora {
@@ -301,7 +331,7 @@ async function submitRegister() {
   height: 50vw;
   border-radius: 50%;
   filter: blur(60px);
-  opacity: 0.3;
+  opacity: 0.28;
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -309,14 +339,14 @@ async function submitRegister() {
 .aurora-a {
   left: -15vw;
   top: -18vw;
-  background: radial-gradient(circle, rgba(0, 194, 255, 0.6), transparent 60%);
+  background: radial-gradient(circle, rgba(0, 194, 255, 0.55), transparent 60%);
   animation: floatAurora 12s ease-in-out infinite;
 }
 
 .aurora-b {
   right: -18vw;
   bottom: -18vw;
-  background: radial-gradient(circle, rgba(62, 115, 255, 0.5), transparent 60%);
+  background: radial-gradient(circle, rgba(62, 115, 255, 0.45), transparent 60%);
   animation: floatAurora 14s ease-in-out infinite reverse;
 }
 
@@ -336,6 +366,40 @@ async function submitRegister() {
   animation: particleDrift 14s linear infinite;
 }
 
+.meteor {
+  position: absolute;
+  width: 170px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(150, 235, 255, 0.95));
+  filter: drop-shadow(0 0 6px rgba(0, 220, 255, 0.85));
+  opacity: 0;
+  pointer-events: none;
+  animation: meteorFall 7.5s ease-in infinite;
+}
+
+.meteor-a {
+  left: 46%;
+  top: 5%;
+  animation-delay: 0.8s;
+}
+
+.meteor-b {
+  left: 68%;
+  top: 13%;
+  width: 120px;
+  animation-duration: 9s;
+  animation-delay: 3.6s;
+}
+
+.meteor-c {
+  left: 16%;
+  top: 26%;
+  width: 90px;
+  animation-duration: 10.5s;
+  animation-delay: 6.2s;
+}
+
 .login-stage {
   position: relative;
   z-index: 1;
@@ -343,15 +407,21 @@ async function submitRegister() {
   justify-items: end;
   align-items: center;
   min-height: 100vh;
-  padding: 42px clamp(12px, 2vw, 36px) 42px 24px;
+  padding: 42px clamp(28px, 4.5vw, 96px) 42px 24px;
+}
+
+.card-zone {
+  position: relative;
+  display: grid;
+  justify-items: center;
 }
 
 .orbit-shell {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(90vw, 700px);
-  height: min(90vw, 700px);
+  width: min(64vw, 780px);
+  height: min(64vw, 780px);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -504,20 +574,19 @@ async function submitRegister() {
   transform: rotate(-20deg);
 }
 
-@property --flow-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
 .auth-card {
   position: relative;
-  width: min(48vw, 650px);
-  border-radius: 92px 72px 88px 76px / 76px 92px 72px 88px;
-  padding: 50px 52px 30px;
-  background: linear-gradient(172deg, rgba(6, 24, 58, 0.82) 0%, rgba(3, 12, 36, 0.88) 52%, rgba(9, 22, 56, 0.82) 100%);
-  box-shadow: 0 0 46px rgba(0, 185, 255, 0.26), 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(24px);
+  width: clamp(430px, 31vw, 540px);
+  border-radius: 26px;
+  padding: 44px 46px 24px;
+  background:
+    linear-gradient(160deg, rgba(13, 34, 72, 0.72) 0%, rgba(5, 15, 38, 0.85) 46%, rgba(8, 20, 50, 0.8) 100%);
+  box-shadow:
+    0 0 0 1px rgba(120, 200, 255, 0.08),
+    0 24px 70px rgba(0, 0, 0, 0.55),
+    0 0 60px rgba(0, 170, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(26px) saturate(1.15);
   transform-style: preserve-3d;
   transition: transform 0.2s ease, box-shadow 0.3s ease;
   z-index: 2;
@@ -526,10 +595,10 @@ async function submitRegister() {
 .auth-card::after {
   content: "";
   position: absolute;
-  inset: -1px;
+  inset: 0;
   border-radius: inherit;
-  padding: 1.5px;
-  background: linear-gradient(140deg, rgba(0, 214, 255, 0.45), rgba(64, 118, 255, 0.16) 40%, rgba(146, 98, 255, 0.4) 72%, rgba(0, 214, 255, 0.35));
+  padding: 1px;
+  background: linear-gradient(155deg, rgba(140, 230, 255, 0.5), rgba(64, 118, 255, 0.14) 34%, rgba(10, 30, 70, 0.1) 62%, rgba(150, 110, 255, 0.38));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -537,73 +606,298 @@ async function submitRegister() {
   pointer-events: none;
 }
 
-.auth-card::before {
+/* 彗星流光：真实的光带沿边框路径环绕飞行 */
+.fx-head,
+.fx-head-b {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+  offset-rotate: auto;
+}
+
+@supports (offset-path: inset(0 round 1px)) {
+  .fx-head,
+  .fx-head-b {
+    display: block;
+  }
+}
+
+.fx-head {
+  width: 96px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(0, 214, 255, 0.08) 28%, rgba(120, 240, 255, 0.9) 74%, #f4ffff);
+  filter: drop-shadow(0 0 6px rgba(0, 228, 255, 0.95)) drop-shadow(0 0 20px rgba(0, 195, 255, 0.7)) drop-shadow(0 0 44px rgba(90, 160, 255, 0.45));
+  offset-path: inset(-4px round 30px);
+  animation: headTravel 3.2s linear infinite;
+}
+
+/* 第二颗彗星：紫色，反向环绕，速度不同制造交错感 */
+.fx-head-b {
+  width: 74px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(270deg, transparent, rgba(190, 140, 255, 0.08) 28%, rgba(216, 175, 255, 0.9) 74%, #fdf8ff);
+  filter: drop-shadow(0 0 6px rgba(198, 152, 255, 0.95)) drop-shadow(0 0 20px rgba(150, 100, 255, 0.6));
+  offset-path: inset(-4px round 30px);
+  animation: headTravel 5.6s linear infinite reverse;
+}
+
+/* 卡片内部：缓慢漂移的科技网格 */
+.fx-grid {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  background-image:
+    linear-gradient(rgba(90, 180, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90, 180, 255, 0.055) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 72%);
+  mask: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 72%);
+  animation: gridShift 14s linear infinite;
+  pointer-events: none;
+}
+
+/* 卡片内部：两团缓慢游走的蓝紫星云 */
+.fx-nebula {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fx-nebula::before,
+.fx-nebula::after {
   content: "";
   position: absolute;
-  inset: -1px;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+
+.fx-nebula::before {
+  width: 70%;
+  height: 46%;
+  left: -18%;
+  top: -16%;
+  background: radial-gradient(circle, rgba(0, 150, 255, 0.22), transparent 65%);
+  filter: blur(28px);
+  animation: nebulaA 12s ease-in-out infinite alternate;
+}
+
+.fx-nebula::after {
+  width: 60%;
+  height: 42%;
+  right: -16%;
+  bottom: -14%;
+  background: radial-gradient(circle, rgba(140, 90, 255, 0.18), transparent 65%);
+  filter: blur(30px);
+  animation: nebulaB 15s ease-in-out infinite alternate;
+}
+
+/* 鼠标跟随光斑 */
+.fx-pointer {
+  position: absolute;
+  inset: 0;
   border-radius: inherit;
-  padding: 2.5px;
-  background: conic-gradient(
-    from var(--flow-angle),
-    rgba(0, 228, 255, 0) 0deg,
-    rgba(0, 228, 255, 0) 235deg,
-    rgba(0, 216, 255, 0.9) 295deg,
-    #b8f7ff 322deg,
-    rgba(168, 122, 255, 0.85) 346deg,
-    rgba(0, 228, 255, 0) 360deg
-  );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  filter: drop-shadow(0 0 7px rgba(0, 220, 255, 0.6));
-  animation: borderFlow 4.2s linear infinite;
+  overflow: hidden;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(0, 214, 255, 0.12), transparent 62%);
+  opacity: var(--go, 0);
+  transition: opacity 0.35s ease;
   pointer-events: none;
+  z-index: 1;
+}
+
+/* 每隔几秒扫过卡片的一道柔光 */
+.fx-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fx-sweep::before {
+  content: "";
+  position: absolute;
+  top: -25%;
+  bottom: -25%;
+  left: -35%;
+  width: 24%;
+  background: linear-gradient(105deg, transparent, rgba(170, 235, 255, 0.13), transparent);
+  transform: rotate(8deg) translateX(0);
+  filter: blur(7px);
+  animation: cardSweep 7s ease-in-out infinite;
+}
+
+/* HUD 四角呼吸灯 */
+.fx-corners {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.fx-corners i {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 0 solid rgba(0, 225, 255, 0.75);
+  filter: drop-shadow(0 0 6px rgba(0, 220, 255, 0.55));
+  animation: cornerPulse 3.4s ease-in-out infinite;
+}
+
+.fx-corners i:nth-child(1) {
+  left: 9px;
+  top: 9px;
+  border-left-width: 2px;
+  border-top-width: 2px;
+  border-top-left-radius: 10px;
+}
+
+.fx-corners i:nth-child(2) {
+  right: 9px;
+  top: 9px;
+  border-right-width: 2px;
+  border-top-width: 2px;
+  border-top-right-radius: 10px;
+  animation-delay: 0.85s;
+}
+
+.fx-corners i:nth-child(3) {
+  right: 9px;
+  bottom: 9px;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+  border-bottom-right-radius: 10px;
+  animation-delay: 1.7s;
+}
+
+.fx-corners i:nth-child(4) {
+  left: 9px;
+  bottom: 9px;
+  border-left-width: 2px;
+  border-bottom-width: 2px;
+  border-bottom-left-radius: 10px;
+  animation-delay: 2.55s;
 }
 
 .card-halo {
   position: absolute;
-  inset: -30px;
-  border-radius: 120px;
-  background: radial-gradient(ellipse at 50% 10%, rgba(0, 196, 255, 0.2), transparent 62%);
-  filter: blur(22px);
+  inset: -34px;
+  border-radius: 60px;
+  background: radial-gradient(ellipse at 50% 8%, rgba(0, 196, 255, 0.2), transparent 62%);
+  filter: blur(26px);
   pointer-events: none;
 }
 
 .auth-card:hover {
-  box-shadow: 0 0 68px rgba(0, 200, 255, 0.34), 0 34px 90px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 0 0 1px rgba(120, 200, 255, 0.12),
+    0 28px 80px rgba(0, 0, 0, 0.58),
+    0 0 84px rgba(0, 190, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-@keyframes borderFlow {
-  to { --flow-angle: 360deg; }
+@keyframes headTravel {
+  to { offset-distance: 100%; }
+}
+
+@keyframes gridShift {
+  to { background-position: 34px 34px; }
+}
+
+@keyframes nebulaA {
+  to { transform: translate(58%, 42%) scale(1.18); }
+}
+
+@keyframes nebulaB {
+  to { transform: translate(-52%, -38%) scale(1.12); }
+}
+
+@keyframes cardSweep {
+  0%, 58% { transform: rotate(8deg) translateX(0); }
+  88%, 100% { transform: rotate(8deg) translateX(660%); }
+}
+
+@keyframes cornerPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes meteorFall {
+  0%, 76% { opacity: 0; transform: rotate(158deg) translateX(0); }
+  81% { opacity: 1; }
+  92%, 100% { opacity: 0; transform: rotate(158deg) translateX(34vw); }
 }
 
 .auth-head {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
+}
+
+.brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 18px 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 190, 255, 0.22);
+  background: linear-gradient(180deg, rgba(10, 28, 62, 0.6), rgba(5, 14, 34, 0.6));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 6px 18px rgba(0, 10, 30, 0.35);
+  margin-bottom: 18px;
+}
+
+.brand-chip img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(120, 220, 255, 0.6));
+}
+
+.brand-chip span {
+  color: rgba(196, 234, 255, 0.95);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
 }
 
 .auth-head h1 {
   margin: 0;
-  color: #fff;
-  font-size: 28px;
+  background: linear-gradient(110deg, #ffffff 22%, #9fd8ff 38%, #e7b8ff 50%, #9fd8ff 62%, #ffffff 78%);
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 30px;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  text-shadow: 0 0 26px rgba(80, 200, 255, 0.5);
+  letter-spacing: 0.1em;
+  filter: drop-shadow(0 0 22px rgba(80, 200, 255, 0.35));
+  animation: titleShine 5.5s ease-in-out infinite;
+}
+
+@keyframes titleShine {
+  0%, 100% { background-position: 0% 0; }
+  50% { background-position: 100% 0; }
 }
 
 .auth-head p {
   margin: 10px 0 0;
   color: rgba(150, 200, 235, 0.6);
   font-size: 13px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
 }
 
 .mode-switch {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: grid;
   grid-template-columns: 1fr 1fr;
   margin-bottom: 24px;
@@ -612,7 +906,7 @@ async function submitRegister() {
   border-radius: 999px;
   background:
     linear-gradient(180deg, rgba(7, 24, 54, 0.88), rgba(4, 14, 34, 0.92)) padding-box,
-    linear-gradient(120deg, rgba(0, 209, 255, 0.6), rgba(46, 92, 255, 0.28) 45%, rgba(147, 96, 255, 0.55)) border-box;
+    linear-gradient(120deg, rgba(0, 209, 255, 0.5), rgba(46, 92, 255, 0.26) 45%, rgba(147, 96, 255, 0.48)) border-box;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -8px 16px rgba(0, 8, 24, 0.5),
@@ -669,7 +963,7 @@ async function submitRegister() {
   gap: 7px;
   border: 0;
   border-radius: 999px;
-  padding: 11px 0;
+  padding: 10px 0;
   background: transparent;
   color: rgba(158, 204, 236, 0.62);
   font-weight: 700;
@@ -706,7 +1000,7 @@ async function submitRegister() {
 
 .auth-form {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -717,17 +1011,23 @@ async function submitRegister() {
   align-items: center;
   gap: 12px;
   height: 52px;
-  border: 1px solid rgba(0, 190, 255, 0.22);
-  border-radius: 14px;
-  background: rgba(5, 18, 44, 0.55);
+  border: 1px solid rgba(0, 190, 255, 0.2);
+  border-radius: 13px;
+  background:
+    linear-gradient(180deg, rgba(9, 26, 56, 0.55), rgba(4, 13, 32, 0.62));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   padding: 0 16px;
   transition: all 0.25s ease;
 }
 
+.input-wrap:hover {
+  border-color: rgba(0, 200, 255, 0.38);
+}
+
 .input-wrap:focus-within {
   border-color: rgba(0, 224, 255, 0.6);
-  box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.12), 0 0 24px rgba(0, 190, 255, 0.12);
-  background: rgba(7, 24, 56, 0.65);
+  box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.13), 0 0 26px rgba(0, 190, 255, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(10, 30, 64, 0.66), rgba(5, 16, 40, 0.72));
 }
 
 .input-icon {
@@ -774,7 +1074,7 @@ async function submitRegister() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 2px 0 6px;
+  margin: 0 0 4px;
 }
 
 .remember-me {
@@ -794,7 +1094,7 @@ async function submitRegister() {
   width: 16px;
   height: 16px;
   border: 1.5px solid rgba(100, 180, 230, 0.4);
-  border-radius: 4px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -802,9 +1102,14 @@ async function submitRegister() {
   background: transparent;
 }
 
+.remember-me:hover .check-box {
+  border-color: rgba(0, 210, 255, 0.6);
+}
+
 .remember-me input:checked + .check-box {
   background: linear-gradient(135deg, #0099ff, #00ddff);
   border-color: transparent;
+  box-shadow: 0 0 12px rgba(0, 190, 255, 0.45);
 }
 
 .remember-me input:checked + .check-box::after {
@@ -835,7 +1140,7 @@ async function submitRegister() {
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 50px;
+  min-height: 52px;
   overflow: hidden;
   border: 0;
   border-radius: 999px;
@@ -863,10 +1168,23 @@ async function submitRegister() {
   content: "";
 }
 
+.submit-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 -8px 18px rgba(20, 20, 90, 0.28);
+  pointer-events: none;
+}
+
 .submit-button:hover {
   transform: translateY(-2px);
   filter: brightness(1.08);
   box-shadow: 0 18px 42px rgba(90, 120, 255, 0.52), 0 0 28px rgba(138, 92, 255, 0.32);
+}
+
+.submit-button:active {
+  transform: translateY(0);
 }
 
 .submit-button:disabled {
@@ -989,23 +1307,54 @@ async function submitRegister() {
   85%, 100% { transform: translateX(130%); }
 }
 
+@media (max-width: 1600px) {
+  .auth-card {
+    width: clamp(430px, 36vw, 520px);
+  }
+}
+
+@media (max-width: 1280px) {
+  .login-stage {
+    justify-items: center;
+    padding: 36px 24px;
+  }
+
+  .auth-card {
+    width: min(88vw, 480px);
+  }
+
+  .orbit-shell {
+    width: 130vw;
+    height: 130vw;
+  }
+}
+
 @media (max-width: 600px) {
   .login-stage {
-    place-items: center;
     padding: 28px 16px;
   }
 
   .auth-card {
-    width: min(90vw, 440px);
-    padding: 42px 26px 22px;
-    border-radius: 58px 46px 54px 48px / 48px 58px 46px 54px;
+    width: min(92vw, 440px);
+    padding: 36px 26px 20px;
   }
   .auth-head h1 {
-    font-size: 24px;
+    font-size: 25px;
   }
-  .orbit-shell {
-    width: 120vw;
-    height: 120vw;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-head,
+  .fx-head-b,
+  .fx-sweep::before,
+  .fx-grid,
+  .fx-nebula::before,
+  .fx-nebula::after,
+  .fx-corners i,
+  .meteor,
+  .auth-head h1,
+  .aurora {
+    animation: none !important;
   }
 }
 </style>
