@@ -159,7 +159,7 @@ const roleRouteMap: Record<string, string[]> = {
     '/resume-parser', '/match-analysis', '/learning-path', '/digital-interviewer', '/account-settings'
   ],
   hr: [
-    '/overview', '/dashboards/hr', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
+    '/overview', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
     '/emerging-jobs', '/job-evolution', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/digital-interviewer',
     '/review-tasks', '/evaluation', '/settings', '/account-settings',
@@ -217,6 +217,7 @@ const dropdownStyle = computed(() => {
 
 const visibleGroups = computed<MenuGroup[]>(() => {
   const allowed = new Set(roleRouteMap[auth.role || 'candidate'] || roleRouteMap.candidate)
+  const isHr = auth.role === 'hr'
   return groupDefs
     .map((g) => ({
       key: g.key,
@@ -225,6 +226,7 @@ const visibleGroups = computed<MenuGroup[]>(() => {
       items: g.items
         .map((p) => rawMenus.find((m) => m.path === p))
         .filter((m): m is MenuItem => Boolean(m && allowed.has(m.path)))
+        .map((m) => (isHr && m.path === '/overview' ? { ...m, path: '/dashboards/hr' } : m))
     }))
     .filter((g) => g.items.length > 0)
 })

@@ -18,7 +18,7 @@ const routes = [
     children: [
       { path: 'overview', name: 'overview', component: () => import('@/views/Overview.vue'), meta: { title: '系统概览', roles: allRoles } },
       { path: 'dashboards/candidate', name: 'dashboards-candidate', component: () => import('@/views/dashboards/CandidateDashboard.vue'), meta: { title: '求职者驾驶舱', roles: candidateRoles, fullscreen: true } },
-      { path: 'dashboards/hr', name: 'dashboards-hr', component: () => import('@/views/dashboards/HrDashboard.vue'), meta: { title: '企业 HR 大屏', roles: ['hr'], fullscreen: true } },
+      { path: 'dashboards/hr', name: 'dashboards-hr', component: () => import('@/views/dashboards/HrDashboard.vue'), meta: { title: '企业 HR 大屏', roles: ['hr'] } },
       { path: 'dashboards/admin', name: 'dashboards-admin', component: () => import('@/views/dashboards/AdminCockpit.vue'), meta: { title: '管理端驾驶舱', roles: ['admin'], fullscreen: true } },
       { path: 'cockpit', name: 'growth-cockpit-nested', component: () => import('@/views/GrowthCockpit.vue'), meta: { title: '个人成长驾驶舱', roles: candidateRoles, fullscreen: true } },
       { path: 'personal-center', name: 'personal-center', component: () => import('@/views/PersonalCenter.vue'), meta: { title: '个人中心', roles: candidateRoles } },
@@ -56,7 +56,11 @@ router.beforeEach((to) => {
   if (!token || !user) return { path: '/login', query: { redirect: to.fullPath } }
   const roles = (to.meta.roles as string[] | undefined) || allRoles
   if (!roles.includes(user.role)) {
-    return user.role === 'candidate' ? '/personal-center' : '/overview'
+    return user.role === 'candidate' ? '/personal-center' : user.role === 'hr' ? '/dashboards/hr' : '/overview'
+  }
+  // HR 角色的系统概览直接落到 HR 大屏
+  if (user.role === 'hr' && to.path === '/overview') {
+    return { path: '/dashboards/hr' }
   }
   return true
 })
