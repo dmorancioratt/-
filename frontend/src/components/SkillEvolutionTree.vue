@@ -56,7 +56,7 @@
                 <div class="course-name">{{ course.name }}</div>
                 <div class="course-meta">{{ course.duration }} · {{ course.level }}</div>
               </div>
-              <button class="course-btn">开始学习</button>
+              <button class="course-btn" @click="goToBilibili(course.name)">开始学习</button>
             </div>
           </div>
         </div>
@@ -597,6 +597,11 @@ function createParticleBurst(pos: THREE.Vector3, color: THREE.Color, scene: THRE
   }
 }
 
+function goToBilibili(courseName: string) {
+  const keyword = encodeURIComponent(courseName + ' 教程')
+  window.open(`https://search.bilibili.com/all?keyword=${keyword}`, '_blank')
+}
+
 function closePanel() {
   panelVisible.value = false
   setTimeout(() => {
@@ -729,6 +734,20 @@ function animate(composer: any, controls: any, camera: THREE.Camera) {
     sceneCtx.environment.update(time)
   }
 
+  // 3D Starfield animation: extremely slow cosmic drift (Y rotation) +
+  // subtle twinkle-breathe opacity variation. Keeps stars immersive
+  // without creating distracting motion.
+  if (sceneCtx && sceneCtx.stars) {
+    // ~1 full rotation every 25 minutes = near-static but subtly alive
+    sceneCtx.stars.rotation.y = time * 0.0006
+    sceneCtx.stars.rotation.x = Math.sin(time * 0.0003) * 0.02
+    // Opacity breathe: 0.82 → 1.0 → 0.82, slow ~6-second cycle
+    const mat = sceneCtx.stars.material as THREE.PointsMaterial
+    if (mat) {
+      mat.opacity = 0.82 + 0.18 * (0.5 + 0.5 * Math.sin(time * 1.05))
+    }
+  }
+
   // Ripples
   ripples = ripples.filter(r => {
     const elapsed = time - r.startTime
@@ -812,7 +831,7 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
   border-radius: 16px;
-  background: radial-gradient(ellipse at 50% 80%, rgba(10, 40, 80, 0.3) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 90%, rgba(10, 28, 70, 0.55) 0%, rgba(7, 20, 52, 0.32) 50%, transparent 85%);
 }
 
 .tree-canvas {
@@ -844,7 +863,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 16px;
   z-index: 50;
-  background: rgba(7, 17, 35, 0.6);
+  background: rgba(6, 18, 48, 0.85);
   backdrop-filter: blur(4px);
 }
 
@@ -884,7 +903,7 @@ onUnmounted(() => {
   padding: 8px 14px;
   border-radius: 10px;
   border: 1px solid rgba(78, 216, 255, 0.3);
-  background: rgba(7, 26, 53, 0.7);
+  background: rgba(8, 22, 58, 0.82);
   backdrop-filter: blur(12px);
   color: #4ed8ff;
   font-size: 12px;
@@ -906,7 +925,7 @@ onUnmounted(() => {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(7, 26, 53, 0.7);
+  background: rgba(8, 22, 58, 0.82);
   backdrop-filter: blur(8px);
   padding: 8px 18px;
   border-radius: 24px;
@@ -938,7 +957,7 @@ onUnmounted(() => {
   width: 340px;
   max-height: calc(100% - 40px);
   overflow-y: auto;
-  background: rgba(7, 22, 50, 0.72);
+  background: rgba(7, 20, 55, 0.88);
   backdrop-filter: blur(20px);
   border-radius: 16px;
   border: 1px solid rgba(78, 216, 255, 0.2);
@@ -1270,7 +1289,7 @@ onUnmounted(() => {
 .skill-label .label-text {
   display: inline-block;
   padding: 3px 10px;
-  background: rgba(7, 22, 50, 0.85);
+  background: rgba(6, 18, 50, 0.90);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(78, 216, 255, 0.4);
   border-radius: 10px;

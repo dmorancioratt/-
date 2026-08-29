@@ -480,7 +480,7 @@ function avatarGradient(name: string) {
   const palettes = [
     ['#14426b', '#36d7ff'],
     ['#1d3a70', '#6ea8ff'],
-    ['#104d6b', '#4be3c4'],
+    ['#104d6b', '#38bdf8'],
     ['#2b2b7a', '#9aa3ff'],
     ['#304b7a', '#67c8f5']
   ]
@@ -550,7 +550,7 @@ const demandSupplyOption = computed(() => {
         name: '人才供给', type: 'bar', barWidth: 6,
         data: supply,
         itemStyle: {
-          color: { type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: '#06b6d4' }, { offset: 1, color: '#083344' }] },
+          color: { type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: '#0ea5e9' }, { offset: 1, color: '#083344' }] },
           borderRadius: [0, 4, 4, 0]
         }
       }
@@ -625,7 +625,7 @@ const gapTrendOption = computed(() => ({
     },
     {
       name: '增减速度', type: 'line', yAxisIndex: 1, smooth: true, symbol: 'diamond', symbolSize: 6,
-      itemStyle: { color: '#22d3ee' }, lineStyle: { width: 2, color: '#22d3ee' },
+      itemStyle: { color: '#38bdf8' }, lineStyle: { width: 2, color: '#38bdf8' },
       data: [-10, 5, 12, 18, 24, 15, 8, 25]
     }
   ]
@@ -754,7 +754,7 @@ const regionMapOption = computed(() => {
         },
         itemStyle: {
           color: '#36d7ff',
-          borderColor: '#a5f3fc',
+          borderColor: '#bae6fd',
           borderWidth: 1,
           shadowBlur: 16,
           shadowColor: 'rgba(54, 215, 255, 0.9)'
@@ -1056,17 +1056,17 @@ onBeforeUnmount(() => {
 .kpi-card::after { position: absolute; right: 14px; bottom: 0; width: 72px; height: 24px; border-top-left-radius: 14px; pointer-events: none; content: ""; background: linear-gradient(135deg, transparent 50%, rgba(54, 215, 255, .14) 50%); }
 .kpi-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 .kpi-icon--cyan { background: rgba(54, 215, 255, .14); color: #36d7ff; border: 1px solid rgba(54, 215, 255, .28); }
-.kpi-icon--cyan-bright { background: rgba(54, 215, 255, .18); color: #67e8f9; border: 1px solid rgba(54, 215, 255, .35); }
+.kpi-icon--cyan-bright { background: rgba(54, 215, 255, .18); color: #7dd3fc; border: 1px solid rgba(54, 215, 255, .35); }
 .kpi-icon--blue { background: rgba(61, 134, 255, .14); color: #6ea8ff; border: 1px solid rgba(61, 134, 255, .28); }
 .kpi-icon--sky { background: rgba(56, 189, 248, .14); color: #67c8f5; border: 1px solid rgba(56, 189, 248, .28); }
 .kpi-icon--indigo { background: rgba(125, 138, 255, .14); color: #9aa3ff; border: 1px solid rgba(125, 138, 255, .28); }
-.kpi-icon--teal { background: rgba(36, 215, 177, .14); color: #4be3c4; border: 1px solid rgba(36, 215, 177, .28); }
+.kpi-icon--teal { background: rgba(56, 189, 248, .14); color: #67c8f5; border: 1px solid rgba(56, 189, 248, .28); }
 .kpi-meta { min-width: 0; flex: 1; }
 .kpi-label { color: #88a9c4; font-size: 11px; }
 .kpi-value { color: #36d7ff; font-size: 20px; font-weight: 800; margin-top: 4px; line-height: 1.1; }
 .kpi-unit { color: #88a9c4; font-size: 11px; font-weight: 500; margin-left: 3px; }
 .kpi-foot { margin-top: 6px; display: flex; gap: 6px; align-items: center; font-size: 10px; color: #6f91ad; }
-.kpi-foot__delta.up { color: #24d7b1; font-weight: 600; }
+.kpi-foot__delta.up { color: #38bdf8; font-weight: 600; }
 .kpi-foot__delta.down { color: #ff6682; font-weight: 600; }
 
 /* ============ Main grid ============ */
@@ -1103,8 +1103,8 @@ onBeforeUnmount(() => {
 .gap-circle--sky .gap-circle__value { color: #67c8f5; }
 .gap-circle--indigo .gap-circle__inner { border-color: rgba(125, 138, 255, .55); background: rgba(125, 138, 255, .08); }
 .gap-circle--indigo .gap-circle__value { color: #9aa3ff; }
-.gap-circle--teal .gap-circle__inner { border-color: rgba(36, 215, 177, .55); background: rgba(36, 215, 177, .08); }
-.gap-circle--teal .gap-circle__value { color: #4be3c4; }
+.gap-circle--teal .gap-circle__inner { border-color: rgba(56, 189, 248, .55); background: rgba(56, 189, 248, .08); }
+.gap-circle--teal .gap-circle__value { color: #67c8f5; }
 .gap-circle__caption { font-size: 11px; color: #88a9c4; }
 
 .panel-actions .action-list { display: flex; flex-direction: column; gap: 8px; padding: 4px 16px 16px; }
@@ -1170,7 +1170,7 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(78, 200, 255, 0.08);
 }
 .pano-kpi__delta-prefix { color: #77a0c6; font-weight: 500; margin-right: 2px; }
-.pano-kpi__delta.up   { color: #22d3ee; border-color: rgba(34, 211, 238, 0.18); }
+.pano-kpi__delta.up   { color: #38bdf8; border-color: rgba(34, 211, 238, 0.18); }
 .pano-kpi__delta.down { color: #fca5a5; border-color: rgba(252, 165, 165, 0.16); }
 .pano-kpi__delta .el-icon { font-size: 9px; }
 .pano-kpi__sub { margin-top: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; }
@@ -1197,7 +1197,7 @@ onBeforeUnmount(() => {
 .talent-row__contact:hover { background: rgba(54, 215, 255, .22); }
 
 .text-link { background: transparent; border: 0; color: #36d7ff; font-size: 11px; cursor: pointer; padding: 0; transition: color .2s; }
-.text-link:hover { color: #67e8f9; }
+.text-link:hover { color: #7dd3fc; }
 
 .panel-emerging .emerging-body { display: grid; grid-template-columns: 5fr 7fr; gap: 8px; align-items: center; padding: 4px 16px 16px; }
 .emerging-chart { position: relative; height: 150px; overflow: visible; }

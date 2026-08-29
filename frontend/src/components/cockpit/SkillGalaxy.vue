@@ -20,9 +20,9 @@
           <stop offset="100%" stop-color="#4ed8ff" stop-opacity="0"/>
         </radialGradient>
         <radialGradient id="masteredGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#37d6a5" stop-opacity="0.7"/>
-          <stop offset="50%" stop-color="#37d6a5" stop-opacity="0.25"/>
-          <stop offset="100%" stop-color="#37d6a5" stop-opacity="0"/>
+          <stop offset="0%" stop-color="#36d7ff" stop-opacity="0.7"/>
+          <stop offset="50%" stop-color="#36d7ff" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#36d7ff" stop-opacity="0"/>
         </radialGradient>
         <radialGradient id="improvingGlow" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="#8f7cff" stop-opacity="0.65"/>
@@ -86,7 +86,7 @@
           <circle cx="0" cy="0" r="82" fill="none" stroke="rgba(143,124,255,0.15)" stroke-width="1" stroke-dasharray="8 14"/>
         </g>
         <g class="core-ring-inner" style="animation: core-rotate 35s linear infinite; transform-origin: center;">
-          <circle cx="0" cy="0" r="70" fill="none" stroke="rgba(55,214,165,0.12)" stroke-width="0.8" stroke-dasharray="3 8"/>
+          <circle cx="0" cy="0" r="70" fill="none" stroke="rgba(54,215,255,0.12)" stroke-width="0.8" stroke-dasharray="3 8"/>
         </g>
         <circle cx="0" cy="0" r="62" fill="rgba(30, 120, 220, 0.12)" stroke="rgba(78,216,255,0.4)" stroke-width="1" filter="url(#softGlow)"/>
         <circle cx="0" cy="0" r="62" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
@@ -259,7 +259,7 @@ function getSkillPos(skill: Skill & { orbit?: SkillOrbit; angle?: number }) {
 
 function getNodeFill(skill: Skill): string {
   switch (skill.status) {
-    case 'mastered': return 'rgba(55,214,165,0.18)'
+    case 'mastered': return 'rgba(54,215,255,0.18)'
     case 'improving': return 'rgba(143,124,255,0.15)'
     case 'transferable': return 'rgba(255,182,92,0.15)'
     case 'missing': return 'rgba(255,112,136,0.08)'
@@ -269,7 +269,7 @@ function getNodeFill(skill: Skill): string {
 
 function getNodeOuterRingFill(skill: Skill): string {
   switch (skill.status) {
-    case 'mastered': return 'rgba(55,214,165,0.05)'
+    case 'mastered': return 'rgba(54,215,255,0.05)'
     case 'improving': return 'rgba(143,124,255,0.05)'
     case 'transferable': return 'rgba(255,182,92,0.05)'
     case 'missing': return 'rgba(255,112,136,0.03)'
@@ -279,7 +279,7 @@ function getNodeOuterRingFill(skill: Skill): string {
 
 function getNodeStroke(skill: Skill): string {
   switch (skill.status) {
-    case 'mastered': return '#37d6a5'
+    case 'mastered': return '#36d7ff'
     case 'improving': return '#8f7cff'
     case 'transferable': return '#ffb65c'
     case 'missing': return '#ff7088'
@@ -299,7 +299,7 @@ function getTextColor(skill: Skill): string {
 
 function getLinkColor(status: SkillStatus): string {
   switch (status) {
-    case 'mastered': return 'rgba(55,214,165,0.5)'
+    case 'mastered': return 'rgba(54,215,255,0.5)'
     case 'improving': return 'rgba(143,124,255,0.4)'
     case 'transferable': return 'rgba(255,182,92,0.4)'
     case 'missing': return 'rgba(255,112,136,0.2)'
@@ -309,7 +309,7 @@ function getLinkColor(status: SkillStatus): string {
 
 function getStatusColor(status: SkillStatus): string {
   const m: Record<SkillStatus, string> = {
-    mastered: '#37d6a5', improving: '#8f7cff',
+    mastered: '#36d7ff', improving: '#8f7cff',
     transferable: '#ffb65c', missing: '#ff7088'
   }
   return m[status]
@@ -366,7 +366,7 @@ function initNebula() {
   nebulaClouds = [
     { x: -120, y: -80, r: 200, color: 'rgba(78,216,255,', alpha: 0.025, drift: 0 },
     { x: 140, y: 60, r: 180, color: 'rgba(143,124,255,', alpha: 0.02, drift: 1 },
-    { x: -60, y: 140, r: 160, color: 'rgba(55,214,165,', alpha: 0.015, drift: 2 },
+    { x: -60, y: 140, r: 160, color: 'rgba(54,215,255,', alpha: 0.015, drift: 2 },
     { x: 100, y: -130, r: 140, color: 'rgba(255,182,92,', alpha: 0.012, drift: 3 },
   ]
 }
@@ -390,7 +390,7 @@ function initDots() {
   orbitDots = []
   const orbits: SkillOrbit[] = [1, 2, 3]
   const counts = [4, 6, 8]
-  const orbitColors = ['rgba(78,216,255,', 'rgba(143,124,255,', 'rgba(55,214,165,']
+  const orbitColors = ['rgba(78,216,255,', 'rgba(143,124,255,', 'rgba(54,215,255,']
   orbits.forEach((orbit, oi) => {
     for (let i = 0; i < counts[oi]; i++) {
       const trail: { angle: number; alpha: number }[] = []

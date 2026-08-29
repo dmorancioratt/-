@@ -46,7 +46,7 @@
       <article class="journey-stage" aria-label="职业成长视频">
         <div class="video-shell" :class="{ 'video-unavailable': videoUnavailable }">
           <video v-if="!videoUnavailable" class="career-video" autoplay muted loop playsinline @error="videoUnavailable = true">
-            <source src="/career-journey.mp4" type="video/mp4" />
+            <source src="/Digital_path_transforms_into_river_202608242002.mp4" type="video/mp4" />
           </video>
           <div v-else class="video-fallback">职业成长视频暂不可用</div>
         </div>

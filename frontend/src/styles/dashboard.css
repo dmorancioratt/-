@@ -5,7 +5,7 @@
   --cockpit-border: rgba(78, 200, 255, 0.18);
   --cockpit-cyan: #36d7ff;
   --cockpit-blue: #3d86ff;
-  --cockpit-teal: #24d7b1;
+  --cockpit-teal: #38bdf8;
   --cockpit-amber: #ffb85c;
   --cockpit-red: #ff6682;
   --cockpit-text: #eefaff;
@@ -145,7 +145,7 @@
   font-weight: 750;
 }
 
-.cockpit-tag.success { border-color: rgba(36, 215, 177, 0.28); color: #73f1d4; background: rgba(14, 104, 86, 0.24); }
+.cockpit-tag.success { border-color: rgba(56, 189, 248, 0.28); color: #7dd3fc; background: rgba(12, 98, 168, 0.24); }
 .cockpit-tag.warning { border-color: rgba(255, 184, 92, 0.3); color: #ffd094; background: rgba(118, 71, 14, 0.24); }
 .cockpit-tag.danger { border-color: rgba(255, 102, 130, 0.3); color: #ff9db0; background: rgba(118, 26, 45, 0.24); }
 .cockpit-tag i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }

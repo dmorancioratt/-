@@ -65,42 +65,39 @@
     </section>
 
     <main class="cockpit-main">
+      <!-- ==================== 左栏 · 质量辅助分析 ==================== -->
       <section class="col col-left">
-        <article class="cockpit-panel priority-panel">
+        <article class="cockpit-panel health-panel">
           <div class="hud-card__corner hud-card__corner--tr"></div>
           <div class="hud-card__corner hud-card__corner--bl"></div>
           <div class="panel-head">
-            <h2><span class="title-bar title-bar--rose"></span><span>今日治理重点</span></h2>
-            <span class="cockpit-tag" :class="priorityItems.length ? 'danger' : 'success'">
-              <i></i>{{ priorityItems.length ? `${priorityItems.length} 项待处理` : '当前无阻塞项' }}
-            </span>
+            <h2><span class="title-bar title-bar--cyan"></span><span>数据健康度</span></h2>
+            <span v-if="healthIsMock" class="mock-flag">示例数据</span>
+            <button v-else class="text-button" type="button" @click="router.push('/datasets')">数据明细</button>
           </div>
-          <p class="panel-sub">优先处理低置信风险前置项</p>
-          <div v-if="priorityItems.length" class="priority-queue">
-            <button
-              v-for="(item, index) in priorityItems"
-              :key="item.title"
-              type="button"
-              class="priority-row"
-              :class="`priority-row--${item.tone}`"
-              @click="router.push(item.path)"
-            >
-              <span class="priority-index">{{ String(index + 1).padStart(2, '0') }}</span>
-              <span class="priority-body">
-                <b>{{ item.title }}</b>
-                <small>{{ item.detail }}</small>
-                <div class="priority-bar" :class="`priority-bar--${item.tone}`"><i><em :style="{ width: `${item.confidence}%` }"></em></i></div>
-              </span>
-              <em :class="`tag tag--${item.tone}`">{{ item.action }}</em>
-              <el-icon class="priority-arrow"><ArrowRight /></el-icon>
-            </button>
+          <p class="panel-sub">完整性 · 时效性 · 一致性 · 唯一性，实时来自库表统计</p>
+          <div class="health-top">
+            <div class="health-ring">
+              <svg viewBox="0 0 36 36" class="score-ring__svg">
+                <circle cx="18" cy="18" r="15.9" class="score-ring__bg" />
+                <circle cx="18" cy="18" r="15.9" class="score-ring__fg" :style="{ strokeDasharray: `${Math.max(0, Math.min(100, healthOverall))}, 100` }" />
+              </svg>
+              <div class="score-ring__num"><b class="font-digits">{{ healthOverall }}</b><small>健康分</small></div>
+            </div>
+            <div class="health-summary">
+              <b>{{ healthVerdict }}</b>
+              <p>{{ health.dataset_count != null ? `${health.dataset_count} 个在管数据源` : '覆盖解析、复核、发布全链路' }}</p>
+            </div>
           </div>
-          <div v-else class="all-clear">
-            <el-icon><CircleCheckFilled /></el-icon>
-            <span>
-              <b>可信发布链路正常</b>
-              <small>数据源、模型服务与人工审核队列均无阻塞。</small>
-            </span>
+          <div class="health-dims">
+            <div v-for="d in healthDims" :key="d.key" class="health-dim">
+              <div class="health-dim__head">
+                <span>{{ d.label }}</span>
+                <b class="font-digits" :class="`health-num--${dimTone(d.value)}`">{{ d.value }}</b>
+              </div>
+              <div class="quality-bar"><i><em :class="`health-bar--${dimTone(d.value)}`" :style="{ width: `${Math.min(100, Number(d.value) || 0)}%` }"></em></i></div>
+              <small>{{ d.note }}</small>
+            </div>
           </div>
         </article>
 
@@ -132,100 +129,126 @@
         </article>
       </section>
 
+      <!-- ==================== 中栏 · 核心数据大屏 ==================== -->
       <section class="col col-center">
-        <article class="cockpit-panel topology-panel">
-          <div class="hud-card__corner hud-card__corner--tr"></div>
-          <div class="hud-card__corner hud-card__corner--bl"></div>
-          <div class="topology-head">
-            <h2>治理核心总览</h2>
-            <p>点击任意节点可穿透至治理明细或下钻分析</p>
-          </div>
-
-          <div class="topology-canvas">
-            <button type="button" class="node node--top" @click="router.push('/datasets')">
-              <span class="node__icon node__icon--cyan"><el-icon><Coin /></el-icon></span>
-              <div class="node__body">
-                <span class="node__label">有效数据源</span>
-                <b class="font-digits">{{ kpiCards[0].value }} <span class="node__unit">个</span></b>
-                <small>{{ lowQualitySources.length }} 个需要复核</small>
-              </div>
-            </button>
-
-            <button type="button" class="node node--tr" @click="router.push('/datasets')">
-              <span class="node__icon node__icon--teal"><el-icon><Files /></el-icon></span>
-              <div class="node__body">
-                <span class="node__label">本地权威索引</span>
-                <b class="font-digits">{{ kpiCards[1].value }}</b>
-                <small>{{ kpiCards[1].hint }}</small>
-              </div>
-            </button>
-
-            <button type="button" class="node node--br" @click="openConfigModal">
-              <span class="node__icon node__icon--blue"><el-icon><Setting /></el-icon></span>
-              <div class="node__body">
-                <span class="node__label">规则与模型</span>
-                <b class="font-digits">{{ model.ai.match_accuracy != null ? `${model.ai.match_accuracy}%` : '—' }}</b>
-                <small>适用项目</small>
-              </div>
-            </button>
-
-            <button type="button" class="node node--bl" @click="router.push('/review-tasks')">
-              <span class="node__icon node__icon--sky"><el-icon><UserFilled /></el-icon></span>
-              <div class="node__body">
-                <span class="node__label">人工复核</span>
-                <b class="font-digits">{{ kpiCards[3].value }} <span class="node__unit">项</span></b>
-                <small>阻塞或可信发布</small>
-              </div>
-            </button>
-
-            <button type="button" class="node node--tl" @click="router.push('/evaluation')">
-              <span class="node__icon node__icon--indigo"><el-icon><Grid /></el-icon></span>
-              <div class="node__body">
-                <span class="node__label">回归样本</span>
-                <b class="font-digits">{{ kpiCards[2].value }} <span class="node__unit">条</span></b>
-                <small>解析与匹配坐标</small>
-              </div>
-            </button>
-          </div>
-        </article>
-
-        <article class="cockpit-panel pipeline-panel">
+        <article class="cockpit-panel flow-panel">
           <div class="hud-card__corner hud-card__corner--tr"></div>
           <div class="hud-card__corner hud-card__corner--bl"></div>
           <div class="panel-head">
-            <h2><span class="title-bar title-bar--blue"></span><span>可信数据发布链路</span></h2>
-            <span class="panel-head__hint">最近同步 {{ formatDate(model.market?.last_synced_at, true) }}</span>
+            <h2><span class="title-bar title-bar--blue"></span><span>数据流管道</span></h2>
+            <span class="panel-head__hint">来源 → 解析 → 校验 → 幻觉检测 → 复核 → 发布 · 最近同步 {{ formatDate(model.market?.last_synced_at, true) }}</span>
           </div>
-          <p class="panel-sub">链路状态只表示真实处理顺序，不代表后台正在虚构运行</p>
-          <div class="pipeline-grid">
+          <div class="flow-pipeline">
+            <div v-for="(stage, index) in flowStages" :key="stage.key" class="flow-stage">
+              <div class="flow-rail">
+                <span class="flow-node" :class="`flow-node--${stage.tone}`"><el-icon><component :is="stage.icon" /></el-icon></span>
+                <i v-if="index < flowStages.length - 1" class="flow-link"><em></em><em></em><em></em></i>
+              </div>
+              <button
+                type="button"
+                class="flow-card"
+                :class="{ 'flow-card--guard': stage.action === 'modal' }"
+                @click="stage.action === 'modal' ? openGuardModal() : router.push(stage.path)"
+              >
+                <span class="flow-card__main">
+                  <b>{{ stage.label }}</b>
+                  <small>{{ stage.note }}</small>
+                </span>
+                <span class="flow-card__meta">
+                  <strong class="font-digits">{{ stage.value }}</strong>
+                  <span class="flow-status" :class="`flow-status--${stage.tone}`"><i></i>{{ stage.status }}</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article class="cockpit-panel priority-strip">
+          <div class="hud-card__corner hud-card__corner--tr"></div>
+          <div class="hud-card__corner hud-card__corner--bl"></div>
+          <div class="panel-head">
+            <h2><span class="title-bar title-bar--rose"></span><span>今日治理重点</span></h2>
+            <span class="cockpit-tag" :class="priorityItems.length ? 'danger' : 'success'">
+              <i></i>{{ priorityItems.length ? `${priorityItems.length} 项待处理` : '当前无阻塞项' }}
+            </span>
+          </div>
+          <div v-if="priorityItems.length" class="priority-queue priority-queue--compact">
             <button
-              v-for="(step, index) in pipelineSteps"
-              :key="step.label"
+              v-for="(item, index) in priorityItems.slice(0, 2)"
+              :key="item.title"
               type="button"
-              class="pipeline-step"
-              :class="`pipeline-step--${step.tone}`"
-              @click="router.push(step.path)"
+              class="priority-row priority-row--slim"
+              :class="`priority-row--${item.tone}`"
+              @click="router.push(item.path)"
             >
-              <span class="pipeline-step__icon"><el-icon><component :is="step.icon" /></el-icon></span>
-              <b>{{ step.label }}</b>
-              <strong class="font-digits">{{ step.value }}</strong>
-              <small>{{ step.note }}</small>
-              <span v-if="index < pipelineSteps.length - 1" class="pipeline-link" />
+              <span class="priority-index">{{ String(index + 1).padStart(2, '0') }}</span>
+              <span class="priority-body">
+                <b>{{ item.title }}</b>
+                <small>{{ item.detail }}</small>
+              </span>
+              <em :class="`tag tag--${item.tone}`">{{ item.action }}</em>
+              <el-icon class="priority-arrow"><ArrowRight /></el-icon>
             </button>
+          </div>
+          <div v-else class="all-clear all-clear--slim">
+            <el-icon><CircleCheckFilled /></el-icon>
+            <span>
+              <b>可信发布链路正常</b>
+              <small>数据源、模型服务与人工审核队列均无阻塞。</small>
+            </span>
           </div>
         </article>
       </section>
 
+      <!-- ==================== 右栏 · 风险辅助分析 ==================== -->
       <section class="col col-right">
-        <article class="cockpit-panel metrics-panel">
+        <article class="cockpit-panel guard-panel">
           <div class="hud-card__corner hud-card__corner--tr"></div>
           <div class="hud-card__corner hud-card__corner--bl"></div>
           <div class="panel-head">
-            <h2><span class="title-bar title-bar--cyan"></span><span>评测基线</span></h2>
+            <h2><span class="title-bar title-bar--rose"></span><span>幻觉检测</span></h2>
+            <button class="text-button" type="button" @click="openGuardModal">检测能力</button>
+          </div>
+          <p class="panel-sub">AI 结构化输出发布前的强制防护关卡</p>
+          <div class="guard-stats">
+            <div class="guard-stat">
+              <b class="font-digits" :class="guardStats.flagged ? 'guard-num--warn' : ''">{{ guardStats.pass_rate }}%</b>
+              <span>防护通过率</span>
+            </div>
+            <div class="guard-stat">
+              <b class="font-digits">{{ guardStats.flagged }}</b>
+              <span>待复核条目</span>
+            </div>
+            <div class="guard-stat">
+              <b class="font-digits">{{ compact(guardStats.total_checked || 0) }}</b>
+              <span>累计检测</span>
+            </div>
+          </div>
+          <div class="guard-rules">
+            <div v-for="rule in guardStats.rules" :key="rule.key" class="guard-rule">
+              <span class="guard-rule__label"><i></i>{{ rule.label }}</span>
+              <b class="font-digits">{{ rule.hits }} 次命中</b>
+            </div>
+          </div>
+          <div v-if="guardStats.recent_events?.length" class="guard-events">
+            <div class="guard-events__title">近期拦截</div>
+            <div v-for="event in guardStats.recent_events.slice(0, 3)" :key="event.id" class="guard-event">
+              <b>{{ event.job_name }}</b>
+              <small>{{ event.issues.join('、') }} · 置信度 {{ Math.round((event.confidence || 0) * 100) }}%</small>
+            </div>
+          </div>
+          <div v-else class="guard-events__empty">暂无拦截记录，所有结构化输出均携带合格证据链。</div>
+          <span v-if="guardIsMock" class="mock-flag mock-flag--block">示例数据 · 后端接入后自动切换真实统计</span>
+        </article>
+
+        <article class="cockpit-panel eval-model-panel">
+          <div class="hud-card__corner hud-card__corner--tr"></div>
+          <div class="hud-card__corner hud-card__corner--bl"></div>
+          <div class="panel-head">
+            <h2><span class="title-bar title-bar--cyan"></span><span>评测基线与模型</span></h2>
             <button class="text-button" type="button" @click="router.push('/evaluation')">查看样本</button>
           </div>
-          <p class="panel-sub">小规模回归集与代码覆盖</p>
-          <div class="metrics-list">
+          <div class="metrics-list metrics-list--compact">
             <div v-for="m in metrics" :key="m.label" class="metric-row">
               <div class="metric-row__head">
                 <span>{{ m.label }}</span>
@@ -233,39 +256,16 @@
               </div>
               <div class="quality-bar"><i><em :style="{ width: `${Math.min(100, Number(m.value) || 0)}%` }"></em></i></div>
             </div>
-            <div class="metric-foot">
-              <span>代码覆盖</span>
-              <b class="font-digits">{{ codeCoverage }}%</b>
-            </div>
           </div>
-        </article>
-
-        <article class="cockpit-panel model-panel">
-          <div class="hud-card__corner hud-card__corner--tr"></div>
-          <div class="hud-card__corner hud-card__corner--bl"></div>
-          <div class="panel-head">
-            <h2><span class="title-bar title-bar--blue"></span><span>模型与规则</span></h2>
-          </div>
-          <p class="panel-sub">实际服务配置，不使用演示状态</p>
-          <div class="model-facts">
+          <div class="model-facts model-facts--compact">
             <div>
-              <span>提供方</span>
-              <b class="font-digits">{{ model.ai.provider || '未配置' }}</b>
+              <span>提供方 / 模型</span>
+              <b class="font-digits">{{ model.ai.provider || '未配置' }} · {{ model.ai.model || '—' }}</b>
             </div>
             <div>
-              <span>模型</span>
-              <b class="font-digits">{{ model.ai.model || '—' }}</b>
-            </div>
-            <div>
-              <span>API 密钥</span>
-              <b :class="model.ai.api_key_configured ? 'ok' : 'warn'">
-                {{ model.ai.api_key_configured ? '已配置' : '未配置' }}
-              </b>
-            </div>
-            <div>
-              <span>结构化输出</span>
-              <b :class="model.ai.json_output ? 'ok' : 'warn'">
-                {{ model.ai.json_output ? '可用' : '不可用' }}
+              <span>密钥 / 结构化输出</span>
+              <b :class="model.ai.api_key_configured && model.ai.json_output ? 'ok' : 'warn'">
+                {{ model.ai.api_key_configured ? '已配置' : '未配置' }} / {{ model.ai.json_output ? '可用' : '不可用' }}
               </b>
             </div>
           </div>
@@ -273,7 +273,6 @@
             配置模型与校验规则
             <el-icon><ArrowRight /></el-icon>
           </button>
-          <p class="model-foot">最后同步 {{ formatDate(model.market?.last_synced_at) }}</p>
         </article>
       </section>
     </main>
@@ -337,6 +336,49 @@
           </div>
         </div>
       </Transition>
+      <Transition name="cockpit-modal">
+        <div v-if="guardOpen" class="cockpit-modal" @click.self="closeGuardModal">
+          <div class="cockpit-modal__inner cockpit-panel hud-card--modal guard-modal">
+            <div class="hud-card__corner hud-card__corner--tr"></div>
+            <div class="hud-card__corner hud-card__corner--bl"></div>
+            <button class="cockpit-modal__close" type="button" @click="closeGuardModal"><el-icon><Close /></el-icon></button>
+            <div class="cockpit-modal__head">
+              <el-icon class="cockpit-modal__icon--guard"><Aim /></el-icon>
+              <h3>幻觉检测能力</h3>
+            </div>
+            <p class="cockpit-modal__desc">
+              平台所有 AI 结构化输出（岗位解析、简历抽取、匹配解释）在进入图谱前，都必须通过幻觉防护关卡：
+              置信度低于阈值或证据链缺失的结果不会被直接发布，而是转入人工复核队列，从源头抑制模型幻觉。
+            </p>
+            <div class="guard-modal__stats">
+              <div><span>累计检测</span><b class="font-digits">{{ compact(guardStats.total_checked || 0) }}</b></div>
+              <div><span>防护通过</span><b class="font-digits">{{ guardStats.passed }}</b></div>
+              <div><span>转人工复核</span><b class="font-digits" :class="{ 'guard-num--warn': guardStats.flagged }">{{ guardStats.flagged }}</b></div>
+              <div><span>通过率</span><b class="font-digits">{{ guardStats.pass_rate }}%</b></div>
+            </div>
+            <div class="guard-modal__section-title">检测规则</div>
+            <div class="guard-modal__rules">
+              <div v-for="rule in guardStats.rules" :key="rule.key" class="guard-modal__rule">
+                <b>{{ rule.label }}</b>
+                <small>{{ rule.detail }}</small>
+                <em class="font-digits">{{ rule.hits }} 次命中</em>
+              </div>
+            </div>
+            <div class="guard-modal__section-title">在管道中的位置</div>
+            <p class="guard-modal__stage">{{ guardStats.pipeline_stage }}</p>
+            <div v-if="guardStats.recent_events?.length" class="guard-modal__events">
+              <div class="guard-modal__section-title">近期拦截记录</div>
+              <div v-for="event in guardStats.recent_events" :key="event.id" class="guard-event">
+                <b>{{ event.job_name }}</b>
+                <small>{{ event.issues.join('、') }} · 置信度 {{ Math.round((event.confidence || 0) * 100) }}%</small>
+              </div>
+            </div>
+            <div class="cockpit-modal__actions">
+              <button class="cockpit-button primary" type="button" @click="closeGuardModal">知道了</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </Teleport>
   </div>
 </template>
@@ -344,6 +386,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import {
+  Aim,
   ArrowRight,
   CircleCheckFilled,
   Close,
@@ -356,7 +399,6 @@ import {
   List,
   Refresh,
   Setting,
-  Share,
   Tickets,
   UploadFilled,
   UserFilled,
@@ -368,8 +410,8 @@ import { api } from '@/api/http'
 import { useAuthStore } from '@/stores/auth'
 import { formatSnapshotTime, readDashboardSnapshot, settledValue, writeDashboardSnapshot } from '@/utils/dashboardCache'
 
-type AdminModel = { summary: any; datasets: any[]; reviews: any[]; evaluation: any; ai: any; market: any }
-const emptyModel: AdminModel = { summary: {}, datasets: [], reviews: [], evaluation: {}, ai: {}, market: {} }
+type AdminModel = { summary: any; datasets: any[]; reviews: any[]; evaluation: any; ai: any; market: any; health: any; hallucination: any }
+const emptyModel: AdminModel = { summary: {}, datasets: [], reviews: [], evaluation: {}, ai: {}, market: {}, health: {}, hallucination: {} }
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -377,13 +419,17 @@ const model = ref<AdminModel>({ ...emptyModel })
 const loading = ref(true)
 const refreshing = ref(false)
 const updatedAt = ref('')
-const cacheKey = computed(() => `sr-dashboard:admin:${auth.user?.id || auth.user?.username || 'default'}:v2`)
+const cacheKey = computed(() => `sr-dashboard:admin:${auth.user?.id || auth.user?.username || 'default'}:v3`)
 
 const reviewOpen = ref(false)
 const reviewTarget = ref<{ name: string; taskType: string; confidence: string }>({ name: '', taskType: '', confidence: '' })
 
 const configOpen = ref(false)
 const configDraft = ref({ provider: '', model: '', apiKey: '' })
+
+const guardOpen = ref(false)
+function openGuardModal() { guardOpen.value = true }
+function closeGuardModal() { guardOpen.value = false }
 
 const updatedLabel = computed(() => formatSnapshotTime(updatedAt.value))
 const pendingReviews = computed(() => model.value.reviews.filter((item: any) => item.status === 'pending'))
@@ -463,14 +509,51 @@ const metrics = computed(() => {
   return hasAny ? dataFromApi : fallback
 })
 
-const pipelineSteps = computed(() => [
-  { label: '来源接入', value: `${model.value.datasets.length || '—'} 源`, note: '版本与许可', path: '/datasets', icon: UploadFilled, tone: 'cyan' },
-  { label: '结构解析', value: `${model.value.summary.parsed_jd_count || 0} JD`, note: '字段与证据', path: '/jd-parser', icon: DataAnalysis, tone: 'blue' },
-  { label: '规则校验', value: `${model.value.evaluation.jd_parse_accuracy || 0}%`, note: '抽取回归', path: '/evaluation', icon: DocumentChecked, tone: 'indigo' },
-  { label: '人工复核', value: `${pendingReviews.value.length} 待办`, note: '低置信度回写', path: '/review-tasks', icon: List, tone: 'sky' },
-  { label: '图谱发布', value: `${model.value.summary.graph_relation_count || 0} 关系`, note: '岗位能力应用', path: '/skill-graph', icon: Connection, tone: 'teal' },
-  { label: '策略配置', value: model.value.ai.enabled ? '已启用' : '待配置', note: '模型与阈值', path: '/settings', icon: Setting, tone: 'amber' }
-])
+// ======== 数据健康度 ========
+const health = computed<any>(() => model.value.health || {})
+const healthIsMock = computed(() => !health.value?.dimensions?.length || !(Number(health.value.overall) > 0))
+const healthDims = computed(() => (healthIsMock.value ? MOCK_HEALTH.dimensions : health.value.dimensions))
+const healthOverall = computed(() => (healthIsMock.value ? MOCK_HEALTH.overall : Number(health.value.overall) || 0))
+const healthVerdict = computed(() => {
+  const v = healthOverall.value
+  if (v >= 90) return '数据资产状态优良'
+  if (v >= 75) return '整体健康，个别维度需关注'
+  if (v > 0) return '存在明显短板，优先补齐'
+  return '暂无统计数据'
+})
+function dimTone(value: any) {
+  const v = Number(value) || 0
+  if (v >= 85) return 'good'
+  if (v >= 70) return 'mid'
+  return 'low'
+}
+
+// ======== 幻觉检测 ========
+const guardStats = computed<any>(() => {
+  const g = model.value.hallucination
+  if (g && Number(g.sample_size) > 0) return g
+  return MOCK_GUARD
+})
+const guardIsMock = computed(() => !(model.value.hallucination && Number(model.value.hallucination.sample_size) > 0))
+
+// ======== 中央数据流管道 ========
+const flowStages = computed(() => {
+  const m = model.value
+  const g = guardStats.value
+  const pending = pendingReviews.value.length
+  const jdAcc = Number(m.evaluation.jd_parse_accuracy) || 0
+  const parseTotal = Number(m.summary.jd_count) || 0
+  const parsed = Number(m.summary.parsed_jd_count) || 0
+  return [
+    { key: 'source', label: '来源接入', value: `${m.datasets.length || '—'} 源`, note: '权威来源 · 版本与许可', path: '/datasets', icon: UploadFilled, tone: m.datasets.length ? 'cyan' : 'amber', status: m.datasets.length ? '运行中' : '待接入' },
+    { key: 'parse', label: '结构解析', value: `${parsed} JD`, note: `原始 ${parseTotal} 条 · 字段与证据抽取`, path: '/jd-parser', icon: DataAnalysis, tone: 'cyan', status: parsed ? '运行中' : '待解析' },
+    { key: 'validate', label: '规则校验', value: `${jdAcc}%`, note: '抽取回归准确率', path: '/evaluation', icon: DocumentChecked, tone: jdAcc >= 90 ? 'cyan' : 'amber', status: jdAcc >= 90 ? '达标' : '需关注' },
+    { key: 'guard', label: '幻觉检测', value: `${g.pass_rate}%`, note: `${g.flagged} 条待复核 · 置信阈值 ${g.min_confidence}`, action: 'modal', path: '', icon: Aim, tone: g.flagged > 0 ? 'rose' : 'cyan', status: g.flagged > 0 ? `${g.flagged} 条拦截` : '全部通过' },
+    { key: 'review', label: '人工复核', value: `${pending} 待办`, note: '低置信度结果回写', path: '/review-tasks', icon: List, tone: pending ? 'rose' : 'cyan', status: pending ? '阻塞发布' : '队列清空' },
+    { key: 'graph', label: '图谱发布', value: `${compact(m.summary.graph_relation_count || 0)} 关系`, note: '岗位-技能-证书图谱', path: '/skill-graph', icon: Connection, tone: 'teal', status: m.summary.graph_relation_count ? '已发布' : '待发布' },
+    { key: 'config', label: '策略配置', value: m.ai.enabled ? '已启用' : '待配置', note: `${m.ai.provider || '未配置'} · 模型与阈值`, path: '/settings', icon: Setting, tone: m.ai.enabled ? 'cyan' : 'amber', status: m.ai.enabled ? '运行中' : '未配置' }
+  ]
+})
 
 // ======== Mock Fallback（与 HrDashboard 保持一致：无真实数据时填充，保证大屏视觉完整） ========
 const MOCK_SOURCES = [
@@ -492,6 +575,33 @@ const MOCK_METRICS = [
   { label: '简历抽取', value: '95.65', tone: 'cyan' },
   { label: '岗位匹配', value: '80.00', tone: 'cyan' }
 ]
+const MOCK_HEALTH = {
+  overall: 92.5,
+  dataset_count: null,
+  dimensions: [
+    { key: 'completeness', label: '完整性', value: 95.2, note: '解析记录关键字段齐全率' },
+    { key: 'timeliness', label: '时效性', value: 88.6, note: '原始 JD 解析消化率' },
+    { key: 'consistency', label: '一致性', value: 93.1, note: '幻觉防护通过率' },
+    { key: 'uniqueness', label: '唯一性', value: 93.0, note: '重复入库 3 条' }
+  ]
+}
+const MOCK_GUARD: Record<string, any> = {
+  total_checked: 128,
+  sample_size: 128,
+  passed: 121,
+  flagged: 7,
+  pass_rate: 94.5,
+  min_confidence: 0.72,
+  rules: [
+    { key: 'low_confidence', label: '置信度阈值检测', detail: '解析结果置信度低于 0.72 时标记待复核', hits: 5 },
+    { key: 'missing_evidence', label: '证据链缺失检测', detail: '结构化输出缺少 evidence 字段时拒绝直接发布', hits: 2 }
+  ],
+  recent_events: [
+    { id: 1, job_name: 'LLMOps 平台运营专员', confidence: 0.61, issues: ['置信度低于阈值'], guard_status: 'needs_review' },
+    { id: 2, job_name: 'AIGC 内容风控分析师', confidence: 0.58, issues: ['置信度低于阈值', '缺少 evidence 字段'], guard_status: 'needs_review' }
+  ],
+  pipeline_stage: 'AI 结构化解析 → 幻觉防护 → 低置信结果转人工复核'
+}
 
 function roundAcc(v: any) {
   const n = Number(v)
@@ -508,14 +618,6 @@ function compact(value: number) {
   return new Intl.NumberFormat('zh-CN', { notation: value >= 10000 ? 'compact' : 'standard', maximumFractionDigits: 1 }).format(value)
 }
 
-function onCrystalClick() {
-  ElMessage.info(`当前治理健康度为 ${governanceScore.value}/100，${governanceVerdict.value}`)
-}
-
-function openReviewModal(target: { name: string; taskType?: string; confidence?: string }) {
-  reviewTarget.value = { name: target.name, taskType: target.taskType || '—', confidence: target.confidence || '—' }
-  reviewOpen.value = true
-}
 function closeReviewModal() { reviewOpen.value = false }
 
 function openConfigModal() {
@@ -550,14 +652,16 @@ async function refresh(force = false) {
   loading.value = !force
   refreshing.value = force
   try {
-    const results = await Promise.allSettled([api.overview(), api.datasets(), api.reviewTasks(), api.evaluation(), api.aiStatus(), api.marketSnapshot()])
+    const results = await Promise.allSettled([api.overview(), api.datasets(), api.reviewTasks(), api.evaluation(), api.aiStatus(), api.marketSnapshot(), api.governanceHealth(), api.hallucinationStats()])
     const next: AdminModel = {
       summary: settledValue(results[0], {}),
       datasets: settledValue(results[1], []),
       reviews: settledValue(results[2], []),
       evaluation: settledValue(results[3], {}),
       ai: settledValue(results[4], {}),
-      market: settledValue(results[5], {})
+      market: settledValue(results[5], {}),
+      health: settledValue(results[6], {}),
+      hallucination: settledValue(results[7], {})
     }
     const snapshot = writeDashboardSnapshot(cacheKey.value, next)
     model.value = snapshot.data
@@ -578,7 +682,7 @@ onMounted(() => refresh(false))
 .admin-cockpit {
   --cockpit-cyan: #36d7ff;
   --cockpit-blue: #3d86ff;
-  --cockpit-teal: #4be3c4;
+  --cockpit-teal: #67c8f5;
   --cockpit-amber: #ffb85c;
   --cockpit-rose: #ff6682;
   --cockpit-sky: #67c8f5;
@@ -693,13 +797,13 @@ onMounted(() => refresh(false))
   background: #ffb85c;
 }
 .service-state.online {
-  color: #71e6c8;
-  border-color: rgba(36, 215, 177, 0.35);
-  background: rgba(8, 88, 85, 0.22);
+  color: #7dd3fc;
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(8, 60, 100, 0.22);
 }
 .service-state.online i {
-  background: #24d7b1;
-  box-shadow: 0 0 8px rgba(36, 215, 177, 0.65);
+  background: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.65);
   animation: status-breathe 2.4s ease-in-out infinite;
 }
 
@@ -740,7 +844,7 @@ onMounted(() => refresh(false))
   flex: 0 0 auto;
 }
 .kpi-icon--cyan { background: rgba(54, 215, 255, 0.14); color: #36d7ff; border: 1px solid rgba(54, 215, 255, 0.28); }
-.kpi-icon--teal { background: rgba(75, 227, 196, 0.14); color: #4be3c4; border: 1px solid rgba(75, 227, 196, 0.28); }
+.kpi-icon--teal { background: rgba(103, 200, 245, 0.14); color: #67c8f5; border: 1px solid rgba(103, 200, 245, 0.28); }
 .kpi-icon--indigo { background: rgba(154, 163, 255, 0.14); color: #9aa3ff; border: 1px solid rgba(154, 163, 255, 0.28); }
 .kpi-icon--sky { background: rgba(103, 200, 245, 0.14); color: #67c8f5; border: 1px solid rgba(103, 200, 245, 0.28); }
 
@@ -791,7 +895,7 @@ onMounted(() => refresh(false))
   place-content: center;
   text-align: center;
 }
-.score-ring__num b { font-size: 22px; color: #67e8f9; font-weight: 900; line-height: 1; text-shadow: 0 0 8px rgba(0, 240, 255, 0.55); }
+.score-ring__num b { font-size: 22px; color: #7dd3fc; font-weight: 900; line-height: 1; text-shadow: 0 0 8px rgba(0, 240, 255, 0.55); }
 .score-ring__num small { display: block; margin-top: 3px; color: #7f9fb7; font-size: 9px; }
 
 .score-copy { display: grid; gap: 4px; min-width: 0; flex: 1; }
@@ -803,7 +907,7 @@ onMounted(() => refresh(false))
   display: grid;
   flex: 1 1 auto;
   min-height: 0;
-  grid-template-columns: minmax(320px, 3fr) minmax(560px, 6fr) minmax(320px, 3fr);
+  grid-template-columns: minmax(300px, 3fr) minmax(600px, 7fr) minmax(300px, 3fr);
   gap: 12px;
 }
 .col {
@@ -811,9 +915,9 @@ onMounted(() => refresh(false))
   min-height: 0;
   gap: 12px;
 }
-.col-left { grid-template-rows: minmax(0, 1fr) minmax(0, 1.05fr); }
-.col-center { grid-template-rows: minmax(0, 3.3fr) minmax(0, 1fr); }
-.col-right { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
+.col-left { grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr); }
+.col-center { grid-template-rows: minmax(0, 1fr) auto; }
+.col-right { grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr); }
 .col > .cockpit-panel { min-height: 0; display: flex; flex-direction: column; }
 
 .cockpit-panel { padding: 14px 16px; }
@@ -868,7 +972,7 @@ onMounted(() => refresh(false))
 }
 .cockpit-tag i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
 .cockpit-tag.danger { color: #ff9db0; border-color: rgba(255, 102, 130, 0.3); background: rgba(118, 26, 45, 0.24); }
-.cockpit-tag.success { color: #73f1d4; border-color: rgba(36, 215, 177, 0.28); background: rgba(14, 104, 86, 0.24); }
+.cockpit-tag.success { color: #7dd3fc; border-color: rgba(56, 189, 248, 0.28); background: rgba(14, 74, 120, 0.24); }
 
 .text-button {
   border: 0;
@@ -903,7 +1007,7 @@ onMounted(() => refresh(false))
 .priority-row:hover {
   background: rgba(124, 211, 255, 0.06);
 }
-.priority-row--emerald:hover { background: rgba(75, 227, 196, 0.06); }
+.priority-row--emerald:hover { background: rgba(103, 200, 245, 0.06); }
 .priority-index { color: #6f91ad; font-size: 12px; font-weight: 800; font-family: "JetBrains Mono", Consolas, monospace; }
 .priority-body { min-width: 0; }
 .priority-body b {
@@ -925,7 +1029,7 @@ onMounted(() => refresh(false))
   white-space: nowrap;
 }
 .tag--rose { color: #ff9db0; background: rgba(118, 26, 45, 0.28); }
-.tag--emerald { color: #71e6c8; background: rgba(14, 104, 86, 0.28); }
+.tag--emerald { color: #7dd3fc; background: rgba(12, 98, 168, 0.28); }
 .priority-arrow { color: #7899b1; }
 
 .all-clear {
@@ -974,14 +1078,14 @@ onMounted(() => refresh(false))
   flex: 0 0 auto;
 }
 .source-volume { color: var(--cockpit-dim); font-size: 10px; }
-.source-score { color: #67e8f9; font-size: 12px; font-weight: 800; }
+.source-score { color: #7dd3fc; font-size: 12px; font-weight: 800; }
 .source-status {
   border-radius: 5px;
   padding: 3px 7px;
   font-size: 9px;
   font-weight: 700;
 }
-.source-status.good { color: #71e6c8; background: rgba(14, 104, 86, 0.28); }
+.source-status.good { color: #7dd3fc; background: rgba(12, 98, 168, 0.28); }
 .source-status.review { color: #ffd094; background: rgba(121, 75, 18, 0.28); }
 .source-row__pub {
   color: #7899b1;
@@ -1003,192 +1107,295 @@ onMounted(() => refresh(false))
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%);
+  background: linear-gradient(90deg, #3b82f6 0%, #0ea5e9 100%);
   box-shadow: 0 0 8px rgba(6, 182, 212, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transform-origin: left;
   animation: bar-enter 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
-/* =========================== Topology =========================== */
-.topology-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-height: 0;
-  background: transparent url('../../assets/cockpit-topology.png') center / cover no-repeat !important;
-  border-color: rgba(71, 191, 255, 0.35) !important;
-  box-shadow: none !important;
+/* =========================== Mock Flag =========================== */
+.mock-flag {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 184, 92, 0.35);
+  border-radius: 999px;
+  padding: 2px 8px;
+  color: #ffd094;
+  background: rgba(120, 75, 18, 0.18);
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
 }
-.topology-head {
-  text-align: center;
-  flex: 0 0 auto;
-}
-.topology-head h2 {
-  margin: 0;
-  color: #dff7ff;
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: 0.18em;
-  text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
-}
-.topology-head p {
-  margin: 6px 0 0;
-  color: var(--cockpit-dim);
-  font-size: 11px;
+.mock-flag--block {
+  display: inline-flex;
+  margin-top: auto;
+  align-self: flex-start;
 }
 
-.topology-canvas {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
-  display: grid;
-  place-items: center;
-}
-
-.node {
-  position: absolute;
-  z-index: 10;
+/* =========================== Health Panel =========================== */
+.health-top {
   display: flex;
   align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.health-ring { position: relative; width: 68px; height: 68px; flex: 0 0 auto; }
+.health-ring .score-ring__num b { font-size: 17px; }
+.health-summary { display: grid; gap: 4px; min-width: 0; }
+.health-summary b { color: #f1fbff; font-size: 14px; font-weight: 800; }
+.health-summary p { margin: 0; color: #809fb7; font-size: 11px; line-height: 1.5; }
+.health-dims {
+  display: grid;
   gap: 9px;
-  padding: 8px 13px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  align-content: start;
+  padding-right: 4px;
+}
+.health-dim { display: grid; gap: 4px; }
+.health-dim__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #c2dcef;
+  font-size: 12px;
+}
+.health-num--good { color: #7dd3fc; }
+.health-num--mid { color: #ffd094; }
+.health-num--low { color: #ff9db0; }
+.health-bar--good { background: linear-gradient(90deg, #3b82f6, #0ea5e9); }
+.health-bar--mid { background: linear-gradient(90deg, #d97706, #ffb85c); }
+.health-bar--low { background: linear-gradient(90deg, #be3d5c, #ff7088); }
+.health-dim > small { color: #7394af; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* =========================== Flow Pipeline (中央核心) =========================== */
+.flow-panel { padding: 12px 16px 10px; }
+.flow-pipeline {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 2px 6px 2px 2px;
+}
+.flow-stage {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  flex: 1 1 0;
+  min-height: 0;
+}
+.flow-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.flow-node {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  flex: 0 0 auto;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.flow-node--cyan { background: rgba(54, 215, 255, 0.16); color: #7dd3fc; border: 1px solid rgba(54, 215, 255, 0.45); box-shadow: 0 0 12px rgba(54, 215, 255, 0.25); }
+.flow-node--teal { background: rgba(103, 200, 245, 0.16); color: #67c8f5; border: 1px solid rgba(103, 200, 245, 0.45); box-shadow: 0 0 12px rgba(103, 200, 245, 0.25); }
+.flow-node--amber { background: rgba(255, 184, 92, 0.16); color: #ffb85c; border: 1px solid rgba(255, 184, 92, 0.45); box-shadow: 0 0 12px rgba(255, 184, 92, 0.25); }
+.flow-node--rose { background: rgba(255, 102, 130, 0.16); color: #ff9db0; border: 1px solid rgba(255, 102, 130, 0.5); box-shadow: 0 0 12px rgba(255, 102, 130, 0.3); }
+
+.flow-link {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 10px;
+  width: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgba(64, 178, 223, 0.25);
+}
+.flow-link em {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 12px;
+  background: linear-gradient(180deg, rgba(78, 216, 255, 0), #4ed8ff, rgba(78, 216, 255, 0));
+  animation: flow-drop 2.4s linear infinite;
+}
+.flow-link em:nth-child(2) { animation-delay: 0.8s; }
+.flow-link em:nth-child(3) { animation-delay: 1.6s; }
+@keyframes flow-drop {
+  from { transform: translateY(-14px); }
+  to { transform: translateY(64px); }
+}
+
+.flow-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 6px;
+  border: 1px solid rgba(73, 156, 207, 0.2);
   border-radius: 10px;
-  background: rgba(2, 7, 19, 0.32);
-  backdrop-filter: blur(6px) saturate(1.05);
-  -webkit-backdrop-filter: blur(6px) saturate(1.05);
+  padding: 7px 14px;
+  background: rgba(6, 31, 64, 0.5);
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
-  box-shadow:
-    0 0 14px rgba(0, 240, 255, 0.22),
-    0 6px 18px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(161, 231, 255, 0.12);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
 }
-.node b { text-shadow: 0 0 8px rgba(0, 0, 0, 0.7); }
-.node:hover {
-  transform: scale(1.05);
-  border-color: rgba(124, 211, 255, 0.75) !important;
-  background: rgba(2, 7, 19, 0.5);
-}
-.node--top {
-  top: 6%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 1px solid rgba(54, 215, 255, 0.55);
-}
-.node--top:hover { transform: translateX(-50%) scale(1.05); }
-.node--tr {
-  top: 24%;
-  right: 4%;
-  border: 1px solid rgba(75, 227, 196, 0.55);
-}
-.node--br {
-  bottom: 14%;
-  right: 4%;
-  border: 1px solid rgba(61, 134, 255, 0.55);
-}
-.node--bl {
-  bottom: 14%;
-  left: 4%;
-  border: 1px solid rgba(103, 200, 245, 0.55);
-}
-.node--tl {
-  top: 24%;
-  left: 4%;
-  border: 1px solid rgba(154, 163, 255, 0.55);
-}
-
-.node__icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  font-size: 15px;
-  flex: 0 0 auto;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-}
-.node__icon--cyan { background: rgba(54, 215, 255, 0.18); color: #67e8f9; border: 1px solid rgba(54, 215, 255, 0.45); }
-.node__icon--teal { background: rgba(75, 227, 196, 0.18); color: #4be3c4; border: 1px solid rgba(75, 227, 196, 0.45); }
-.node__icon--blue { background: rgba(61, 134, 255, 0.18); color: #6ea8ff; border: 1px solid rgba(61, 134, 255, 0.45); }
-.node__icon--sky { background: rgba(103, 200, 245, 0.18); color: #67c8f5; border: 1px solid rgba(103, 200, 245, 0.45); }
-.node__icon--indigo { background: rgba(154, 163, 255, 0.18); color: #9aa3ff; border: 1px solid rgba(154, 163, 255, 0.45); }
-
-.node__body { display: grid; gap: 2px; min-width: 0; }
-.node__label { color: #c2dcef; font-size: 10px; font-weight: 700; }
-.node__body b { color: #ffffff; font-size: 14px; line-height: 1.1; font-weight: 800; }
-.node__body small { color: #b6d4ee; font-size: 10px; }
-.node__unit { color: #cde3f3; font-size: 9px; font-weight: 500; }
-
-/* =========================== Pipeline =========================== */
-.pipeline-panel { padding: 10px 14px 12px; }
-.pipeline-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 6px;
-  padding-top: 2px;
-  flex: 1 1 auto;
-  min-height: 0;
-  align-content: center;
-}
-.pipeline-step {
-  position: relative;
-  display: grid;
-  grid-template-rows: 26px auto auto auto;
-  align-content: center;
-  gap: 3px;
-  padding: 7px 6px;
-  border: 1px solid rgba(73, 156, 207, 0.18);
-  border-radius: 8px;
-  background: rgba(6, 31, 64, 0.55);
-  color: inherit;
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 180ms ease, background 180ms ease;
-}
-.pipeline-step:hover {
+.flow-card:hover {
+  border-color: rgba(73, 208, 243, 0.5);
   background: rgba(18, 117, 194, 0.18);
+  transform: translateX(2px);
 }
-.pipeline-step--cyan:hover { border-color: rgba(0, 240, 255, 0.55); }
-.pipeline-step--blue:hover { border-color: rgba(61, 134, 255, 0.55); }
-.pipeline-step--indigo:hover { border-color: rgba(154, 163, 255, 0.55); }
-.pipeline-step--sky:hover { border-color: rgba(103, 200, 245, 0.55); }
-.pipeline-step--teal:hover { border-color: rgba(75, 227, 196, 0.55); }
-.pipeline-step--amber:hover { border-color: rgba(255, 184, 92, 0.55); }
+.flow-card--guard { border-color: rgba(255, 102, 130, 0.32); background: rgba(64, 22, 38, 0.32); }
+.flow-card--guard:hover { border-color: rgba(255, 102, 130, 0.55); background: rgba(94, 32, 54, 0.42); }
+.flow-card__main { display: grid; gap: 3px; min-width: 0; }
+.flow-card__main b { color: #e5f8ff; font-size: 13px; font-weight: 700; }
+.flow-card__main small { color: #7394ad; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.flow-card__meta { display: grid; justify-items: end; gap: 4px; flex: 0 0 auto; }
+.flow-card__meta strong { color: #7dd3fc; font-size: 15px; font-weight: 800; }
+.flow-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.flow-status i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+.flow-status--cyan { color: #7dd3fc; background: rgba(12, 98, 168, 0.28); }
+.flow-status--teal { color: #67c8f5; background: rgba(12, 98, 168, 0.28); }
+.flow-status--amber { color: #ffd094; background: rgba(121, 75, 18, 0.3); }
+.flow-status--rose { color: #ff9db0; background: rgba(118, 26, 45, 0.3); }
 
-.pipeline-step__icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+/* =========================== Guard Panel (幻觉检测) =========================== */
+.guard-panel { gap: 6px; }
+.guard-stats {
   display: grid;
-  place-items: center;
-  margin: 0 auto;
-  font-size: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 10px;
 }
-.pipeline-step--cyan .pipeline-step__icon { background: rgba(0, 240, 255, 0.14); color: #67e8f9; border: 1px solid rgba(54, 215, 255, 0.4); }
-.pipeline-step--blue .pipeline-step__icon { background: rgba(61, 134, 255, 0.14); color: #6ea8ff; border: 1px solid rgba(61, 134, 255, 0.4); }
-.pipeline-step--indigo .pipeline-step__icon { background: rgba(154, 163, 255, 0.14); color: #9aa3ff; border: 1px solid rgba(154, 163, 255, 0.4); }
-.pipeline-step--sky .pipeline-step__icon { background: rgba(103, 200, 245, 0.14); color: #67c8f5; border: 1px solid rgba(103, 200, 245, 0.4); }
-.pipeline-step--teal .pipeline-step__icon { background: rgba(75, 227, 196, 0.14); color: #4be3c4; border: 1px solid rgba(75, 227, 196, 0.4); }
-.pipeline-step--amber .pipeline-step__icon { background: rgba(255, 184, 92, 0.14); color: #ffb85c; border: 1px solid rgba(255, 184, 92, 0.4); }
-
-.pipeline-step b { color: #dff5ff; font-size: 11px; font-weight: 600; }
-.pipeline-step strong { color: #67e8f9; font-size: 13px; font-weight: 800; }
-.pipeline-step small { color: var(--cockpit-dim); font-size: 9px; }
-
-.pipeline-link {
-  position: absolute;
-  right: -8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 10px;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(64, 178, 223, 0.6), rgba(64, 178, 223, 0));
-  pointer-events: none;
+.guard-stat {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(73, 156, 207, 0.2);
+  border-radius: 9px;
+  padding: 10px 8px;
+  background: rgba(6, 31, 64, 0.45);
+  text-align: center;
 }
+.guard-stat b { color: #7dd3fc; font-size: 19px; font-weight: 900; line-height: 1; }
+.guard-stat b.guard-num--warn { color: #ff9db0; }
+.guard-stat span { color: #88a9c4; font-size: 10px; }
+.guard-rules { display: grid; gap: 7px; margin-bottom: 10px; }
+.guard-rule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(74, 143, 191, 0.12);
+  padding-bottom: 7px;
+}
+.guard-rule__label { display: inline-flex; align-items: center; gap: 7px; color: #c2dcef; font-size: 11px; }
+.guard-rule__label i { width: 5px; height: 5px; border-radius: 50%; background: #38bdf8; box-shadow: 0 0 7px rgba(56, 189, 248, 0.8); }
+.guard-rule b { color: #e5f7ff; font-size: 11px; }
+.guard-events__title,
+.guard-modal__section-title {
+  margin: 0 0 6px;
+  color: #88a9c4;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.guard-event {
+  display: grid;
+  gap: 3px;
+  border-left: 2px solid rgba(255, 102, 130, 0.5);
+  border-radius: 3px;
+  padding: 5px 8px;
+  background: rgba(64, 22, 38, 0.22);
+  margin-bottom: 6px;
+}
+.guard-event b { color: #edfaff; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.guard-event small { color: #829fb6; font-size: 10px; }
+.guard-events__empty {
+  padding: 12px 10px;
+  border: 1px dashed rgba(74, 143, 191, 0.25);
+  border-radius: 8px;
+  color: #7394af;
+  font-size: 11px;
+  text-align: center;
+}
+.guard-events { max-height: 180px; overflow-y: auto; }
+
+/* =========================== Guard Modal =========================== */
+.guard-modal__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.guard-modal__stats div {
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(74, 143, 191, 0.2);
+  border-radius: 9px;
+  padding: 10px 8px;
+  background: rgba(2, 7, 19, 0.5);
+  text-align: center;
+}
+.guard-modal__stats span { color: #7899b1; font-size: 10px; }
+.guard-modal__stats b { color: #7dd3fc; font-size: 17px; font-weight: 900; }
+.guard-modal__stats b.guard-num--warn { color: #ff9db0; }
+.guard-modal__rules { display: grid; gap: 8px; margin-bottom: 14px; }
+.guard-modal__rule {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(74, 143, 191, 0.18);
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: rgba(2, 7, 19, 0.45);
+}
+.guard-modal__rule b { color: #e5f7ff; font-size: 12px; white-space: nowrap; }
+.guard-modal__rule small { color: #829fb6; font-size: 10px; line-height: 1.5; }
+.guard-modal__rule em {
+  border-radius: 5px;
+  padding: 3px 8px;
+  color: #ffd094;
+  background: rgba(121, 75, 18, 0.28);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.guard-modal__stage {
+  margin: 0 0 14px;
+  border-left: 2px solid rgba(54, 215, 255, 0.55);
+  border-radius: 3px;
+  padding: 6px 10px;
+  color: #bfe8ff;
+  background: rgba(8, 60, 100, 0.22);
+  font-size: 11px;
+}
+.guard-modal__events { max-height: 170px; overflow-y: auto; margin-bottom: 12px; }
+.cockpit-modal__icon--guard { color: #36d7ff; font-size: 18px; }
+
+/* =========================== Compact Strips =========================== */
+.priority-strip { padding: 10px 16px 12px; }
+.priority-queue--compact { flex: 0 0 auto; overflow: visible; }
+.priority-row--slim { min-height: 44px; }
+.all-clear--slim { min-height: 64px; padding: 10px 8px; }
+.metrics-list--compact { gap: 9px; }
+.model-facts--compact { padding-bottom: 6px; }
 
 /* =========================== Metrics Panel =========================== */
 .metrics-panel { padding: 14px 16px; }
@@ -1201,22 +1408,10 @@ onMounted(() => refresh(false))
   color: #c2dcef;
   font-size: 12px;
 }
-.metric-row__num { color: #67e8f9; font-weight: 800; font-size: 13px; }
-.metric-row__num--cyan { color: #67e8f9; }
-.metric-foot {
-  margin-top: 8px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(70, 158, 216, 0.18);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #c2dcef;
-  font-size: 11px;
-}
-.metric-foot b { color: #dff7ff; }
+.metric-row__num { color: #7dd3fc; font-weight: 800; font-size: 13px; }
+.metric-row__num--cyan { color: #7dd3fc; }
 
-/* =========================== Model Panel =========================== */
-.model-panel { display: flex; flex-direction: column; gap: 8px; }
+/* =========================== Model Facts =========================== */
 .model-facts { display: grid; gap: 8px; padding: 4px 0 8px; }
 .model-facts div {
   display: flex;
@@ -1227,18 +1422,12 @@ onMounted(() => refresh(false))
 }
 .model-facts span { color: #7899b1; font-size: 11px; }
 .model-facts b { color: #e5f7ff; font-size: 12px; }
-.model-facts b.ok { color: #71e6c8; }
+.model-facts b.ok { color: #7dd3fc; }
 .model-facts b.warn { color: #ffd094; }
 .cockpit-button--block {
   display: flex;
   width: 100%;
   margin-top: 6px;
-}
-.model-foot {
-  margin: 4px 0 0;
-  text-align: right;
-  color: var(--cockpit-dim);
-  font-size: 10px;
 }
 
 .cockpit-empty {
@@ -1416,25 +1605,21 @@ onMounted(() => refresh(false))
 /* =========================== Responsive =========================== */
 @media (max-width: 1480px) {
   .kpi-strip { grid-template-columns: minmax(240px, 1.1fr) repeat(4, minmax(0, 1fr)); }
-  .cockpit-main { grid-template-columns: minmax(280px, 1fr) minmax(420px, 1.4fr) minmax(280px, 1fr); }
-  .node { padding: 5px 9px; }
-  .node__body b { font-size: 12px; }
+  .cockpit-main { grid-template-columns: minmax(270px, 1fr) minmax(420px, 1.6fr) minmax(270px, 1fr); }
+  .flow-card__meta strong { font-size: 13px; }
 }
 @media (max-width: 1180px) {
   .kpi-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .kpi-card--score { grid-column: 1 / -1; }
   .cockpit-main { grid-template-columns: 1fr; }
-  .topology-canvas { min-height: 420px; }
-  .node--top { top: 1%; }
-  .node--tr { top: 18%; right: 2%; }
-  .node--br { bottom: 4%; right: 2%; }
-  .node--bl { bottom: 4%; left: 2%; }
-  .node--tl { top: 18%; left: 2%; }
+  .admin-cockpit { height: auto; overflow-y: auto; }
+  .flow-pipeline { max-height: 520px; }
+  .flow-stage { flex: 0 0 auto; }
+  .flow-link { min-height: 22px; }
 }
 @media (max-width: 760px) {
   .admin-cockpit { padding: 16px 14px 24px; }
   .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pipeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cockpit-header { flex-direction: column; align-items: stretch; }
   .cockpit-header__actions { justify-content: flex-end; flex-wrap: wrap; }
 }

@@ -70,7 +70,7 @@ from app.services.constants import SKILLS
 from app.services.document_parser import DocumentParseError, MAX_UPLOAD_BYTES, extract_resume_text
 from app.services.capability_catalog import enriched_job, job_authority, job_requirements, resolve_onet
 from app.services.emerging_jobs import build_emerging_candidate
-from app.services.hallucination_guard import guard_payload
+from app.services.hallucination_guard import MIN_CONFIDENCE, guard_payload
 from app.services.jd_parser import text_hash
 from app.services.matching import score_match
 from app.services.official_data import catalog_to_dict, market_snapshot, source_to_dict, sync_official_data, sync_status
@@ -550,6 +550,108 @@ def overview_summary(db: Session = Depends(get_db)):
         "market_coverage": market["coverage"],
         "market_as_of": market["as_of"],
         "market_last_synced_at": market["last_synced_at"],
+    }
+
+
+def _guard_stats(db: Session) -> dict:
+    """基于 ParsedJD 的置信度与证据链，统计幻觉防护结果（取样最近 1000 条）。"""
+    total_in_db = db.scalar(select(func.count(ParsedJD.id))) or 0
+    rows = db.execute(
+        select(ParsedJD.id, ParsedJD.job_name, ParsedJD.confidence, ParsedJD.evidence)
+        .order_by(ParsedJD.id.desc())
+        .limit(1000)
+    ).all()
+    flagged = []
+    rule_hits = {"missing_evidence": 0, "low_confidence": 0}
+    for row in rows:
+        try:
+            evidence = json.loads(row.evidence or "{}")
+        except (json.JSONDecodeError, TypeError):
+            evidence = {}
+        issues = evidence.get("guard_issues")
+        if issues is None:
+            ok, issues = guard_payload({"confidence": row.confidence, "evidence": evidence.get("evidence_sources")})
+            if ok:
+                issues = []
+        if "缺少 evidence 字段" in issues:
+            rule_hits["missing_evidence"] += 1
+        if "置信度低于阈值" in issues:
+            rule_hits["low_confidence"] += 1
+        if issues:
+            flagged.append({
+                "id": row.id,
+                "job_name": row.job_name,
+                "confidence": round(float(row.confidence or 0), 4),
+                "issues": issues,
+                "guard_status": evidence.get("guard_status", "needs_review"),
+            })
+    sample = len(rows)
+    passed = sample - len(flagged)
+    return {
+        "total_checked": total_in_db,
+        "sample_size": sample,
+        "passed": passed,
+        "flagged": len(flagged),
+        "pass_rate": round(passed / sample * 100, 1) if sample else 0,
+        "min_confidence": MIN_CONFIDENCE,
+        "rules": [
+            {"key": "low_confidence", "label": "置信度阈值检测", "detail": f"解析结果置信度低于 {MIN_CONFIDENCE} 时标记待复核", "hits": rule_hits["low_confidence"]},
+            {"key": "missing_evidence", "label": "证据链缺失检测", "detail": "结构化输出缺少 evidence 字段时拒绝直接发布", "hits": rule_hits["missing_evidence"]},
+        ],
+        "recent_events": flagged[:6],
+        "pipeline_stage": "AI 结构化解析 → 幻觉防护 → 低置信结果转人工复核",
+    }
+
+
+@router.get("/governance/hallucination")
+def governance_hallucination(db: Session = Depends(get_db)):
+    return _guard_stats(db)
+
+
+@router.get("/governance/health")
+def governance_health(db: Session = Depends(get_db)):
+    """数据健康度：完整性 / 时效性 / 一致性 / 唯一性，全部来自真实库表统计。"""
+    jd_total = db.scalar(select(func.count(RawJD.id))) or 0
+    parsed_total = db.scalar(select(func.count(ParsedJD.id))) or 0
+    duplicate_total = db.scalar(select(func.count(RawJD.id)).where(RawJD.is_duplicate.is_(True))) or 0
+
+    # 完整性：解析结果关键字段填充率
+    complete = parsed_total
+    if parsed_total:
+        filled = db.scalar(
+            select(func.count(ParsedJD.id)).where(
+                ParsedJD.domain != "未分类",
+                ParsedJD.level != "未说明",
+                ParsedJD.responsibilities != "[]",
+                ParsedJD.required_skills != "[]",
+            )
+        ) or 0
+        complete = filled
+    completeness = round(complete / parsed_total * 100, 1) if parsed_total else 0
+
+    # 时效性：原始 JD 的解析消化率（入库后完成解析的比例）
+    timeliness = round(parsed_total / jd_total * 100, 1) if jd_total else 0
+
+    # 一致性：通过幻觉防护（置信度 + 证据链）的比例
+    guard = _guard_stats(db)
+    consistency = guard["pass_rate"]
+
+    # 唯一性：非重复原始记录占比
+    uniqueness = round((jd_total - duplicate_total) / jd_total * 100, 1) if jd_total else 0
+
+    dimensions = [
+        {"key": "completeness", "label": "完整性", "value": completeness, "note": f"{complete}/{parsed_total} 条解析记录关键字段齐全"},
+        {"key": "timeliness", "label": "时效性", "value": timeliness, "note": f"{parsed_total}/{jd_total} 条原始 JD 完成解析"},
+        {"key": "consistency", "label": "一致性", "value": consistency, "note": f"幻觉防护通过率（取样 {guard['sample_size']} 条）"},
+        {"key": "uniqueness", "label": "唯一性", "value": uniqueness, "note": f"重复入库 {duplicate_total} 条"},
+    ]
+    active = [d["value"] for d in dimensions]
+    overall = round(sum(active) / len(active), 1) if active else 0
+    return {
+        "overall": overall,
+        "dimensions": dimensions,
+        "dataset_count": db.scalar(select(func.count(DataSource.id)).where(DataSource.status != "archived")) or 0,
+        "generated_at": datetime.utcnow().isoformat(),
     }
 
 

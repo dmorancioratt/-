@@ -26,6 +26,9 @@ backend/data/external/
 node_modules/
 frontend/dist/
 *.tsbuildinfo
+frontend/output/
+frontend/.playwright-cli/
+.playwright-mcp/
 
 # Editor / OS
 .idea/
@@ -36,6 +39,13 @@ frontend/dist/
 _work_shurong/
 _work_jobgraph/
 _extract/
+ez-tree-temp/
+tmp/
+
+# Local browser/visual QA artifacts
+growth-cockpit-*.png
+screenshot-edge.js
+take-screenshot.mjs
 
 # Local backup archives
 fightbei/

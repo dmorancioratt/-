@@ -72,7 +72,7 @@ body.theme-dark .app-main:not(.app-main--dashboard) :is(
   .evaluation-card
 ) {
   border-color: rgba(78, 200, 255, 0.18) !important;
-  background: rgba(8, 42, 92, 0.35) !important;
+  background: rgba(6, 50, 48, 0.35) !important;
   box-shadow:
     inset 0 1px 0 rgba(161, 231, 255, 0.08),
     0 8px 32px rgba(0, 10, 40, 0.25) !important;
@@ -272,7 +272,7 @@ body.theme-dark .identity-card > span { background: #112b3b !important; color: #
 
 body.theme-dark .el-alert {
   border: 1px solid rgba(78, 200, 255, 0.18) !important;
-  background: rgba(8, 42, 92, 0.35) !important;
+  background: rgba(6, 50, 48, 0.35) !important;
   box-shadow:
     inset 0 1px 0 rgba(161, 231, 255, 0.08),
     0 8px 32px rgba(0, 10, 40, 0.25) !important;

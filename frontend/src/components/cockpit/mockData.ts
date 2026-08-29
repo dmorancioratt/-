@@ -221,7 +221,7 @@ export function getMatchDimensions(role: TargetRole) {
   const dims = (role as any).matchDetails || { proSkill: 70, projectExp: 70, toolAbility: 70, generalAbility: 70, jobPrep: 60 }
   return [
     { key: 'proSkill', name: '专业技能', val: dims.proSkill, color: '#4ed8ff' },
-    { key: 'projectExp', name: '项目经验', val: dims.projectExp, color: '#37d6a5' },
+    { key: 'projectExp', name: '项目经验', val: dims.projectExp, color: '#36d7ff' },
     { key: 'toolAbility', name: '工具能力', val: dims.toolAbility, color: '#8f7cff' },
     { key: 'generalAbility', name: '通用能力', val: dims.generalAbility, color: '#ffb65c' },
     { key: 'jobPrep', name: '求职准备度', val: dims.jobPrep, color: '#ff7088' }

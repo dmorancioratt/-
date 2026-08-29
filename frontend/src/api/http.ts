@@ -75,6 +75,8 @@ export const api = {
   approveTask: (id: number) => http.post(`/api/review-tasks/${id}/approve`).then((res) => res.data),
   rejectTask: (id: number) => http.post(`/api/review-tasks/${id}/reject`).then((res) => res.data),
   evaluation: () => http.get('/api/evaluation/metrics').then((res) => res.data),
+  governanceHealth: () => http.get('/api/governance/health').then((res) => res.data),
+  hallucinationStats: () => http.get('/api/governance/hallucination').then((res) => res.data),
   resumes: () => http.get('/api/resumes').then((res) => res.data),
   saveParsedResume: (payload: { resume: Record<string, unknown>; source_filename?: string; raw_text?: string }) =>
     http.post('/api/resumes/save-parsed', payload).then((res) => res.data),
