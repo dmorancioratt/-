@@ -67,8 +67,8 @@
           </div>
         </div>
         <div class="panel-actions">
-          <button class="action-btn primary">加入学习路径</button>
-          <button class="action-btn secondary">查看岗位详情</button>
+          <button class="action-btn primary" @click="joinLearningPath">加入学习路径</button>
+          <button class="action-btn secondary" @click="viewJobDetails">查看岗位详情</button>
         </div>
       </div>
     </div>
@@ -81,6 +81,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import * as THREE from 'three'
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js'
 import { createScene } from '../lib/ez-tree/scene/scene.js'
@@ -126,6 +128,7 @@ const connectorSvg = ref<SVGSVGElement>()
 const selectedFruit = ref<any>(null)
 const panelVisible = ref(false)
 const loading = ref(true)
+const router = useRouter()
 
 let renderer: THREE.WebGLRenderer | null = null
 let labelRenderer: CSS2DRenderer | null = null
@@ -600,6 +603,34 @@ function createParticleBurst(pos: THREE.Vector3, color: THREE.Color, scene: THRE
 function goToBilibili(courseName: string) {
   const keyword = encodeURIComponent(courseName + ' 教程')
   window.open(`https://search.bilibili.com/all?keyword=${keyword}`, '_blank')
+}
+
+function joinLearningPath() {
+  const skillName = selectedFruit.value?.name || ''
+  let role: string | undefined
+  try {
+    role = JSON.parse(localStorage.getItem('auth_user') || 'null')?.role
+  } catch {
+    role = undefined
+  }
+  if (role === 'candidate') {
+    ElMessage.success(`已将「${skillName}」加入学习路径`)
+    router.push('/learning-path')
+  } else {
+    ElMessage.success(`已将「${skillName}」加入学习路径`)
+  }
+}
+
+function viewJobDetails() {
+  const focusSkill = selectedFruit.value?.name || ''
+  const relatedJobs: string[] = selectedFruit.value?.relatedJobs || []
+  const jobName = relatedJobs[0]
+  if (jobName) {
+    router.push({ path: '/match-analysis', query: { jobName } })
+  } else {
+    ElMessage.info(`暂无「${focusSkill}」关联岗位，已为你打开匹配分析`)
+    router.push('/match-analysis')
+  }
 }
 
 function closePanel() {
