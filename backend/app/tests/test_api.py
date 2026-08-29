@@ -293,7 +293,14 @@ def test_review_approval_writes_back_to_parsed_jd():
 def test_all_ai_business_routes_use_provider():
     status = client.get("/api/ai/status")
     assert status.status_code == 200
-    assert len(status.json()["supported_tasks"]) == 6
+    assert {
+        "jd_parse",
+        "resume_parse",
+        "match_analysis",
+        "learning_path",
+        "emerging_job_analysis",
+        "digital_interview",
+    }.issubset(status.json()["supported_tasks"])
 
     emerging = client.get("/api/emerging-jobs")
     assert emerging.status_code == 200
