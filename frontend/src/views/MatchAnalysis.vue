@@ -311,6 +311,12 @@ async function loadBaseData() {
     profile.value = profileRow
     const queryJobId = Number(route.query.jobId || 0)
     if (queryJobId && jobs.value.some((item) => item.id === queryJobId)) jobId.value = queryJobId
+    // 支持按岗位名称定位（例如从能力演化树"查看岗位详情"跳转而来）
+    const queryJobName = String(route.query.jobName || '')
+    if (!jobId.value && queryJobName) {
+      const matchedJob = jobs.value.find((item: any) => item.name === queryJobName || item.name.includes(queryJobName) || queryJobName.includes(item.name))
+      if (matchedJob) jobId.value = matchedJob.id
+    }
     if (!jobId.value) jobId.value = jobs.value[0]?.id
     if (!resumeId.value) resumeId.value = resumes.value[0]?.id
     const cachedReportId = cachedState?.reportId
