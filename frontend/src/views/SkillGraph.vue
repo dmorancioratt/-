@@ -253,6 +253,7 @@ let edgeRecords: Array<{ source: string; target: string }> = []
 let focusedEdgeRecords: Array<{ source: string; target: string }> = []
 let highlightLineGeometry: THREE.BufferGeometry | undefined
 let highlightGlowGeometry: THREE.BufferGeometry | undefined
+let highlightAuroraMaterial: THREE.ShaderMaterial | undefined
 let highlightGroup: THREE.Group | undefined
 let draggedMesh: THREE.Mesh | undefined
 let pendingClickNode: GraphNode | undefined
@@ -267,6 +268,8 @@ let labelTextureCache = new Map<string, THREE.CanvasTexture>()
 let lastFrameTime = 0
 const pressedKeys = new Set<string>()
 const cameraPanVelocity = new THREE.Vector2()
+const prefersReducedMotion = typeof window !== 'undefined'
+  && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const typeLabels: Record<string, string> = {
   Job: '岗位',
@@ -621,6 +624,50 @@ function initScene() {
   animate()
 }
 
+function createNodeGeometry(type: string, size: number) {
+  if (type === 'Job') return new THREE.DodecahedronGeometry(size, 0)
+  if (type === 'Skill') return new THREE.OctahedronGeometry(size, 0)
+  if (type === 'Tool') return new THREE.BoxGeometry(size * 1.42, size * 1.42, size * 1.42)
+  if (type === 'Certificate') return new THREE.IcosahedronGeometry(size, 0)
+  if (type === 'Responsibility') return new THREE.TetrahedronGeometry(size * 1.16, 0)
+  if (type === 'IndustryScenario') return new THREE.DodecahedronGeometry(size, 0)
+  if (type === 'Course') return new THREE.CylinderGeometry(size * 0.78, size, size * 1.52, 6)
+  if (type === 'Level') return new THREE.OctahedronGeometry(size * 1.08, 0)
+  return new THREE.IcosahedronGeometry(size, 0)
+}
+
+function createNodeOrbitRings(node: PositionedNode, size: number) {
+  const specs = [
+    { radius: 1.48, tube: 0.064, arc: Math.PI * 1.72, color: 0x63e6ff, x: 1.04, y: 0.16, z: 0.2, speed: 0.72, opacity: 0.9 },
+    { radius: 1.82, tube: 0.044, arc: Math.PI * 1.52, color: 0x2f7cff, x: 1.2, y: -0.34, z: 1.12, speed: -0.48, opacity: 0.72 }
+  ]
+
+  return specs.map((spec, index) => {
+    const orbit = new THREE.Mesh(
+      new THREE.TorusGeometry(spec.radius * size, Math.max(0.72, spec.tube * size), 7, 72, spec.arc),
+      new THREE.MeshBasicMaterial({
+        color: spec.color,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        depthTest: true,
+        fog: false
+      })
+    )
+    orbit.position.copy(node.position)
+    orbit.rotation.set(spec.x, spec.y, spec.z)
+    orbit.renderOrder = 18
+    orbit.userData.offset = new THREE.Vector3()
+    orbit.userData.isOrbit = true
+    orbit.userData.orbitIndex = index
+    orbit.userData.orbitSpeed = spec.speed
+    orbit.userData.baseOpacity = spec.opacity
+    orbit.userData.baseScale = orbit.scale.clone()
+    return orbit
+  })
+}
+
 function buildNodes(nodes: PositionedNode[], total: number) {
   if (!graphGroup || !glowTexture) return
   const group = graphGroup
@@ -636,9 +683,14 @@ function buildNodes(nodes: PositionedNode[], total: number) {
     const isCenter = node.id === targetJobId.value
     const size = nodeSize(node.type, isCenter)
     const color = new THREE.Color(nodeColor(node.type))
-    const geometry = new THREE.SphereGeometry(size, 32, 24)
-    const material = new THREE.MeshBasicMaterial({
+    const geometry = createNodeGeometry(node.type, size)
+    const material = new THREE.MeshStandardMaterial({
       color,
+      emissive: color,
+      emissiveIntensity: 0.3,
+      metalness: 0.34,
+      roughness: 0.28,
+      flatShading: true,
       transparent: true,
       opacity: 1,
       fog: false
@@ -655,6 +707,11 @@ function buildNodes(nodes: PositionedNode[], total: number) {
     nodeFocusState.set(node.id, 1)
     const companions: THREE.Object3D[] = []
 
+    createNodeOrbitRings(node, size).forEach((orbit) => {
+      group.add(orbit)
+      companions.push(orbit)
+    })
+
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({
       map: glowTexture,
       color,
@@ -669,6 +726,7 @@ function buildNodes(nodes: PositionedNode[], total: number) {
     const glowSize = isCenter ? 136 : node.type === 'Job' ? 112 : node.type === 'Skill' ? 84 : 78
     glow.scale.set(glowSize, glowSize, 1)
     glow.userData.offset = new THREE.Vector3(0, 0, 0)
+    glow.userData.isGlow = true
     glow.userData.baseOpacity = isCenter ? 0.86 : node.type === 'Job' ? 0.72 : 0.52
     glow.userData.baseScale = glow.scale.clone()
     group.add(glow)
@@ -714,7 +772,7 @@ function buildEdges(edges: GraphEdge[]) {
     new THREE.LineBasicMaterial({
       color: 0x79dfff,
       transparent: true,
-      opacity: 0.075,
+      opacity: 0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       fog: false
@@ -740,7 +798,7 @@ function updateEdgeGeometry(refreshFocusLines = true) {
 }
 
 function updateFocusLines(nodeId?: string) {
-  if (!highlightGroup || !nodeId) return
+  if (!highlightGroup) return
   highlightGroup.children.forEach((child) => {
     if ('geometry' in child && child.geometry instanceof THREE.BufferGeometry) child.geometry.dispose()
     if ('material' in child && child.material instanceof THREE.Material) child.material.dispose()
@@ -749,16 +807,20 @@ function updateFocusLines(nodeId?: string) {
   focusedEdgeRecords = []
   highlightLineGeometry = undefined
   highlightGlowGeometry = undefined
+  highlightAuroraMaterial = undefined
+
+  if (!nodeId) return
 
   const positions: number[] = []
   edgeRecords.forEach((edge) => {
     if (edge.source !== nodeId && edge.target !== nodeId) return
-    const source = nodeMeshById.get(edge.source)
-    const target = nodeMeshById.get(edge.target)
+    const targetId = edge.source === nodeId ? edge.target : edge.source
+    const source = nodeMeshById.get(nodeId)
+    const target = nodeMeshById.get(targetId)
     if (!source || !target) return
     positions.push(source.position.x, source.position.y, source.position.z)
     positions.push(target.position.x, target.position.y, target.position.z)
-    focusedEdgeRecords.push({ source: edge.source, target: edge.target })
+    focusedEdgeRecords.push({ source: nodeId, target: targetId })
   })
 
   if (!positions.length) return
@@ -768,47 +830,166 @@ function updateFocusLines(nodeId?: string) {
   const line = new THREE.LineSegments(
     highlightLineGeometry,
     new THREE.LineBasicMaterial({
-      color: 0xf2feff,
+      color: 0x1e7bff,
       transparent: true,
-      opacity: 0.96,
+      opacity: 0.38,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      depthTest: false,
       fog: false
     })
   )
+  line.renderOrder = 20
   highlightGroup.add(line)
 
-  highlightGlowGeometry = highlightLineGeometry.clone()
-  const glowLine = new THREE.LineSegments(
-    highlightGlowGeometry,
-    new THREE.LineBasicMaterial({
-      color: 0x48e7ff,
-      transparent: true,
-      opacity: 0.62,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      fog: false
-    })
-  )
-  glowLine.scale.setScalar(1.002)
-  highlightGroup.add(glowLine)
+  highlightGlowGeometry = createAuroraRibbonGeometry(focusedEdgeRecords.length)
+  updateAuroraRibbonGeometry()
+  highlightAuroraMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uMotion: { value: prefersReducedMotion ? 0 : 1 },
+      uOpacity: { value: 1 }
+    },
+    vertexShader: `
+      attribute float aProgress;
+      attribute float aSide;
+      attribute float aPhase;
+      varying float vProgress;
+      varying float vSide;
+      varying float vPhase;
+
+      void main() {
+        vProgress = aProgress;
+        vSide = aSide;
+        vPhase = aPhase;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      precision highp float;
+      uniform float uTime;
+      uniform float uMotion;
+      uniform float uOpacity;
+      varying float vProgress;
+      varying float vSide;
+      varying float vPhase;
+
+      vec3 borderFlowColor(float t) {
+        vec3 cyan = vec3(0.0, 0.784, 0.961);
+        vec3 ice = vec3(0.302, 0.961, 1.0);
+        vec3 sky = vec3(0.278, 0.761, 1.0);
+        vec3 blue = vec3(0.118, 0.482, 1.0);
+        if (t < 0.24) return mix(cyan, ice, t / 0.24);
+        if (t < 0.46) return mix(ice, sky, (t - 0.24) / 0.22);
+        if (t < 0.68) return mix(sky, blue, (t - 0.46) / 0.22);
+        return blue;
+      }
+
+      void main() {
+        float travel = uTime / 9.5 * uMotion;
+        float cycle = fract(vProgress - travel + vPhase);
+        float borderCycle = fract(cycle * 2.0);
+        float band = smoothstep(0.08, 0.16, borderCycle)
+          * (1.0 - smoothstep(0.28, 0.40, borderCycle));
+        float bandPosition = clamp((borderCycle - 0.08) / 0.32, 0.0, 1.0);
+        vec3 color = borderFlowColor(bandPosition);
+
+        float distanceFromCore = abs(vSide);
+        float softGlow = 1.0 - smoothstep(0.12, 1.0, distanceFromCore);
+        float brightCore = 1.0 - smoothstep(0.0, 0.2, distanceFromCore);
+        float alpha = band
+          * (softGlow * 0.58 + brightCore * 0.92)
+          * uOpacity;
+
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    depthTest: false,
+    side: THREE.DoubleSide,
+    fog: false
+  })
+  const auroraRibbon = new THREE.Mesh(highlightGlowGeometry, highlightAuroraMaterial)
+  auroraRibbon.renderOrder = 21
+  auroraRibbon.frustumCulled = false
+  highlightGroup.add(auroraRibbon)
+}
+
+function createAuroraRibbonGeometry(edgeCount: number) {
+  const geometry = new THREE.BufferGeometry()
+  const positions = new Float32Array(edgeCount * 4 * 3)
+  const progress = new Float32Array(edgeCount * 4)
+  const sides = new Float32Array(edgeCount * 4)
+  const phases = new Float32Array(edgeCount * 4)
+  const indices: number[] = []
+
+  for (let index = 0; index < edgeCount; index += 1) {
+    const vertex = index * 4
+    progress.set([0, 0, 1, 1], vertex)
+    sides.set([1, -1, 1, -1], vertex)
+    const phase = (index * 0.097) % 1
+    phases.set([phase, phase, phase, phase], vertex)
+    indices.push(vertex, vertex + 2, vertex + 1, vertex + 2, vertex + 3, vertex + 1)
+  }
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  geometry.setAttribute('aProgress', new THREE.BufferAttribute(progress, 1))
+  geometry.setAttribute('aSide', new THREE.BufferAttribute(sides, 1))
+  geometry.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1))
+  geometry.setIndex(indices)
+  return geometry
+}
+
+function updateAuroraRibbonGeometry() {
+  if (!highlightGlowGeometry || !focusedEdgeRecords.length || !camera || !graphGroup) return
+  graphGroup.updateWorldMatrix(true, false)
+  const cameraLocal = graphGroup.worldToLocal(camera.position.clone())
+  const positions = highlightGlowGeometry.getAttribute('position') as THREE.BufferAttribute
+  const direction = new THREE.Vector3()
+  const toCamera = new THREE.Vector3()
+  const perpendicular = new THREE.Vector3()
+  const midpoint = new THREE.Vector3()
+  const offset = new THREE.Vector3()
+  const fallbackAxis = new THREE.Vector3(0, 1, 0)
+  const ribbonHalfWidth = 3.4
+
+  focusedEdgeRecords.forEach((edge, index) => {
+    const source = nodeMeshById.get(edge.source)
+    const target = nodeMeshById.get(edge.target)
+    if (!source || !target) return
+
+    direction.subVectors(target.position, source.position).normalize()
+    midpoint.addVectors(source.position, target.position).multiplyScalar(0.5)
+    toCamera.subVectors(cameraLocal, midpoint).normalize()
+    perpendicular.crossVectors(direction, toCamera)
+    if (perpendicular.lengthSq() < 0.0001) perpendicular.crossVectors(direction, fallbackAxis)
+    perpendicular.normalize()
+    offset.copy(perpendicular).multiplyScalar(ribbonHalfWidth)
+
+    const vertex = index * 4
+    positions.setXYZ(vertex, source.position.x + offset.x, source.position.y + offset.y, source.position.z + offset.z)
+    positions.setXYZ(vertex + 1, source.position.x - offset.x, source.position.y - offset.y, source.position.z - offset.z)
+    positions.setXYZ(vertex + 2, target.position.x + offset.x, target.position.y + offset.y, target.position.z + offset.z)
+    positions.setXYZ(vertex + 3, target.position.x - offset.x, target.position.y - offset.y, target.position.z - offset.z)
+  })
+  positions.needsUpdate = true
+  highlightGlowGeometry.computeBoundingSphere()
 }
 
 function updateHighlightEdgeGeometry() {
   if (!highlightLineGeometry || !highlightGlowGeometry || !focusedEdgeRecords.length) return
-  const applyPositions = (geometry: THREE.BufferGeometry) => {
-    const positions = geometry.getAttribute('position') as THREE.BufferAttribute
-    focusedEdgeRecords.forEach((edge, index) => {
-      const source = nodeMeshById.get(edge.source)
-      const target = nodeMeshById.get(edge.target)
-      if (!source || !target) return
-      positions.setXYZ(index * 2, source.position.x, source.position.y, source.position.z)
-      positions.setXYZ(index * 2 + 1, target.position.x, target.position.y, target.position.z)
-    })
-    positions.needsUpdate = true
-  }
-  applyPositions(highlightLineGeometry)
-  applyPositions(highlightGlowGeometry)
+  const positions = highlightLineGeometry.getAttribute('position') as THREE.BufferAttribute
+  focusedEdgeRecords.forEach((edge, index) => {
+    const source = nodeMeshById.get(edge.source)
+    const target = nodeMeshById.get(edge.target)
+    if (!source || !target) return
+    positions.setXYZ(index * 2, source.position.x, source.position.y, source.position.z)
+    positions.setXYZ(index * 2 + 1, target.position.x, target.position.y, target.position.z)
+  })
+  positions.needsUpdate = true
+  updateAuroraRibbonGeometry()
 }
 
 function clearGraphGroup() {
@@ -830,6 +1011,7 @@ function clearGraphGroup() {
   edgeLineGeometry = undefined
   highlightLineGeometry = undefined
   highlightGlowGeometry = undefined
+  highlightAuroraMaterial = undefined
   highlightGroup = undefined
   draggedMesh = undefined
   pendingClickNode = undefined
@@ -1190,6 +1372,7 @@ function clearGraphFocus() {
   focusedEdgeRecords = []
   highlightLineGeometry = undefined
   highlightGlowGeometry = undefined
+  highlightAuroraMaterial = undefined
 }
 
 function resetView(animateBack = true) {
@@ -1251,11 +1434,14 @@ function animateGraphFocus(deltaSeconds: number) {
 
     const focus = nodeFocusState.get(rawNode.id) ?? 1
     const isFocused = focusedNodeId === rawNode.id
+    const isSelectedNode = selected.value?.id === rawNode.id
+    const isActiveNode = isFocused || isSelectedNode
+    const isHoveredNode = hovered.value?.id === rawNode.id
     const targetOpacity = focusedNodeId ? (focus > 0.5 ? 1 : 0.16) : 1
     const currentOpacity = objectOpacity(mesh)
     setObjectOpacity(mesh, currentOpacity + (targetOpacity - currentOpacity) * fadeEase)
 
-    const targetScale = isFocused ? 1.32 : focus > 0.5 ? 1.04 : 0.66
+    const targetScale = isActiveNode ? 1.32 : focus > 0.5 ? 1.04 : 0.66
     const baseScale = mesh.userData.baseScale as THREE.Vector3
     if (baseScale) {
       const scale = baseScale.clone().multiplyScalar(targetScale)
@@ -1267,13 +1453,34 @@ function animateGraphFocus(deltaSeconds: number) {
       item.position.copy(mesh.position).add(offset || new THREE.Vector3())
 
       const baseOpacity = item.userData.baseOpacity ?? 1
-      const itemTargetOpacity = focusedNodeId ? baseOpacity * (focus > 0.5 ? 1 : 0.12) : baseOpacity
+      if (item.userData.isOrbit === true) {
+        const orbitVisible = isActiveNode || isHoveredNode
+        const orbitTargetOpacity = orbitVisible
+          ? baseOpacity * (isActiveNode ? 1 : 0.72) * (focusedNodeId && focus <= 0.5 ? 0.35 : 1)
+          : 0
+        const current = objectOpacity(item)
+        setObjectOpacity(item, current + (orbitTargetOpacity - current) * fadeEase)
+        const baseOrbitScale = item.userData.baseScale as THREE.Vector3 | undefined
+        if (baseOrbitScale) {
+          const orbitScale = isActiveNode ? 1.16 : isHoveredNode ? 1.07 : 0.92
+          item.scale.lerp(baseOrbitScale.clone().multiplyScalar(orbitScale), scaleEase)
+        }
+        if (!prefersReducedMotion && orbitVisible) {
+          item.rotation.z += (item.userData.orbitSpeed as number) * deltaSeconds
+        }
+        return
+      }
+
+      const isFocusedGlow = isActiveNode && item.userData.isGlow === true
+      const focusedOpacity = isFocusedGlow ? Math.min(1, baseOpacity * 1.65) : baseOpacity
+      const itemTargetOpacity = focusedNodeId ? focusedOpacity * (focus > 0.5 ? 1 : 0.12) : baseOpacity
       const current = objectOpacity(item)
       setObjectOpacity(item, current + (itemTargetOpacity - current) * fadeEase)
 
       const baseItemScale = item.userData.baseScale as THREE.Vector3 | undefined
       if (baseItemScale) {
-        item.scale.lerp(baseItemScale.clone().multiplyScalar(isFocused ? 1.14 : focus > 0.5 ? 1.02 : 0.74), scaleEase)
+        const focusedScale = isFocusedGlow ? 1.48 : 1.14
+        item.scale.lerp(baseItemScale.clone().multiplyScalar(isActiveNode ? focusedScale : focus > 0.5 ? 1.02 : 0.74), scaleEase)
       }
     })
   })
@@ -1292,6 +1499,9 @@ function animate() {
   animationId = requestAnimationFrame(animate)
   updateKeyboardPan(deltaSeconds)
   animateGraphFocus(deltaSeconds)
+  if (highlightAuroraMaterial) {
+    highlightAuroraMaterial.uniforms.uTime.value = now / 1000
+  }
   if (graphGroup && !isDragging && !draggedMesh) {
     graphGroup.rotation.y += 0.0007
     graphGroup.rotation.z = Math.sin(Date.now() * 0.00035) * 0.025
