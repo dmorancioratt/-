@@ -725,8 +725,12 @@ async function handleUserCommand(command: string) {
   position: relative;
   z-index: 1;
   margin-bottom: 14px;
-  padding: 4px 4px 14px;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .app-titlebar .header-title-row {
@@ -813,5 +817,13 @@ async function handleUserCommand(command: string) {
 <style>
 html body.theme-dark .app-main {
   background: transparent !important;
+}
+
+html body.theme-dark #app .app-main .app-titlebar {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 </style>

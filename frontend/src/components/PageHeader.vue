@@ -1,5 +1,5 @@
 <template>
-  <div v-if="$slots.default" class="page-toolbar" aria-label="页面快捷操作">
+  <div v-if="$slots.default" class="page-toolbar page-toolbar--bare" aria-label="页面快捷操作">
     <slot />
   </div>
 </template>
@@ -31,5 +31,24 @@ defineProps<{ title: string; desc?: string }>()
   .page-toolbar {
     justify-content: flex-start;
   }
+}
+</style>
+
+<style>
+html body #app .app-main .page .page-toolbar.page-toolbar--bare {
+  min-height: 0;
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  animation: none !important;
+}
+
+html body #app .app-main .page .page-toolbar.page-toolbar--bare::before,
+html body #app .app-main .page .page-toolbar.page-toolbar--bare::after {
+  display: none !important;
+  content: none !important;
 }
 </style>
