@@ -104,28 +104,111 @@
       <!-- CENTER COLUMN -->
       <section class="col col-center">
         <article class="cockpit-panel panel-panorama">
-          <div class="panorama-head">
-            <h2>人才供需全景图</h2>
-            <div class="panorama-total">
-              <span>人才总量</span>
-              <span class="font-digits">{{ totalTalent.toLocaleString() }}</span>
-              <span>人</span>
-            </div>
-          </div>
-          <div ref="threeContainer" class="panorama-canvas"></div>
-          <div class="panorama-metrics panorama-metrics--supply">
-            <div v-for="(m, i) in panoramaMetrics" :key="i" class="pano-kpi">
-              <div class="pano-kpi__title">{{ m.label }}</div>
-              <div class="pano-kpi__row">
-                <div class="font-digits pano-kpi__value">
-                  {{ m.value }}<span v-if="m.unit" class="pano-kpi__unit">{{ m.unit }}</span>
+          <div class="panorama-placeholder">
+            <!-- 背景图 -->
+            <img src="/hr_dashboard.png" alt="" class="panorama-placeholder__img" />
+            <!-- 文字覆盖层 -->
+            <div class="panorama-overlay">
+              <!-- 左侧：人才供给 -->
+              <div class="overlay-left">
+                <div class="overlay-section-title">人才供给</div>
+                <div class="talent-supply-list">
+                  <div class="talent-supply-item">
+                    <div class="talent-supply-info">
+                      <div class="talent-supply-name">刘厉宏</div>
+                      <div class="talent-supply-row">
+                        <div class="talent-supply-num">4,580</div>
+                        <div class="talent-supply-label">人才储备</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="talent-supply-item">
+                    <div class="talent-supply-info">
+                      <div class="talent-supply-name">卫维情</div>
+                      <div class="talent-supply-row">
+                        <div class="talent-supply-num">621</div>
+                        <div class="talent-supply-label">人才储备</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="talent-supply-item">
+                    <div class="talent-supply-info">
+                      <div class="talent-supply-name">赵宇辰</div>
+                      <div class="talent-supply-row">
+                        <div class="talent-supply-num">890</div>
+                        <div class="talent-supply-label">人才储备</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="talent-supply-item">
+                    <div class="talent-supply-info">
+                      <div class="talent-supply-name">周子墨</div>
+                      <div class="talent-supply-row">
+                        <div class="talent-supply-num">769</div>
+                        <div class="talent-supply-label">人才储备</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div v-if="m.variant === 'ratio'" class="pano-kpi__sub pano-kpi__sub--info">{{ m.sub }}</div>
-              <div v-else class="pano-kpi__delta" :class="m.deltaTone">
-                <span class="pano-kpi__delta-prefix">较上周</span>
-                <el-icon><Top v-if="m.deltaTone === 'up'" /><Bottom v-else /></el-icon>
-                <span class="font-digits">{{ m.delta }}</span>
+
+              <!-- 中间：漏斗核心数据 -->
+              <div class="overlay-center">
+                <div class="funnel-title">人才流动地图</div>
+                <div class="funnel-match">匹配度 87%</div>
+                <div class="funnel-row">主动候选人 3,860</div>
+                <div class="funnel-highlight">高匹配人才 1,089</div>
+                <div class="funnel-row">供需缺口 131</div>
+                <div class="funnel-big">127</div>
+              </div>
+
+              <!-- 右侧：指标 -->
+              <div class="overlay-right">
+                <div class="right-metric-card">
+                  <div class="right-metric-main">
+                    <div class="right-metric-name">冯韵皓</div>
+                    <div class="right-metric-sub">内推待入职</div>
+                  </div>
+                  <div class="right-metric-num">586</div>
+                </div>
+                <div class="right-metric-card">
+                  <div class="right-metric-main">
+                    <div class="right-metric-name">待面试人数</div>
+                    <div class="right-metric-sub">紧急需求</div>
+                  </div>
+                  <div class="right-metric-num">186</div>
+                </div>
+                <div class="right-metric-card">
+                  <div class="right-metric-main">
+                    <div class="right-metric-name right-metric-name--big">127</div>
+                    <div class="right-metric-sub">岗位需求</div>
+                  </div>
+                </div>
+                <div class="right-metric-card">
+                  <div class="right-metric-main">
+                    <div class="right-metric-name">平均响应周期</div>
+                  </div>
+                  <div class="right-metric-num right-metric-num--small">21天</div>
+                </div>
+              </div>
+
+              <!-- 底部：行动建议 -->
+              <div class="overlay-bottom">
+                <div class="bottom-circle">
+                  <div class="bottom-circle-label">HR行动建议</div>
+                  <div class="bottom-circle-num">32%</div>
+                  <div class="bottom-circle-sub">较同期提升</div>
+                </div>
+                <div class="bottom-advice">
+                  <div class="bottom-advice-title">HR行动建议</div>
+                  <div class="bottom-advice-line">优先跟进：研发工程师、销售经理、生产主管</div>
+                  <div class="bottom-advice-line">建议激活：高匹配备选人才 189</div>
+                </div>
+                <div class="bottom-circle">
+                  <div class="bottom-circle-label">岗位填充率</div>
+                  <div class="bottom-circle-num">217</div>
+                  <div class="bottom-circle-sub">较同期提升</div>
+                </div>
               </div>
             </div>
           </div>
@@ -255,7 +338,6 @@ import {
   UserFilled,
   ZoomIn
 } from '@element-plus/icons-vue'
-import * as THREE from 'three'
 import * as echarts from 'echarts'
 import chinaGeo from '@/assets/china.json'
 import EChart from '@/components/EChart.vue'
@@ -441,22 +523,7 @@ const recruitmentActions = computed(() => {
   ]
 })
 
-const panoramaMetrics = computed(() => {
-  if (!hasOverview.value) return MOCK_PANORAMA
-  const o = model.value.overview
-  const demand = Number(o.job_count || 0) * 10
-  const supply = Number(o.resume_count || 0)
-  const gap = Math.max(demand - supply, 0)
-  const ratio = supply > 0 && demand > 0 ? (supply / demand).toFixed(2) : '—'
-  const fmt = (v: number) => v > 0 ? v.toLocaleString() : '—'
-  return [
-    { label: '供需比', value: ratio, unit: '', variant: 'ratio', sub: '供给 / 需求' },
-    { label: '需求总量', value: fmt(demand), unit: '人', delta: '—', deltaTone: 'up' },
-    { label: '供给总量', value: fmt(supply), unit: '人', delta: '—', deltaTone: 'up' },
-    { label: '缺口总量', value: fmt(gap), unit: '人', delta: '—', deltaTone: 'down' },
-    { label: '平均匹配度', value: o.match_accuracy != null ? String(o.match_accuracy) : '—', unit: '%', delta: '—', deltaTone: 'up' }
-  ]
-})
+const panoramaMetrics = computed(() => [])
 
 const priorityTalents = computed(() => {
   if (!hasCandidates.value) return MOCK_TALENTS
@@ -886,108 +953,13 @@ async function triggerDataRefresh() {
 }
 
 // ======== Three.js particle wave ========
-const threeContainer = ref<HTMLDivElement | null>(null)
-let renderer: THREE.WebGLRenderer | null = null
 let animationFrame = 0
 let resizeHandler: (() => void) | null = null
 let pointerHandler: ((e: PointerEvent) => void) | null = null
 
-function initThree() {
-  const container = threeContainer.value
-  if (!container) return
-  const width = container.clientWidth
-  const height = container.clientHeight
-
-  const scene = new THREE.Scene()
-  scene.fog = new THREE.FogExp2(0x030712, 0.0018)
-
-  const camera = new THREE.PerspectiveCamera(55, width / height, 1, 2000)
-  camera.position.set(0, 220, 400)
-  camera.lookAt(0, -30, 0)
-
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-  renderer.setSize(width, height)
-  renderer.setPixelRatio(window.devicePixelRatio)
-  container.appendChild(renderer.domElement)
-
-  const amountX = 80
-  const amountY = 80
-  const separation = 14
-  const numParticles = amountX * amountY
-  const positions = new Float32Array(numParticles * 3)
-  const scales = new Float32Array(numParticles)
-  let i = 0, j = 0
-  for (let ix = 0; ix < amountX; ix++) {
-    for (let iy = 0; iy < amountY; iy++) {
-      positions[i] = ix * separation - (amountX * separation) / 2
-      positions[i + 1] = 0
-      positions[i + 2] = iy * separation - (amountY * separation) / 2
-      scales[j] = 1
-      i += 3
-      j++
-    }
-  }
-  const geometry = new THREE.BufferGeometry()
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  geometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1))
-
-  const material = new THREE.PointsMaterial({
-    color: 0x38bdf8, size: 3.2, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending
-  })
-  const particles = new THREE.Points(geometry, material)
-  scene.add(particles)
-
-  const planeGeo = new THREE.PlaneGeometry(1000, 1000, 32, 32)
-  const planeMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, wireframe: true, transparent: true, opacity: 0.12 })
-  const wireMesh = new THREE.Mesh(planeGeo, planeMat)
-  wireMesh.rotation.x = -Math.PI / 2
-  wireMesh.position.y = -40
-  scene.add(wireMesh)
-
-  let count = 0
-  let mouseX = 0, mouseY = 0
-
-  pointerHandler = (event: PointerEvent) => {
-    const rect = container.getBoundingClientRect()
-    mouseX = (event.clientX - rect.left - width / 2) * 0.2
-    mouseY = (event.clientY - rect.top - height / 2) * 0.2
-  }
-  container.addEventListener('pointermove', pointerHandler)
-
-  resizeHandler = () => {
-    const newWidth = container.clientWidth
-    const newHeight = container.clientHeight
-    camera.aspect = newWidth / newHeight
-    camera.updateProjectionMatrix()
-    renderer?.setSize(newWidth, newHeight)
-  }
-  window.addEventListener('resize', resizeHandler)
-
-  function animate() {
-    animationFrame = requestAnimationFrame(animate)
-    camera.position.x += (mouseX - camera.position.x) * 0.03
-    camera.position.y += (-mouseY + 220 - camera.position.y) * 0.03
-    camera.lookAt(0, -20, 0)
-    const buf = particles.geometry.attributes.position.array as Float32Array
-    let k = 0, l = 0
-    for (let ix = 0; ix < amountX; ix++) {
-      for (let iy = 0; iy < amountY; iy++) {
-        buf[k + 1] = Math.sin((ix + count) * 0.25) * 35 + Math.sin((iy + count) * 0.4) * 35
-        k += 3
-        l++
-      }
-    }
-    particles.geometry.attributes.position.needsUpdate = true
-    count += 0.04
-    renderer?.render(scene, camera)
-  }
-  animate()
-}
-
 onMounted(() => {
   updateClock()
   clockTimer = setInterval(updateClock, 1000)
-  initThree()
   refresh(false)
 })
 
@@ -995,12 +967,7 @@ onBeforeUnmount(() => {
   if (clockTimer) clearInterval(clockTimer)
   if (animationFrame) cancelAnimationFrame(animationFrame)
   if (resizeHandler) window.removeEventListener('resize', resizeHandler)
-  if (pointerHandler && threeContainer.value) threeContainer.value.removeEventListener('pointermove', pointerHandler)
-  if (renderer) {
-    renderer.dispose()
-    renderer.forceContextLoss?.()
-    renderer = null
-  }
+  if (pointerHandler) pointerHandler = null
 })
 </script>
 
@@ -1122,13 +1089,332 @@ onBeforeUnmount(() => {
 
 /* ============ Center column ============ */
 .panel-panorama { padding: 0; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 440px; }
-.panorama-head { text-align: center; padding: 12px 16px 6px; }
-.panorama-head h2 { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 0; color: #eefaff; font-size: 14px; font-weight: 800; }
-.panorama-head h2::before { width: 3px; height: 16px; border-radius: 6px; content: ""; background: #36d7ff; box-shadow: 0 0 9px rgba(54, 215, 255, 0.65); }
-.panorama-total { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; padding: 4px 14px; border-radius: 999px; background: rgba(8, 42, 92, .5); border: 1px solid rgba(78, 200, 255, .28); font-size: 12px; color: #88a9c4; }
-.panorama-total .font-digits { color: #36d7ff; font-size: 18px; font-weight: 800; }
-.panorama-canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; z-index: 0; pointer-events: auto; }
-.panorama-canvas:active { cursor: grabbing; }
+.panorama-placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(8, 25, 60, 0.35), rgba(4, 17, 42, 0.35));
+}
+.panorama-placeholder__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* 文字覆盖层 — 纯文字，无卡片背景 */
+.panorama-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 180px 1fr 180px;
+  grid-template-rows: 1fr auto;
+  gap: 0;
+  padding: 16px 20px 12px;
+  pointer-events: none;
+}
+.panorama-overlay > * { pointer-events: auto; }
+
+/* 左侧人才供给 — 在 grid 中占位，内部全部 absolute 固定，不影响中间/右侧位置 */
+.overlay-left {
+  position: relative;
+  /* 必须保留 grid 子项的空间占位，避免 middle / right 列补位 */
+  grid-column: 1 / 2;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+.overlay-section-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  color: #c4f4ff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+.talent-supply-list {
+  position: absolute;
+  top: 28px;
+  left: 50px;
+  width: 130px;
+  height: 360px;
+  flex: none;
+}
+.talent-supply-item {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 64px;
+}
+.talent-supply-item:nth-child(1) { top: 0; }
+.talent-supply-item:nth-child(2) { top: 96px; }
+.talent-supply-item:nth-child(3) { top: 192px; }
+.talent-supply-item:nth-child(4) { top: 288px; }
+.talent-supply-info {
+  position: absolute;
+  top: 25px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+/* 第 3 条（赵宇辰 890）单独微调 */
+.talent-supply-item:nth-child(3) > .talent-supply-info {
+  top: 12px;
+}
+/* 第 4 条（周子墨 769）单独微调 */
+.talent-supply-item:nth-child(4) > .talent-supply-info {
+  top: 2px;
+}
+.talent-supply-name {
+  color: #c4f4ff;
+  font-size: 15px;
+  font-weight: 700;
+}
+.talent-supply-num {
+  color: #36d7ff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.talent-supply-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 2px;
+}
+.talent-supply-label {
+  color: #6f91ad;
+  font-size: 10px;
+}
+
+/* 中间漏斗数据 — 父容器显式 relative，确保子元素 absolute 坐标系锚定在中间列自身 */
+.panorama-overlay > .overlay-center {
+  position: relative !important;
+  display: block !important;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  grid-column: 2 / 3;
+}
+.panorama-overlay > .overlay-center > .funnel-title {
+  position: absolute !important;
+  top: 100px !important;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.panorama-overlay > .overlay-center > .funnel-match {
+  position: absolute !important;
+  top: 120px !important;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ===== Element 1：主动候选人 3,860（DOM 第 3 个子节点）===== */
+.panorama-overlay > .overlay-center > div.funnel-row:nth-child(3) {
+  position: absolute !important;
+  left: 250px !important;
+  top: 150px !important;
+}
+
+/* ===== Element 2：供需缺口 131（DOM 第 5 个子节点）===== */
+.panorama-overlay > .overlay-center > div.funnel-row:nth-child(5) {
+  position: absolute !important;
+  left: 260px !important;
+  top: 50px !important;
+}
+
+.panorama-overlay > .overlay-center > .funnel-highlight {
+  position: absolute !important;
+  top: 215px !important;
+  left: 220px !important;
+}
+/* ===== 基础样式（颜色/字号/发光）===== */
+.panorama-overlay > .overlay-center { text-align: center; }
+.funnel-row {
+  color: rgba(200, 235, 255, 0.85);
+  font-size: 13px;
+  font-weight: 500;
+}
+.panorama-overlay > .overlay-center > .funnel-title {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 20px rgba(54, 215, 255, 0.4);
+}
+.panorama-overlay > .overlay-center > .funnel-match {
+  color: #36d7ff;
+  font-size: 26px;
+  font-weight: 900;
+  text-shadow: 0 0 16px rgba(54, 215, 255, 0.5);
+}
+.panorama-overlay > .overlay-center > .funnel-highlight {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  text-shadow: 0 0 12px rgba(54, 215, 255, 0.35);
+}
+.panorama-overlay > .overlay-center > .funnel-big {
+  color: #36d7ff;
+  font-size: 36px;
+  font-weight: 900;
+  text-shadow: 0 0 24px rgba(54, 215, 255, 0.6);
+  position: absolute !important;
+  top: 280px !important;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 右侧指标 — 在 grid 中占位，内部 absolute 固定，避免随左列 flex 漂移 */
+.overlay-right {
+  position: relative;
+  grid-column: 3 / 4;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+.right-metric-card {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 60px;
+}
+.right-metric-card:nth-child(1) { top: 50px; }
+.right-metric-card:nth-child(2) { top: 140px; }
+.right-metric-card:nth-child(3) { top: 220px; }
+.right-metric-card:nth-child(4) { top: 310px; }
+.right-metric-name {
+  color: #c4f4ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.right-metric-name--big {
+  color: #36d7ff;
+  font-size: 22px;
+  font-weight: 900;
+}
+.right-metric-sub {
+  color: #6f91ad;
+  font-size: 10px;
+  margin-top: 2px;
+}
+.right-metric-num {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #36d7ff;
+  font-size: 22px;
+  font-weight: 800;
+}
+/* Element 1/3/6：3 个带数字的卡片把数字右移 100px */
+.overlay-right > .right-metric-card:nth-child(1) > .right-metric-num,
+.overlay-right > .right-metric-card:nth-child(2) > .right-metric-num,
+.overlay-right > .right-metric-card:nth-child(4) > .right-metric-num {
+  left: 100px;
+}
+.right-metric-num--small {
+  font-size: 14px;
+  color: #c4f4ff;
+}
+
+/* 底部行动建议 */
+.overlay-bottom {
+  position: relative;
+  grid-column: 1 / -1;
+  /* 固定占位高度，避免 flex/grid 自动分配导致内容漂移 */
+  width: 100%;
+  height: 100px;
+  padding: 0;
+  box-sizing: border-box;
+}
+.bottom-circle {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  background: transparent;
+  border: none;
+  flex-shrink: 0;
+}
+/* 底部左圆圈（HR行动建议 32%）— 单独定位 */
+.overlay-bottom .bottom-circle:nth-of-type(1) {
+  top: -20px;
+  left: 775px;
+}
+/* 底部右圆圈（岗位填充率 217）— 单独定位 */
+.overlay-bottom .bottom-circle:nth-of-type(2),
+.overlay-bottom > div:nth-child(3).bottom-circle {
+  right: auto;
+  left: 85px;
+  top: -19px;
+}
+.bottom-advice {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 260px);
+  text-align: center;
+  background: transparent;
+  border: none;
+  padding: 6px 0;
+}
+.bottom-circle-label {
+  color: #88a9c4;
+  font-size: 10px;
+  font-weight: 600;
+}
+.bottom-circle-num {
+  color: #36d7ff;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+.bottom-circle-sub {
+  color: #6f91ad;
+  font-size: 9px;
+}
+.bottom-advice {
+  flex: 1;
+  text-align: center;
+  background: transparent;
+  border: none;
+  padding: 6px 0;
+}
+.bottom-advice-title {
+  color: #c4f4ff;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.bottom-advice-line {
+  color: rgba(200, 235, 255, 0.8);
+  font-size: 11px;
+  line-height: 1.6;
+}
 
 .panorama-metrics--supply { position: relative; z-index: 2; margin: auto 20px 8px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 8px 10px; background: linear-gradient(135deg, rgba(4, 26, 58, 0.42), rgba(8, 42, 92, 0.32)); border: 1px solid rgba(78, 200, 255, 0.12); border-radius: 14px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgba(0, 80, 160, 0.08); }
 .pano-kpi {
