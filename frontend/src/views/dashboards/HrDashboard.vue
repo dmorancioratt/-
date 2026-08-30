@@ -751,7 +751,7 @@ const regionMapOption = computed(() => {
       min: 0,
       max: maxVal,
       left: 14,
-      bottom: 14,
+      bottom: 4, /* 下调 10px，让左侧条状图整体下移，与 TOP 列表/地图对齐 */
       text: ['高', '低'],
       textGap: 8,
       textStyle: { color: '#c2dceb', fontSize: 11, fontWeight: 600 },
@@ -770,7 +770,7 @@ const regionMapOption = computed(() => {
         roam: false,
         zoom: 1.1,
         aspectScale: 0.85,
-        layoutCenter: ['50%', '50%'],
+        layoutCenter: ['50%', '57%'], /* 水平居中不变，垂直下移 7%，让地图整体下沉、与左条和 TOP 卡同一水平线 */
         layoutSize: '102%',
         itemStyle: {
           areaColor: 'rgba(8, 42, 92, 0.25)',
@@ -1495,7 +1495,7 @@ onBeforeUnmount(() => {
 .panel-region { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 220px; }
 .region-canvas { position: relative; flex: 1; min-height: 200px; margin: 4px 16px 16px; background: rgba(2, 6, 23, .35); border: 1px solid rgba(78, 200, 255, .14); border-radius: 10px; overflow: hidden; }
 .region-chart { width: 100%; height: 100%; min-height: 200px; }
-.region-top { position: absolute; top: 180px; left: 70px; background: rgba(8, 42, 92, .7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(78, 200, 255, .22); font-size: 10px; width: 116px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 6px 18px rgba(0, 10, 40, .35); z-index: 3; }
+.region-top { position: absolute; top: 190px; left: 70px; background: rgba(8, 42, 92, .7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(78, 200, 255, .22); font-size: 10px; width: 116px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 6px 18px rgba(0, 10, 40, .35); z-index: 3; }
 .region-top__row { display: flex; justify-content: space-between; align-items: center; color: #88a9c4; }
 .region-top__row .font-digits { color: #36d7ff; }
 .region-rank { font-weight: 700; margin-right: 4px; }
