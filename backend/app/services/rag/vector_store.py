@@ -144,22 +144,39 @@ class FaissVectorStore:
             return self._metadatas[chunk_id]
         return None
 
+    def remove_by_ref_id(self, ref_id: int, embedder: Any) -> int:
+        """Faiss 不支持原地删除：过滤掉指定 ref_id 的 chunk 后重建索引。返回移除的 chunk 数。"""
+        removed = [m for m in self._metadatas if int(m.get("ref_id", 0)) == ref_id]
+        if not removed:
+            return 0
+        kept = [m for m in self._metadatas if int(m.get("ref_id", 0)) != ref_id]
+        texts = [str(m.get("text", "")) for m in kept]
+        vectors = embedder.encode(texts) if texts else np.zeros((0, self.dim), dtype=np.float32)
+        for m in kept:
+            m.pop("chunk_id", None)
+        self._index = None
+        self._metadatas = []
+        self.add(vectors, kept)
+        return len(removed)
+
 
 # ---------- UserDocsStore 单例 ----------
 # 用于 workflow 编辑器中用户上传到本地知识库的文档向量。
 # 与现有 SOURCE_REGISTRY 4 个数据源完全隔离，不污染 rag_index_jobs 表。
-_USER_DOCS_DIM = 512
 _user_docs_store: "FaissVectorStore | None" = None
+_user_docs_dim: int = 512
 
 
-def get_user_docs_store() -> "FaissVectorStore":
-    global _user_docs_store
-    if _user_docs_store is None:
+def get_user_docs_store(dim: int = 512) -> "FaissVectorStore":
+    """返回 user_docs 向量库单例。维度跟随 embedder.dim；若维度变化则重建（旧向量作废）。"""
+    global _user_docs_store, _user_docs_dim
+    if _user_docs_store is None or _user_docs_dim != dim:
         from app.services.rag.indexer import RAG_DATA_DIR
-        store = FaissVectorStore(dim=_USER_DOCS_DIM)
-        _path = RAG_DATA_DIR / "user_docs.index"
-        store.load(_path)
+
+        store = FaissVectorStore(dim=dim)
+        store.load(RAG_DATA_DIR / "user_docs.index")
         _user_docs_store = store
+        _user_docs_dim = dim
     return _user_docs_store
 
 
