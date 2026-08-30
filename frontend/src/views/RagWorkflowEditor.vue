@@ -14,7 +14,15 @@
 
       <!-- 中间：画布 -->
       <div class="canvas-area">
-        <RagFlowCanvas />
+        <div class="canvas-top">
+          <CloseLoopBar />
+        </div>
+        <div class="canvas-canvas">
+          <RagFlowCanvas />
+        </div>
+        <div class="canvas-progress">
+          <RunProgressBar />
+        </div>
       </div>
 
       <!-- 右侧：工作流状态 + 节点配置 -->
@@ -52,11 +60,14 @@ import RagFlowCanvas from '@/components/rag-flow/RagFlowCanvas.vue'
 import NodeConfigDrawer from '@/components/rag-flow/NodeConfigDrawer.vue'
 import RagEngineStatus from '@/components/rag-flow/RagEngineStatus.vue'
 import RunStageLog from '@/components/rag-flow/RunStageLog.vue'
+import RunProgressBar from '@/components/rag-flow/RunProgressBar.vue'
+import CloseLoopBar from '@/components/rag-flow/CloseLoopBar.vue'
 
 const store = useWorkflowStore()
 
-onMounted(() => {
+onMounted(async () => {
   store.loadDraft()
+  await store.ensureConfig()
   store.fetchDocs()
 })
 </script>
@@ -97,6 +108,26 @@ onMounted(() => {
   min-width: 0;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-top {
+  flex-shrink: 0;
+}
+
+.canvas-canvas {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.canvas-progress {
+  position: absolute;
+  left: 16px;
+  right: 220px;
+  bottom: 12px;
+  z-index: 5;
 }
 
 .right-sidebar {

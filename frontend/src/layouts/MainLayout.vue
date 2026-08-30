@@ -74,13 +74,6 @@
     </Teleport>
 
     <main class="app-main" :class="{ 'app-main--fullscreen': $route.meta.fullscreen }">
-      <div class="app-titlebar" v-if="!$route.meta.fullscreen">
-        <div class="header-title-row">
-          <span class="section-mark"></span>
-          <div class="header-title">{{ $route.meta.title }}</div>
-        </div>
-        <div class="header-desc">{{ headerSubtitle }}</div>
-      </div>
 
       <button v-if="$route.meta.fullscreen" class="fullscreen-exit-btn" @click="router.push('/overview')" title="返回系统概览">
         <el-icon><ArrowLeft /></el-icon>
