@@ -89,14 +89,14 @@ type ZoneMetric = 'x' | 'y' | 'width' | 'height'
 type ZoneControl = { key: ZoneMetric; label: string; min: number; step: number }
 
 const emit = defineEmits<{ select: [id: MissionCabinId] }>()
-const showLayoutEditor = import.meta.env.DEV
+const showLayoutEditor = false
 
 const defaultModules: ModuleZone[] = [
-  { id: 'radar',            label: '能力图谱', x: 13.6, y: 10.8, width: 19.6, height: 31.2 },
+  { id: 'radar',            label: '能力图谱', x: 13.6, y: 10.8, width: 16.5, height: 31.2 },
   { id: 'path',             label: '学习路径', x: 33.5, y: 11.2, width: 34.8, height: 29.2 },
   { id: 'avatar',           label: '成长档案', x: 70.5, y: 9.2,  width: 19.0, height: 23.8 },
-  { id: 'resource-library', label: '资源库',   x: 6.2,  y: 41.0, width: 21.0, height: 41.0 },
-  { id: 'ai-suggest',       label: 'AI 助手',  x: 42.0, y: 42.0, width: 14.5, height: 21.0 },
+  { id: 'resource-library', label: '资源库',   x: 5.6,  y: 42.4, width: 21.0, height: 50.1 },
+  { id: 'ai-suggest',       label: 'AI 助手',  x: 41.1, y: 40.4, width: 14.5, height: 21.0 },
   { id: 'weekly-plan',      label: '计划日历', x: 70.3, y: 33.0, width: 22.0, height: 25.0 },
   { id: 'timeline',         label: '成就墙',   x: 70.2, y: 58.0, width: 25.4, height: 30.0 },
 ]
