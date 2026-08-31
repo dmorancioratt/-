@@ -50,7 +50,7 @@
     />
 
     <button
-      v-if="showLayoutEditor"
+      v-if="false && showLayoutEditor"
       class="frame-tuner__toggle"
       :class="{ active: frameTunerOpen }"
       type="button"
@@ -109,7 +109,7 @@
     </aside>
 
     <button
-      v-if="showLayoutEditor"
+      v-if="false && showLayoutEditor"
       class="layout-editor__toggle"
       :class="{ active: editorEnabled }"
       type="button"

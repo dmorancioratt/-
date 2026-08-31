@@ -158,7 +158,7 @@ const rawMenus: MenuItem[] = [
 
 const roleRouteMap: Record<string, string[]> = {
   candidate: [
-    '/overview', '/skill-graph', '/capability-evolution',
+    '/overview', '/personal-center', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/learning-path', '/digital-interviewer', '/account-settings'
   ],
   hr: [
@@ -259,9 +259,10 @@ const visibleGroups = computed<MenuGroup[]>(() => {
     .filter((g) => g.items.length > 0)
 })
 
-// 平级直达入口：系统概览（顶导直接按钮；候选人"个人驾驶舱"已下线）
+// 平级直达入口：系统概览 / 驾驶舱 由下拉改为顶导直接按钮
 const directEntries: Array<{ path: string; label: string; icon: any }> = [
   { path: '/overview', label: '系统概览', icon: Histogram },
+  { path: '/personal-center', label: '驾驶舱', icon: User },
 ]
 
 const visibleDirect = computed(() => {

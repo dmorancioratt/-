@@ -2,7 +2,7 @@
   <section class="image-cabin" :class="{ 'image-cabin--editing': editorEnabled }" aria-label="个人学习成长仓">
     <div class="image-cabin__ambience" aria-hidden="true"></div>
 
-    <div v-if="showLayoutEditor" class="image-cabin__dev-controls" aria-label="成长仓开发工具">
+    <div v-if="false && showLayoutEditor" class="image-cabin__dev-controls" aria-label="成长仓开发工具">
       <button
         type="button"
         class="image-cabin__dev-button"
