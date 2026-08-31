@@ -16,6 +16,17 @@
       </div>
 
       <nav class="top-nav" ref="navRef">
+        <button
+          v-for="entry in visibleDirect"
+          :key="'direct-' + entry.path"
+          class="nav-trigger"
+          :class="{ active: isDirectActive(entry) }"
+          type="button"
+          @click="navigateTo(entry.path)"
+        >
+          <el-icon v-if="entry.icon"><component :is="entry.icon" /></el-icon>
+          <span>{{ entry.label }}</span>
+        </button>
         <template v-for="group in visibleGroups" :key="group.key">
           <div class="nav-group" :ref="(el) => setTriggerRef(group.key, el as HTMLElement | null)">
             <button
@@ -167,7 +178,7 @@ const roleRouteMap: Record<string, string[]> = {
 }
 
 const groupDefs: Array<{ key: string; label: string; icon: any; items: string[] }> = [
-  { key: 'overview', label: '概览', icon: Histogram, items: ['/overview', '/dashboards/hr', '/dashboards/admin', '/hr-candidates', '/personal-center'] },
+  { key: 'overview', label: '概览', icon: Histogram, items: ['/dashboards/hr', '/dashboards/admin', '/hr-candidates'] },
   { key: 'jobs', label: '岗位管理', icon: Management, items: ['/datasets', '/jd-parser', '/jobs', '/emerging-jobs', '/job-evolution'] },
   { key: 'graph', label: '能力分析', icon: Connection, items: ['/skill-graph', '/capability-evolution'] },
   { key: 'match', label: '人岗匹配', icon: Aim, items: ['/resume-parser', '/match-analysis', '/learning-path'] },
@@ -247,6 +258,22 @@ const visibleGroups = computed<MenuGroup[]>(() => {
     }))
     .filter((g) => g.items.length > 0)
 })
+
+// 平级直达入口：系统概览 / 驾驶舱 由下拉改为顶导直接按钮
+const directEntries: Array<{ path: string; label: string; icon: any }> = [
+  { path: '/overview', label: '系统概览', icon: Histogram },
+  { path: '/personal-center', label: '驾驶舱', icon: User },
+]
+
+const visibleDirect = computed(() => {
+  if (auth.role !== 'candidate') return []
+  const allowed = new Set(roleRouteMap.candidate)
+  return directEntries.filter((e) => allowed.has(e.path))
+})
+
+function isDirectActive(entry: { path: string }) {
+  return route.path === entry.path
+}
 
 
 const roleLabel = computed(() => (auth.role === 'hr' ? '企业 HR' : auth.role === 'admin' ? '管理员' : '求职端/学生'))

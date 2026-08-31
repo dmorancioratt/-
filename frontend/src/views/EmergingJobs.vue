@@ -316,6 +316,35 @@ const MOCK_JOBS = [
   },
 ]
 
+// ===== 默认排序：新兴岗位（大模型/智能体等）置顶，传统岗位（Java/前端等）后置 =====
+const EMERGING_KEYWORDS = [
+  '大模型', '大语言模型', 'LLM', '智能体', 'Agent', 'AIGC', '提示工程', 'Prompt',
+  '多模态', '具身智能', '数字孪生', '人工智能', '机器学习', '深度学习', '数据科学',
+  '算法', '机器人', '自动驾驶', '云计算', '大数据', 'AI ',
+]
+const TRADITIONAL_KEYWORDS = [
+  'Java', '前端', 'Web', '后端', 'PHP', '.NET', '测试', '运维', '网络工程',
+  '数据库', '行政', '会计', '财务', '销售', '人事', '文员', '客服', '运营专员',
+]
+
+function jobTier(job: any): number {
+  const name = String(job?.job_name || '')
+  if (EMERGING_KEYWORDS.some((k) => name.includes(k))) return 0
+  if (TRADITIONAL_KEYWORDS.some((k) => name.includes(k))) return 2
+  return 1
+}
+
+// 层级优先（新兴 > 其他 > 传统）；同层级按新兴指数降序，再按名称排序，保证结果稳定
+function sortJobsByDefault(list: any[]): any[] {
+  return [...list].sort((a, b) => {
+    const tierDiff = jobTier(a) - jobTier(b)
+    if (tierDiff !== 0) return tierDiff
+    const idxDiff = (Number(b?.emerging_index) || 0) - (Number(a?.emerging_index) || 0)
+    if (idxDiff !== 0) return idxDiff
+    return String(a?.job_name || '').localeCompare(String(b?.job_name || ''))
+  })
+}
+
 const rows = ref<any[]>([])
 const router = useRouter()
 const current = ref<any>()
@@ -395,7 +424,7 @@ function startMatch() {
 async function generate(notify = false) {
   loading.value = true
   try {
-    rows.value = await api.emergingJobs()
+    rows.value = sortJobsByDefault(await api.emergingJobs())
     current.value = rows.value[0]
     lastUpdated.value = new Date().toISOString()
     persistState()
@@ -403,7 +432,7 @@ async function generate(notify = false) {
   } catch {
     // 后端不可用时使用 mock 数据
     isMock.value = true
-    rows.value = MOCK_JOBS
+    rows.value = sortJobsByDefault(MOCK_JOBS)
     current.value = rows.value[0]
     lastUpdated.value = new Date().toISOString()
     persistState()
@@ -423,7 +452,7 @@ onMounted(async () => {
   const cached = loadPageState<EmergingJobsState>('emerging-jobs')
   const cacheMatchesCatalog = cached?.rows?.length && cached.rows.every((item) => item.job_id && item.requirements && item.authority)
   if (cacheMatchesCatalog) {
-    rows.value = cached.rows
+    rows.value = sortJobsByDefault(cached.rows)
     lastUpdated.value = cached.lastUpdated
     current.value = rows.value.find((item) => item.job_name === cached.currentJobName) || rows.value[0]
     return

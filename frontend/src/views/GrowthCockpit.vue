@@ -7,11 +7,23 @@
     </button>
 
     <div class="cockpit-scene" :class="sceneClass">
-      <GrowthCockpitScene :active-module="activePanel" @focus="openPanel" />
+      <GrowthCabinImage @select="openPanel" />
     </div>
 
+    <GrowthProfileMission
+      v-if="activeMissionPanel === 'avatar'"
+      @close="closePanel"
+      @primary="handlePrimaryAction"
+      @assist="switchPanel('ai-suggest')"
+    />
+
     <LearningPathMission
-      v-if="activeMissionPanel === 'path'"
+      v-else-if="activeMissionPanel === 'path'"
+      @close="closePanel"
+    />
+
+    <AchievementWallMission
+      v-else-if="activeMissionPanel === 'timeline'"
       @close="closePanel"
     />
 
@@ -199,6 +211,8 @@
 
         <!-- 推荐岗位详情 -->
         <div v-if="activePanel === 'resource-library'" class="detail-page page-resource-library">
+          <div class="resource-frame">
+            <div class="resource-frame__inner">
           <div class="page-header">
             <div class="header-icon resource-library__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path d="M4 19a2.5 2.5 0 0 1 2.5-2.5H20"/><path d="M9 7h7M9 10h5"/></svg>
@@ -234,6 +248,9 @@
           <div class="resource-library__actions">
             <button type="button" @click="router.push('/learning-path')">进入完整学习路径</button>
             <button type="button" class="ghost" @click="closePanel">返回资源舱</button>
+          </div>
+            </div>
+            <div class="resource-frame__base"></div>
           </div>
         </div>
 
@@ -579,7 +596,8 @@
             </div>
           </div>
 
-          <div class="tech-section">
+          <div class="tech-section tech-section--badge-wall">
+            <div class="tech-frame-frame"></div>
             <h3 class="section-title"><span class="st-line"></span>成就徽章</h3>
             <div class="badge-wall">
               <div class="badge-item" v-for="b in badges" :key="b.name" :class="{ locked: !b.unlocked }">
@@ -610,11 +628,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { nextTick, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import GrowthCockpitScene from '@/components/cockpit/GrowthCockpitScene.vue'
+import GrowthCabinImage from '@/components/cockpit/GrowthCabinImage.vue'
 import ImmersiveMissionCabin from '@/components/cockpit/ImmersiveMissionCabin.vue'
 import LearningPathMission from '@/components/cockpit/LearningPathMission.vue'
+import GrowthProfileMission from '@/components/cockpit/GrowthProfileMission.vue'
+import AchievementWallMission from '@/components/cockpit/AchievementWallMission.vue'
 import { isMissionCabinId, type MissionCabinId } from '@/components/cockpit/missionCabinData'
 
 const router = useRouter()
@@ -647,6 +667,11 @@ function openPanel(id: string) {
 }
 
 function closePanel() { activePanel.value = null }
+
+function switchPanel(id: MissionCabinId) {
+  closePanel()
+  void nextTick(() => openPanel(id))
+}
 
 function handlePrimaryAction(payload: { id: MissionCabinId; route: string }) {
   if (payload.route === router.currentRoute.value.path) {
@@ -1117,6 +1142,42 @@ for (let r = 0; r < 7; r++) {
 
 /* ============ 通用区块 ============ */
 .tech-section { margin-top: 32px; }
+
+/* 成就墙 — 平行四边形外框 */
+.tech-section--badge-wall {
+  position: relative;
+  margin-top: 36px;
+  padding: 18px 18px 26px;
+}
+.tech-section--badge-wall .tech-frame-frame {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 22px 100%);
+  border: 1px solid rgba(78, 216, 255, 0.32);
+  border-radius: 14px 14px 16px 18px;
+  background: linear-gradient(135deg, rgba(78, 216, 255, 0.09), rgba(143, 124, 255, 0.04));
+  box-shadow:
+    inset 0 1px 0 rgba(208, 243, 255, 0.1),
+    inset 0 -1px 0 rgba(78, 216, 255, 0.08);
+  pointer-events: none;
+}
+.tech-section--badge-wall::after {
+  /* 左下延伸接"地面"的斜角底座斜边 */
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 22px; height: 18px;
+  border-left: 1px solid rgba(78, 216, 255, 0.42);
+  border-bottom: 1px solid rgba(78, 216, 255, 0.42);
+  transform: skewX(-14deg);
+  transform-origin: bottom left;
+  pointer-events: none;
+}
+.tech-section--badge-wall .section-title,
+.tech-section--badge-wall .badge-wall {
+  position: relative;
+  z-index: 1;
+}
 .section-title {
   margin: 0 0 18px;
   font-size: 15px; font-weight: 600;
@@ -1474,7 +1535,56 @@ for (let r = 0; r < 7; r++) {
 .ls-meta { display: flex; gap: 16px; margin-top: 6px; }
 .ls-time, .ls-diff { font-size: 11px; color: rgba(255,255,255,0.35); }
 
-.page-resource-library { display: grid; gap: 18px; }
+.page-resource-library { display: grid; gap: 18px; padding-top: 8px; padding-bottom: 24px; }
+
+/* 资源库 — 长方形外框 + 下方底座（贴在一起） */
+.resource-frame {
+  position: relative;
+  padding: 4px;
+  margin-bottom: 6px;
+}
+.resource-frame__inner {
+  position: relative;
+  padding: 18px 18px 6px;
+  border: 1px solid rgba(78, 216, 255, 0.28);
+  border-radius: 18px 18px 4px 4px;
+  background:
+    linear-gradient(180deg, rgba(10, 42, 80, 0.55), rgba(7, 24, 52, 0.28));
+  box-shadow:
+    inset 0 1px 0 rgba(210, 241, 255, 0.09),
+    inset 0 -1px 0 rgba(78, 216, 255, 0.06);
+}
+.resource-frame__base {
+  position: relative;
+  margin: -1px 6px 0;
+  height: 22px;
+  border: 1px solid rgba(78, 216, 255, 0.22);
+  border-top: none;
+  border-radius: 0 0 18px 18px;
+  background:
+    linear-gradient(180deg, rgba(78, 216, 255, 0.12), rgba(10, 30, 64, 0.7));
+  box-shadow:
+    inset 0 -1px 0 rgba(78, 216, 255, 0.1),
+    0 10px 28px rgba(1, 9, 28, 0.5);
+}
+.resource-frame__base::before {
+  content: '';
+  position: absolute;
+  left: 14%; right: 14%;
+  top: 6px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(78, 216, 255, 0.5), transparent);
+  border-radius: 3px;
+}
+.resource-frame__base::after {
+  content: '';
+  position: absolute;
+  left: 22%; right: 22%;
+  top: 13px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(143, 124, 255, 0.35), transparent);
+  border-radius: 2px;
+}
 .resource-library__icon { color: #8ae8ff; background: linear-gradient(135deg, rgba(63, 211, 255, .2), rgba(44, 106, 196, .12)); border-color: rgba(106, 224, 255, .6); }
 .resource-library__icon svg { width: 25px; height: 25px; }
 .resource-library__count { margin-left: auto; padding: 6px 9px; border: 1px solid rgba(101, 221, 255, .34); border-radius: 2px; color: #7ee9ff; font: 700 10px/1 Bahnschrift, sans-serif; letter-spacing: .11em; }
