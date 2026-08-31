@@ -2,16 +2,6 @@
   <div class="candidate-dashboard">
     <div v-if="loading" class="cockpit-loading">正在读取你的成长数据...</div>
 
-    <nav class="overview-rail" aria-label="概览区块导航">
-      <a href="#career-map">职业路线</a>
-      <a href="#readiness">准备进度</a>
-      <a href="#actions">本周行动</a>
-      <a href="#evidence">资料证据</a>
-      <button type="button" :disabled="refreshing" @click="refresh(true)">
-        <el-icon><Refresh /></el-icon>{{ refreshing ? '更新中' : '更新数据' }}
-      </button>
-    </nav>
-
     <section id="career-map" class="career-hero" aria-labelledby="career-title">
       <article class="hero-card readiness-card">
         <span class="section-kicker">职业进化引擎</span>
@@ -138,6 +128,19 @@
         <p class="skill-footnote"><el-icon><TrendCharts /></el-icon>{{ selectedItem ? `${selectedItem.name}：${selectedItem.status === 'missing' ? '建议优先安排学习任务' : '可继续补充项目与实践证据'}` : '完成岗位匹配后，可查看更精准的能力建议。' }}</p>
       </article>
     </section>
+
+    <!-- 底部数据状态栏：刷新操作与更新时间集中在此，顶部导航只负责区块跳转 -->
+    <footer class="overview-footer">
+      <div class="overview-footer__status">
+        <span class="status-dot" :class="{ busy: refreshing }"></span>
+        <span>{{ refreshing ? '正在重新拉取最新成长数据…' : '个人成长数据就绪' }}</span>
+        <span class="footer-divider"></span>
+        <span>更新于 {{ updatedLabel }}</span>
+      </div>
+      <button type="button" :disabled="refreshing" @click="refresh(true)">
+        <el-icon :class="{ 'fa-spin': refreshing }"><Refresh /></el-icon>{{ refreshing ? '更新中' : '更新数据' }}
+      </button>
+    </footer>
   </div>
 </template>
 
@@ -149,7 +152,6 @@ import { ElMessage } from 'element-plus'
 import { api } from '@/api/http'
 import { useAuthStore } from '@/stores/auth'
 import { formatSnapshotTime, readDashboardSnapshot, settledValue, writeDashboardSnapshot } from '@/utils/dashboardCache'
-
 type SkillStatus = 'mastered' | 'growing' | 'missing'
 type SkillItem = { name: string; score: number; category: string; status: SkillStatus }
 type CandidateModel = { summary: any; profile: any; resumes: any[]; matches: any[]; matchDetail: any; interviews: any[]; market: any }
@@ -164,6 +166,7 @@ const videoUnavailable = ref(false)
 const updatedAt = ref('')
 const selectedSkill = ref('')
 const cacheKey = computed(() => `sr-dashboard:candidate:${auth.user?.id || auth.user?.username || 'default'}`)
+const updatedLabel = computed(() => formatSnapshotTime(updatedAt.value))
 
 const targetRole = computed(() => model.value.profile.target_role || model.value.matches[0]?.target_job || '大模型应用工程师')
 const latestResume = computed(() => model.value.resumes[0])
@@ -272,4 +275,16 @@ onMounted(() => refresh(false))
 .video-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: #8fc9e9; background: radial-gradient(circle at 50% 50%, #0c4a84, #03183d 72%); font-size: 13px; }
 @media (max-width: 840px) { .journey-stage { min-height: 360px; }.journey-stage .video-shell { min-height: 100%; } }
 @media (max-width: 520px) { .journey-stage { min-height: 290px; }.journey-stage .video-shell { min-height: 100%; margin: 0; } }
+/* ===== 底部数据状态栏：更新操作集中在页面最下方，顶部导航只负责区块跳转 ===== */
+.overview-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 18px; border: 1px solid rgba(64,189,255,.18); border-radius: 10px; padding: 13px 18px; background: rgba(4,23,61,.66); backdrop-filter: blur(12px); }
+.overview-footer__status { display: flex; align-items: center; gap: 10px; color: #7fa3c6; font-size: 12px; }
+.overview-footer__status .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #57dfc5; box-shadow: 0 0 8px rgba(87,223,197,.7); }
+.overview-footer__status .status-dot.busy { background: #ffb65c; box-shadow: 0 0 8px rgba(255,182,92,.7); animation: footer-busy 1s ease-in-out infinite; }
+@keyframes footer-busy { 50% { opacity: .35; } }
+.footer-divider { width: 1px; height: 12px; background: rgba(99,150,187,.3); }
+.overview-footer button { display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(83,232,255,.42); border-radius: 8px; padding: 9px 14px; color: #e7fbff; background: linear-gradient(90deg, rgba(29,186,231,.18), rgba(40,87,238,.26)); box-shadow: 0 0 18px rgba(27,110,244,.18), inset 0 1px 0 rgba(155,240,255,.18); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.overview-footer button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.overview-footer button:disabled { cursor: wait; opacity: .7; }
+.overview-footer .fa-spin { color: #70e6ff; }
+@media (max-width: 620px) { .overview-footer { flex-direction: column; align-items: flex-start; } .overview-footer button { align-self: stretch; justify-content: center; } }
 </style>

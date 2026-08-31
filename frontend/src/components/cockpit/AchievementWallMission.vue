@@ -53,48 +53,31 @@
       <div class="stage">
         <i class="arch-glow" aria-hidden="true"></i>
 
-        <div class="podium-row">
-          <template v-for="(slot, i) in podiumSlots" :key="`${i}-${slot.id}`">
-            <div v-if="i === 2" class="podium podium--center">
-              <Transition name="focus-swap" mode="out-in">
-                <article
-                  :key="slot.id"
-                  class="showcase"
-                  role="button"
-                  tabindex="0"
-                  :aria-label="`查看 ${slot.name} 详情`"
-                  @click="openDetail(slot)"
-                  @keydown.enter="openDetail(slot)"
-                >
-                  <i class="showcase__corner showcase__corner--tl"></i>
-                  <i class="showcase__corner showcase__corner--tr"></i>
-                  <i class="showcase__corner showcase__corner--bl"></i>
-                  <i class="showcase__corner showcase__corner--br"></i>
-                  <h3>{{ slot.name }}</h3>
-                  <span class="showcase__date">{{ slot.date }}</span>
-                  <button class="showcase__btn" type="button" @click.stop="openDetail(slot)">查看详情 ›</button>
-                  <div class="showcase__stage-area">
-                    <img
-                      class="showcase__trophy showcase__trophy--real"
-                      :src="heroTrophyImage"
-                      alt="蓝金星盾奖杯"
-                    />
-                    <i class="showcase__pedestal"></i>
-                  </div>
-                </article>
-              </Transition>
-            </div>
-
-            <div v-else class="podium" :class="`podium--s${i}`">
-              <button class="podium-case" type="button" :aria-label="`聚焦成就 ${slot.name}`" @click="selectAchievement(slot)">
-                <TrophyStatue :variant="slot.variant" class="podium-case__trophy" :style="{ animationDelay: `${i * 0.7}s` }" />
-              </button>
-              <div class="podium-plate">
-                <b>{{ slot.name }}</b>
-                <span>{{ slot.date }}</span>
-              </div>
-            </div>
-          </template>
+        <div class="trophy-carousel" aria-label="五奖杯旋转展台">
+          <button
+            v-for="(item, itemIndex) in carouselItems"
+            :key="item.achievement.id"
+            type="button"
+            class="trophy-carousel__item"
+            :class="{ 'is-center': itemIndex === carouselIndex }"
+            :style="carouselItemStyle(itemIndex)"
+            :aria-label="itemIndex === carouselIndex ? `查看 ${item.achievement.name} 详情` : `将 ${item.achievement.name} 转到中央`"
+            @click="handleCarouselClick(itemIndex)"
+          >
+            <span class="trophy-carousel__frame">
+              <span v-if="itemIndex === carouselIndex" class="trophy-carousel__meta">
+                <strong>{{ item.achievement.name }}</strong>
+                <small>{{ item.achievement.date }}</small>
+                <i @click.stop="openDetail(item.achievement)">查看详情 ›</i>
+              </span>
+              <img :src="item.image" alt="蓝金成就奖杯" />
+              <span class="trophy-carousel__aura"></span>
+            </span>
+            <span class="trophy-carousel__plate">
+              <b>{{ item.achievement.name }}</b>
+              <small>{{ item.achievement.date }}</small>
+            </span>
+          </button>
         </div>
 
         <div class="stage-discs" aria-hidden="true">
@@ -198,9 +181,16 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import TrophyStatue from './TrophyStatue.vue'
-import heroTrophyImage from '@/assets/cockpit/trophy-shield.png'
+import trophyStarCup from '@/assets/cockpit/trophy-star-cup.png'
+import trophyDiamondCup from '@/assets/cockpit/trophy-diamond-cup.png'
+import trophyCrownCup from '@/assets/cockpit/trophy-crown-cup.png'
+import trophyOrbitCup from '@/assets/cockpit/trophy-orbit-cup.png'
+import trophyShieldCup from '@/assets/cockpit/trophy-shield.png'
 
 const emit = defineEmits<{ close: [] }>()
+
+const heroTrophyImages = [trophyCrownCup, trophyStarCup, trophyDiamondCup, trophyOrbitCup, trophyShieldCup]
+let trophyTimer: number | undefined
 
 const ambientStars = Array.from({ length: 42 }, (_, index) => ({
   id: index,
@@ -364,21 +354,62 @@ const focusAchievement = computed(() => achievements.find(item => item.id === fo
 
 function selectAchievement(ach: Achievement) {
   focusId.value = ach.id
+  const showcaseIndex = showcaseAchievements.findIndex(item => item.id === ach.id)
+  if (showcaseIndex >= 0) selectCarouselItem(showcaseIndex)
 }
 
 const showcaseAchievements = achievements.filter(item => item.showcase)
-const centerAchievement = computed(() => {
-  const focus = focusAchievement.value
-  return focus.showcase ? focus : showcaseAchievements[0]
-})
-const sideAchievements = computed(() => showcaseAchievements.filter(item => item.id !== centerAchievement.value.id).slice(0, 4))
-const podiumSlots = computed<Achievement[]>(() => [
-  sideAchievements.value[0],
-  sideAchievements.value[1],
-  centerAchievement.value,
-  sideAchievements.value[2],
-  sideAchievements.value[3],
-].filter(Boolean))
+const carouselItems = showcaseAchievements.map((achievement, index) => ({
+  achievement,
+  image: heroTrophyImages[index],
+}))
+const carouselIndex = ref(0)
+
+const carouselSlots = [
+  { x: -43, y: 34, scale: 0.58, depth: -260, rotate: 17, opacity: 0.58, zIndex: 1 },
+  { x: -24, y: 20, scale: 0.78, depth: -110, rotate: 10, opacity: 0.9, zIndex: 3 },
+  { x: 0, y: 4, scale: 1.08, depth: 120, rotate: 0, opacity: 1, zIndex: 6 },
+  { x: 24, y: 20, scale: 0.78, depth: -110, rotate: -10, opacity: 0.9, zIndex: 3 },
+  { x: 43, y: 34, scale: 0.58, depth: -260, rotate: -17, opacity: 0.58, zIndex: 1 },
+]
+
+function carouselSlotIndex(itemIndex: number) {
+  const offset = (itemIndex - carouselIndex.value + carouselItems.length) % carouselItems.length
+  return [2, 3, 4, 0, 1][offset]
+}
+
+function carouselItemStyle(itemIndex: number) {
+  const slot = carouselSlots[carouselSlotIndex(itemIndex)]
+  return {
+    left: `${50 + slot.x}%`,
+    top: `${slot.y}%`,
+    opacity: slot.opacity,
+    zIndex: slot.zIndex,
+    transform: `translate(-50%, 0) translateZ(${slot.depth}px) rotateY(${slot.rotate}deg) scale(${slot.scale})`,
+  }
+}
+
+function startTrophyCycle() {
+  if (trophyTimer) window.clearInterval(trophyTimer)
+  trophyTimer = window.setInterval(() => {
+    carouselIndex.value = (carouselIndex.value + 1) % carouselItems.length
+    focusId.value = carouselItems[carouselIndex.value].achievement.id
+  }, 4800)
+}
+
+function selectCarouselItem(index: number) {
+  carouselIndex.value = index
+  focusId.value = carouselItems[index].achievement.id
+  startTrophyCycle()
+}
+
+function handleCarouselClick(index: number) {
+  if (index === carouselIndex.value) {
+    openDetail(carouselItems[index].achievement)
+    return
+  }
+  selectCarouselItem(index)
+}
 
 const detailAchievement = ref<Achievement | null>(null)
 
@@ -409,10 +440,14 @@ function handleKeydown(event: KeyboardEvent) {
   emit('close')
 }
 
-onMounted(() => window.addEventListener('keydown', handleKeydown))
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+  startTrophyCycle()
+})
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
   if (toastTimer) window.clearTimeout(toastTimer)
+  if (trophyTimer) window.clearInterval(trophyTimer)
 })
 
 // 大厅环境元素已由 stage-3d-bg 效果图承载，无需额外生成
@@ -1136,5 +1171,219 @@ onBeforeUnmount(() => {
   .wall-appear-enter-active,
   .focus-swap-enter-active,
   .detail-pop-enter-active { transition: none; }
+}
+
+/* ============ 蓝金展厅还原层：纯 CSS 场景，不使用参考图 ============ */
+.achv-wall {
+  background: #020817;
+  color: #eef8ff;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+.hall-bg { background: #020817; isolation: isolate; }
+.hall-bg__shell {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 54% 46% at 50% 43%, rgba(13, 76, 170, .28), transparent 72%),
+    radial-gradient(ellipse 94% 74% at 50% 72%, rgba(0, 75, 183, .16), transparent 70%),
+    linear-gradient(180deg, #020817 0%, #04132e 46%, #020817 100%);
+}
+.hall-bg__shell::before {
+  content: ''; position: absolute; inset: 5% 7% 22%; border-radius: 46% 46% 10% 10% / 23% 23% 8% 8%;
+  border: 2px solid rgba(34, 157, 255, .22);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 8%, rgba(44, 141, 255, .07) 8.15% 8.35%, transparent 8.5% 16%),
+    radial-gradient(ellipse at 50% 68%, rgba(6, 31, 78, .22), rgba(1, 8, 25, .84) 74%);
+  box-shadow: inset 0 0 90px rgba(5, 71, 174, .25), 0 0 70px rgba(0, 91, 255, .12);
+}
+.hall-bg__ceiling {
+  position: absolute; left: 50%; top: -28%; width: 132%; height: 58%; transform: translateX(-50%);
+  border-radius: 0 0 50% 50%; border-bottom: 3px solid rgba(53, 160, 255, .34);
+  background:
+    repeating-radial-gradient(ellipse at 50% 100%, transparent 0 8%, rgba(31, 91, 172, .23) 8.3% 8.8%, transparent 9.1% 13%),
+    linear-gradient(180deg, #01050f, #07162f 70%, #061f47);
+  box-shadow: 0 20px 70px rgba(7, 83, 196, .36), inset 0 -4px 20px rgba(57, 171, 255, .18);
+}
+.hall-bg__ceiling i {
+  --lamp-x: calc(14% + (var(--lamp-index) - 1) * 12%);
+  position: absolute; left: var(--lamp-x); bottom: -7px; width: 15px; height: 15px; border-radius: 50%;
+  background: #fff4c8; border: 2px solid #ffc75c;
+  box-shadow: 0 0 8px #fff, 0 0 22px #ffb43f, 0 0 48px rgba(255, 174, 50, .58);
+}
+.hall-bg__ceiling i::after {
+  content: ''; position: absolute; left: 50%; top: 12px; width: 72px; height: 250px; transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(255, 202, 104, .2), transparent 78%); clip-path: polygon(43% 0, 57% 0, 100% 100%, 0 100%); filter: blur(8px);
+}
+.hall-bg__arch {
+  position: absolute; left: 50%; top: 14%; width: 72%; height: 59%; transform: translateX(-50%);
+  border: 14px solid rgba(9, 35, 79, .72); border-radius: 50% 50% 8% 8% / 28% 28% 8% 8%;
+  box-shadow: 0 0 0 2px rgba(36, 160, 255, .34), inset 0 0 36px rgba(18, 121, 255, .24), 0 0 46px rgba(2, 66, 176, .28);
+}
+.hall-bg__arch::before {
+  content: ''; position: absolute; inset: 14px; border-radius: inherit; border: 2px solid rgba(62, 198, 255, .2);
+  box-shadow: inset 0 0 55px rgba(0, 96, 255, .12);
+}
+.hall-bg__horizon {
+  position: absolute; left: 0; right: 0; top: 48%; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(26, 145, 255, .78) 18%, #70dfff 50%, rgba(26, 145, 255, .78) 82%, transparent);
+  box-shadow: 0 0 22px rgba(34, 154, 255, .66);
+}
+.hall-bg__floor {
+  position: absolute; left: -8%; right: -8%; bottom: -20%; height: 65%;
+  background:
+    repeating-conic-gradient(from 0deg at 50% 0%, rgba(24, 113, 255, .16) 0 1deg, transparent 1.5deg 12deg),
+    repeating-radial-gradient(ellipse at 50% 0%, transparent 0 9%, rgba(43, 148, 255, .18) 9.3% 9.7%, transparent 10% 16%),
+    radial-gradient(ellipse at 50% 0%, #0a2b61, #030b1c 68%);
+  transform: perspective(650px) rotateX(58deg); transform-origin: 50% 0;
+  filter: drop-shadow(0 -16px 36px rgba(13, 105, 255, .22));
+}
+.hall-bg__stars { position: absolute; inset: 14% 10% 25%; }
+.hall-bg__stars i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #b9edff; box-shadow: 0 0 8px #56c8ff; animation: blue-star 3.8s ease-in-out infinite; }
+@keyframes blue-star { 50% { transform: scale(2.2); opacity: 1; } }
+.hall-bg__vignette { background: radial-gradient(ellipse 70% 70% at 50% 45%, transparent 42%, rgba(0, 4, 15, .76) 100%); }
+.hall-bg__spot { top: -2%; width: 54%; height: 56%; background: radial-gradient(ellipse at 50% 0%, rgba(72, 171, 255, .24), rgba(20, 91, 255, .08) 42%, transparent 72%); }
+.hall-bg__magenta { bottom: 21%; width: 42%; height: 34%; background: radial-gradient(ellipse, rgba(50, 164, 255, .24), rgba(255, 189, 75, .08) 38%, transparent 70%); }
+
+.stage { width: min(1120px, 68vw); height: min(88vh, 850px); perspective: 1700px; }
+.stage::before { content: ''; position: absolute; left: 50%; top: 9%; width: 58%; height: 65%; transform: translateX(-50%); border-radius: 28px; background: radial-gradient(ellipse, rgba(3, 29, 74, .92), rgba(2, 13, 38, .76) 62%, transparent 78%); filter: blur(2px); }
+.arch-glow { bottom: 14%; width: clamp(430px, 39vw, 650px); border-color: rgba(54, 183, 255, .36); box-shadow: 0 0 72px rgba(23, 133, 255, .34), inset 0 0 96px rgba(20, 118, 255, .18); }
+.podium-row { bottom: 31%; z-index: 3; gap: clamp(8px, 1vw, 18px); }
+.podium--s0, .podium--s4 { display: flex; transform: translateY(18px) scale(.72) translateZ(-180px); opacity: .72; }
+.podium--s1 { transform: translateY(4px) scale(.86) translateZ(-90px) rotateY(9deg); }
+.podium--s3 { transform: translateY(4px) scale(.86) translateZ(-90px) rotateY(-9deg); }
+.podium--center { transform: translateZ(110px); }
+.stage-discs { bottom: 2%; z-index: 1; width: min(82%, 900px); opacity: 1; mix-blend-mode: normal; }
+.stage-disc--base { background: linear-gradient(180deg, rgba(16, 48, 97, .96), rgba(2, 12, 32, .98)); border-color: rgba(63, 174, 255, .62); box-shadow: 0 0 36px rgba(27, 132, 255, .48), inset 0 12px 24px rgba(102, 196, 255, .16); }
+.stage-disc--mid { background: linear-gradient(180deg, rgba(24, 66, 119, .96), rgba(4, 18, 46, .98)); border-color: rgba(255, 202, 94, .55); box-shadow: 0 0 32px rgba(37, 152, 255, .42); }
+.stage-disc--top { background: radial-gradient(ellipse, rgba(255, 210, 126, .28), rgba(15, 57, 112, .92) 58%, rgba(2, 17, 46, .98)); border-color: rgba(255, 217, 139, .72); box-shadow: 0 0 38px rgba(255, 183, 68, .22), 0 0 70px rgba(31, 143, 255, .42); }
+.stage-sweep { border-color: rgba(70, 205, 255, .5); }
+.stage-crest { z-index: 4; bottom: 13%; background: linear-gradient(180deg, #5b3b12, #19130d); border-color: rgba(255, 213, 132, .76); color: #ffe2a6; box-shadow: 0 0 22px rgba(255, 176, 50, .28); }
+
+.trophy-carousel { position: absolute; inset: 5% -4% 22%; z-index: 3; perspective: 1500px; transform-style: preserve-3d; pointer-events: none; }
+.trophy-carousel::before { content: ''; position: absolute; left: 50%; bottom: 1%; width: 88%; height: 35%; transform: translateX(-50%) rotateX(68deg); border: 1px solid rgba(54, 177, 255, .3); border-radius: 50%; box-shadow: 0 0 34px rgba(28, 137, 255, .25), inset 0 0 35px rgba(30, 128, 255, .12); }
+.trophy-carousel__item { position: absolute; width: clamp(220px, 17vw, 282px); height: clamp(400px, 55vh, 520px); padding: 0; border: 0; background: transparent; color: #eefaff; pointer-events: auto; cursor: pointer; transform-style: preserve-3d; transition: left .9s cubic-bezier(.22, 1, .36, 1), top .9s cubic-bezier(.22, 1, .36, 1), transform .9s cubic-bezier(.22, 1, .36, 1), opacity .7s ease, filter .7s ease; }
+.trophy-carousel__frame { position: absolute; inset: 0 0 72px; display: block; overflow: hidden; border: 1px solid rgba(63, 179, 255, .36); border-radius: 13px; background: linear-gradient(165deg, rgba(7, 43, 88, .9), rgba(2, 17, 46, .94)); box-shadow: 0 18px 38px rgba(0, 5, 24, .48), inset 0 0 34px rgba(25, 130, 255, .09); backdrop-filter: blur(10px); transition: border-color .5s ease, box-shadow .5s ease, background .5s ease; }
+.trophy-carousel__frame::before { content: ''; position: absolute; top: -45%; left: -36%; width: 42%; height: 190%; background: linear-gradient(180deg, rgba(184, 235, 255, .18), transparent); transform: rotate(18deg); }
+.trophy-carousel__item.is-center .trophy-carousel__frame { border-color: rgba(105, 211, 255, .74); background: linear-gradient(180deg, rgba(5, 39, 86, .98), rgba(1, 14, 42, .98)); box-shadow: 0 0 48px rgba(34, 151, 255, .4), inset 0 0 50px rgba(37, 148, 255, .12); }
+.trophy-carousel__frame img { position: absolute; left: 50%; bottom: 4%; z-index: 2; width: 108%; height: 94%; max-width: none; object-fit: contain; transform: translateX(-50%); filter: drop-shadow(0 18px 20px rgba(0, 4, 18, .58)) drop-shadow(0 0 14px rgba(255, 184, 50, .42)) drop-shadow(0 0 22px rgba(39, 164, 255, .28)); animation: carousel-trophy-float 4.4s ease-in-out infinite; transition: height .6s ease, bottom .6s ease, filter .5s ease; }
+.trophy-carousel__item.is-center .trophy-carousel__frame img { bottom: 1%; height: 77%; filter: drop-shadow(0 22px 24px rgba(0, 4, 18, .68)) drop-shadow(0 0 18px rgba(255, 193, 62, .62)) drop-shadow(0 0 34px rgba(42, 174, 255, .42)); }
+.trophy-carousel__aura { position: absolute; left: 50%; bottom: 5%; width: 86%; height: 42%; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(ellipse, rgba(56, 186, 255, .28), rgba(255, 194, 64, .1) 38%, transparent 72%); filter: blur(8px); }
+.trophy-carousel__meta { position: absolute; left: 14px; right: 14px; top: 16px; z-index: 4; display: grid; justify-items: center; gap: 6px; }
+.trophy-carousel__meta strong { font-size: clamp(17px, 1.45vw, 23px); letter-spacing: 2px; text-shadow: 0 0 16px rgba(63, 181, 255, .52); }
+.trophy-carousel__meta small { color: #b5d9ef; font-size: 13px; letter-spacing: 3px; }
+.trophy-carousel__meta i { margin-top: 3px; padding: 6px 18px; border: 1px solid rgba(72, 192, 255, .58); border-radius: 999px; background: rgba(5, 78, 139, .72); color: #e8faff; font-size: 12px; font-style: normal; }
+.trophy-carousel__plate { position: absolute; left: 6%; right: 6%; bottom: 0; min-height: 54px; display: grid; place-content: center; gap: 4px; border: 1px solid rgba(67, 180, 255, .45); border-radius: 9px; background: linear-gradient(180deg, rgba(5, 37, 81, .98), rgba(2, 17, 46, .98)); box-shadow: 0 10px 24px rgba(0, 7, 28, .54), 0 0 16px rgba(39, 151, 255, .14); }
+.trophy-carousel__plate b { font-size: 14px; letter-spacing: 1px; white-space: nowrap; }
+.trophy-carousel__plate small { color: rgba(165, 211, 236, .68); font-size: 11px; letter-spacing: 1px; }
+.trophy-carousel__item.is-center .trophy-carousel__plate { opacity: 0; transform: translateY(8px); pointer-events: none; }
+.trophy-carousel__item:hover .trophy-carousel__frame { border-color: #80dcff; box-shadow: 0 0 34px rgba(35, 157, 255, .42), inset 0 0 34px rgba(42, 163, 255, .14); }
+@keyframes carousel-trophy-float { 0%, 100% { transform: translateX(-50%) translateY(4px); } 50% { transform: translateX(-50%) translateY(-6px); } }
+
+.wall-back { top: 22px; left: 28px; border-color: rgba(82, 193, 255, .55); background: linear-gradient(180deg, rgba(8, 43, 88, .94), rgba(3, 20, 50, .96)); color: #dff8ff; box-shadow: 0 10px 30px rgba(0, 7, 25, .46), inset 0 1px rgba(255, 255, 255, .1); }
+.wall-back:hover { border-color: #7ddfff; background: linear-gradient(180deg, rgba(12, 79, 139, .96), rgba(4, 35, 78, .98)); box-shadow: 0 0 22px rgba(41, 169, 255, .36); }
+.wall-title { top: clamp(58px, 7.5vh, 78px); left: clamp(38px, 4.6vw, 78px); }
+.wall-title h1 { font-size: clamp(34px, 3.25vw, 52px); background: linear-gradient(135deg, #fff 18%, #c9edff 58%, #63c7ff); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 0 20px rgba(64, 174, 255, .45)); }
+.wall-title p { color: rgba(178, 226, 255, .84); text-shadow: 0 0 12px rgba(62, 170, 255, .32); }
+
+.stat-panel { left: clamp(28px, 3vw, 52px); top: 50%; width: clamp(174px, 13.2vw, 222px); border-color: rgba(73, 181, 255, .5); border-radius: 10px; background: linear-gradient(160deg, rgba(6, 36, 78, .96), rgba(2, 18, 48, .97)); box-shadow: 0 24px 55px rgba(0, 5, 22, .58), inset 0 0 34px rgba(30, 134, 255, .1); backdrop-filter: blur(14px); }
+.stat-panel::before, .stat-panel::after { border-color: rgba(193, 239, 255, .9); filter: drop-shadow(0 0 7px #2cb8ff); }
+.sp-item + .sp-item { border-top-color: rgba(79, 181, 255, .18); }
+.sp-label { color: rgba(154, 205, 234, .72); }
+.sp-value { background: linear-gradient(135deg, #fff 30%, #9edcff 88%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 0 16px rgba(61, 173, 255, .38)); }
+.sp-value small { color: #e7f8ff; -webkit-text-fill-color: #e7f8ff; }
+.sp-delta { border-color: rgba(255, 193, 72, .52); background: rgba(255, 177, 42, .1); color: #ffc65d; }
+
+.podium-case { border-color: rgba(58, 171, 255, .42); border-radius: 9px; background: linear-gradient(165deg, rgba(8, 45, 91, .94), rgba(2, 19, 50, .97)); box-shadow: inset 0 0 30px rgba(28, 131, 255, .12), 0 18px 34px rgba(0, 5, 24, .55); }
+.podium-case::before { background: linear-gradient(180deg, rgba(172, 231, 255, .2), transparent); }
+.podium-case:hover, .podium-case:focus-visible { border-color: #72d5ff; box-shadow: inset 0 0 34px rgba(35, 151, 255, .2), 0 0 30px rgba(29, 144, 255, .42); }
+.podium-case__trophy { filter: drop-shadow(0 12px 18px rgba(255, 176, 45, .34)) drop-shadow(0 0 9px rgba(68, 177, 255, .28)); }
+.podium-case__trophy--real { width: 92%; height: 92%; object-fit: contain; transform-origin: 50% 78%; }
+.trophy-side-cycle-enter-active { transition: opacity .38s ease, transform .44s cubic-bezier(.22, 1, .36, 1), filter .44s ease; }
+.trophy-side-cycle-leave-active { position: absolute; transition: opacity .25s ease, transform .25s ease, filter .25s ease; }
+.trophy-side-cycle-enter-from { opacity: 0; transform: translateY(12px) scale(.82); filter: blur(6px); }
+.trophy-side-cycle-leave-to { opacity: 0; transform: translateY(-8px) scale(1.08); filter: blur(5px); }
+.podium-plate { border-color: rgba(67, 180, 255, .48); background: linear-gradient(180deg, rgba(5, 37, 81, .98), rgba(2, 17, 46, .98)); box-shadow: 0 10px 24px rgba(0, 7, 28, .56), 0 0 16px rgba(39, 151, 255, .16); }
+.podium-plate b { color: #effaff; }
+.podium-plate span { color: rgba(167, 213, 238, .7); }
+
+.showcase { width: clamp(270px, 22vw, 354px); padding-top: clamp(18px, 2.2vh, 25px); border-color: rgba(70, 190, 255, .66); border-radius: 10px; background: linear-gradient(180deg, rgba(4, 34, 78, .98), rgba(2, 16, 46, .98) 58%, rgba(4, 31, 72, .98)); box-shadow: 0 0 42px rgba(30, 139, 255, .36), inset 0 0 46px rgba(35, 139, 255, .1); overflow: hidden; }
+.showcase:hover { border-color: #91e5ff; box-shadow: 0 0 58px rgba(38, 158, 255, .5), inset 0 0 54px rgba(50, 167, 255, .14); }
+.showcase__corner { border-color: #8ae1ff; filter: drop-shadow(0 0 7px #1aa9ff); }
+.showcase h3 { color: #f4fbff; text-shadow: 0 0 18px rgba(67, 181, 255, .5); }
+.showcase__date { color: #b9dcf2; }
+.showcase__btn { border-color: rgba(70, 192, 255, .62); background: linear-gradient(180deg, rgba(9, 91, 155, .78), rgba(3, 52, 105, .85)); color: #eafaff; }
+.showcase__btn:hover { background: linear-gradient(135deg, #078fe4, #0758bb); border-color: #b2edff; box-shadow: 0 0 20px rgba(36, 168, 255, .56); }
+.showcase__stage-area { min-height: clamp(245px, 34vh, 355px); perspective: 1000px; }
+.showcase__stage-area::before { content: ''; position: absolute; inset: 8% 8% 4%; border-radius: 50%; background: radial-gradient(circle at 50% 46%, rgba(56, 190, 255, .22), rgba(18, 92, 255, .08) 42%, transparent 70%); filter: blur(5px); animation: hero-aura 4.5s ease-in-out infinite; }
+.showcase__trophy--real { position: relative; z-index: 2; width: auto; height: clamp(245px, 33vh, 350px); max-width: 94%; object-fit: contain; filter: drop-shadow(0 20px 24px rgba(0, 4, 18, .62)) drop-shadow(0 0 14px rgba(255, 184, 49, .5)) drop-shadow(0 0 28px rgba(34, 155, 255, .34)); transform-origin: 50% 78%; animation: real-trophy-float 4.8s ease-in-out infinite; }
+.showcase:hover .showcase__trophy--real { filter: drop-shadow(0 24px 28px rgba(0, 4, 18, .68)) drop-shadow(0 0 20px rgba(255, 195, 68, .66)) drop-shadow(0 0 36px rgba(43, 177, 255, .48)); }
+.showcase__pedestal { z-index: 1; bottom: 3px; width: 74%; height: 24px; background: radial-gradient(ellipse, rgba(255, 199, 91, .38), rgba(49, 176, 255, .25) 38%, transparent 72%); }
+@keyframes real-trophy-float { 0%, 100% { transform: translateY(3px) rotateX(0deg) scale(1); } 50% { transform: translateY(-7px) rotateX(2deg) scale(1.015); } }
+@keyframes hero-aura { 50% { transform: scale(1.08); opacity: .72; } }
+.showcase__trophy-dots { position: absolute; left: 50%; bottom: 2px; z-index: 5; display: flex; gap: 7px; transform: translateX(-50%); }
+.showcase__trophy-dots button { width: 18px; height: 4px; padding: 0; border: 0; border-radius: 999px; background: rgba(91, 173, 224, .36); box-shadow: 0 0 7px rgba(49, 166, 255, .16); cursor: pointer; transition: width .24s ease, background .24s ease, box-shadow .24s ease; }
+.showcase__trophy-dots button:hover { background: rgba(137, 220, 255, .8); }
+.showcase__trophy-dots button.active { width: 32px; background: linear-gradient(90deg, #2dcaff, #ffd067); box-shadow: 0 0 10px rgba(52, 190, 255, .72); }
+.trophy-cycle-enter-active { transition: opacity .46s ease, transform .52s cubic-bezier(.22, 1, .36, 1), filter .52s ease; }
+.trophy-cycle-leave-active { position: absolute; transition: opacity .3s ease, transform .3s ease, filter .3s ease; }
+.trophy-cycle-enter-from { opacity: 0; transform: translateY(18px) scale(.9) rotateY(-8deg); filter: blur(8px) drop-shadow(0 0 24px rgba(48, 180, 255, .5)); }
+.trophy-cycle-leave-to { opacity: 0; transform: translateY(-12px) scale(1.06) rotateY(8deg); filter: blur(7px) drop-shadow(0 0 28px rgba(255, 190, 64, .5)); }
+
+.record-panel { right: clamp(24px, 2.4vw, 42px); top: clamp(94px, 11vh, 118px); bottom: clamp(70px, 9vh, 96px); width: clamp(320px, 22vw, 390px); }
+.record-tabs { gap: 4px; margin-bottom: 10px; padding: 5px; border: 1px solid rgba(57, 177, 255, .42); border-radius: 12px 12px 0 0; background: rgba(2, 22, 55, .92); }
+.record-tabs__btn { flex: 1; padding: 8px 10px; border-color: transparent; border-radius: 10px; background: transparent; color: rgba(190, 224, 244, .78); }
+.record-tabs__btn:hover { color: #eefbff; border-color: rgba(70, 185, 255, .4); }
+.record-tabs__btn.active { background: linear-gradient(135deg, #0d9ae9, #0759ba); border-color: rgba(143, 226, 255, .74); color: #fff; box-shadow: 0 0 18px rgba(31, 158, 255, .48), inset 0 1px rgba(255, 255, 255, .18); }
+.record-list { padding: 10px; gap: 2px; border-color: rgba(55, 176, 255, .5); border-radius: 0 0 12px 12px; background: linear-gradient(170deg, rgba(3, 31, 72, .97), rgba(1, 15, 42, .98)); box-shadow: 0 22px 48px rgba(0, 5, 24, .58), inset 0 0 34px rgba(27, 129, 255, .08); backdrop-filter: blur(16px); }
+.record-list::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(70, 193, 255, .65), rgba(20, 94, 204, .5)); }
+.record-row { gap: 13px; padding: 10px 11px; border-radius: 7px; }
+.record-row:hover { background: rgba(24, 119, 205, .18); }
+.record-row.active { border-color: rgba(72, 193, 255, .44); background: linear-gradient(90deg, rgba(18, 126, 219, .28), rgba(8, 69, 143, .08)); box-shadow: inset 0 0 24px rgba(39, 151, 255, .12); }
+.record-row__medal { color: #664108; background: radial-gradient(circle at 35% 28%, #fff3c7, #ffc857 50%, #c0821d 76%, #77470b); box-shadow: 0 0 14px rgba(255, 190, 70, .42), inset 0 0 0 3px rgba(111, 68, 6, .3); }
+.record-row__copy b { color: #eef8ff; }
+.record-row__copy small { color: rgba(163, 207, 232, .66); }
+.record-row__arrow { stroke: rgba(65, 184, 255, .66); }
+.record-row:hover .record-row__arrow { stroke: #8ee2ff; }
+.record-empty { color: rgba(168, 215, 240, .58); }
+
+.wall-motto { bottom: clamp(15px, 2.2vh, 24px); color: #f3fbff; text-shadow: 0 0 22px rgba(59, 171, 255, .58); }
+.wall-motto::after { background: linear-gradient(90deg, transparent, #22caff, transparent); box-shadow: 0 0 12px #22caff; }
+
+.detail-mask { background: rgba(0, 7, 22, .76); backdrop-filter: blur(10px); }
+.detail-card { border-color: rgba(66, 186, 255, .55); background: linear-gradient(165deg, rgba(4, 38, 84, .98), rgba(1, 14, 40, .99)); box-shadow: 0 30px 80px rgba(0, 0, 0, .68), 0 0 58px rgba(26, 137, 255, .3); }
+.detail-card__close { border-color: rgba(72, 189, 255, .4); background: rgba(4, 39, 83, .82); color: #aee8ff; }
+.detail-card__close:hover { border-color: #8de4ff; box-shadow: 0 0 14px rgba(45, 172, 255, .48); }
+.detail-card__halo { background: radial-gradient(circle at 50% 42%, rgba(50, 181, 255, .3), rgba(255, 190, 64, .08) 42%, transparent 66%); }
+.detail-card h3 { text-shadow: 0 0 18px rgba(63, 180, 255, .5); }
+.chip { border-color: rgba(61, 177, 255, .35); background: rgba(7, 58, 112, .48); color: rgba(214, 240, 255, .9); }
+.chip--cat { border-color: rgba(68, 192, 255, .58); color: #9ee7ff; }
+.detail-card__desc { color: rgba(211, 235, 248, .84); }
+.detail-card__evidence { border-color: rgba(55, 174, 255, .22); background: rgba(4, 39, 82, .48); }
+.detail-card__evidence li { color: rgba(207, 233, 247, .82); }
+.detail-card__evidence li + li { border-top-color: rgba(65, 177, 255, .14); }
+.detail-btn { border-color: rgba(66, 183, 255, .42); background: rgba(6, 58, 113, .68); color: #dff7ff; }
+.detail-btn:hover { border-color: #8ce2ff; box-shadow: 0 0 16px rgba(41, 165, 255, .4); }
+.detail-btn--primary { background: linear-gradient(135deg, #109fe9, #0757b9); }
+.detail-btn--primary:hover { box-shadow: 0 0 22px rgba(35, 161, 255, .58); }
+.wall-toast { border-color: rgba(68, 187, 255, .5); background: rgba(3, 34, 76, .96); box-shadow: 0 0 26px rgba(34, 155, 255, .4); color: #e7f9ff; }
+
+@media (max-width: 1500px) {
+  .podium--s0, .podium--s4 { display: none; }
+  .stage { width: min(980px, 64vw); }
+}
+@media (max-width: 1180px) {
+  .stat-panel { display: none; }
+  .stage { left: 36%; width: 66vw; }
+  .record-panel { width: min(350px, 31vw); }
+}
+@media (max-width: 860px) {
+  .stage { left: 50%; top: 80px; bottom: auto; width: 100vw; height: 68vh; }
+  .record-panel { top: auto; bottom: 18px; left: 12px; right: 12px; width: auto; height: 32vh; }
+  .record-tabs { border-radius: 10px; }
+  .record-list { border-radius: 10px; }
+  .wall-title { top: 64px; left: 20px; }
+  .wall-title p { display: none; }
+  .showcase { width: min(300px, 78vw); }
+  .showcase__stage-area { min-height: 220px; }
+  .showcase__trophy--real { height: 230px; }
 }
 </style>
