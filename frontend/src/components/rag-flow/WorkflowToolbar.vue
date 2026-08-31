@@ -18,7 +18,7 @@
         :icon="VideoPlay"
         @click="store.openTestDialog('什么是 RAG 工作流？')"
       >
-        运行测试
+        运行
       </el-button>
 
       <el-button :icon="DocumentCopy" @click="onSave" :loading="store.saving">

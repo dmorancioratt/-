@@ -18,6 +18,7 @@ interface WorkflowState {
   runtime: {
     running: boolean
     stageIndex: number
+    progress: number
     logs: StageLog[]
     lastResult: TestRunResponse | null
   }
@@ -39,6 +40,7 @@ export const useWorkflowStore = defineStore('workflow', {
     runtime: {
       running: false,
       stageIndex: 0,
+      progress: 0,
       logs: [],
       lastResult: null,
     },
@@ -189,11 +191,25 @@ export const useWorkflowStore = defineStore('workflow', {
           const cfg = await api.workflowConfigsUpdate(this.configId, payload)
           this.configId = cfg.id
           this.configName = cfg.name
+          this.persistDraft()
           return cfg
         } else {
-          const cfg = await api.workflowConfigsSave(payload)
+          let cfg: any
+          try {
+            cfg = await api.workflowConfigsSave(payload)
+          } catch (e: any) {
+            // 409：名称已存在 → 自动切换为更新同名配置，而不是报错
+            if (e?.response?.status === 409) {
+              const existing = ((await this.listConfigs()) || []).find((c: any) => c.name === name)
+              if (!existing) throw e
+              cfg = await api.workflowConfigsUpdate(existing.id, payload)
+            } else {
+              throw e
+            }
+          }
           this.configId = cfg.id
           this.configName = cfg.name
+          this.persistDraft()
           return cfg
         }
       } finally {
@@ -212,6 +228,48 @@ export const useWorkflowStore = defineStore('workflow', {
 
     async listConfigs() {
       return api.workflowConfigsList()
+    },
+
+    async ensureConfig() {
+      // 页面加载时：若无关联配置，自动关联后端已有配置（优先默认），避免反复新建导致重名冲突
+      if (this.configId) return
+      try {
+        const configs = (await this.listConfigs()) || []
+        if (!configs.length) return
+        const target = configs.find((c: any) => c.is_default) || configs[0]
+        if (target?.id) {
+          this.configId = target.id
+          this.configName = target.name
+        }
+      } catch {
+        // 关联失败不阻塞
+      }
+    },
+
+    async demoRun() {
+      // 一键跑完整闭环：上传 → 解析 → 切片/向量化 → 检索 → 生成 → 引用校验
+      const DEMO_TEXT =
+        '数融智联是专注人才数据智能的平台。核心产品为岗位能力图谱构建与分析系统，' +
+        '采用 RAG（检索增强生成）技术，把岗位 JD、候选人简历、技能图谱等文档切分并向量化，' +
+        '检索时基于语义召回最相关片段，再结合证据生成人岗匹配解释与面试追问。' +
+        '所有结论均附有可追溯的原文引用，避免幻觉。'
+      const DEMO_QUESTION = '数融智联的核心产品和技术是什么？'
+
+      // 1. 知识库为空则上传示例文档并切片向量化（上传 → 解析 → 向量化）
+      if (this.docs.length === 0) {
+        const file = new File([DEMO_TEXT], '数融智联知识库示例.txt', { type: 'text/plain' })
+        const doc = await this.uploadDoc(file)
+        await this.chunkDoc(doc.id, 500, 50)
+      }
+
+      // 2. 确保有工作流配置
+      await this.ensureConfig()
+      if (!this.configId) {
+        await this.save(this.configName || '默认 RAG 流程')
+      }
+
+      // 3. 流式运行：检索 → 生成 → 引用校验
+      await this.testRunStream(DEMO_QUESTION, 5)
     },
 
     async testRun(question: string, topK = 5): Promise<TestRunResponse> {
@@ -243,6 +301,99 @@ export const useWorkflowStore = defineStore('workflow', {
       this.runtime.lastResult = result
       this.runtime.running = false
       return result
+    },
+
+    async testRunStream(question: string, topK = 5): Promise<TestRunResponse | null> {
+      if (!this.configId) throw new Error('请先保存工作流配置')
+      this.runtime.running = true
+      this.runtime.progress = 0
+      this.runtime.stageIndex = 0
+      this.runtime.logs = []
+      this.runtime.lastResult = null
+      this.nodes.forEach((n) => (n.data.status = 'idle'))
+
+      const base = import.meta.env.VITE_API_BASE || ''
+      const res = await fetch(`${base}/api/workflow/configs/${this.configId}/test-stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, top_k: topK }),
+      })
+      if (!res.ok || !res.body) {
+        this.runtime.running = false
+        throw new Error('运行失败，请稍后重试')
+      }
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buf = ''
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buf += decoder.decode(value, { stream: true })
+          let sep: number
+          while ((sep = buf.indexOf('\n\n')) >= 0) {
+            const raw = buf.slice(0, sep)
+            buf = buf.slice(sep + 2)
+            const line = raw.split('\n').find((l) => l.startsWith('data:'))
+            if (!line) continue
+            let payload: any
+            try {
+              payload = JSON.parse(line.slice(5).trim())
+            } catch {
+              continue
+            }
+            this.applyStreamEvent(payload)
+          }
+        }
+      } finally {
+        this.runtime.running = false
+      }
+      return this.runtime.lastResult
+    },
+
+    applyStreamEvent(payload: any) {
+      if (payload.event === 'stage') {
+        this.runtime.stageIndex = payload.index ?? 0
+        this.runtime.progress = payload.progress ?? 0
+        const existing = this.runtime.logs.find((l) => l.stage === payload.stage)
+        if (existing) {
+          existing.status = payload.status
+          existing.output = payload.output
+        } else {
+          this.runtime.logs.push({ stage: payload.stage, status: payload.status, output: payload.output })
+        }
+        const kind = this.stageToKind(payload.stage)
+        const node = this.nodes.find((n) => n.data.kind === kind)
+        if (node) {
+          const valid: NodeStatus[] = ['idle', 'running', 'done', 'error', 'warn']
+          node.data.status = valid.includes(payload.status) ? (payload.status as NodeStatus) : 'idle'
+          node.data.output = payload.output
+        }
+      } else if (payload.event === 'result') {
+        this.runtime.logs = payload.stages_log || this.runtime.logs
+        this.runtime.lastResult = {
+          answer: payload.answer ?? null,
+          evidence: payload.evidence || [],
+          confidence: payload.confidence ?? 0,
+          stages_log: payload.stages_log || [],
+        }
+        this.runtime.progress = 100
+        this.runtime.running = false
+      }
+    },
+
+    stageToKind(stage: string): string {
+      const map: Record<string, string> = {
+        '问题解析': 'parser',
+        '本地知识库': 'knowledge',
+        'Top-K 检索': 'retrieve',
+        '向量检索': 'vector',
+        '大模型生成': 'llm',
+        '幻觉检测': 'guard',
+        '引用校验': 'citation',
+      }
+      return map[stage] || ''
     },
 
     collectSettings(): Record<string, any> {

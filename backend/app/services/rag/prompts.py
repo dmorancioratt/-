@@ -129,6 +129,23 @@ INTERVIEW_HINT_DEFINITION: dict[str, Any] = {
 }
 
 
+KNOWLEDGE_BASE_DEFINITION: dict[str, Any] = {
+    "instruction": (
+        "扮演企业本地知识库问答助手。严格基于 evidence 中的检索片段回答用户关于本地知识库文档的问题。"
+        "只引用 evidence 中出现的片段内容，禁止编造文档里没有的事实。"
+        "若检索片段不足以回答，明确说明信息不足并把 confidence 降到 0.5 以下，evidence 仍给出最相关的尝试引用。"
+    ),
+    "example": {
+        "summary": "基于检索片段的整体回答",
+        "answer": "面向用户的完整回答（3-6 句话）",
+        "confidence": 0.85,
+        "evidence": [
+            {"source": "本地文档 id=1", "quote": "原文证据片段"},
+        ],
+    },
+}
+
+
 # ---------------------------------------------------------------------------
 # 注册到 ai_provider
 # ---------------------------------------------------------------------------
@@ -138,11 +155,12 @@ RAG_TASK_TYPES: tuple[str, ...] = (
     "rag_query_skill",
     "rag_query_match_explain",
     "rag_query_interview_hint",
+    "rag_query_knowledge_base",
 )
 
 
 def register_rag_tasks() -> None:
-    """把 4 个 RAG task_type 注册到 ai_provider。幂等。"""
+    """把 5 个 RAG task_type 注册到 ai_provider。幂等。"""
     if "rag_query_job" in TASK_DEFINITIONS:
         return
 
@@ -150,6 +168,7 @@ def register_rag_tasks() -> None:
     TASK_DEFINITIONS["rag_query_skill"] = SKILL_DEFINITION
     TASK_DEFINITIONS["rag_query_match_explain"] = MATCH_EXPLAIN_DEFINITION
     TASK_DEFINITIONS["rag_query_interview_hint"] = INTERVIEW_HINT_DEFINITION
+    TASK_DEFINITIONS["rag_query_knowledge_base"] = KNOWLEDGE_BASE_DEFINITION
 
     # 扩展 SUPPORTED_TASKS（原始是 tuple，需要替换为新 tuple）
     import app.services.ai_provider as _ai_module
@@ -266,7 +285,35 @@ def rag_mock_result(task_type: str, hits: list[Hit], payload: dict[str, Any]) ->
             "confidence": 0.6 if hits else 0.0,
             "evidence": evidence,
         }
+    if task_type == "rag_query_knowledge_base":
+        return {
+            "summary": f"（mock）基于本地知识库证据回答：{question}",
+            "answer": f"（mock）已从本地知识库召回 {len(hits)} 条相关片段，可作为回答依据。",
+            "confidence": 0.6 if hits else 0.0,
+            "evidence": evidence,
+        }
     raise AIProviderError(f"未知 RAG 任务：{task_type}")
+
+
+def analyze_rag(task_type: str, payload: dict[str, Any]) -> dict[str, Any]:
+    """RAG 问答统一入口：mock/无 key 走 rag_mock_result，否则走真实 LLM。
+
+    不依赖 install_mock_patch 的 monkeypatch（它对 `from ... import` 的旧引用无效），
+    这里显式判断 provider 与 key，确保降级路径可靠。
+    """
+    import app.services.ai_provider as ai_module
+
+    clean = {k: v for k, v in payload.items() if k != "_rag_hits"}
+    if ai_module.AI_PROVIDER == "mock" or not ai_module.AI_API_KEY:
+        hits = payload.get("_rag_hits") or []
+        result = rag_mock_result(task_type, hits, clean)
+        return {
+            "provider": "mock",
+            "model": "mock-llm",
+            "task_type": task_type,
+            "result": result,
+        }
+    return ai_module.analyze_with_openai_compatible(task_type, clean)
 
 
 # ---------------------------------------------------------------------------
@@ -283,7 +330,7 @@ _original_analyze_with_mock = None
 
 
 def install_mock_patch() -> None:
-    """替换 ai_provider.analyze_with_ai，让 RAG task 走 rag_mock_result。幂等。"""
+    """给 RAG task 打补丁：mock 或无 key 时走 rag_mock_result，否则走真实 LLM。幂等。"""
     import app.services.ai_provider as _ai_module
 
     if getattr(_ai_module, "_rag_patched", False):
@@ -294,15 +341,18 @@ def install_mock_patch() -> None:
 
     def _patched_analyze_with_ai(task_type, payload):
         if task_type in RAG_TASK_TYPES:
-            hits = payload.get("_rag_hits") or []
             clean_payload = {k: v for k, v in payload.items() if k != "_rag_hits"}
-            result = rag_mock_result(task_type, hits, clean_payload)
-            return {
-                "provider": "mock",
-                "model": "mock-llm",
-                "task_type": task_type,
-                "result": result,
-            }
+            # 仅在 mock 模式或未配置 key 时走 rag_mock_result；否则交给真实 LLM
+            if _ai_module.AI_PROVIDER == "mock" or not _ai_module.AI_API_KEY:
+                hits = payload.get("_rag_hits") or []
+                result = rag_mock_result(task_type, hits, clean_payload)
+                return {
+                    "provider": "mock",
+                    "model": "mock-llm",
+                    "task_type": task_type,
+                    "result": result,
+                }
+            return _original_analyze_with_ai(task_type, clean_payload)
         return _original_analyze_with_ai(task_type, payload)
 
     def _patched_analyze_with_mock(task_type, payload):

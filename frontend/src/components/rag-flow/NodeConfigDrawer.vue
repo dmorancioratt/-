@@ -301,7 +301,7 @@ async function onRunTest() {
     return
   }
   try {
-    await store.testRun(q, 5)
+    await store.testRunStream(q, 5)
     resultVisible.value = true
     store.closeTestDialog()
   } catch (e: any) {

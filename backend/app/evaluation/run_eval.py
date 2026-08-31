@@ -29,6 +29,7 @@ class EvalResult:
     recall: float | None = None
     f1: float | None = None
     accuracy: float | None = None
+    metrics: dict = field(default_factory=dict)
     error_cases: list[dict] = field(default_factory=list)
     notes: str | None = None
 
@@ -101,11 +102,24 @@ def eval_match(gold_path: Path, pred_path: Path) -> EvalResult:
     )
 
 
+def _from_result_dict(result: dict) -> EvalResult:
+    return EvalResult(
+        task=result["task"],
+        task_label=result["task_label"],
+        samples=result["samples"],
+        metrics=result.get("metrics", {}),
+        error_cases=result.get("error_cases", []),
+        notes=result.get("notes"),
+    )
+
+
 def run() -> list[EvalResult]:
     # Keep match predictions tied to the current graph instead of a stale
     # hand-authored fixture.  JD/resume predictions remain explicit fixtures
     # until a labeled import batch is supplied.
     from app.evaluation.generate_match_predictions import generate
+    from app.evaluation.hallucination_eval import run as run_hallucination
+    from app.evaluation.retrieval_eval import run as run_retrieval
 
     generate()
     gold = SAMPLES_DIR / "gold"
@@ -114,6 +128,8 @@ def run() -> list[EvalResult]:
         eval_skill_extraction("jd_extraction", "JD 技能抽取", gold / "jd_gold.jsonl", pred / "jd_pred.jsonl"),
         eval_skill_extraction("resume_extraction", "简历技能抽取", gold / "resume_gold.jsonl", pred / "resume_pred.jsonl"),
         eval_match(gold / "match_gold.jsonl", pred / "match_pred.jsonl"),
+        _from_result_dict(run_retrieval()),
+        _from_result_dict(run_hallucination()),
     ]
 
 
