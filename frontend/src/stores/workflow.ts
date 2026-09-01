@@ -236,7 +236,7 @@ export const useWorkflowStore = defineStore('workflow', {
       for (const [stageLabel, kind] of kindToStage) {
         const node = this.nodes.find((n) => n.data.kind === kind)
         if (node) node.data.status = 'done'
-        const log = result.stages_log?.find((s) => s.stage === stageLabel)
+        const log = result.stages_log?.find((s: StageLog) => s.stage === stageLabel)
         if (node && log) node.data.output = log.output
       }
       this.runtime.logs = result.stages_log || []
@@ -304,5 +304,5 @@ export const useWorkflowStore = defineStore('workflow', {
 })
 
 function markRawArr<T>(arr: T[]): T[] {
-  return arr.map((item) => (item as any).__v_skip ? item : markRaw(item))
+  return arr.map((item) => (item as any).__v_skip ? item : markRaw(item as object) as T)
 }

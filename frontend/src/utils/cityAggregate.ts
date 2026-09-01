@@ -67,7 +67,6 @@ export function hotspotsFromProvinces(provinces: ProvinceCount[], n = 5): Hotspo
 
 export type SkillFreq = { names: string[]; demand: number[]; supply: number[] }
 
-const MOCK_SKILL_FILL = ['云原生', '板块管理', '机器学习', '数据可视化', 'Docker', '安全合规', 'Python', 'SQL', 'Linux', '数据分析']
 const TARGET_SKILL_COUNT = 10
 
 export function aggregateSkillDemand(jobs: any[], candidates: any[], graph?: { nodes?: any[]; edges?: any[] } | null): SkillFreq {
@@ -109,10 +108,7 @@ export function aggregateSkillDemand(jobs: any[], candidates: any[], graph?: { n
     .sort((a, b) => b[1] - a[1])
     .map(([n]) => n)
 
-  // 不足 10 个时用 mock 补齐
-  const realSet = new Set(realNames)
-  const fillNames = MOCK_SKILL_FILL.filter((n) => !realSet.has(n))
-  const names = [...realNames, ...fillNames].slice(0, TARGET_SKILL_COUNT)
+  const names = realNames.slice(0, TARGET_SKILL_COUNT)
 
   const demand = names.map((n) => demandMap.get(n) || 0)
   const supply = names.map((n) => supplyMap.get(n) || 0)

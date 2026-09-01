@@ -15,7 +15,7 @@
             <div class="v-metric">
               <div class="v-m-val">{{ previousCount }}</div>
               <div class="v-m-label">上一版</div>
-              <div class="v-m-delta cyan">{{ activeCard.fromVersion || 'v1.1' }}</div>
+              <div class="v-m-delta cyan">{{ activeCard.fromVersion || '—' }}</div>
             </div>
             <div class="v-metric">
               <div class="v-mini-ring"><span class="v-m-val" style="font-size:.9em">{{ signedDelta }}</span></div>
@@ -25,7 +25,7 @@
             <div class="v-metric">
               <div class="v-m-val">{{ currentCount }}</div>
               <div class="v-m-label">当前版</div>
-              <div class="v-m-delta gold">{{ activeCard.toVersion || 'v1.2' }}</div>
+              <div class="v-m-delta gold">{{ activeCard.toVersion || '—' }}</div>
             </div>
           </div>
         </section>
@@ -87,59 +87,7 @@
         <section class="v-chart-panel" style="flex:1;">
           <div class="v-corner-tl"></div>
           <div class="v-corner-br"></div>
-          <svg class="v-trend-svg" viewBox="0 0 1000 360" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="vAreaFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#57e8ff" stop-opacity=".14"/>
-                <stop offset="1" stop-color="#57e8ff" stop-opacity="0"/>
-              </linearGradient>
-              <linearGradient id="vGoldArea" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#ffd66b" stop-opacity=".12"/>
-                <stop offset="1" stop-color="#ffd66b" stop-opacity="0"/>
-              </linearGradient>
-              <filter id="vLineGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            </defs>
-            <g opacity=".24" stroke="#4bd5f3" stroke-width="1">
-              <path v-for="x in [55,185,315,445,575,705,835,965]" :key="'vx'+x" :d="`M${x} 40V315`"/>
-              <path v-for="y in [70,125,180,235,290]" :key="'hy'+y" :d="`M55 ${y}H965`"/>
-            </g>
-            <path d="M55 315H965M55 40V315" stroke="#8eeeff" stroke-width="1.5" opacity=".65"/>
-            <path d="M55 290 L215 250 L395 220 L560 180 L730 140 L965 100 L965 315 L55 315Z" fill="url(#vAreaFill)"/>
-            <path d="M55 280 C120 258 150 218 215 198 S340 225 395 205 S500 150 560 155 S660 105 730 118 S850 125 965 82" fill="none" stroke="#71efff" stroke-width="4" filter="url(#vLineGlow)"/>
-            <path d="M55 300 C125 285 160 270 215 250 S335 255 395 240 S490 200 560 190 S655 155 730 150 S840 170 965 155" fill="none" stroke="#ffe098" stroke-width="3.5" filter="url(#vLineGlow)"/>
-            <path d="M55 298 C120 288 155 275 215 260 S330 262 395 252 S495 220 560 210 S660 180 730 175 S835 185 965 170" fill="none" stroke="#ff785f" stroke-width="2.8" filter="url(#vLineGlow)" opacity=".85"/>
-            <g fill="#f8fdff" stroke="#75edff" stroke-width="2">
-              <circle v-for="p in vCyanNodes" :key="'cn'+p.x" :cx="p.x" :cy="p.y" r="5"/>
-            </g>
-            <g fill="#fff6df" stroke="#ffda7c" stroke-width="2">
-              <circle v-for="p in vGoldNodes" :key="'gn'+p.x" :cx="p.x" :cy="p.y" r="4"/>
-            </g>
-            <g fill="#ff9f8d" stroke="#ff785f" stroke-width="2">
-              <circle v-for="p in vRedNodes" :key="'rn'+p.x" :cx="p.x" :cy="p.y" r="3.5"/>
-            </g>
-            <g class="v-year-labels" fill="#dffaff" font-weight="700" font-size="12">
-              <text x="170" y="180">v1.0</text>
-              <text x="365" y="195">v1.1</text>
-              <text x="535" y="140">{{ activeCard.fromVersion || 'v1.1' }}</text>
-              <text x="705" y="100">{{ activeCard.toVersion || 'v1.2' }}</text>
-              <text x="850" y="70">v1.3</text>
-            </g>
-            <g class="v-x-labels" fill="#b9dcea" font-size="11">
-              <text x="40" y="342">基础版本</text>
-              <text x="250" y="342">迭代更新</text>
-              <text x="465" y="342">能力升级</text>
-              <text x="690" y="342">当前版本</text>
-              <text x="885" y="342">未来演进</text>
-            </g>
-            <g class="v-legend" font-size="10" fill="#a6c9dc">
-              <circle cx="80" cy="30" r="4" fill="#71efff"/>
-              <text x="92" y="34">能力总数</text>
-              <circle cx="180" cy="30" r="4" fill="#ffe098"/>
-              <text x="192" y="34">核心能力</text>
-              <circle cx="280" cy="30" r="4" fill="#ff785f"/>
-              <text x="292" y="34">淘汰趋势</text>
-            </g>
-          </svg>
+          <div class="v-chart-empty">当前接口仅提供相邻版本差异，未提供连续历史序列，因此不绘制趋势曲线。</div>
         </section>
       </main>
 
@@ -177,13 +125,6 @@
             </div>
             <div class="v-num-row">
               <div v-for="(n, i) in vNumSet2" :key="i" class="v-num-cell"><b>{{ n.val }}</b><small>{{ n.label }}</small></div>
-            </div>
-            <div class="v-spark-line">
-              <svg viewBox="0 0 240 70">
-                <path d="M0 58L22 52L38 45L61 40L82 30L102 28L123 22L145 25L166 15L188 20L210 12L240 8" fill="none" stroke="#4bffd0" stroke-width="2"/>
-                <path d="M0 40L22 45L38 38L61 48L82 35L102 42L123 32L145 38L166 28L188 35L210 25L240 30" fill="none" stroke="#ffd25c" stroke-width="2"/>
-                <path d="M0 65H240" stroke="#3d829f" opacity=".3"/>
-              </svg>
             </div>
           </div>
         </section>
@@ -225,24 +166,20 @@
         <h3>能力热点总览</h3>
         <div class="summary-stats">
           <div class="stat-item">
-            <b>{{ Math.max(124, hotSkills.length) }}</b>
+            <b>{{ allHotSkills.length }}</b>
             <span>能力总数</span>
-            <em class="up">▲ 6.2%</em>
           </div>
           <div class="stat-item">
-            <b>{{ Math.max(12, emerging.length) }}</b>
+            <b>{{ heatBuckets.high }}</b>
             <span>高热能力</span>
-            <em class="up">▲ {{ emerging.length }}</em>
           </div>
           <div class="stat-item">
-            <b>{{ Math.max(28, rising.length) }}</b>
+            <b>{{ rising.length }}</b>
             <span>升温能力</span>
-            <em class="up">▲ 3</em>
           </div>
           <div class="stat-item">
-            <b>{{ Math.max(18, declining.length) }}</b>
+            <b>{{ declining.length }}</b>
             <span>降温能力</span>
-            <em class="down">▼ 2</em>
           </div>
         </div>
       </div>
@@ -304,10 +241,10 @@
       <EChart :option="sunburstOption" class="domain-chart" @click="handleDomainClick" />
       <div class="domain-focus"><small>ACTIVE DOMAIN</small><b>{{ activeDomain.domain }}</b><strong>{{ domainShare(activeDomain) }}%</strong><span>{{ activeDomain.topSkills?.slice(0, 3).map((item: any) => item.name).join(' · ') }}</span></div>
       <div class="wheel-note">
-        <span>最强领域 <b>{{ topDomain?.domain || '软件研发' }}</b><em>{{ topDomain ? domainShare(topDomain) : 0 }}%</em></span>
-        <span>增长最快 <b>{{ fastestDomain?.domain || '人工智能' }}</b><em>▲ 18.7%</em></span>
-        <span>结构均衡度 <b>78/100</b><em>良好</em></span>
-        <span>能力覆盖率 <b>92.6%</b><em>主流技能</em></span>
+        <span>占比最高领域 <b>{{ topDomain?.domain || '暂无数据' }}</b><em>{{ topDomain ? domainShare(topDomain) : 0 }}%</em></span>
+        <span>领域数量 <b>{{ domains.length }}</b><em>实时聚合</em></span>
+        <span>能力项数 <b>{{ compareSkillCount }}</b><em>去重统计</em></span>
+        <span>数据口径 <b>岗位-技能</b><em>关系聚合</em></span>
       </div>
     </main>
 
@@ -336,45 +273,28 @@ const PanelTitle = defineComponent({
   }
 })
 
-const fallbackCards = [{
-  jobId: 0, jobName: 'AI 智能体开发工程师', domain: '人工智能', fromVersion: 'v1.1', toVersion: 'v1.2',
-  added: ['Kubernetes', 'Spring Boot', 'Rust', 'WebAssembly'], modified: [{ name: 'Vue', change: '升级为 Vue 3 工程化能力' }, { name: 'TypeScript', change: '增强类型系统能力' }], removed: ['Spring Cloud', 'jQuery'],
-  previousSkills: Array.from({ length: 13 }), currentSkills: Array.from({ length: 15 }), confidence: .76,
-  note: '岗位画像在最近样本中更强调业务场景、证据来源与可落地成果。'
-}]
-const displayCards = computed(() => props.cards?.length ? props.cards : fallbackCards)
+const displayCards = computed(() => props.cards || [])
 const roleCards = computed(() => displayCards.value.slice(0, 5))
 const activeCardIndex = ref(0)
 const activeWell = ref('add')
-const activeCard = computed(() => displayCards.value[activeCardIndex.value] || displayCards.value[0])
+const activeCard = computed(() => displayCards.value[activeCardIndex.value] || {})
 const previousCount = computed(() => activeCard.value.previousSkills?.length || 0)
 const currentCount = computed(() => activeCard.value.currentSkills?.length || 0)
 const delta = computed(() => currentCount.value - previousCount.value)
 const signedDelta = computed(() => `${delta.value > 0 ? '+' : ''}${delta.value}`)
-const confidence = computed(() => Math.round((activeCard.value.confidence || .76) * 100))
+const confidence = computed(() => Math.round(Number(activeCard.value.confidence || 0) * 100))
 const addedItems = computed(() => activeCard.value.added || [])
 const modifiedItems = computed(() => activeCard.value.modified || [])
 const removedItems = computed(() => activeCard.value.removed || [])
 const changeCount = computed(() => addedItems.value.length + modifiedItems.value.length + removedItems.value.length)
 
-const coreSkills = computed(() => {
-  const core = ['JavaScript', 'TypeScript', '数据结构', '算法', '系统设计']
-  if (activeCard.value.domain?.includes('人工智能')) {
-    return ['Python', '机器学习', '深度学习', 'PyTorch', 'NLP']
-  }
-  if (activeCard.value.domain?.includes('前端')) {
-    return ['JavaScript', 'Vue', 'React', 'CSS', 'TypeScript']
-  }
-  return core
-})
-
 const versionSkillBalls = computed(() => [
-  { val: addedItems.value.length || 2, name: '新增能力', color: 'green' },
-  { val: modifiedItems.value.length || 2, name: '调整能力', color: 'gold' },
-  { val: removedItems.value.length || 2, name: '淘汰能力', color: 'red' },
-  { val: currentCount.value || 12, name: '当前总数', color: 'cyan' },
-  { val: previousCount.value || 13, name: '上版总数', color: 'cyan' },
-  { val: confidence.value || 76, name: '置信度%', color: 'cyan' }
+  { val: addedItems.value.length, name: '新增能力', color: 'green' },
+  { val: modifiedItems.value.length, name: '调整能力', color: 'gold' },
+  { val: removedItems.value.length, name: '淘汰能力', color: 'red' },
+  { val: currentCount.value, name: '当前总数', color: 'cyan' },
+  { val: previousCount.value, name: '上版总数', color: 'cyan' },
+  { val: confidence.value, name: '置信度%', color: 'cyan' }
 ])
 
 const versionHoloCards = computed(() => [
@@ -383,35 +303,21 @@ const versionHoloCards = computed(() => [
   { title: '淘汰能力', count: `${removedItems.value.length}项`, glow: '#ff785f', stage: 'REMOVED', img: holoRemoved, imgClass: 'core-right', skills: removedItems.value.map((i: any) => typeof i === 'string' ? i : i.name) }
 ])
 
-const vCyanNodes = computed(() => [
-  { x: 215, y: 198 }, { x: 395, y: 205 }, { x: 560, y: 155 }, { x: 730, y: 118 }, { x: 965, y: 82 }
-])
-const vGoldNodes = computed(() => [
-  { x: 215, y: 250 }, { x: 395, y: 240 }, { x: 560, y: 190 }, { x: 730, y: 150 }
-])
-const vRedNodes = computed(() => [
-  { x: 215, y: 260 }, { x: 395, y: 252 }, { x: 560, y: 210 }, { x: 730, y: 175 }, { x: 965, y: 170 }
-])
-
 const vDimList = computed(() => [
   { name: '技术栈更新', val: `${addedItems.value.length}项`, color: 'cyan' },
   { name: '能力升级', val: `${modifiedItems.value.length}项`, color: 'gold' },
-  { name: '旧技术淘汰', val: `${removedItems.value.length}项`, color: 'red' },
-  { name: '领域扩展', val: '2个', color: 'cyan' },
-  { name: '要求提升', val: '18%', color: 'gold' }
+  { name: '旧技术淘汰', val: `${removedItems.value.length}项`, color: 'red' }
 ])
 
 const vBarMetrics = computed(() => [
-  { name: '技术匹配', val: confidence.value },
-  { name: '能力覆盖', val: Math.min(95, 70 + addedItems.value.length * 5) },
-  { name: '更新幅度', val: Math.min(90, 40 + changeCount.value * 8) },
-  { name: '迁移难度', val: Math.min(85, 30 + modifiedItems.value.length * 10) }
+  { name: '证据置信度', val: confidence.value },
+  { name: '变更率', val: Math.min(100, Math.round(changeCount.value / Math.max(previousCount.value, 1) * 100)) }
 ])
 
 const vNumSet1 = computed(() => [
-  { val: addedItems.value.length || 2, label: '新增' },
-  { val: modifiedItems.value.length || 2, label: '调整' },
-  { val: removedItems.value.length || 2, label: '淘汰' },
+  { val: addedItems.value.length, label: '新增' },
+  { val: modifiedItems.value.length, label: '调整' },
+  { val: removedItems.value.length, label: '淘汰' },
   { val: signedDelta.value, label: '净变' }
 ])
 const vNumSet2 = computed(() => [
@@ -422,24 +328,23 @@ const vNumSet2 = computed(() => [
 ])
 
 function skillLabel(item: any) { return typeof item === 'string' ? item : item?.name || '能力项' }
-function cycleCard(step: number) { activeCardIndex.value = (activeCardIndex.value + step + displayCards.value.length) % displayCards.value.length }
+function cycleCard(step: number) { if (displayCards.value.length) activeCardIndex.value = (activeCardIndex.value + step + displayCards.value.length) % displayCards.value.length }
 
 const rising = computed<any[]>(() => props.hotspot?.rising || [])
 const declining = computed<any[]>(() => props.hotspot?.declining || [])
 const emerging = computed<any[]>(() => props.hotspot?.emerging || [])
-const fallbackSkills = ['项目管理', '安全合规', 'SQL', '数据质量', 'Linux', '业务流程建模', '数据可视化', '需求分析', '权限管理', 'Python'].map((name, index) => ({ name, heat: 17.7 - index * .85, category: '核心能力' }))
 const hotSkills = computed(() => {
   const merged = [...rising.value, ...emerging.value].filter((item, index, arr) => item?.name && arr.findIndex((row) => row.name === item.name) === index)
-  return (merged.length ? merged : fallbackSkills).slice(0, 10).map((item: any, index: number) => ({ ...item, heat: Number(item.heat ?? (13 + Number(item.growth || 0) * 1.5) ?? (17 - index)).toFixed(2) }))
+  return merged.slice(0, 10).map((item: any) => ({ ...item, heat: Number(item.heat ?? item.growth ?? 0).toFixed(2) }))
 })
 const activeSkillName = ref('')
 const activeSkill = computed(() => {
   const all = [...hotSkills.value, ...rising.value, ...emerging.value, ...declining.value]
   const selected = all.find((item) => item.name === activeSkillName.value)
-  return selected ? { ...selected, heat: Number(selected.heat ?? selected.growth ?? selected.removed ?? 0).toFixed(2) } : hotSkills.value[0] || fallbackSkills[0]
+  return selected ? { ...selected, heat: Number(selected.heat ?? selected.growth ?? selected.removed ?? 0).toFixed(2) } : hotSkills.value[0] || {}
 })
 watch(hotSkills, (skills) => { if (!skills.some((item) => item.name === activeSkillName.value)) activeSkillName.value = skills[0]?.name || '' }, { immediate: true })
-const emergingList = computed(() => emerging.value.length ? emerging.value.slice(0, 5) : hotSkills.value.slice(0, 5))
+const emergingList = computed(() => emerging.value.slice(0, 5))
 const heatBuckets = computed(() => allHotSkills.value.reduce((acc, item) => { const heat = Number(item.heat); if (heat >= 16) acc.high++; else if (heat >= 14) acc.mid++; else if (heat >= 12) acc.warm++; else acc.low++; return acc }, { high: 0, mid: 0, warm: 0, low: 0 }))
 
 function heatColor(heat: number) { return heat >= 16 ? '#ffb52e' : heat >= 12 ? '#37e6a1' : heat >= 8 ? '#a26cff' : '#28cfff' }
@@ -448,32 +353,14 @@ function handleSkillClick(params: any) { if (params?.data?.skillName) selectSkil
 function onHotFruitSelect(skill: any) { if (skill?.name) selectSkill(skill.name) }
 
 const allHotSkills = computed<any[]>(() => {
-  const fallbackHot = [
-    { name: '大模型', heat: 18.5, category: '人工智能', trend: 'up' },
-    { name: 'RAG', heat: 17.2, category: '人工智能', trend: 'up' },
-    { name: 'Agent', heat: 16.8, category: '人工智能', trend: 'up' },
-    { name: '多模态', heat: 15.3, category: '人工智能', trend: 'up' },
-    { name: 'Prompt工程', heat: 14.7, category: '人工智能', trend: 'up' },
-    { name: '微调', heat: 13.9, category: '人工智能', trend: 'stable' },
-    { name: 'Python', heat: 18.1, category: '编程语言', trend: 'stable' },
-    { name: 'TypeScript', heat: 16.5, category: '编程语言', trend: 'up' },
-    { name: 'Rust', heat: 12.4, category: '编程语言', trend: 'up' },
-    { name: 'Vue', heat: 15.8, category: '前端框架', trend: 'stable' },
-    { name: 'React', heat: 15.2, category: '前端框架', trend: 'stable' },
-    { name: 'Kubernetes', heat: 14.1, category: '云原生', trend: 'stable' },
-    { name: '微服务', heat: 13.3, category: '架构设计', trend: 'stable' },
-    { name: '向量数据库', heat: 15.6, category: '数据技术', trend: 'up' },
-    { name: '数据治理', heat: 11.8, category: '数据技术', trend: 'stable' },
-    { name: '安全合规', heat: 12.9, category: '安全', trend: 'up' }
-  ]
   const merged = [...hotSkills.value, ...emerging.value, ...rising.value].filter((item, index, arr) => 
     item?.name && arr.findIndex((row) => row.name === item.name) === index
   )
-  return merged.length >= 8 ? merged.slice(0, 16) : fallbackHot
+  return merged.slice(0, 16)
 })
 function hotNodeHitStyle(index: number) { const angle = index / Math.max(hotSkills.value.length, 1) * Math.PI * 2 - Math.PI / 2; return { left: `${50 + Math.cos(angle) * 36}%`, top: `${50 + Math.sin(angle) * 34}%` } }
 function formatHeat(item: any) { return Number(item.heat ?? item.growth ?? item.removed ?? 0).toFixed(2) }
-function growthLabel(_item: any, index: number) { return `${28 - index * 3}.${index}%` }
+function growthLabel(item: any) { const value = item?.growth; return value == null ? '—' : `${Number(value).toFixed(1)}%` }
 
 const hotspotGraphOption = computed(() => {
   const cx = 410; const cy = 308; const radiusX = 322; const radiusY = 222
@@ -520,21 +407,21 @@ const hotspotGraphOption = computed(() => {
 const trendOption = computed(() => ({
   animationDuration: 900, grid: { left: 22, right: 16, top: 16, bottom: 22 },
   tooltip: { trigger: 'axis', backgroundColor: 'rgba(3,20,54,.3)', borderColor: '#21cfff', textStyle: { color: '#e9fbff' } },
-  xAxis: { type: 'category', boundaryGap: false, data: ['01', '02', '03', '04', '05', '06'], axisLine: { lineStyle: { color: 'rgba(83,190,255,.26)' } }, axisLabel: { color: '#78a9c8', fontSize: 9 } },
+  xAxis: { type: 'category', boundaryGap: false, data: [], axisLine: { lineStyle: { color: 'rgba(83,190,255,.26)' } }, axisLabel: { color: '#78a9c8', fontSize: 9 } },
   yAxis: { type: 'value', splitNumber: 3, axisLabel: { color: '#78a9c8', fontSize: 9 }, splitLine: { lineStyle: { color: 'rgba(83,190,255,.10)' } } },
-  series: [{ type: 'line', smooth: .45, data: [6.4, 10.8, 7.1, 13.9, 9.2, Number(activeSkill.value.heat || 14.2)], symbolSize: 7, lineStyle: { color: '#27d9ff', width: 2 }, itemStyle: { color: '#8ff7ff', shadowBlur: 10, shadowColor: '#21d8ff' }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(28,171,255,.42)' }, { offset: 1, color: 'rgba(28,171,255,0)' }] } } }]
+  series: [],
+  graphic: { type: 'text', left: 'center', top: 'middle', style: { text: '接口暂未提供单技能历史趋势', fill: '#78a9c8', fontSize: 12 } }
 }))
 
-const categories = computed<string[]>(() => props.compare?.categories || ['产品与交付', '人工智能', '安全合规', '工具工程', '开发技术', '数据技术', '通用能力'])
-const fallbackDomains = ['云计算', '产业数字化', '人工智能', '基础设施', '物联网', '数据技术', '安全合规', '软件研发'].map((domain, index) => ({ domain, categories: { [categories.value[index % categories.value.length]]: 8 + index }, topSkills: [{ name: ['Kubernetes', '业务流程建模', '机器学习', '网络基础', '设备接入', 'SQL', '权限管理', 'Python'][index], weight: 6 + index }] }))
-const domains = computed<any[]>(() => props.compare?.matrix?.length ? props.compare.matrix.slice(0, 8) : fallbackDomains)
+const categories = computed<string[]>(() => props.compare?.categories || [])
+const domains = computed<any[]>(() => props.compare?.matrix?.slice(0, 8) || [])
+const compareSkillCount = computed(() => new Set(domains.value.flatMap((row) => (row.topSkills || []).map((item: any) => item.name).filter(Boolean))).size)
 const leftDomains = computed(() => domains.value.slice(0, 4))
 const rightDomains = computed(() => domains.value.slice(4, 8))
 const activeDomainName = ref('')
 watch(domains, (rows) => { if (!rows.some((row) => row.domain === activeDomainName.value)) activeDomainName.value = rows[0]?.domain || '' }, { immediate: true })
-const activeDomain = computed(() => domains.value.find((row) => row.domain === activeDomainName.value) || domains.value[0] || fallbackDomains[0])
+const activeDomain = computed(() => domains.value.find((row) => row.domain === activeDomainName.value) || domains.value[0] || { domain: '暂无数据', topSkills: [], categories: {} })
 const topDomain = computed(() => [...domains.value].sort((a, b) => domainRawTotal(b) - domainRawTotal(a))[0])
-const fastestDomain = computed(() => domains.value.find((row) => String(row.domain).includes('人工智能')) || domains.value[1])
 const palette = ['#1ba7ff', '#20ded0', '#8f61ff', '#24d17f', '#ff8b2e', '#ee4e9d', '#3c87ff', '#3be4ff']
 
 function domainRawTotal(domain: any) { return Object.values(domain?.categories || {}).reduce((sum: number, value: any) => sum + Number(value || 0), 0) }
@@ -1279,6 +1166,7 @@ const sunburstOption = computed(() => {
   backdrop-filter: blur(12px) saturate(1.08);
   border-radius: 8px;
 }
+.v-chart-empty { display: grid; height: 100%; min-height: 210px; place-items: center; padding: 24px; color: #78a9c8; font-size: 12px; text-align: center; }
 
 .v-tree-panel {
   height: 460px;

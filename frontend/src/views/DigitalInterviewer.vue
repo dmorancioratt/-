@@ -252,7 +252,7 @@ const currentSession = ref<any>()
 const history = ref<any[]>([])
 const jobName = ref('')
 const interviewStyle = ref('adaptive')
-const resumeSummary = ref('本科计算机相关专业，熟悉 Python、SQL、RAG，参与过知识库问答和数据分析项目。')
+const resumeSummary = ref('')
 const candidateAnswer = ref('')
 
 type InterviewDraftState = {

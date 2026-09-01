@@ -888,10 +888,10 @@ function updateFocusLines(nodeId?: string) {
       void main() {
         float travel = uTime / 4.8 * uMotion;
         float cycle = fract(vProgress - travel + vPhase);
-        float distanceToHighlight = abs(cycle - 0.5);
-        float longHighlight = 1.0 - smoothstep(0.03, 0.28, distanceToHighlight);
-        float band = 0.12 + longHighlight * 0.88;
-        float bandPosition = cycle;
+        float borderCycle = fract(cycle * 2.0);
+        float band = smoothstep(0.08, 0.16, borderCycle)
+          * (1.0 - smoothstep(0.28, 0.40, borderCycle));
+        float bandPosition = clamp((borderCycle - 0.08) / 0.32, 0.0, 1.0);
         vec3 color = borderFlowColor(bandPosition);
 
         float distanceFromCore = abs(vSide);

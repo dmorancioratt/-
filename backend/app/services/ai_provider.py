@@ -28,6 +28,7 @@ AI_API_KEY = os.getenv("DEEPSEEK_API_KEY") or os.getenv("AI_API_KEY") or ""
 AI_MODEL = os.getenv("DEEPSEEK_MODEL") or os.getenv("AI_MODEL") or "deepseek-v4-flash"
 AI_TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT_SECONDS", "90"))
 AI_MAX_RETRIES = max(0, int(os.getenv("AI_MAX_RETRIES", "2")))
+APP_ENV = os.getenv("APP_ENV", "production").strip().lower()
 
 SUPPORTED_TASKS = (
     "jd_parse",
@@ -36,6 +37,7 @@ SUPPORTED_TASKS = (
     "learning_path",
     "emerging_job_analysis",
     "digital_interview",
+    "workflow_rag_answer",
 )
 
 TASK_DEFINITIONS: dict[str, dict[str, Any]] = {
@@ -145,6 +147,18 @@ TASK_DEFINITIONS: dict[str, dict[str, Any]] = {
             "follow_up_tags": ["追问标签"],
         },
     },
+    "workflow_rag_answer": {
+        "instruction": (
+            "仅依据 input.evidence_block 中的用户知识库原文回答 input.question。"
+            "若证据不足，必须明确说明无法从当前知识库得出结论，不得使用外部常识补写。"
+            "answer 应简洁直接；confidence 必须反映证据充分程度；evidence 中的 quote 必须逐字来自 evidence_block。"
+        ),
+        "example": {
+            "answer": "基于知识库证据的回答",
+            "confidence": 0.85,
+            "evidence": [{"source": "user_docs id=1", "quote": "知识库原文片段"}],
+        },
+    },
 }
 
 
@@ -169,6 +183,8 @@ def analyze_with_ai(task_type: str, payload: dict[str, Any]) -> dict[str, Any]:
     if task_type not in SUPPORTED_TASKS:
         raise AIProviderError(f"不支持的 AI 任务：{task_type}")
     if AI_PROVIDER == "mock":
+        if APP_ENV != "test":
+            raise AIProviderError("模拟 AI 仅允许在自动化测试环境使用，请配置真实 AI 服务")
         return analyze_with_mock(task_type, payload)
     if AI_PROVIDER not in {"deepseek", "openai_compatible"}:
         raise AIProviderError(f"不支持的 AI Provider：{AI_PROVIDER}")
@@ -203,6 +219,19 @@ def analyze_with_mock(task_type: str, payload: dict[str, Any]) -> dict[str, Any]
         }
     elif task_type == "emerging_job_analysis":
         result = {"items": payload.get("candidates") or []}
+    elif task_type == "workflow_rag_answer":
+        evidence = payload.get("retrieved_evidence") or []
+        result = {
+            "answer": evidence[0].get("text", "") if evidence else "当前知识库没有可用于回答的证据。",
+            "confidence": 0.6 if evidence else 0.0,
+            "evidence": [
+                {
+                    "source": f"user_docs id={item.get('ref_id')}",
+                    "quote": str(item.get("text") or "")[:200],
+                }
+                for item in evidence[:3]
+            ],
+        }
     else:
         answer = _string(payload.get("candidate_answer"))
         action = _string(payload.get("action"), "answer")

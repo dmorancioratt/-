@@ -65,7 +65,7 @@ const nodeTypes = markRaw({
   guard: GuardNode,
   citation: CitationNode,
   output: OutputNode,
-})
+}) as any
 
 function onConnect(connection: Connection) {
   if (!connection.source || !connection.target) return

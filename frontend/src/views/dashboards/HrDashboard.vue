@@ -135,17 +135,16 @@
           <article class="cockpit-panel">
             <div class="panel-head">
               <h3><span class="title-bar title-bar--sm"></span><span>产业需求趋势</span></h3>
-              <span class="panel-head__hint">软件人才需求估计值(万人)</span>
+              <span class="panel-head__hint">权威行业指标（{{ model.overview?.trend?.[0]?.unit || '暂无数据' }}）</span>
             </div>
             <div class="chart-body chart-body--sm"><EChart :option="industryTrendOption" /></div>
           </article>
 
           <article class="cockpit-panel">
             <div class="panel-head">
-              <h3><span class="title-bar title-bar--sm"></span><span>岗位缺口趋势</span></h3>
+              <h3><span class="title-bar title-bar--sm"></span><span>技能需求当前信号</span></h3>
               <div class="panel-head__legend">
-                <span><span class="legend-swatch legend-swatch--bar"></span>缺口数量</span>
-                <span><span class="legend-swatch legend-swatch--line"></span>增减速度</span>
+                <span><span class="legend-swatch legend-swatch--bar"></span>需求热度</span>
               </div>
             </div>
             <div class="chart-body chart-body--sm"><EChart :option="gapTrendOption" /></div>
@@ -314,81 +313,6 @@ const refreshing = ref(false)
 const updatedAt = ref('')
 const cacheKey = computed(() => `hr-dashboard:${auth.user?.id || auth.user?.username || 'default'}`)
 
-// ======== Mock Fallback（无真实数据时填充，保证大屏视觉完整） ========
-const MOCK_TOTAL_TALENT = 6260
-
-const MOCK_KPI = [
-  { key: 'kpi1', label: '人才库低偏重覆盖', value: '107', unit: '个', hint: '覆盖率 73.5%', delta: '↑ 16', tone: 'cyan', icon: UserFilled, route: '/skill-graph' },
-  { key: 'kpi2', label: '人才库可筛选', value: '6,260', unit: '人', hint: '较上期 ↑ 8.6%', delta: '↑ 8.6%', tone: 'blue', icon: Aim, route: '/hr-candidates' },
-  { key: 'kpi3', label: '关键技能缺口', value: '10', unit: '项', hint: '较上期 ↑ 2', delta: '↑ 2', tone: 'sky', icon: Tickets, route: '/skill-graph' },
-  { key: 'kpi4', label: '岗位画像覆盖', value: '107', unit: '个', hint: '较上期 ↑ 16', delta: '↑ 16', tone: 'indigo', icon: User, route: '/jobs' },
-  { key: 'kpi5', label: '新兴岗位信号', value: '17', unit: '个', hint: '较上期 ↑ 5', delta: '↑ 5', tone: 'teal', icon: TrendCharts, route: '/emerging-jobs' },
-  { key: 'kpi6', label: '人才匹配成功率', value: '68.45', unit: '%', hint: '较上期 ↑ 6.3%', delta: '↑ 6.3%', tone: 'cyan-bright', icon: Aim, route: '/skill-graph' }
-]
-
-const MOCK_GAP = [
-  { name: 'Linux', value: 7129, tone: 'cyan' },
-  { name: 'SQL', value: 5931, tone: 'blue' },
-  { name: 'Python', value: 4667, tone: 'sky' },
-  { name: '数据分析', value: 3976, tone: 'indigo' },
-  { name: '安全合规', value: 2842, tone: 'teal' }
-]
-
-const MOCK_ACTIONS = [
-  { title: '优先补充数据分析人才', desc: '当前数据分析人才供给不足，建议优先招聘', cta: '查看人才', route: '/hr-candidates', query: { skill: '数据分析' }, tone: 'cyan', icon: Plus },
-  { title: '围绕 Linux 技能扩大人才储备', desc: 'Linux 技能缺口较大，建议加大挖掘力度', cta: '查看策略', route: '/emerging-jobs', query: undefined, tone: 'blue', icon: ZoomIn },
-  { title: '完善 SQL 技能人才的画像', desc: '建议完善 SQL 技能人才画像，提高匹配精度', cta: '进入画像', route: '/skill-graph', query: { keyword: 'SQL' }, tone: 'indigo', icon: DataBoard }
-]
-
-const MOCK_PANORAMA = [
-  { label: '供需比', value: '6.74', unit: '', variant: 'ratio', sub: '供给 / 需求' },
-  { label: '需求总量', value: '46,521', unit: '人', delta: '8.3%', deltaTone: 'up' },
-  { label: '供给总量', value: '34,267', unit: '人', delta: '7.1%', deltaTone: 'up' },
-  { label: '缺口总量', value: '12,254', unit: '人', delta: '1.2%', deltaTone: 'down' },
-  { label: '平均匹配度', value: '68.45', unit: '%', delta: '6.3%', deltaTone: 'up' }
-]
-
-const MOCK_TALENTS = [
-  { id: 1, name: '李明宇', role: '数据分析师', experience: '5年经验', tags: ['Python', 'SQL', '数据可视化'], match: 92 },
-  { id: 2, name: '张晓雨', role: '数据工程师', experience: '4年经验', tags: ['Linux', 'SQL', '数据仓库'], match: 89 },
-  { id: 3, name: '王思语', role: '后端开发工程师', experience: '3年经验', tags: ['Java', 'Docker', '微服务'], match: 87 }
-]
-
-const MOCK_EMERGING = [
-  { name: '人工智能工程师', count: 6, percent: 35, color: '#1e3a8a' },
-  { name: '数据安全工程师', count: 4, percent: 24, color: '#1d4ed8' },
-  { name: '机器学习工程师', count: 3, percent: 18, color: '#3b82f6' },
-  { name: '云原生工程师', count: 2, percent: 12, color: '#60a5fa' },
-  { name: '其他', count: 2, percent: 11, color: '#93c5fd' }
-]
-
-const MOCK_TOP_CITIES = [
-  { name: '北京', count: 1265 }, { name: '上海', count: 1023 }, { name: '广东', count: 856 }, { name: '浙江', count: 654 }, { name: '四川', count: 521 }
-]
-
-const MOCK_PROVINCES = [
-  { name: '北京市', value: 1265 }, { name: '上海市', value: 1023 }, { name: '广东省', value: 856 }, { name: '浙江省', value: 654 },
-  { name: '四川省', value: 521 }, { name: '江苏省', value: 432 }, { name: '山东省', value: 398 }, { name: '湖北省', value: 312 },
-  { name: '陕西省', value: 256 }, { name: '福建省', value: 198 }, { name: '安徽省', value: 176 }, { name: '河南省', value: 154 },
-  { name: '湖南省', value: 132 }, { name: '辽宁省', value: 118 }, { name: '重庆市', value: 96 }, { name: '天津市', value: 82 }
-]
-
-const MOCK_HOTSPOTS = [
-  { name: '北京', value: [116.4074, 39.9042, 1265] as [number, number, number] },
-  { name: '上海', value: [121.4737, 31.2304, 1023] as [number, number, number] },
-  { name: '广州', value: [113.2644, 23.1291, 856] as [number, number, number] },
-  { name: '杭州', value: [120.1535, 30.2874, 654] as [number, number, number] },
-  { name: '成都', value: [104.0657, 30.6594, 521] as [number, number, number] }
-]
-
-const MOCK_SKILLS = ['云原生', '板块管理', '机器学习', '数据可视化', 'Docker', '安全合规', 'Python', 'SQL', 'Linux', '数据分析']
-const MOCK_DEMAND = [1562, 2269, 3125, 4215, 4325, 5232, 6985, 8326, 9865, 18562]
-const MOCK_SUPPLY = [1100, 1800, 2400, 3100, 3400, 3900, 5200, 6100, 7200, 12400]
-
-const MOCK_TREND_LABELS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月']
-const MOCK_TREND_VALUES = [700, 800, 900, 1000, 1150, 1300, 1500, 1800]
-
-// 真实数据是否就绪（用于决定走真实 vs mock）
 const hasOverview = computed(() => !!model.value.overview && (model.value.overview.resume_count != null || model.value.overview.job_count != null))
 const hasCandidates = computed(() => model.value.candidates.length > 0)
 const hasEmerging = computed(() => model.value.emerging.length > 0)
@@ -399,11 +323,10 @@ const hasSkills = computed(() => model.value.skillDemand.names.length > 0)
 // ======== Derived view-model ========
 const totalTalent = computed(() => {
   const v = model.value.overview?.resume_count
-  return v != null ? Number(v) : MOCK_TOTAL_TALENT
+  return v != null ? Number(v) : 0
 })
 
 const kpiCards = computed(() => {
-  if (!hasOverview.value) return MOCK_KPI
   const o = model.value.overview
   const num = (v: any) => (v == null ? '—' : Number(v).toLocaleString())
   return [
@@ -416,11 +339,11 @@ const kpiCards = computed(() => {
   ]
 })
 
-const gapTop5 = computed(() => hasRising.value && model.value.gapTop5.length > 0 ? model.value.gapTop5 : MOCK_GAP)
+const gapTop5 = computed(() => model.value.gapTop5)
 const hasGapData = computed(() => gapTop5.value.length > 0)
 
 const recruitmentActions = computed(() => {
-  if (!hasRising.value) return MOCK_ACTIONS
+  if (!hasRising.value) return []
   const [s1, s2, s3] = model.value.topRisingSkills
   return [
     {
@@ -442,9 +365,8 @@ const recruitmentActions = computed(() => {
 })
 
 const panoramaMetrics = computed(() => {
-  if (!hasOverview.value) return MOCK_PANORAMA
   const o = model.value.overview
-  const demand = Number(o.job_count || 0) * 10
+  const demand = model.value.skillDemand.demand.reduce((sum, value) => sum + Number(value || 0), 0)
   const supply = Number(o.resume_count || 0)
   const gap = Math.max(demand - supply, 0)
   const ratio = supply > 0 && demand > 0 ? (supply / demand).toFixed(2) : '—'
@@ -459,7 +381,7 @@ const panoramaMetrics = computed(() => {
 })
 
 const priorityTalents = computed(() => {
-  if (!hasCandidates.value) return MOCK_TALENTS
+  if (!hasCandidates.value) return []
   return model.value.candidates.slice(0, 3).map((c, i) => {
     const u = c?.user || {}
     const p = c?.profile || {}
@@ -490,21 +412,21 @@ function avatarGradient(name: string) {
   return `linear-gradient(135deg, ${c1}, ${c2})`
 }
 
-const emergingLegend = computed(() => hasEmerging.value && model.value.emergingLegend.length > 0 ? model.value.emergingLegend : MOCK_EMERGING)
+const emergingLegend = computed(() => model.value.emergingLegend)
 
 const topCities = computed(() => {
-  if (!hasCandidates.value) return MOCK_TOP_CITIES
+  if (!hasCandidates.value) return []
   const list = model.value.provinces.slice(0, 5).map((p) => ({ name: p.name.replace(/[省市区]$/, ''), count: p.value }))
-  return list.length ? list : MOCK_TOP_CITIES
+  return list
 })
 
-const talentByProvince = computed(() => model.value.provinces.length > 0 ? model.value.provinces : MOCK_PROVINCES)
+const talentByProvince = computed(() => model.value.provinces)
 
-const topHotspots = computed(() => model.value.hotspots.length > 0 ? model.value.hotspots : MOCK_HOTSPOTS)
+const topHotspots = computed(() => model.value.hotspots)
 
-const skillsList = computed(() => hasSkills.value ? model.value.skillDemand.names : MOCK_SKILLS)
-const demandData = computed(() => hasSkills.value ? model.value.skillDemand.demand : MOCK_DEMAND)
-const supplyData = computed(() => hasSkills.value ? model.value.skillDemand.supply : MOCK_SUPPLY)
+const skillsList = computed(() => model.value.skillDemand.names)
+const demandData = computed(() => model.value.skillDemand.demand)
+const supplyData = computed(() => model.value.skillDemand.supply)
 const hasSkillData = computed(() => skillsList.value.length > 0)
 
 // ======== ECharts options ========
@@ -560,10 +482,9 @@ const demandSupplyOption = computed(() => {
 
 const industryTrendOption = computed(() => {
   const trend = model.value.overview?.trend || []
-  const useReal = hasTrend.value
-  const labels = useReal ? trend.map((t: any) => t.date || t.period || '') : MOCK_TREND_LABELS
-  const values = useReal ? trend.map((t: any) => Number(t.value ?? t.amount ?? 0)) : MOCK_TREND_VALUES
-  const maxVal = values.length ? Math.max(...values, 100) : 2000
+  const labels = trend.map((t: any) => t.date || t.period || '')
+  const values = trend.map((t: any) => Number(t.value ?? t.amount ?? 0))
+  const maxVal = values.length ? Math.max(...values, 1) : 1
   return {
     tooltip: {
       trigger: 'axis',
@@ -584,7 +505,7 @@ const industryTrendOption = computed(() => {
       splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)', type: 'dashed' } }
     },
     series: [{
-      name: '软件人才需求', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6,
+      name: '权威行业指标', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6,
       itemStyle: { color: '#38bdf8', borderWidth: 2, borderColor: '#ffffff' },
       lineStyle: { width: 3, color: '#0284c7' },
       areaStyle: {
@@ -606,29 +527,22 @@ const gapTrendOption = computed(() => ({
   grid: { top: 20, left: '2%', right: '8%', bottom: '5%', containLabel: true },
   xAxis: {
     type: 'category',
-    data: ['8/7', '8/8', '8/9', '8/10', '8/11', '8/12', '8/13', '8/14'],
+    data: gapTop5.value.map((item) => item.name),
     axisLabel: { color: '#64748b', fontSize: 9 },
     axisLine: { lineStyle: { color: '#334155' } }
   },
-  yAxis: [
-    { type: 'value', name: '缺口', min: 0, max: 80, axisLabel: { color: '#64748b', fontSize: 9 }, splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)', type: 'dashed' } } },
-    { type: 'value', name: '增速', min: -40, max: 40, axisLabel: { color: '#64748b', fontSize: 9, formatter: '{value}%' }, splitLine: { show: false } }
-  ],
+  yAxis: { type: 'value', name: '热度', min: 0, axisLabel: { color: '#64748b', fontSize: 9 }, splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.3)', type: 'dashed' } } },
   series: [
     {
-      name: '缺口数量', type: 'bar', barWidth: 8,
+      name: '需求热度', type: 'bar', barWidth: 8,
       itemStyle: {
         color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#38bdf8' }, { offset: 1, color: '#0369a1' }] },
         borderRadius: [3, 3, 0, 0]
       },
-      data: [35, 42, 50, 58, 65, 70, 72, 78]
-    },
-    {
-      name: '增减速度', type: 'line', yAxisIndex: 1, smooth: true, symbol: 'diamond', symbolSize: 6,
-      itemStyle: { color: '#38bdf8' }, lineStyle: { width: 2, color: '#38bdf8' },
-      data: [-10, 5, 12, 18, 24, 15, 8, 25]
+      data: gapTop5.value.map((item) => item.value)
     }
-  ]
+  ],
+  graphic: gapTop5.value.length ? undefined : { type: 'text', left: 'center', top: 'middle', style: { text: '暂无技能需求信号', fill: '#88a9c4', fontSize: 12 } }
 }))
 
 const emergingRolesOption = computed(() => {

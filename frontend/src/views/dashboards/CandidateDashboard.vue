@@ -59,7 +59,7 @@
           <div class="skill-icon"><el-icon><Connection /></el-icon></div>
           <div><b>{{ selectedSkill || prioritySkills[0]?.name || '岗位核心能力' }}</b><small>{{ selectedItem?.category || '待完成岗位匹配' }}</small></div>
         </div>
-        <div class="focus-progress"><span :style="{ width: `${selectedItem?.score || 42}%` }"></span></div>
+        <div class="focus-progress"><span :style="{ width: selectedItem?.status === 'missing' ? '0%' : selectedItem ? '100%' : '0%' }"></span></div>
         <button class="plain-link" type="button" @click="router.push('/capability-evolution')">查看能力图谱 <el-icon><ArrowRight /></el-icon></button>
 
         <div class="recommendation">
@@ -72,7 +72,7 @@
         </div>
 
         <div class="trend-box">
-          <div><span>能力提升预测</span><b>+{{ predictedGain }}%</b></div>
+          <div><span>能力提升预测</span><b>{{ predictedGain == null ? '待生成' : `+${predictedGain}%` }}</b></div>
           <svg viewBox="0 0 270 64" preserveAspectRatio="none" aria-hidden="true"><path d="M0,52 C30,48 37,54 64,44 S107,43 130,31 S178,36 198,21 S232,25 270,8" /></svg>
           <small>当前 <i></i> 30天后 <i></i> 60天后</small>
         </div>
@@ -92,7 +92,7 @@
       <article class="overview-panel actions-panel">
         <div class="panel-heading">
           <div><span class="section-kicker">THIS WEEK</span><h2>本周行动任务</h2><p>完成任务，持续提升岗位匹配度</p></div>
-          <span class="panel-count">{{ nextActions.length }} 项待完成</span>
+          <span class="panel-count">{{ nextActions.length }} 项建议操作</span>
         </div>
         <div class="action-list">
           <button v-for="(action, index) in nextActions" :key="action.title" type="button" @click="router.push(action.path)">
@@ -132,7 +132,7 @@
         <div class="panel-heading"><div><span class="section-kicker">SKILL SIGNAL</span><h2>能力信号</h2><p>从总览进入完整的能力演化图谱</p></div><button class="outline-button" type="button" @click="router.push('/capability-evolution')">能力图谱</button></div>
         <div class="skill-cloud">
           <button v-for="item in skillItems.slice(0, 8)" :key="item.name" type="button" :class="['skill-pill', item.status, { active: selectedSkill === item.name }]" @click="focusSkill(item.name)">
-            <span>{{ item.name }}</span><small>{{ item.score }}%</small>
+            <span>{{ item.name }}</span><small>{{ item.status === 'missing' ? '待补齐' : '已录入' }}</small>
           </button>
         </div>
         <p class="skill-footnote"><el-icon><TrendCharts /></el-icon>{{ selectedItem ? `${selectedItem.name}：${selectedItem.status === 'missing' ? '建议优先安排学习任务' : '可继续补充项目与实践证据'}` : '完成岗位匹配后，可查看更精准的能力建议。' }}</p>
@@ -151,7 +151,7 @@ import { useAuthStore } from '@/stores/auth'
 import { formatSnapshotTime, readDashboardSnapshot, settledValue, writeDashboardSnapshot } from '@/utils/dashboardCache'
 
 type SkillStatus = 'mastered' | 'growing' | 'missing'
-type SkillItem = { name: string; score: number; category: string; status: SkillStatus }
+type SkillItem = { name: string; category: string; status: SkillStatus }
 type CandidateModel = { summary: any; profile: any; resumes: any[]; matches: any[]; matchDetail: any; interviews: any[]; market: any }
 const emptyModel: CandidateModel = { summary: {}, profile: {}, resumes: [], matches: [], matchDetail: {}, interviews: [], market: {} }
 
@@ -165,7 +165,7 @@ const updatedAt = ref('')
 const selectedSkill = ref('')
 const cacheKey = computed(() => `sr-dashboard:candidate:${auth.user?.id || auth.user?.username || 'default'}`)
 
-const targetRole = computed(() => model.value.profile.target_role || model.value.matches[0]?.target_job || '大模型应用工程师')
+const targetRole = computed(() => model.value.profile.target_role || model.value.matches[0]?.target_job || '尚未设置目标岗位')
 const latestResume = computed(() => model.value.resumes[0])
 const latestMatch = computed(() => model.value.matches[0])
 const latestInterview = computed(() => model.value.interviews.find((item) => item.status === 'completed') || model.value.interviews[0])
@@ -173,7 +173,10 @@ const matchScore = computed(() => Math.round(latestMatch.value?.total_score || 0
 const scoreOffset = computed(() => `${320 - (320 * matchScore.value) / 100}`)
 const matchStatus = computed(() => !latestMatch.value ? '待分析' : matchScore.value >= 80 ? '准备充分' : matchScore.value >= 60 ? '提升后可投' : '需要补强')
 const matchTagClass = computed(() => !latestMatch.value ? 'warning' : matchScore.value >= 80 ? 'success' : matchScore.value >= 60 ? 'warning' : 'danger')
-const predictedGain = computed(() => Math.max(12, Math.min(36, Math.round((model.value.matchDetail.missing_skills?.length || 3) * 6 + 6))))
+const predictedGain = computed(() => {
+  const value = model.value.matchDetail?.ai_analysis?.predicted_gain ?? model.value.matchDetail?.predicted_gain
+  return Number.isFinite(Number(value)) ? Math.max(0, Math.min(100, Math.round(Number(value)))) : null
+})
 
 function categoryFor(name: string) {
   if (/Python|Java|SQL|RAG|模型|算法|前端|后端|数据/.test(name)) return '专业技能'
@@ -187,14 +190,13 @@ const prioritySkills = computed<Array<{ name: string; category: string; reason: 
   category: categoryFor(name),
   reason: index === 0 ? '目标岗位必备，建议本周优先开始' : index === 1 ? '会直接影响项目完成度和面试回答' : '补齐后可提高岗位能力覆盖率'
 })))
-const ownedSkills = computed(() => (model.value.profile.skills || []).map((item: any) => typeof item === 'string' ? item : item.name).filter(Boolean).slice(0, 3).length ? (model.value.profile.skills || []).map((item: any) => typeof item === 'string' ? item : item.name).filter(Boolean).slice(0, 3) : ['Python 开发', '逻辑思维', '数据分析'])
-const missingSkills = computed(() => prioritySkills.value.map((item) => item.name).length ? prioritySkills.value.map((item) => item.name) : ['RAG 工程化', 'Agent 协同', '项目落地经验'])
+const ownedSkills = computed(() => (model.value.profile.skills || []).map((item: any) => typeof item === 'string' ? item : item.name).filter(Boolean).slice(0, 3))
+const missingSkills = computed(() => prioritySkills.value.map((item) => item.name))
 const skillItems = computed<SkillItem[]>(() => {
-  const owned = (model.value.profile.skills || []).map((skill: any, index: number) => ({ name: typeof skill === 'string' ? skill : skill.name, score: Math.max(62, 92 - index * 4), category: categoryFor(typeof skill === 'string' ? skill : skill.name), status: (index < 4 ? 'mastered' : 'growing') as SkillStatus })).filter((item: SkillItem) => item.name)
-  const missing = (model.value.matchDetail.missing_skills || []).map((name: string, index: number) => ({ name, score: 34 + index * 3, category: categoryFor(name), status: 'missing' as SkillStatus }))
-  const fallback = ['Python', 'SQL', 'RAG', '项目管理', 'Docker', '模型部署'].map((name, index) => ({ name, score: 86 - index * 6, category: categoryFor(name), status: (index < 4 ? 'mastered' : 'growing') as SkillStatus }))
+  const owned = (model.value.profile.skills || []).map((skill: any) => ({ name: typeof skill === 'string' ? skill : skill.name, category: categoryFor(typeof skill === 'string' ? skill : skill.name), status: 'mastered' as SkillStatus })).filter((item: SkillItem) => item.name)
+  const missing = (model.value.matchDetail.missing_skills || []).map((name: string) => ({ name, category: categoryFor(name), status: 'missing' as SkillStatus }))
   const unique = new Map<string, SkillItem>()
-  ;(([...owned, ...missing].length ? [...owned, ...missing] : fallback)).forEach((item) => { if (!unique.has(item.name)) unique.set(item.name, item) })
+  ;[...owned, ...missing].forEach((item) => { if (!unique.has(item.name)) unique.set(item.name, item) })
   return [...unique.values()].slice(0, 12)
 })
 const selectedItem = computed(() => skillItems.value.find((item) => item.name === selectedSkill.value) || skillItems.value[0])
@@ -208,7 +210,7 @@ const nextActions = computed(() => {
 })
 const progressItems = computed(() => [
   { label: '个人资料完整度', value: Math.round(model.value.profile.completeness || 0), unit: '%', progress: Math.round(model.value.profile.completeness || 0), action: '完善资料', path: '/personal-center', icon: Collection },
-  { label: '进行中任务', value: nextActions.value.length, unit: ' 项', progress: Math.min(100, nextActions.value.length * 25), action: '查看任务', path: '/learning-path', icon: Document },
+  { label: '建议操作', value: nextActions.value.length, unit: ' 项', progress: 0, action: '查看建议', path: '/learning-path', icon: Document },
   { label: '简历优化进度', value: Math.min(100, Math.round((model.value.profile.completeness || 0) * .8 + (latestResume.value ? 20 : 0))), unit: '%', progress: Math.min(100, Math.round((model.value.profile.completeness || 0) * .8 + (latestResume.value ? 20 : 0))), action: '去优化', path: '/resume-parser', icon: Aim },
   { label: '面试模拟得分', value: Math.round(latestInterview.value?.final_score || 0), unit: ' 分', progress: Math.round(latestInterview.value?.final_score || 0), action: '去练习', path: '/digital-interviewer', icon: Medal }
 ])

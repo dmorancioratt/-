@@ -19,7 +19,7 @@
       </div>
       <div class="priority-copy">
         <span>先解决</span>
-        <b>{{ missingSkills[0] || '项目成果表达' }}</b>
+        <b>{{ missingSkills[0] || '暂无待补能力' }}</b>
         <small v-if="missingSkills.length > 1">随后：{{ missingSkills.slice(1, 3).join('、') }}</small>
       </div>
     </section>
@@ -108,18 +108,10 @@ const scoreLabel = computed(() => {
   if (score >= 55) return '可培养'
   return '需系统补强'
 })
-const heroSummary = computed(() => missingSkills.value.length
-  ? `当前最需要补齐 ${missingSkills.value.length} 项能力。不要同时开始所有内容，先从影响最大的 ${missingSkills.value[0]} 入手。`
-  : '岗位基础能力已覆盖，接下来重点把项目成果变成简历和面试中可验证的证据。')
-const weeklyTodos = computed(() => {
-  const first = missingSkills.value.slice(0, 2)
-  if (!first.length) return ['整理一个项目复盘：背景、个人负责内容、结果', '完善岗位相关证书或课程记录', '准备 3 分钟项目介绍']
-  return [
-    `先把 ${first[0]} 的基础用法过一遍，并做一份笔记`,
-    first[1] ? `围绕 ${first[1]} 做一个小任务，写清楚你怎么完成的` : '做一个能讲清楚过程的小项目',
-    '把新的项目经历同步到个人画像和简历文本'
-  ]
-})
+const heroSummary = computed(() => report.value
+  ? (missingSkills.value.length ? `本次岗位匹配报告识别出 ${missingSkills.value.length} 项待补能力。` : '本次岗位匹配报告未识别出必备技能缺口。')
+  : '请先完成一次岗位匹配，系统将根据已保存的报告生成学习路径。')
+const weeklyTodos = computed(() => path.value.slice(0, 3).map((item) => item.project || item.content).filter(Boolean))
 
 type LearningPathState = {
   path: any[]
@@ -130,9 +122,11 @@ type LearningPathState = {
 async function load(force = false) {
   loading.value = true
   try {
-    const cached = localStorage.getItem('last_match_report')
-    const cachedReport = cached ? JSON.parse(cached) : undefined
-    const reportId = Number(route.query.reportId || cachedReport?.report_id || 0)
+    let reportId = Number(route.query.reportId || 0)
+    if (!reportId) {
+      const history = await api.matchAnalysisHistory()
+      reportId = Number(history?.[0]?.report_id || 0)
+    }
     if (!reportId) {
       report.value = undefined
       path.value = []
@@ -142,12 +136,12 @@ async function load(force = false) {
     const pageKey = `learning-path:${reportId}`
     const pageCache = loadPageState<LearningPathState>(pageKey)
     if (!force && pageCache?.path?.length) {
-      report.value = pageCache.report || (cachedReport?.report_id === reportId ? cachedReport : await api.matchAnalysisDetail(reportId))
+      report.value = pageCache.report || await api.matchAnalysisDetail(reportId)
       path.value = pageCache.path
       aiAnalysis.value = pageCache.aiAnalysis
       return
     }
-    report.value = cachedReport?.report_id === reportId ? cachedReport : await api.matchAnalysisDetail(reportId)
+    report.value = await api.matchAnalysisDetail(reportId)
     const response = await api.learningPath(reportId)
     const rows = Array.isArray(response) ? response : response.items
     path.value = enrichPath(rows || [])

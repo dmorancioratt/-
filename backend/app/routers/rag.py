@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -71,9 +72,8 @@ def _get_embedder() -> Embedder:
         else:
             try:
                 _embedder = BGESmallZhEmbedder(cache_dir=RAG_MODEL_DIR)
-            except RagInitError:
-                logger.warning("[RAG] BGE 加载失败，回退到 FakeEmbedder")
-                _embedder = FakeEmbedder(dim=64)
+            except RagInitError as exc:
+                raise HTTPException(status_code=503, detail=f"RAG 真实嵌入模型不可用：{exc}") from exc
     return _embedder
 
 
@@ -96,9 +96,10 @@ def _ensure_indexes_loaded() -> dict[str, VectorStore]:
     return stores
 
 
-# 启动时立即注册 task 与 mock patch
+# 生产环境只注册真实任务；mock 补丁仅供自动化测试使用。
 register_rag_tasks()
-install_mock_patch()
+if os.getenv("APP_ENV", "production").strip().lower() == "test":
+    install_mock_patch()
 
 
 # ---------------------------------------------------------------------------

@@ -309,10 +309,9 @@ def test_all_ai_business_routes_use_provider():
 
     interview_login = client.post("/api/auth/login", json={"username": "student_demo", "password": "Demo@123"})
     interview_headers = {"Authorization": f"Bearer {interview_login.json()['token']}"}
-    learning = client.get("/api/learning-path/1", headers=interview_headers)
-    assert learning.status_code == 200
-    assert learning.json()["items"]
-    assert learning.json()["ai_provider"] == "mock"
+    learning = client.get("/api/learning-path/999999", headers=interview_headers)
+    assert learning.status_code == 404
+    assert "请先完成岗位匹配分析" in learning.json()["detail"]
 
     interview = client.post(
         "/api/digital-interviewer/interview",

@@ -54,7 +54,7 @@ import type { FlowNodeData, NodeKind } from '@/types/workflow'
 
 const props = defineProps<{
   id: string
-  data: FlowNodeData
+  data: Omit<FlowNodeData, 'status'> & { status: string }
   selected?: boolean
 }>()
 

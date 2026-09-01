@@ -8,3 +8,4 @@ if str(BACKEND_DIR) not in sys.path:
 
 # Automated tests must be deterministic and must never spend external API quota.
 os.environ["AI_PROVIDER"] = "mock"
+os.environ["APP_ENV"] = "test"

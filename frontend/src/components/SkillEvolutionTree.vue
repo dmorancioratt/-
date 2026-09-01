@@ -8,6 +8,8 @@
 
     <canvas ref="canvasRef" class="tree-canvas" :class="{ 'canvas-ready': !loading }"></canvas>
 
+    <div v-if="!loading && !hasSkills" class="tree-empty">当前接口没有可展示的技能热点数据</div>
+
     <!-- Toolbar -->
     <div v-if="!loading" class="tree-toolbar">
       <button class="toolbar-btn" @click="resetView" title="重置视角">
@@ -40,14 +42,14 @@
           </div>
           <div class="info-row">
             <span class="info-label">岗位数量</span>
-            <span class="info-value">{{ selectedFruit.jobs }}+ 个</span>
+            <span class="info-value">{{ selectedFruit.jobs == null ? '暂无数据' : `${selectedFruit.jobs} 个` }}</span>
           </div>
           <div class="info-row">
             <span class="info-label">平均薪资</span>
-            <span class="info-value salary">{{ selectedFruit.salary }}</span>
+            <span class="info-value salary">{{ selectedFruit.salary || '暂无数据' }}</span>
           </div>
         </div>
-        <div class="info-section">
+        <div v-if="selectedFruit.courses?.length" class="info-section">
           <h4 class="section-title">相关课程</h4>
           <div class="course-list">
             <div v-for="(course, i) in selectedFruit.courses" :key="i" class="course-item">
@@ -60,14 +62,13 @@
             </div>
           </div>
         </div>
-        <div class="info-section">
+        <div v-if="selectedFruit.relatedJobs?.length" class="info-section">
           <h4 class="section-title">热门岗位</h4>
           <div class="job-tags">
             <span v-for="(job, i) in selectedFruit.relatedJobs" :key="i" class="job-tag">{{ job }}</span>
           </div>
         </div>
         <div class="panel-actions">
-          <button class="action-btn primary" @click="joinLearningPath">加入学习路径</button>
           <button class="action-btn secondary" @click="viewJobDetails">查看岗位详情</button>
         </div>
       </div>
@@ -128,6 +129,7 @@ const connectorSvg = ref<SVGSVGElement>()
 const selectedFruit = ref<any>(null)
 const panelVisible = ref(false)
 const loading = ref(true)
+const hasSkills = ref(false)
 const router = useRouter()
 
 let renderer: THREE.WebGLRenderer | null = null
@@ -156,21 +158,6 @@ const DECOR_COLORS = [0x3d6fa0, 0x4a82b8, 0x5a94c8, 0x2f6090, 0x6aaad4]
 // Flower center
 const COLOR_CENTER = new THREE.Color(0x8de4ff)
 
-const defaultSkills: Skill[] = [
-  { name: 'React', heat: 18, trend: 'up', category: '前端框架', salary: '25-50K', relatedJobs: ['前端工程师', '全栈工程师'], courses: [{ name: 'React高级进阶', duration: '48课时', level: '高级', status: 'available' }] },
-  { name: 'TypeScript', heat: 19, trend: 'up', category: '编程语言', salary: '20-45K', relatedJobs: ['前端工程师', 'Node.js工程师'], courses: [{ name: 'TypeScript实战', duration: '36课时', level: '中级', status: 'available' }] },
-  { name: 'Vue3', heat: 16, trend: 'up', category: '前端框架', salary: '20-40K', relatedJobs: ['前端工程师', 'Vue开发工程师'], courses: [{ name: 'Vue3 Composition API', duration: '32课时', level: '中级', status: 'available' }] },
-  { name: 'Node.js', heat: 15, trend: 'stable', category: '后端开发', salary: '22-45K', relatedJobs: ['后端工程师', '全栈工程师'], courses: [{ name: 'Node.js企业级开发', duration: '56课时', level: '高级', status: 'available' }] },
-  { name: 'Python', heat: 20, trend: 'up', category: '编程语言', salary: '18-50K', relatedJobs: ['后端工程师', 'AI工程师', '数据分析师'], courses: [{ name: 'Python数据分析', duration: '40课时', level: '入门', status: 'available' }] },
-  { name: 'Java', heat: 14, trend: 'stable', category: '编程语言', salary: '18-40K', relatedJobs: ['后端工程师', 'Java开发'], courses: [{ name: 'Java微服务架构', duration: '64课时', level: '高级', status: 'available' }] },
-  { name: 'Docker', heat: 13, trend: 'stable', category: 'DevOps', salary: '20-45K', relatedJobs: ['运维工程师', 'DevOps工程师'], courses: [{ name: 'Docker容器化部署', duration: '24课时', level: '中级', status: 'available' }] },
-  { name: 'Kubernetes', heat: 12, trend: 'up', category: 'DevOps', salary: '28-60K', relatedJobs: ['云原生工程师', 'SRE'], courses: [{ name: 'K8s实战指南', duration: '48课时', level: '高级', status: 'available' }] },
-  { name: '机器学习', heat: 17, trend: 'up', category: 'AI', salary: '30-70K', relatedJobs: ['AI工程师', '算法工程师'], courses: [{ name: '机器学习基础', duration: '60课时', level: '中级', status: 'available' }] },
-  { name: '大模型开发', heat: 21, trend: 'up', category: 'AI', salary: '35-80K', relatedJobs: ['大模型工程师', 'Prompt工程师'], courses: [{ name: 'LLM应用开发', duration: '40课时', level: '高级', status: 'available' }] },
-  { name: '数据结构', heat: 11, trend: 'stable', category: '基础', salary: '15-35K', relatedJobs: ['算法工程师', '后端工程师'], courses: [{ name: '数据结构与算法', duration: '56课时', level: '入门', status: 'available' }] },
-  { name: 'Git', heat: 10, trend: 'stable', category: '工具', salary: '-', relatedJobs: ['所有开发岗位'], courses: [{ name: 'Git版本控制', duration: '12课时', level: '入门', status: 'available' }] },
-]
-
 function getSkills(): Skill[] {
   try {
     const hs = props.hotSkills
@@ -179,9 +166,10 @@ function getSkills(): Skill[] {
         const mapped: Skill[] = []
         for (let i = 0; i < hs.length; i++) {
           const s = hs[i] as any
+          if (!s?.name) continue
           mapped.push({
-            name: s?.name || '未知技能',
-            heat: Number(s?.heat) || 10,
+            name: s.name,
+            heat: Number(s?.heat) || 0,
             trend: (s?.trend as 'up'|'down'|'stable') || 'stable',
             category: s?.category || '技能',
             jobs: s?.jobs,
@@ -192,12 +180,12 @@ function getSkills(): Skill[] {
         }
         if (mapped.length > 0) return mapped
       }
-      return defaultSkills
+      return []
     }
-    return defaultSkills
+    return []
   } catch (e) {
     console.error('getSkills error:', e)
-    return defaultSkills
+    return []
   }
 }
 
@@ -397,6 +385,7 @@ function addDecorativeFlowers(tree: THREE.Object3D) {
 
 function addSkillFruits(tree: THREE.Object3D, _camera: THREE.Camera) {
   const skillsToUse = getSkills()
+  hasSkills.value = skillsToUse.length > 0
   const positions = getFruitPositions(skillsToUse.length)
 
   for (let i = 0; i < skillsToUse.length; i++) {
@@ -471,13 +460,10 @@ function selectFruit(fruit: THREE.Object3D, scene: THREE.Scene) {
   fruit.userData.clickTime = time
   const skill = data.skill
   const trendLabel = skill.trend === 'up' ? '↑ 快速上升' : skill.trend === 'down' ? '↓ 下降' : '→ 稳定'
-  const relatedJobs = skill.relatedJobs || [`${skill.category || '相关'}工程师`, `${skill.name}开发`, `${skill.name}专家`]
-  const salary = skill.salary || ['15-30K', '20-40K', '25-50K', '30-60K'][Math.floor(Math.random() * 4)]
-  const jobs = skill.jobs || Math.floor(Math.random() * 5000 + 1000)
-  const courses = skill.courses || [
-    { name: skill.name + '从入门到精通', duration: '48课时', level: '入门', status: 'available' },
-    { name: skill.name + '实战项目', duration: '36课时', level: '中级', status: 'available' }
-  ]
+  const relatedJobs = Array.isArray(skill.relatedJobs) ? skill.relatedJobs : []
+  const salary = skill.salary || '后端未提供薪资数据'
+  const jobs = skill.jobs ?? 0
+  const courses = Array.isArray(skill.courses) ? skill.courses : []
 
   selectedFruit.value = {
     ...skill,
@@ -603,22 +589,6 @@ function createParticleBurst(pos: THREE.Vector3, color: THREE.Color, scene: THRE
 function goToBilibili(courseName: string) {
   const keyword = encodeURIComponent(courseName + ' 教程')
   window.open(`https://search.bilibili.com/all?keyword=${keyword}`, '_blank')
-}
-
-function joinLearningPath() {
-  const skillName = selectedFruit.value?.name || ''
-  let role: string | undefined
-  try {
-    role = JSON.parse(localStorage.getItem('auth_user') || 'null')?.role
-  } catch {
-    role = undefined
-  }
-  if (role === 'candidate') {
-    ElMessage.success(`已将「${skillName}」加入学习路径`)
-    router.push('/learning-path')
-  } else {
-    ElMessage.success(`已将「${skillName}」加入学习路径`)
-  }
 }
 
 function viewJobDetails() {
@@ -896,6 +866,16 @@ onUnmounted(() => {
   z-index: 50;
   background: rgba(6, 18, 48, 0.85);
   backdrop-filter: blur(4px);
+}
+
+.tree-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(181, 221, 241, 0.72);
+  font-size: 13px;
+  pointer-events: none;
 }
 
 .loading-spinner {

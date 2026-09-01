@@ -1527,12 +1527,13 @@ def match_analysis_detail(report_id: int, user: User = Depends(current_user), db
 @router.get("/learning-path/{report_id}")
 def learning_path(report_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
     record = db.get(MatchAnalysisRecord, report_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="匹配报告不存在，请先完成岗位匹配分析")
     if record and record.user_id != user.id and user.role != "admin":
         raise HTTPException(status_code=403, detail="无权使用该匹配报告生成学习路径")
-    deterministic = _safe_json_object(record.deterministic_result) if record else {}
-    legacy_report = None if record else db.get(MatchReport, report_id)
-    missing = deterministic.get("missing_skills") or (parse_list(legacy_report.missing_skills) if legacy_report else ["RAG", "Docker", "模型部署"])
-    target_job = deterministic.get("target_job") or (db.get(JobEntity, legacy_report.job_id).name if legacy_report and db.get(JobEntity, legacy_report.job_id) else "目标岗位")
+    deterministic = _safe_json_object(record.deterministic_result)
+    missing = deterministic.get("missing_skills") or []
+    target_job = deterministic.get("target_job") or "未命名目标岗位"
     deterministic_suggestions = deterministic.get("suggestions") or []
     recommended_certificates = deterministic.get("job_profile", {}).get("recommended_certificates", [])
     missing_certificates = deterministic.get("missing_certificates", [])
@@ -1981,7 +1982,7 @@ def get_or_create_profile(db: Session, user: User) -> CandidateProfile:
         projects="[]",
         internships="[]",
         awards="[]",
-        completeness=12,
+        completeness=0,
     )
     db.add(profile)
     db.commit()

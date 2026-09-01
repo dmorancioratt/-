@@ -1,4 +1,5 @@
 import random
+import os
 import sys
 from datetime import datetime, timedelta
 
@@ -43,6 +44,13 @@ def seed_database() -> None:
     migrate_database()
     db = SessionLocal()
     try:
+        # Production starts with schema + traceable official sources only. Synthetic
+        # accounts and business records exist exclusively for automated tests.
+        if os.getenv("APP_ENV", "production").strip().lower() != "test":
+            bootstrap_official_data(db)
+            remove_legacy_demo_data(db)
+            db.commit()
+            return
         if db.scalar(select(User).limit(1)):
             ensure_admin_user(db)
             ensure_minimum_test_cases(db)
@@ -65,6 +73,32 @@ def seed_database() -> None:
         db.commit()
     finally:
         db.close()
+
+
+def remove_legacy_demo_data(db) -> None:
+    """Remove records created by historical demo/test seeders, preserving real users."""
+    demo_users_sql = """
+        SELECT id FROM users
+        WHERE username IN ('admin_demo', 'hr_admin', 'student_demo', 'candidate_demo')
+           OR username LIKE 'rag_test_user_%'
+    """
+    demo_resumes_sql = f"SELECT id FROM resumes WHERE user_id IN ({demo_users_sql})"
+    db.execute(text(f"DELETE FROM interview_turns WHERE session_id IN (SELECT id FROM interview_sessions WHERE user_id IN ({demo_users_sql}))"))
+    db.execute(text(f"DELETE FROM interview_sessions WHERE user_id IN ({demo_users_sql})"))
+    db.execute(text(f"DELETE FROM match_analysis_records WHERE user_id IN ({demo_users_sql})"))
+    db.execute(text(f"DELETE FROM match_reports WHERE resume_id IN ({demo_resumes_sql}) OR evidence LIKE 'seed:%'"))
+    db.execute(text(f"DELETE FROM resume_skills WHERE resume_id IN ({demo_resumes_sql}) OR evidence LIKE 'seed:%'"))
+    db.execute(text(f"DELETE FROM resumes WHERE id IN ({demo_resumes_sql})"))
+    db.execute(text(f"DELETE FROM candidate_profiles WHERE user_id IN ({demo_users_sql})"))
+    db.execute(text(f"DELETE FROM user_sessions WHERE user_id IN ({demo_users_sql})"))
+    db.execute(text(f"DELETE FROM users WHERE id IN ({demo_users_sql})"))
+
+    db.execute(text("DELETE FROM evolution_events WHERE evidence LIKE 'seed:%'"))
+    db.execute(text("DELETE FROM review_tasks WHERE evidence LIKE 'seed:%' OR title IN ('LLMOps 平台运营专员', 'AIGC 内容风控分析师', 'AI 产品经理')"))
+    db.execute(text("DELETE FROM test_cases WHERE name LIKE '测试用例-%'"))
+    db.execute(text("DELETE FROM parsed_jds WHERE raw_jd_id IN (SELECT raw_jds.id FROM raw_jds JOIN data_sources ON data_sources.id = raw_jds.source_id WHERE data_sources.source_key LIKE 'legacy_demo_%')"))
+    db.execute(text("DELETE FROM raw_jds WHERE source_id IN (SELECT id FROM data_sources WHERE source_key LIKE 'legacy_demo_%')"))
+    db.execute(text("DELETE FROM data_sources WHERE source_key LIKE 'legacy_demo_%'"))
 
 
 def seed_sources(db):

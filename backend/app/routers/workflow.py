@@ -24,8 +24,10 @@ from app.db.database import get_db
 from app.models import RagDocument, WorkflowConfig
 from app.services.document_parser import extract_resume_text
 from app.services.rag.chunker import split_text
-from app.services.rag.embedder import FakeEmbedder
-from app.services.rag.errors import RagError
+from app.services.ai_provider import AIProviderError, analyze_with_ai
+from app.services.rag.embedder import BGESmallZhEmbedder, Embedder, FakeEmbedder
+from app.services.rag.errors import RagError, RagInitError
+from app.services.rag.indexer import RAG_MODEL_DIR
 from app.services.rag.retriever import retrieve
 from app.services.rag.vector_store import (
     FaissVectorStore,
@@ -43,6 +45,20 @@ router = APIRouter(prefix="/api/workflow", tags=["workflow"])
 UPLOAD_ROOT = Path(__file__).resolve().parents[3] / "data" / "rag_uploads"
 UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
 ALLOWED_FILE_TYPES = {".pdf", ".docx", ".txt", ".md"}
+APP_ENV = os.getenv("APP_ENV", "production").strip().lower()
+_workflow_embedder: Embedder | None = None
+
+
+def _get_workflow_embedder() -> Embedder:
+    """Use deterministic fake vectors only in tests; production always uses BGE."""
+    global _workflow_embedder
+    if _workflow_embedder is None:
+        _workflow_embedder = (
+            FakeEmbedder(dim=512)
+            if APP_ENV == "test"
+            else BGESmallZhEmbedder(cache_dir=RAG_MODEL_DIR)
+        )
+    return _workflow_embedder
 
 
 # ---------- Pydantic schemas ----------
@@ -211,7 +227,7 @@ def chunk_doc(
 
     # 写入 user_docs 向量库
     store = get_user_docs_store()
-    embedder = FakeEmbedder(dim=512)
+    embedder = _get_workflow_embedder()
     try:
         vectors = embedder.encode(chunks)
         metadatas = [
@@ -229,7 +245,7 @@ def chunk_doc(
             m["chunk_id"] = start_idx + i
         store.add(vectors, metadatas)
         save_user_docs_store()
-    except RagError as exc:
+    except (RagError, RagInitError) as exc:
         raise HTTPException(status_code=503, detail=f"向量化失败：{exc}") from exc
 
     doc.chunk_count = len(chunks)
@@ -359,8 +375,7 @@ def dry_run(cfg_id: int, req: TestRunRequest, db: Session = Depends(get_db)) -> 
         "output": f"top_k={retrieve_top_k}",
     })
 
-    # 真实检索（fake embedder 即可，本环境不依赖外部 API）
-    embedder = FakeEmbedder(dim=512)
+    embedder = _get_workflow_embedder()
     try:
         hits = retrieve(
             req.question,
@@ -368,9 +383,9 @@ def dry_run(cfg_id: int, req: TestRunRequest, db: Session = Depends(get_db)) -> 
             {"user_docs": user_docs},
             top_k=retrieve_top_k,
         )
-    except RagError as exc:
+    except (RagError, RagInitError) as exc:
         stages.append({"stage": "向量检索", "status": "error", "output": str(exc)})
-        return TestRunResponse(answer=None, evidence=[], confidence=0.0, stages_log=stages)
+        raise HTTPException(status_code=503, detail=f"真实向量检索不可用：{exc}") from exc
 
     evidence = [
         {
@@ -388,17 +403,40 @@ def dry_run(cfg_id: int, req: TestRunRequest, db: Session = Depends(get_db)) -> 
         "output": f"返回 {len(hits)} 条证据，最高相似度 {hits[0].score:.3f}" if hits else "无匹配",
     })
 
-    answer = (
-        f"（mock）基于本地知识库 {len(hits)} 条证据生成的回答："
-        + (evidence[0]["text"] if evidence else "无可用证据")
-    )
-    stages.append({"stage": "大模型生成", "status": "done", "output": "已生成候选答案（mock）"})
-    stages.append({"stage": "幻觉检测", "status": "done", "output": "通过（基于本地证据回答）"})
-    stages.append({"stage": "引用校验", "status": "done", "output": f"{len(hits)} 条引用"})
+    if not hits:
+        stages.append({"stage": "大模型生成", "status": "warn", "output": "无检索证据，未调用 AI 生成"})
+        return TestRunResponse(answer=None, evidence=[], confidence=0.0, stages_log=stages)
+
+    try:
+        ai_result = analyze_with_ai(
+            "workflow_rag_answer",
+            {
+                "question": req.question,
+                "evidence_block": "\n\n".join(
+                    f"source_type={hit.source_type} ref_id={hit.ref_id}\n{hit.text}"
+                    for hit in hits
+                ),
+                "retrieved_evidence": evidence,
+            },
+        )
+    except AIProviderError as exc:
+        stages.append({"stage": "大模型生成", "status": "error", "output": str(exc)})
+        raise HTTPException(status_code=503, detail=f"真实 AI 服务不可用：{exc}") from exc
+
+    result = ai_result.get("result") or {}
+    answer = str(result.get("answer") or "").strip() or None
+    cited = result.get("evidence") if isinstance(result.get("evidence"), list) else []
+    confidence = max(0.0, min(1.0, float(result.get("confidence") or 0.0)))
+    stages.append({"stage": "大模型生成", "status": "done", "output": f"已由 {ai_result.get('provider')} / {ai_result.get('model')} 生成"})
+    stages.append({
+        "stage": "引用校验",
+        "status": "done" if cited else "warn",
+        "output": f"模型返回 {len(cited)} 条引用" if cited else "模型未返回可校验引用",
+    })
 
     return TestRunResponse(
         answer=answer,
         evidence=evidence,
-        confidence=0.6 if hits else 0.0,
+        confidence=confidence,
         stages_log=stages,
     )

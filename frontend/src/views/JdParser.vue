@@ -68,7 +68,7 @@ const loading = ref(false)
 const historyLoading = ref(false)
 const history = ref<any[]>([])
 const result = ref<any>()
-const text = ref('大模型应用工程师，负责企业知识库 RAG 应用建设，需要 Python、FastAPI、LangChain、向量数据库、Docker、Prompt Engineering，熟悉智能制造或智慧教育场景。')
+const text = ref('')
 
 async function submit() {
   loading.value = true

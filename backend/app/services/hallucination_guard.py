@@ -12,5 +12,6 @@ def guard_payload(payload: dict) -> tuple[bool, list[str]]:
 
 def require_evidence(item: dict, default_source: str) -> dict:
     if not item.get("evidence"):
-        item["evidence"] = [{"source": default_source, "quote": item.get("name") or item.get("title") or "mock evidence"}]
+        item["evidence"] = []
+        item["evidence_missing"] = True
     return item
