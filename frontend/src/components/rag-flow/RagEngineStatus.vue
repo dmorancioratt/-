@@ -91,7 +91,7 @@ onMounted(refresh)
   color: #e2e8f0;
 }
 .card-title .el-icon {
-  color: #93c5fd;
+  color: #a5fffc;
 }
 
 .model-row {

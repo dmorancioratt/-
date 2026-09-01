@@ -181,7 +181,7 @@ const hotspot = ref<any>({ rising: [], declining: [], emerging: [] })
 const compare = ref<any>({ categories: [], domains: [], matrix: [] })
 const versionCards = ref<any[]>([])
 
-const PALETTE = ['#2563eb', '#0ea5e9', '#7c3aed', '#0ea5e9', '#f59e0b', '#ec4899', '#0ea5e9']
+const PALETTE = ['#22f7ff', '#00c9d2', '#9ad8c5', '#4feaff', '#ffc048', '#c19aff', '#6ffaff']
 
 function sum(key: string) {
   return (timeline.value.timeline || []).reduce((acc: number, b: any) => acc + (b[key] || 0), 0)
@@ -190,24 +190,24 @@ function sum(key: string) {
 const timelineOption = computed(() => {
   const rows = timeline.value.timeline || []
   return {
-    textStyle: { color: '#8595ad' },
+    textStyle: { color: '#78a4a9' },
     tooltip: { trigger: 'axis' },
-    legend: { data: ['新增', '淘汰', '修改'], top: 0, textStyle: { color: '#8595ad' } },
+    legend: { data: ['新增', '淘汰', '修改'], top: 0, textStyle: { color: '#8fb7bd' } },
     grid: { left: 40, right: 20, top: 40, bottom: 30 },
-    xAxis: { type: 'category', data: rows.map((r: any) => r.date), axisLine: { lineStyle: { color: 'rgba(120,150,190,0.4)' } } },
-    yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(120,150,190,0.14)' } } },
+    xAxis: { type: 'category', data: rows.map((r: any) => r.date), axisLine: { lineStyle: { color: 'rgba(34,247,255,0.20)' } }, axisLabel: { color: '#78a4a9' } },
+    yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(34,247,255,0.10)' } }, axisLabel: { color: '#78a4a9' } },
     series: [
-      { name: '新增', type: 'bar', stack: 'x', data: rows.map((r: any) => r.added), itemStyle: { color: '#0ea5e9', borderRadius: [4, 4, 0, 0] } },
-      { name: '淘汰', type: 'bar', stack: 'x', data: rows.map((r: any) => r.removed), itemStyle: { color: '#f43f5e' } },
-      { name: '修改', type: 'bar', stack: 'x', data: rows.map((r: any) => r.modified), itemStyle: { color: '#f59e0b' } },
+      { name: '新增', type: 'bar', stack: 'x', data: rows.map((r: any) => r.added), itemStyle: { color: '#22f7ff', borderRadius: [4, 4, 0, 0], shadowColor: 'rgba(34,247,255,0.28)', shadowBlur: 8 } },
+      { name: '淘汰', type: 'bar', stack: 'x', data: rows.map((r: any) => r.removed), itemStyle: { color: '#ff5d7d' } },
+      { name: '修改', type: 'bar', stack: 'x', data: rows.map((r: any) => r.modified), itemStyle: { color: '#ffc048' } },
       {
         name: '事件',
         type: 'line',
         smooth: true,
         data: rows.map((r: any) => r.events),
-        lineStyle: { color: '#2563eb', width: 3 },
-        itemStyle: { color: '#2563eb' },
-        areaStyle: { color: 'rgba(37,99,235,0.08)' }
+        lineStyle: { color: '#00c9d2', width: 3 },
+        itemStyle: { color: '#22f7ff', shadowColor: 'rgba(34,247,255,0.45)', shadowBlur: 8 },
+        areaStyle: { color: 'rgba(0,201,210,0.10)' }
       }
     ]
   }
@@ -216,24 +216,25 @@ const timelineOption = computed(() => {
 const hotspotOption = computed(() => {
   const rows = [...(hotspot.value.rising || [])].reverse()
   return {
-    textStyle: { color: '#8595ad' },
+    textStyle: { color: '#78a4a9' },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     grid: { left: 90, right: 30, top: 20, bottom: 30 },
-    xAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(120,150,190,0.14)' } } },
+    xAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(34,247,255,0.10)' } }, axisLabel: { color: '#78a4a9' } },
     yAxis: {
       type: 'category',
       data: rows.map((r: any) => r.name),
-      axisLine: { lineStyle: { color: 'rgba(120,150,190,0.4)' } }
+      axisLine: { lineStyle: { color: 'rgba(34,247,255,0.20)' } },
+      axisLabel: { color: '#bcd8dd' }
     },
     series: [
       {
         type: 'bar',
         data: rows.map((r: any, i: number) => ({
           value: r.heat,
-          itemStyle: { color: PALETTE[i % PALETTE.length], borderRadius: [0, 6, 6, 0] }
+          itemStyle: { color: PALETTE[i % PALETTE.length], borderRadius: [0, 6, 6, 0], shadowColor: 'rgba(34,247,255,0.25)', shadowBlur: 6 }
         })),
         barWidth: '58%',
-        label: { show: true, position: 'right', formatter: '{c}', color: '#8595ad', fontWeight: 700 }
+        label: { show: true, position: 'right', formatter: '{c}', color: '#bcd8dd', fontWeight: 700 }
       }
     ]
   }
@@ -244,12 +245,12 @@ const compareOption = computed(() => {
   const domains = compare.value.domains || []
   const matrix = compare.value.matrix || []
   return {
-    textStyle: { color: '#8595ad' },
+    textStyle: { color: '#78a4a9' },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    legend: { data: cats, top: 0, type: 'scroll', textStyle: { color: '#8595ad' } },
+    legend: { data: cats, top: 0, type: 'scroll', textStyle: { color: '#8fb7bd' } },
     grid: { left: 40, right: 20, top: 40, bottom: 60 },
-    xAxis: { type: 'category', data: domains, axisLabel: { interval: 0, rotate: 24 }, axisLine: { lineStyle: { color: 'rgba(120,150,190,0.4)' } } },
-    yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(120,150,190,0.14)' } } },
+    xAxis: { type: 'category', data: domains, axisLabel: { interval: 0, rotate: 24, color: '#bcd8dd' }, axisLine: { lineStyle: { color: 'rgba(34,247,255,0.20)' } } },
+    yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(34,247,255,0.10)' } }, axisLabel: { color: '#78a4a9' } },
     series: cats.map((cat: string, i: number) => ({
       name: cat,
       type: 'bar',
@@ -298,36 +299,61 @@ onMounted(loadAll)
 </script>
 
 <style scoped>
+/* ===== 系统概览风格（荧光青 + 高通透玻璃） ===== */
 .evolution-page {
   min-width: 0;
   overflow-x: clip;
   position: relative;
   background: transparent;
+  --panel: rgba(3, 28, 36, .30);
+  --edge: rgba(34, 247, 255, .11);
+  --cyan: #22f7ff;
+  --teal: #00c9d2;
+  --text: #e5ffff;
+  --muted: #78a4a9;
+  --primary: #22f7ff;
+  --success: #9ad8c5;
+  --warn: #ffc048;
+  --danger: #ff5d7d;
+  color: var(--text);
+}
+.evolution-page :deep(.page-header) { border-color: var(--edge) !important; color: var(--text); }
+.evolution-page :deep(.content-grid),
+.evolution-page :deep(.metric-grid) { gap: 14px; }
+.evolution-page :deep(.panel),
+.evolution-page :deep(.metric-card),
+.version-card, .version-hint, .event-item, .domain-card, .side-block {
+  border: 1px solid var(--edge);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  box-shadow: 0 24px 62px rgba(0, 10, 14, .16), inset 0 1px 0 rgba(141, 255, 255, .025);
+  backdrop-filter: blur(26px) saturate(1.18);
+  color: var(--text);
 }
 
 .evolution-page :deep(.page-toolbar) {
   min-height: 42px;
   margin-bottom: 14px;
-  border: 1px solid rgba(57, 196, 255, 0.18);
-  border-radius: 10px;
+  border: 1px solid rgba(34, 247, 255, 0.14);
+  border-radius: 12px;
   padding: 6px 10px;
-  background: linear-gradient(90deg, rgba(3, 29, 70, 0.08), rgba(6, 58, 112, 0.12));
-  box-shadow: inset 0 0 24px rgba(29, 150, 230, 0.04);
-  backdrop-filter: blur(8px) saturate(1.05);
+  background: linear-gradient(90deg, rgba(2, 18, 22, 0.22), rgba(4, 54, 63, 0.24));
+  box-shadow: inset 0 0 24px rgba(34, 247, 255, 0.04);
+  backdrop-filter: blur(20px) saturate(1.15);
 }
 
 .evolution-page :deep(.page-toolbar .el-radio-button__inner) {
   min-width: 86px;
-  border-color: rgba(67, 183, 238, 0.2);
-  color: #a7cde1;
-  background: rgba(3, 29, 67, 0.25);
+  border-color: rgba(34, 247, 255, 0.18);
+  color: #8fb7bd;
+  background: rgba(3, 36, 44, 0.26);
   box-shadow: none;
 }
 
 .evolution-page :deep(.page-toolbar .el-radio-button__original-radio:checked + .el-radio-button__inner) {
-  color: #effdff;
-  background: linear-gradient(180deg, rgba(31, 155, 255, 0.65), rgba(5, 82, 171, 0.55));
-  box-shadow: inset 0 -2px #55e8ff, 0 0 12px rgba(35, 190, 255, 0.3);
+  color: #eaffff;
+  background: linear-gradient(180deg, rgba(0, 178, 188, 0.55), rgba(4, 44, 54, 0.58));
+  box-shadow: inset 0 -2px rgba(141, 255, 255, 0.38), 0 0 12px rgba(34, 247, 255, 0.28);
 }
 
 .evo-merge-label {
@@ -339,20 +365,21 @@ onMounted(loadAll)
   font-size: 14px;
   font-weight: 850;
   letter-spacing: 0.06em;
+  text-shadow: 0 0 8px rgba(34, 247, 255, .30);
 }
 
 .evo-merge-label::before {
   width: 4px;
   height: 16px;
   border-radius: 2px;
-  background: linear-gradient(180deg, var(--primary), var(--cyan));
+  background: linear-gradient(180deg, var(--teal), var(--cyan));
   content: "";
 }
 
 .evo-merge-label::after {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.35), transparent);
+  background: linear-gradient(90deg, rgba(34, 247, 255, 0.28), transparent);
   content: "";
 }
 
@@ -365,6 +392,8 @@ onMounted(loadAll)
   align-items: center;
   justify-content: space-between;
   margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(34, 247, 255, .08);
 }
 
 .panel-heading span {
@@ -379,6 +408,7 @@ onMounted(loadAll)
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.14em;
+  text-shadow: 0 0 8px rgba(34, 247, 255, .30);
 }
 
 /* Version comparison */
@@ -386,19 +416,21 @@ onMounted(loadAll)
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgba(6, 182, 212, 0.28);
+  border: 1px solid rgba(34, 247, 255, 0.16);
   border-radius: 14px;
   padding: 12px 16px;
-  background: rgba(6, 182, 212, 0.07);
+  background: rgba(3, 36, 44, 0.20);
   color: var(--muted);
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 700;
+  backdrop-filter: blur(18px) saturate(1.12);
 }
 
 .version-hint .el-icon {
   flex: 0 0 auto;
   color: var(--cyan);
   font-size: 18px;
+  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
 }
 
 .version-cards {
@@ -442,19 +474,20 @@ onMounted(loadAll)
   border-radius: 8px;
   padding: 3px 10px;
   font-size: 12px;
-  font-weight: 850;
+  font-weight: 800;
 }
 
 .ver--from {
-  border: 1px solid rgba(148, 163, 184, 0.5);
-  background: rgba(148, 163, 184, 0.14);
+  border: 1px solid rgba(34, 247, 255, 0.16);
+  background: rgba(3, 36, 44, 0.18);
   color: var(--muted);
 }
 
 .ver--to {
-  border: 1px solid rgba(37, 99, 235, 0.4);
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(6, 182, 212, 0.14));
-  color: var(--primary);
+  border: 1px solid rgba(34, 247, 255, 0.28);
+  background: linear-gradient(135deg, rgba(0, 178, 188, 0.18), rgba(34, 247, 255, 0.16));
+  color: var(--cyan);
+  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
 }
 
 .ver-arrow {
@@ -466,7 +499,7 @@ onMounted(loadAll)
   margin: 0;
   color: var(--muted);
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .diff-grid {
@@ -478,23 +511,24 @@ onMounted(loadAll)
 .diff-col {
   border-radius: 14px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.42);
-  border: 1px solid rgba(190, 213, 242, 0.5);
+  background: rgba(3, 36, 44, 0.20);
+  border: 1px solid rgba(34, 247, 255, 0.12);
+  backdrop-filter: blur(16px) saturate(1.12);
 }
 
 .diff-col--add {
-  border-color: rgba(24, 185, 129, 0.32);
-  background: rgba(24, 185, 129, 0.06);
+  border-color: rgba(154, 216, 197, 0.26);
+  background: linear-gradient(160deg, rgba(24, 70, 56, .22), rgba(3, 36, 44, .18));
 }
 
 .diff-col--mod {
-  border-color: rgba(245, 158, 11, 0.32);
-  background: rgba(245, 158, 11, 0.06);
+  border-color: rgba(255, 192, 72, 0.26);
+  background: linear-gradient(160deg, rgba(80, 58, 10, .22), rgba(3, 36, 44, .18));
 }
 
 .diff-col--del {
-  border-color: rgba(244, 63, 94, 0.3);
-  background: rgba(244, 63, 94, 0.05);
+  border-color: rgba(255, 93, 125, 0.24);
+  background: linear-gradient(160deg, rgba(80, 20, 34, .22), rgba(3, 36, 44, .18));
 }
 
 .diff-label {
@@ -505,7 +539,8 @@ onMounted(loadAll)
 }
 
 .diff-label b {
-  color: var(--primary);
+  color: var(--cyan);
+  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
 }
 
 .diff-tags {
@@ -524,7 +559,7 @@ onMounted(loadAll)
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  border-top: 1px solid rgba(104, 158, 225, 0.16);
+  border-top: 1px solid rgba(34, 247, 255, 0.08);
   padding-top: 10px;
 }
 
@@ -532,6 +567,7 @@ onMounted(loadAll)
   color: var(--cyan);
   font-size: 12px;
   font-weight: 800;
+  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
 }
 
 .version-count {
@@ -550,10 +586,11 @@ onMounted(loadAll)
 }
 
 .event-item {
-  border: 1px solid rgba(190, 213, 242, 0.5);
+  border: 1px solid rgba(34, 247, 255, 0.12);
   border-radius: 14px;
   padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(3, 36, 44, 0.22);
+  backdrop-filter: blur(16px) saturate(1.12);
 }
 
 .event-top {
@@ -576,9 +613,9 @@ onMounted(loadAll)
 
 .event-note {
   margin: 8px 0;
-  color: var(--muted);
+  color: #a4c6cb;
   font-size: 13px;
-  line-height: 1.55;
+  line-height: 1.65;
 }
 
 .event-tags {
@@ -592,12 +629,13 @@ onMounted(loadAll)
   color: var(--cyan);
   font-size: 12px;
   font-weight: 800;
+  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
 }
 
 .hot-side {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .side-block {
@@ -614,18 +652,20 @@ onMounted(loadAll)
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid rgba(124, 58, 237, 0.3);
+  border: 1px solid rgba(193, 154, 255, 0.26);
   border-radius: 999px;
   padding: 6px 12px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(37, 99, 235, 0.08));
-  color: #7c3aed;
+  background: linear-gradient(135deg, rgba(60, 30, 108, 0.22), rgba(3, 36, 44, 0.20));
+  backdrop-filter: blur(14px) saturate(1.10);
+  color: #c19aff;
   font-size: 13px;
   font-weight: 800;
 }
 
 .emerging-chip b {
-  color: var(--primary);
+  color: var(--cyan);
   font-size: 11px;
+  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
 }
 
 .decline-list {
@@ -638,7 +678,7 @@ onMounted(loadAll)
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(104, 158, 225, 0.16);
+  border-bottom: 1px solid rgba(34, 247, 255, 0.08);
   padding: 8px 2px;
   color: var(--text);
   font-weight: 700;
@@ -684,7 +724,7 @@ onMounted(loadAll)
 .domain-skill__bar {
   height: 8px;
   border-radius: 99px;
-  background: rgba(190, 213, 242, 0.42);
+  background: rgba(0, 142, 156, 0.18);
   overflow: hidden;
 }
 
@@ -692,7 +732,8 @@ onMounted(loadAll)
   display: block;
   height: 100%;
   border-radius: 99px;
-  background: linear-gradient(90deg, var(--primary), var(--cyan));
+  background: linear-gradient(90deg, var(--teal), var(--cyan));
+  box-shadow: 0 0 8px rgba(34, 247, 255, .42);
 }
 
 @media (max-width: 1100px) {

@@ -111,7 +111,7 @@ function buildCore() {
   ].forEach((ring, index) => {
     const mesh = new THREE.Mesh(
       new THREE.TorusGeometry(ring.radius, 0.018 + index * 0.008, 8, 110),
-      new THREE.MeshBasicMaterial({ color: index === 2 ? 0x3d86ff : 0x36d7ff, transparent: true, opacity: 0.32 })
+      new THREE.MeshBasicMaterial({ color: index === 2 ? 0x0aa9b4 : 0x22f7ff, transparent: true, opacity: 0.32 })
     )
     mesh.rotation.x = Math.PI / 2 + ring.tilt
     mesh.rotation.y = index * 0.48

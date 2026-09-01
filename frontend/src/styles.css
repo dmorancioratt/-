@@ -819,9 +819,9 @@ body::after {
 .el-button--primary {
   --el-button-bg-color: var(--primary);
   --el-button-border-color: var(--primary);
-  --el-button-hover-bg-color: #0ea5e9;
-  --el-button-hover-border-color: #0ea5e9;
-  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
+  --el-button-hover-bg-color: #0aa9b4;
+  --el-button-hover-border-color: #0aa9b4;
+  box-shadow: 0 14px 28px rgba(10, 169, 180, 0.18);
   position: relative;
   overflow: hidden;
 }
@@ -860,13 +860,13 @@ body::after {
 .el-textarea__inner:hover,
 .el-select__wrapper:hover {
   background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.34) inset, 0 10px 24px rgba(37, 99, 235, 0.06);
+  box-shadow: 0 0 0 1px rgba(34, 247, 255, 0.30) inset, 0 10px 24px rgba(34, 247, 255, 0.05);
 }
 
 .el-input__wrapper.is-focus,
 .el-select__wrapper.is-focused,
 .el-textarea__inner:focus {
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.42) inset, 0 0 0 4px rgba(37, 99, 235, 0.08), 0 14px 28px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 0 0 1px rgba(34, 247, 255, 0.38) inset, 0 0 0 4px rgba(34, 247, 255, 0.07), 0 14px 28px rgba(34, 247, 255, 0.07);
   transform: translateY(-1px);
 }
 
@@ -885,7 +885,7 @@ body::after {
 }
 
 .el-table__row:hover {
-  box-shadow: inset 3px 0 0 rgba(6, 182, 212, 0.55), 0 10px 24px rgba(37, 99, 235, 0.06);
+  box-shadow: inset 3px 0 0 rgba(0, 201, 210, 0.48), 0 10px 24px rgba(34, 247, 255, 0.05);
   transform: translateX(2px);
 }
 
@@ -923,7 +923,7 @@ body::after {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.22);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.52),
-    0 8px 18px rgba(37, 99, 235, 0.18);
+    0 8px 18px rgba(10, 169, 180, 0.14);
   transform: translateZ(0);
   transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
@@ -955,7 +955,7 @@ body::after {
   filter: saturate(1.12);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.58),
-    0 10px 22px rgba(37, 99, 235, 0.24),
+    0 10px 22px rgba(10, 169, 180, 0.20),
     0 0 18px color-mix(in srgb, var(--badge-b) 48%, transparent);
   transform: translateY(-1px);
 }
@@ -967,16 +967,16 @@ body::after {
 }
 
 .elite-badge-211 {
-  --badge-a: #2563eb;
-  --badge-b: #0ea5e9;
-  --badge-c: #7dd3fc;
+  --badge-a: #0aa9b4;
+  --badge-b: #00c9d2;
+  --badge-c: #8ff7f4;
 }
 
 .elite-badge-double {
   min-width: 68px;
   --badge-a: #7c3aed;
-  --badge-b: #2563eb;
-  --badge-c: #38bdf8;
+  --badge-b: #00c9d2;
+  --badge-c: #4feaff;
 }
 
 @keyframes eliteBadgeSheen {
@@ -1002,7 +1002,7 @@ body::after {
   }
 
   50% {
-    box-shadow: 0 22px 64px rgba(37, 99, 235, 0.14);
+    box-shadow: 0 22px 64px rgba(10, 169, 180, 0.12);
   }
 }
 
@@ -1632,13 +1632,13 @@ body:not(.login-active) .app-main :is(
  * ============================================================ */
 
 .skill-graph-page .graph-overview__item {
-  border-color: rgba(91, 145, 220, 0.4) !important;
+  border-color: rgba(10, 169, 180, 0.4) !important;
   background:
     radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.14), transparent 36%),
     linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.8)),
     rgba(14, 34, 72, 0.8) !important;
   box-shadow:
-    0 0 0 1px rgba(91, 145, 220, 0.16) inset,
+    0 0 0 1px rgba(10, 169, 180, 0.16) inset,
     0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
@@ -1652,13 +1652,13 @@ body:not(.login-active) .app-main :is(
 }
 
 .skill-graph-page .selected-node {
-  border-color: rgba(91, 145, 220, 0.42) !important;
+  border-color: rgba(10, 169, 180, 0.42) !important;
   background:
     radial-gradient(circle at 8% 0%, rgba(0, 200, 245, 0.14), transparent 40%),
     linear-gradient(145deg, rgba(22, 48, 98, 0.9), rgba(10, 28, 62, 0.82)),
     rgba(14, 34, 72, 0.82) !important;
   box-shadow:
-    0 0 0 1px rgba(91, 145, 220, 0.18) inset,
+    0 0 0 1px rgba(10, 169, 180, 0.18) inset,
     0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
@@ -1681,14 +1681,14 @@ body:not(.login-active) .app-main :is(
 }
 
 .skill-graph-page .community-row {
-  border-color: rgba(91, 145, 220, 0.34) !important;
+  border-color: rgba(10, 169, 180, 0.34) !important;
   background:
-    radial-gradient(circle at 100% 0%, rgba(89, 166, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(79, 234, 255, 0.10), transparent 40%),
     linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.78)),
     rgba(12, 30, 66, 0.8) !important;
   color: #e8f2ff !important;
   box-shadow:
-    0 0 0 1px rgba(91, 145, 220, 0.14) inset !important;
+    0 0 0 1px rgba(10, 169, 180, 0.14) inset !important;
 }
 
 .skill-graph-page .community-row:hover,
@@ -1705,11 +1705,11 @@ body:not(.login-active) .app-main :is(
 
 .skill-graph-page .community-bar {
   background: rgba(70, 110, 170, 0.3) !important;
-  box-shadow: inset 0 0 0 1px rgba(91, 145, 220, 0.2) !important;
+  box-shadow: inset 0 0 0 1px rgba(10, 169, 180, 0.2) !important;
 }
 
 .skill-graph-page .path-node {
-  border-color: rgba(91, 145, 220, 0.42) !important;
+  border-color: rgba(10, 169, 180, 0.42) !important;
   background:
     radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.14), transparent 40%),
     linear-gradient(145deg, rgba(22, 48, 98, 0.9), rgba(10, 28, 62, 0.82)),
@@ -1736,7 +1736,7 @@ body:not(.login-active) .app-main :is(
 }
 
 .skill-graph-page .graph-legend__item {
-  border-color: rgba(91, 145, 220, 0.38) !important;
+  border-color: rgba(10, 169, 180, 0.38) !important;
   background:
     linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.76)),
     rgba(12, 30, 66, 0.78) !important;
@@ -1756,13 +1756,13 @@ body:not(.login-active) .app-main :is(
  * ============================================================ */
 
 .eval-page .metric-card {
-  border-color: rgba(91, 145, 220, 0.4) !important;
+  border-color: rgba(10, 169, 180, 0.4) !important;
   background:
     radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.14), transparent 36%),
     linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.8)),
     rgba(14, 34, 72, 0.8) !important;
   box-shadow:
-    0 0 0 1px rgba(91, 145, 220, 0.16) inset,
+    0 0 0 1px rgba(10, 169, 180, 0.16) inset,
     0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
@@ -1777,13 +1777,13 @@ body:not(.login-active) .app-main :is(
 
 .eval-page .panel,
 .eval-page .report-panel {
-  border-color: rgba(91, 145, 220, 0.38) !important;
+  border-color: rgba(10, 169, 180, 0.38) !important;
   background:
     radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.12), transparent 30%),
     linear-gradient(145deg, rgba(18, 38, 78, 0.86), rgba(8, 22, 48, 0.78)),
     rgba(12, 28, 58, 0.76) !important;
   box-shadow:
-    0 0 0 1px rgba(91, 145, 220, 0.16) inset,
+    0 0 0 1px rgba(10, 169, 180, 0.16) inset,
     0 18px 54px rgba(0, 0, 0, 0.28) !important;
 }
 
@@ -1798,7 +1798,7 @@ body:not(.login-active) .app-main :is(
 }
 
 .eval-page .report-cmd code {
-  border-color: rgba(0, 214, 255, 0.32) !important;
+  border-color: rgba(34, 247, 255, 0.28) !important;
   background:
     linear-gradient(145deg, rgba(12, 56, 106, 0.82), rgba(8, 34, 72, 0.76)),
     rgba(10, 44, 88, 0.78) !important;
@@ -1806,13 +1806,13 @@ body:not(.login-active) .app-main :is(
 }
 
 .eval-page .report-card {
-  border-color: color-mix(in srgb, var(--c, #2563eb) 48%, rgba(91, 145, 220, 0.4)) !important;
+  border-color: color-mix(in srgb, var(--c, #0aa9b4) 48%, rgba(10, 169, 180, 0.4)) !important;
   background:
-    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--c, #2563eb) 28%, transparent), transparent 36%),
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--c, #0aa9b4) 28%, transparent), transparent 36%),
     linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.82)),
     rgba(14, 34, 72, 0.82) !important;
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--c, #2563eb) 24%, rgba(91, 145, 220, 0.16)) inset,
+    0 0 0 1px color-mix(in srgb, var(--c, #0aa9b4) 24%, rgba(10, 169, 180, 0.16)) inset,
     0 18px 54px rgba(0, 0, 0, 0.28) !important;
   backdrop-filter: blur(18px) !important;
 }
@@ -1828,7 +1828,7 @@ body:not(.login-active) .app-main :is(
 
 .eval-page .score-num {
   filter: brightness(1.28) saturate(1.35);
-  text-shadow: 0 0 24px color-mix(in srgb, var(--c, #2563eb) 60%, transparent);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--c, #0aa9b4) 60%, transparent);
 }
 
 .eval-page .score-lbl,
@@ -1843,23 +1843,23 @@ body:not(.login-active) .app-main :is(
 }
 
 .eval-page .prf-bar {
-  background: rgba(70, 110, 170, 0.32) !important;
-  box-shadow: inset 0 0 0 1px rgba(91, 145, 220, 0.22) !important;
+  background: rgba(85, 150, 160, 0.28) !important;
+  box-shadow: inset 0 0 0 1px rgba(10, 169, 180, 0.22) !important;
 }
 
 .eval-page .prf-bar i {
   filter: brightness(1.22) saturate(1.28);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--c, #2563eb) 62%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--c, #0aa9b4) 62%, transparent);
 }
 
 .eval-page .error-item {
-  border-color: rgba(91, 145, 220, 0.34) !important;
+  border-color: rgba(10, 169, 180, 0.34) !important;
   background:
-    radial-gradient(circle at 100% 0%, rgba(89, 166, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(79, 234, 255, 0.10), transparent 40%),
     linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.78)),
     rgba(12, 30, 66, 0.8) !important;
   box-shadow:
-    0 0 0 1px rgba(91, 145, 220, 0.14) inset !important;
+    0 0 0 1px rgba(10, 169, 180, 0.14) inset !important;
 }
 
 .eval-page .el-table {
@@ -1868,7 +1868,7 @@ body:not(.login-active) .app-main :is(
   --el-table-tr-bg-color: transparent !important;
   --el-table-header-bg-color: transparent !important;
   --el-table-row-hover-bg-color: rgba(30, 123, 255, 0.08) !important;
-  --el-table-border-color: rgba(91, 145, 220, 0.24) !important;
+  --el-table-border-color: rgba(10, 169, 180, 0.24) !important;
   color: #d8e8ff !important;
 }
 
@@ -1887,7 +1887,7 @@ body:not(.login-active) .app-main :is(
 
 .eval-page .el-table td.el-table__cell,
 .eval-page .el-table th.el-table__cell.is-leaf {
-  border-color: rgba(91, 145, 220, 0.2) !important;
+  border-color: rgba(10, 169, 180, 0.2) !important;
 }
 
 /* 登录后保留动态背景：body::before 网格渐变 + body::after 粒子脉冲 + workspace-atmosphere 流光 */
@@ -1897,5 +1897,5 @@ body:not(.login-active) {
 }
 
 body.theme-dark .eval-page .el-table::before {
-  background-color: rgba(91, 145, 220, 0.2) !important;
+  background-color: rgba(10, 169, 180, 0.2) !important;
 }

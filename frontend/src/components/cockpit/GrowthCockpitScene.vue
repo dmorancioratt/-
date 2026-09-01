@@ -1438,7 +1438,7 @@ onBeforeUnmount(() => {
   color: #f0fbff;
   font: 500 11px/1 Bahnschrift, monospace;
 }
-.layout-editor input:focus { border-color: #65dfff; }
+.layout-editor input:focus { border-color: #4feaff; }
 .layout-editor__scale { grid-template-columns: 1fr 1fr; align-items: end; }
 .layout-editor__actions { grid-template-columns: 1fr 1.35fr; }
 .layout-editor__camera { display: grid; gap: 9px; padding-top: 9px; border-top: 1px solid rgba(120, 202, 236, .15); }

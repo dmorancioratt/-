@@ -278,7 +278,7 @@ function formatCityDisplay(value = '') {
   border-radius: 26px;
   background:
     radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.95), transparent 28%),
-    linear-gradient(135deg, #2563eb, #0ea5e9);
+    linear-gradient(135deg, #0aa9b4, #00c9d2);
   box-shadow: 0 18px 42px rgba(37, 99, 235, 0.18);
   color: #fff;
   font-size: 32px;

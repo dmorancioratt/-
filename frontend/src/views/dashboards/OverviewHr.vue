@@ -174,14 +174,14 @@ const gapOption = computed(() => ({
   yAxis: { type: 'category', inverse: true, data: skillGap.value.slice(0, 8).map((item) => item.name), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: '#c2dceb', fontSize: 11, width: 78, overflow: 'truncate' } },
   series: [
     { name: '岗位需求', type: 'bar', barWidth: 9, data: skillGap.value.slice(0, 8).map((item) => item.demand), itemStyle: { color: '#3d86ff', borderRadius: 5 }, animationDuration: 650 },
-    { name: '人才供给', type: 'bar', barWidth: 9, data: skillGap.value.slice(0, 8).map((item) => item.supply), itemStyle: { color: '#38bdf8', borderRadius: 5 }, animationDuration: 760 }
+    { name: '人才供给', type: 'bar', barWidth: 9, data: skillGap.value.slice(0, 8).map((item) => item.supply), itemStyle: { color: '#22f7ff', borderRadius: 5 }, animationDuration: 760 }
   ]
 }))
 const trendOption = computed(() => ({
   tooltip: { trigger: 'axis', valueFormatter: (value: number) => `${value} 亿元` }, grid: { left: 48, right: 22, top: 18, bottom: 28 },
   xAxis: { type: 'category', boundaryGap: false, data: (model.value.market?.software_revenue_trend || []).map((item: any) => item.period), axisLine: { lineStyle: { color: 'rgba(93,153,193,.22)' } }, axisLabel: { color: '#7898b0', fontSize: 10 } },
   yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(93,153,193,.12)' } }, axisLabel: { color: '#7898b0', fontSize: 10 } },
-  series: [{ type: 'line', smooth: .35, symbolSize: 6, data: (model.value.market?.software_revenue_trend || []).map((item: any) => item.value), lineStyle: { color: '#38bdf8', width: 2 }, itemStyle: { color: '#38bdf8' }, areaStyle: { color: 'rgba(54,198,232,.08)' }, animationDuration: 800 }]
+  series: [{ type: 'line', smooth: .35, symbolSize: 6, data: (model.value.market?.software_revenue_trend || []).map((item: any) => item.value), lineStyle: { color: '#22f7ff', width: 2 }, itemStyle: { color: '#22f7ff' }, areaStyle: { color: 'rgba(54,198,232,.08)' }, animationDuration: 800 }]
 }))
 
 async function refresh(force = false) {

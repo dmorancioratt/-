@@ -388,9 +388,9 @@ async function runCrossValidation() {
 }
 
 function indexColor(val: number) {
-  if (val >= 0.85) return '#60a5fa'
-  if (val >= 0.75) return '#38bdf8'
-  return '#7dd3fc'
+  if (val >= 0.85) return '#65fff6'
+  if (val >= 0.75) return '#22f7ff'
+  return '#8ff7f4'
 }
 
 function persistState() {
@@ -472,7 +472,7 @@ onMounted(async () => {
 
 .validation-strip > div:last-of-type { border-right: 0; }
 .validation-strip span { color: #91acc4; font-size: 11px; }
-.validation-strip strong { grid-row: span 2; color: #7dd3fc; font-size: 20px; line-height: 1.4; }
+.validation-strip strong { grid-row: span 2; color: #8ff7f4; font-size: 20px; line-height: 1.4; }
 .validation-strip small { color: #5f7f99; font-size: 10px; }
 .validation-strip p {
   grid-column: 1 / -1;
@@ -593,7 +593,7 @@ onMounted(async () => {
 }
 
 .source-count {
-  color: #38bdf8;
+  color: #22f7ff;
 }
 
 /* 滚动条 */
@@ -711,14 +711,14 @@ onMounted(async () => {
 }
 
 .source-dot.covered {
-  background: #38bdf8;
-  border-color: #38bdf8;
+  background: #22f7ff;
+  border-color: #22f7ff;
   box-shadow: 0 0 4px rgba(56, 189, 248, 0.4);
 }
 
 .coverage-text {
   font-size: 10px;
-  color: #38bdf8;
+  color: #22f7ff;
   margin-left: 4px;
 }
 
@@ -837,7 +837,7 @@ onMounted(async () => {
 
 .evidence-source {
   font-size: 10px;
-  color: #38bdf8;
+  color: #22f7ff;
   margin-top: 4px;
 }
 
@@ -868,7 +868,7 @@ onMounted(async () => {
   padding: 0 16px;
   font-size: 12px;
   font-weight: 600;
-  color: #60a5fa;
+  color: #65fff6;
   white-space: nowrap;
   border-right: 1px solid rgba(78, 200, 255, 0.12);
   line-height: 40px;
@@ -927,7 +927,7 @@ onMounted(async () => {
 }
 
 .ticker-count {
-  color: #38bdf8;
+  color: #22f7ff;
 }
 
 .ticker-time {

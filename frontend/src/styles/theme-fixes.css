@@ -11,7 +11,7 @@ body.theme-dark {
   --sr-text-secondary: #b9d8ee;
   --sr-muted: #7fa6c3;
   --sr-accent: #46c8ff;
-  --sr-accent-strong: #258dff;
+  --sr-accent-strong: #0aa9b4;
   --bg: var(--sr-bg);
   --text: var(--sr-text);
   --muted: var(--sr-muted);
@@ -495,7 +495,7 @@ body.theme-dark :is(.active-skill-readout strong, .ranking-list button em,
 
 body.theme-dark .heat-donut {
   background: radial-gradient(circle, rgba(5, 35, 84, 0.15) 54%, transparent 56%),
-    conic-gradient(#46d7ff 0 18%, #258dff 18% 44%, #54b8ff 44% 72%, #1769d6 72%) !important;
+    conic-gradient(#4feaff 0 18%, #0aa9b4 18% 44%, #0aa9b4 44% 72%, #066a72 72%) !important;
 }
 
 body.theme-dark :is(.milestone-list li.done > span, .progress-meter span,

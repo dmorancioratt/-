@@ -76,16 +76,16 @@
               <svg class="skill-radar-svg" viewBox="0 0 400 400" role="img" aria-label="八类节点数量占比雷达图">
                 <defs>
                   <radialGradient id="skillRadarFill" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="#4ed8ff" stop-opacity="0.4" />
-                    <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.08" />
+                    <stop offset="0%" stop-color="#22f7ff" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#00c9d2" stop-opacity="0.08" />
                   </radialGradient>
                   <filter id="skillRadarGlow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
                 </defs>
-                <circle cx="200" cy="200" r="152" fill="none" stroke="rgba(78,216,255,0.14)" stroke-width="1" />
-                <polygon v-for="lv in [0.25, 0.5, 0.75, 1]" :key="'g' + lv" :points="radarGrid(lv)" fill="none" stroke="rgba(78,216,255,0.12)" stroke-width="1" />
-                <line v-for="(s, i) in radarSpokes()" :key="'s' + i" x1="200" y1="200" :x2="s.x2" :y2="s.y2" stroke="rgba(78,216,255,0.08)" stroke-width="1" />
-                <polygon :points="radarPolygon" fill="url(#skillRadarFill)" stroke="#4ed8ff" stroke-width="2" filter="url(#skillRadarGlow)" />
-                <circle v-for="g in radarGroups" :key="g.type" :cx="g.x" :cy="g.y" r="5.5" fill="#fff" stroke="#4ed8ff" stroke-width="2.5" />
+                <circle cx="200" cy="200" r="152" fill="none" stroke="rgba(34,247,255,0.14)" stroke-width="1" />
+                <polygon v-for="lv in [0.25, 0.5, 0.75, 1]" :key="'g' + lv" :points="radarGrid(lv)" fill="none" stroke="rgba(34,247,255,0.12)" stroke-width="1" />
+                <line v-for="(s, i) in radarSpokes()" :key="'s' + i" x1="200" y1="200" :x2="s.x2" :y2="s.y2" stroke="rgba(34,247,255,0.08)" stroke-width="1" />
+                <polygon :points="radarPolygon" fill="url(#skillRadarFill)" stroke="#22f7ff" stroke-width="2" filter="url(#skillRadarGlow)" />
+                <circle v-for="g in radarGroups" :key="g.type" :cx="g.x" :cy="g.y" r="5.5" fill="#fff" stroke="#22f7ff" stroke-width="2.5" />
                 <text v-for="g in radarGroups" :key="g.type + 't'" :x="g.lx" :y="g.ly" fill="rgba(236,247,255,0.86)" font-size="13" text-anchor="middle" font-weight="600">{{ g.label }}</text>
                 <text v-for="g in radarGroups" :key="g.type + 'c'" :class="{ 'radar-count--zero': g.count === 0 }" :x="g.x" :y="g.y + 4" fill="#202f46" font-size="11" font-weight="700" text-anchor="middle">{{ g.count }}</text>
               </svg>
@@ -461,16 +461,16 @@ async function clearSearchFocus() {
 
 function nodeColor(type: string) {
   const colors: Record<string, string> = {
-    Job: '#2f7cff',
-    Skill: '#00d6ff',
-    Tool: '#15e0a4',
-    Certificate: '#a77dff',
-    Responsibility: '#ffb22e',
-    IndustryScenario: '#35b7ff',
-    Course: '#43dc6d',
-    Level: '#ff6fc8'
+    Job: '#22f7ff',
+    Skill: '#00c9d2',
+    Tool: '#9ad8c5',
+    Certificate: '#8f7cff',
+    Responsibility: '#ffb65c',
+    IndustryScenario: '#4feaff',
+    Course: '#a5dcc9',
+    Level: '#ff7088'
   }
-  return colors[type] || '#7ca0c8'
+  return colors[type] || '#78a4a9'
 }
 
 function nodeSize(type: string, isCenter: boolean) {
@@ -705,10 +705,10 @@ function initScene() {
   raycaster = new THREE.Raycaster()
   glowTexture = createGlowTexture()
 
-  const ambient = new THREE.AmbientLight(0x92cfff, 0.72)
-  const key = new THREE.DirectionalLight(0x89d8ff, 1.42)
+  const ambient = new THREE.AmbientLight(0x92fff0, 0.72)
+  const key = new THREE.DirectionalLight(0x89fff0, 1.42)
   key.position.set(320, 520, 640)
-  const rim = new THREE.PointLight(0x1e7bff, 1.4, 1200)
+  const rim = new THREE.PointLight(0x22f7ff, 1.4, 1200)
   rim.position.set(-360, -180, 420)
   scene.add(ambient, key, rim, createStarField())
 
@@ -735,8 +735,8 @@ function createNodeGeometry(type: string, size: number) {
 
 function createNodeOrbitRings(node: PositionedNode, size: number) {
   const specs = [
-    { radius: 1.48, tube: 0.064, arc: Math.PI * 1.72, color: 0x63e6ff, x: 1.04, y: 0.16, z: 0.2, speed: 0.72, opacity: 0.9 },
-    { radius: 1.82, tube: 0.044, arc: Math.PI * 1.52, color: 0x2f7cff, x: 1.2, y: -0.34, z: 1.12, speed: -0.48, opacity: 0.72 }
+    { radius: 1.48, tube: 0.064, arc: Math.PI * 1.72, color: 0x22f7ff, x: 1.04, y: 0.16, z: 0.2, speed: 0.72, opacity: 0.9 },
+    { radius: 1.82, tube: 0.044, arc: Math.PI * 1.52, color: 0x00c9d2, x: 1.2, y: -0.34, z: 1.12, speed: -0.48, opacity: 0.72 }
   ]
 
   return specs.map((spec, index) => {
@@ -867,7 +867,7 @@ function buildEdges(edges: GraphEdge[]) {
   const line = new THREE.LineSegments(
     edgeLineGeometry,
     new THREE.LineBasicMaterial({
-      color: 0x79dfff,
+      color: 0x78fffb,
       transparent: true,
       opacity: 0,
       blending: THREE.AdditiveBlending,
@@ -927,7 +927,7 @@ function updateFocusLines(nodeId?: string) {
   const line = new THREE.LineSegments(
     highlightLineGeometry,
     new THREE.LineBasicMaterial({
-      color: 0x1e7bff,
+      color: 0x22f7ff,
       transparent: true,
       opacity: 0.38,
       blending: THREE.AdditiveBlending,
@@ -972,10 +972,10 @@ function updateFocusLines(nodeId?: string) {
       varying float vPhase;
 
       vec3 borderFlowColor(float t) {
-        vec3 cyan = vec3(0.0, 0.784, 0.961);
-        vec3 ice = vec3(0.302, 0.961, 1.0);
-        vec3 sky = vec3(0.278, 0.761, 1.0);
-        vec3 blue = vec3(0.118, 0.482, 1.0);
+        vec3 cyan = vec3(0.133, 0.969, 1.0);
+        vec3 ice = vec3(0.31, 1.0, 1.0);
+        vec3 sky = vec3(0.0, 0.788, 0.824);
+        vec3 blue = vec3(0.0, 0.902, 0.933);
         if (t < 0.24) return mix(cyan, ice, t / 0.24);
         if (t < 0.46) return mix(ice, sky, (t - 0.24) / 0.22);
         if (t < 0.68) return mix(sky, blue, (t - 0.46) / 0.22);
@@ -1122,9 +1122,9 @@ function createGlowTexture() {
   const ctx = canvas.getContext('2d')!
   const gradient = ctx.createRadialGradient(64, 64, 4, 64, 64, 62)
   gradient.addColorStop(0, 'rgba(255,255,255,0.95)')
-  gradient.addColorStop(0.22, 'rgba(115,220,255,0.62)')
-  gradient.addColorStop(0.52, 'rgba(30,123,255,0.22)')
-  gradient.addColorStop(1, 'rgba(30,123,255,0)')
+  gradient.addColorStop(0.22, 'rgba(115,255,248,0.62)')
+  gradient.addColorStop(0.52, 'rgba(34,247,255,0.22)')
+  gradient.addColorStop(1, 'rgba(34,247,255,0)')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, 128, 128)
   return new THREE.CanvasTexture(canvas)
@@ -1135,8 +1135,8 @@ function createStarField() {
   const positions: number[] = []
   const colors: number[] = []
   const colorA = new THREE.Color(0xffffff)
-  const colorB = new THREE.Color(0x65dfff)
-  const colorC = new THREE.Color(0x6d8dff)
+  const colorB = new THREE.Color(0x65fff6)
+  const colorC = new THREE.Color(0x6df7ff)
 
   for (let i = 0; i < 380; i += 1) {
     const radius = 520 + Math.random() * 980
@@ -1763,7 +1763,14 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .skill-graph-page {
+  --panel: rgba(3, 28, 36, .30);
+  --edge: rgba(34, 247, 255, .11);
+  --cyan: #22f7ff;
+  --teal: #00c9d2;
+  --panel-strong: rgba(3, 36, 44, .38);
   position: relative;
+  display: grid;
+  gap: 16px;
 }
 
 .toolbar {
@@ -1782,7 +1789,7 @@ onBeforeUnmount(() => {
 
 :global(.node-search-option span) {
   overflow: hidden;
-  color: #16345f;
+  color: #eaf7f8;
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1790,7 +1797,7 @@ onBeforeUnmount(() => {
 
 :global(.node-search-option small) {
   flex: 0 0 auto;
-  color: #7b8faa;
+  color: #78a4a9;
   font-size: 11px;
 }
 
@@ -1803,12 +1810,12 @@ onBeforeUnmount(() => {
 .graph-overview__item {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(107, 174, 255, 0.3);
-  border-radius: 18px;
+  border: 1px solid var(--edge);
+  border-radius: 20px;
   padding: 16px 18px;
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: 0 14px 42px rgba(37, 99, 235, 0.08);
-  backdrop-filter: blur(16px);
+  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
+  backdrop-filter: blur(26px) saturate(1.18);
 }
 
 .graph-overview__item::after {
@@ -1819,27 +1826,36 @@ onBeforeUnmount(() => {
   height: 92px;
   content: "";
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 200, 245, 0.22), transparent 68%);
+  background: radial-gradient(circle, rgba(34, 247, 255, 0.10), transparent 68%);
 }
 
 .graph-overview strong {
   display: block;
-  color: #1768d1;
+  color: var(--cyan);
   font-size: 26px;
   font-weight: 950;
+  text-shadow: 0 0 8px rgba(34, 247, 255, .20);
 }
 
 .graph-overview span {
   position: relative;
-  color: #5d759a;
+  color: #8aaeb3;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.8;
 }
 
 .graph-overview__hint {
   display: flex;
   align-items: center;
+}
+
+.panel {
+  border: 1px solid var(--edge);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  backdrop-filter: blur(26px) saturate(1.18);
+  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
 }
 
 .graph-panel,
@@ -1850,6 +1866,7 @@ onBeforeUnmount(() => {
 .graph-detail-panel {
   max-height: 842px;
   overflow-y: auto;
+  padding: 20px;
 }
 
 .graph-detail-panel::-webkit-scrollbar {
@@ -1858,7 +1875,7 @@ onBeforeUnmount(() => {
 
 .graph-detail-panel::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: rgba(30, 123, 255, 0.22);
+  background: rgba(34, 247, 255, 0.20);
 }
 
 .graph-stage {
@@ -1874,11 +1891,11 @@ onBeforeUnmount(() => {
   z-index: 20;
   width: 264px;
   padding: 12px 12px 10px;
-  border: 1px solid rgba(92, 199, 255, 0.22);
+  border: 1px solid rgba(34, 247, 255, 0.14);
   border-radius: 16px;
-  background: rgba(7, 19, 41, 0.72);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 14px 44px rgba(4, 12, 30, 0.45), inset 0 1px 0 rgba(190, 235, 255, 0.08);
+  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  backdrop-filter: blur(22px) saturate(1.15);
+  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.16), inset 0 1px 0 rgba(34, 247, 255, 0.08);
   pointer-events: auto;
 }
 .skill-radar-head {
@@ -1887,59 +1904,59 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   padding: 0 4px 8px;
 }
-.skill-radar-title { display: block; color: #ecf7ff; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
-.skill-radar-head small { color: #5f87ab; font-size: 9px; letter-spacing: 0.18em; }
+.skill-radar-title { display: block; color: #eaf7f8; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+.skill-radar-head small { color: #6b9ea4; font-size: 9px; letter-spacing: 0.18em; }
 .skill-radar-close {
   width: 22px; height: 22px; border: 0; border-radius: 7px; cursor: pointer;
-  color: #9cc4e8; background: rgba(92, 199, 255, 0.12); font-size: 16px; line-height: 1;
+  color: #7acfd4; background: rgba(34, 247, 255, 0.10); font-size: 16px; line-height: 1;
+  backdrop-filter: blur(8px);
 }
-.skill-radar-close:hover { color: #fff; background: rgba(255, 92, 128, 0.55); }
+.skill-radar-close:hover { color: #fff; background: rgba(255, 112, 136, 0.45); }
 .skill-radar-svg { display: block; width: 100%; height: auto; }
-/* ===== 雷达能力说明列表（每类一条，数据与后端联动） ===== */
 .radar-desc-list {
   margin: 6px 0 0;
   padding: 6px 2px 2px;
   list-style: none;
   max-height: 200px;
   overflow-y: auto;
-  border-top: 1px solid rgba(92, 199, 255, 0.16);
+  border-top: 1px solid rgba(34, 247, 255, 0.10);
 }
 .radar-desc-list::-webkit-scrollbar { width: 4px; }
-.radar-desc-list::-webkit-scrollbar-thumb { border-radius: 2px; background: rgba(92, 199, 255, 0.3); }
+.radar-desc-list::-webkit-scrollbar-thumb { border-radius: 2px; background: rgba(34, 247, 255, 0.22); }
 .radar-desc-list li { padding: 6px 4px 5px; border-radius: 8px; }
-.radar-desc-list li + li { margin-top: 2px; border-top: 1px dashed rgba(92, 199, 255, 0.1); }
+.radar-desc-list li + li { margin-top: 2px; border-top: 1px dashed rgba(34, 247, 255, 0.08); }
 .radar-desc-list li.zero { opacity: 0.55; }
 .rd-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.rd-name { color: #cdeeff; font-size: 12px; font-weight: 700; }
-.rd-num { color: #4ed8ff; font-size: 11px; font-weight: 700; white-space: nowrap; }
-.radar-desc-list li.zero .rd-num { color: #6b8fae; }
-.rd-desc { margin: 3px 0 0; color: #8fb4d4; font-size: 11px; line-height: 1.55; text-align: justify; }
+.rd-name { color: #cde9eb; font-size: 12px; font-weight: 700; }
+.rd-num { color: var(--cyan); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.radar-desc-list li.zero .rd-num { color: #6b9ea4; }
+.rd-desc { margin: 3px 0 0; color: #85a8ad; font-size: 11px; line-height: 1.55; text-align: justify; }
 .skill-radar-foot {
-  padding-top: 8px; text-align: center; color: #6b8fae; font-size: 10px; letter-spacing: 0.04em;
+  padding-top: 8px; text-align: center; color: #6b9ea4; font-size: 10px; letter-spacing: 0.04em;
 }
 .radar-count--zero { fill: #f2fbff !important; }
 .radar-fade-enter-active, .radar-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
 .radar-fade-enter-from, .radar-fade-leave-to { opacity: 0; transform: translateY(6px) scale(0.98); }
-.el-button.radar-active { color: #dff6ff; border-color: #4ed8ff; background: rgba(78, 216, 255, 0.16); }
-.el-button.radar-active:hover { color: #fff; border-color: #6ee2ff; background: rgba(78, 216, 255, 0.24); }
+.el-button.radar-active { color: #dff8f8; border-color: var(--cyan); background: rgba(34, 247, 255, 0.10); }
+.el-button.radar-active:hover { color: #fff; border-color: #6ffaff; background: rgba(34, 247, 255, 0.16); }
 
 .graph-box {
   position: relative;
   height: 740px;
   overflow: hidden;
-  border: 1px solid rgba(92, 199, 255, 0.34);
-  border-radius: 26px;
+  border: 1px solid rgba(34, 247, 255, 0.18);
+  border-radius: 20px;
   background:
-    radial-gradient(circle at 46% 48%, rgba(62, 132, 220, 0.22), transparent 30%),
-    radial-gradient(circle at 72% 24%, rgba(0, 196, 245, 0.12), transparent 24%),
-    radial-gradient(circle at 24% 78%, rgba(84, 112, 196, 0.14), transparent 28%),
-    linear-gradient(145deg, #07152d 0%, #0b2244 50%, #0d2d55 100%);
+    radial-gradient(circle at 46% 48%, rgba(34, 247, 255, 0.08), transparent 30%),
+    radial-gradient(circle at 72% 24%, rgba(0, 201, 210, 0.06), transparent 24%),
+    radial-gradient(circle at 24% 78%, rgba(79, 234, 255, 0.05), transparent 28%),
+    linear-gradient(145deg, #0d3347 0%, #0f3b55 50%, #0b2c44 100%);
   background-size: auto, auto, auto, auto;
   background-attachment: fixed;
   box-shadow:
-    inset 0 0 100px rgba(2, 11, 28, 0.38),
-    inset 0 0 70px rgba(0, 200, 245, 0.08),
-    0 22px 70px rgba(10, 36, 82, 0.18);
+    inset 0 0 100px rgba(2, 11, 18, 0.28),
+    inset 0 0 70px rgba(34, 247, 255, 0.04),
+    0 22px 70px rgba(0, 10, 14, 0.16);
 }
 
 .graph-box::before {
@@ -1949,9 +1966,9 @@ onBeforeUnmount(() => {
   content: "";
   pointer-events: none;
   background:
-    conic-gradient(from 80deg, transparent 0 18%, rgba(0, 200, 245, 0.08), transparent 34% 100%);
+    conic-gradient(from 80deg, transparent 0 18%, rgba(34, 247, 255, 0.06), transparent 34% 100%);
   filter: blur(18px);
-  opacity: 0.34;
+  opacity: 0.28;
   animation: nebulaSpin 42s linear infinite;
 }
 
@@ -1963,11 +1980,11 @@ onBeforeUnmount(() => {
   pointer-events: none;
   background:
     radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.72) 0 1px, transparent 2px),
-    radial-gradient(circle at 34% 36%, rgba(136, 231, 255, 0.62) 0 1px, transparent 2px),
+    radial-gradient(circle at 34% 36%, rgba(136, 255, 248, 0.52) 0 1px, transparent 2px),
     radial-gradient(circle at 62% 22%, rgba(255, 255, 255, 0.58) 0 1px, transparent 2px),
-    radial-gradient(circle at 78% 64%, rgba(116, 200, 255, 0.68) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 64%, rgba(111, 250, 255, 0.58) 0 1px, transparent 2px),
     radial-gradient(circle at 42% 82%, rgba(255, 255, 255, 0.5) 0 1px, transparent 2px);
-  opacity: 0.28;
+  opacity: 0.22;
   animation: starTwinkle 5.6s ease-in-out infinite;
 }
 
@@ -1990,22 +2007,22 @@ onBeforeUnmount(() => {
   pointer-events: none;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  opacity: 0.48;
+  opacity: 0.38;
 }
 
 .graph-orbit-a {
   width: 500px;
   height: 500px;
-  border: 1px dashed rgba(0, 200, 245, 0.18);
-  box-shadow: 0 0 30px rgba(0, 200, 245, 0.04);
+  border: 1px dashed rgba(34, 247, 255, 0.14);
+  box-shadow: 0 0 30px rgba(34, 247, 255, 0.03);
   animation: graphOrbit 28s linear infinite;
 }
 
 .graph-orbit-b {
   width: 720px;
   height: 720px;
-  border: 1px solid rgba(120, 186, 255, 0.08);
-  box-shadow: inset 0 0 46px rgba(30, 123, 255, 0.04);
+  border: 1px solid rgba(79, 234, 255, 0.08);
+  box-shadow: inset 0 0 46px rgba(34, 247, 255, 0.03);
   animation: graphOrbit 42s linear reverse infinite;
 }
 
@@ -2014,14 +2031,14 @@ onBeforeUnmount(() => {
   z-index: 4;
   min-width: 130px;
   max-width: 220px;
-  border: 1px solid rgba(105, 191, 255, 0.52);
+  border: 1px solid rgba(34, 247, 255, 0.32);
   border-radius: 14px;
   padding: 10px 12px;
-  background: rgba(7, 30, 68, 0.82);
-  box-shadow: 0 16px 40px rgba(11, 43, 111, 0.22);
+  background: linear-gradient(145deg, rgba(4, 46, 54, .50), rgba(2, 20, 24, .54));
+  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.22);
   color: #fff;
   pointer-events: none;
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(22px) saturate(1.15);
 }
 
 .node-tooltip b,
@@ -2034,7 +2051,7 @@ onBeforeUnmount(() => {
 
 .node-tooltip span {
   margin-top: 4px;
-  color: #9eeaff;
+  color: #9eeee8;
   font-size: 12px;
 }
 
@@ -2044,9 +2061,9 @@ onBeforeUnmount(() => {
   inset: 0;
   display: grid;
   place-items: center;
-  border-radius: 22px;
-  background: rgba(248, 252, 255, 0.68);
-  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  backdrop-filter: blur(26px) saturate(1.18);
 }
 
 .detail-heading {
@@ -2054,8 +2071,8 @@ onBeforeUnmount(() => {
   align-items: flex-end;
   justify-content: space-between;
   margin-bottom: 20px;
-  color: #15386d;
-  font-weight: 950;
+  color: #eaf7f8;
+  font-weight: 700;
 }
 
 .detail-heading.compact {
@@ -2063,9 +2080,9 @@ onBeforeUnmount(() => {
 }
 
 .detail-heading small {
-  color: #00a4d6;
+  color: var(--teal);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 1px;
 }
 
@@ -2074,10 +2091,11 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 14px;
   margin-bottom: 18px;
-  border: 1px solid rgba(107, 174, 255, 0.28);
+  border: 1px solid var(--edge);
   border-radius: 18px;
   padding: 14px;
-  background: linear-gradient(135deg, rgba(230, 244, 255, 0.86), rgba(255, 255, 255, 0.72));
+  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  backdrop-filter: blur(22px) saturate(1.15);
 }
 
 .selected-node__dot {
@@ -2085,12 +2103,12 @@ onBeforeUnmount(() => {
   height: 42px;
   border-radius: 50%;
   background: var(--node-color);
-  box-shadow: 0 0 28px color-mix(in srgb, var(--node-color) 66%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--node-color) 50%, transparent);
 }
 
 .selected-node h3 {
   margin: 0 0 8px;
-  color: #102f60;
+  color: #f0f8f9;
   font-size: 18px;
 }
 
@@ -2101,21 +2119,21 @@ onBeforeUnmount(() => {
 }
 
 .detail-block span {
-  color: #6580ab;
+  color: #78a4a9;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .detail-block p {
   margin: 0;
-  color: #23436e;
+  color: #cfe4e6;
   font-size: 14px;
   line-height: 1.8;
 }
 
 .detail-subsection {
   margin-top: 22px;
-  border-top: 1px solid rgba(104, 158, 225, 0.18);
+  border-top: 1px solid rgba(34, 247, 255, 0.10);
   padding-top: 18px;
 }
 
@@ -2130,20 +2148,21 @@ onBeforeUnmount(() => {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 8px;
-  border: 1px solid rgba(107, 174, 255, 0.22);
+  border: 1px solid rgba(34, 247, 255, 0.10);
   border-radius: 14px;
   padding: 9px 10px;
-  background: rgba(246, 251, 255, 0.58);
-  color: #173b70;
+  background: linear-gradient(145deg, rgba(4, 46, 54, .22), rgba(2, 20, 24, .26));
+  color: #cfe4e6;
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(16px) saturate(1.12);
 }
 
 .community-row:hover,
 .community-row.active {
-  border-color: rgba(0, 200, 245, 0.46);
-  background: rgba(226, 246, 255, 0.78);
-  box-shadow: 0 12px 30px rgba(30, 123, 255, 0.1);
+  border-color: rgba(34, 247, 255, 0.26);
+  background: linear-gradient(145deg, rgba(4, 62, 74, .28), rgba(2, 26, 30, .32));
+  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
   transform: translateY(-1px);
 }
 
@@ -2152,17 +2171,17 @@ onBeforeUnmount(() => {
   height: 10px;
   border-radius: 50%;
   opacity: 0.88;
-  box-shadow: 0 0 8px rgba(112, 205, 224, 0.24);
+  box-shadow: 0 0 8px rgba(34, 247, 255, 0.18);
 }
 
 .community-name,
 .community-count {
   font-size: 13px;
-  font-weight: 850;
+  font-weight: 700;
 }
 
 .community-count {
-  color: #52739f;
+  color: #78a4a9;
 }
 
 .community-bar {
@@ -2170,7 +2189,7 @@ onBeforeUnmount(() => {
   height: 4px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(190, 213, 242, 0.42);
+  background: rgba(34, 247, 255, 0.08);
 }
 
 .community-bar i {
@@ -2178,8 +2197,8 @@ onBeforeUnmount(() => {
   height: 100%;
   border-radius: inherit;
   opacity: 0.78;
-  filter: saturate(0.78);
-  box-shadow: 0 0 8px rgba(100, 190, 218, 0.2);
+  filter: saturate(0.82);
+  box-shadow: 0 0 6px rgba(34, 247, 255, 0.16);
 }
 
 .path-select {
@@ -2203,25 +2222,26 @@ onBeforeUnmount(() => {
 }
 
 .path-node {
-  border: 1px solid rgba(95, 159, 255, 0.28);
+  border: 1px solid rgba(34, 247, 255, 0.14);
   border-radius: 999px;
   padding: 5px 10px;
-  background: rgba(235, 243, 255, 0.88);
-  color: #1d4f9a;
+  background: linear-gradient(145deg, rgba(4, 46, 54, .22), rgba(2, 20, 24, .26));
+  color: #cfe4e6;
   font-size: 12px;
-  font-weight: 850;
+  font-weight: 700;
+  backdrop-filter: blur(16px) saturate(1.12);
 }
 
 .path-node.skill,
 .path-node.Skill {
-  border-color: rgba(0, 200, 245, 0.32);
-  background: rgba(224, 250, 255, 0.88);
-  color: #007c9d;
+  border-color: rgba(34, 247, 255, 0.22);
+  background: linear-gradient(145deg, rgba(4, 62, 74, .24), rgba(2, 26, 30, .28));
+  color: #aeeeee;
 }
 
 .path-arrow {
-  color: #00a4d6;
-  font-weight: 950;
+  color: var(--cyan);
+  font-weight: 700;
 }
 
 .path-shared {
@@ -2233,9 +2253,9 @@ onBeforeUnmount(() => {
 
 .path-shared span {
   width: 100%;
-  color: #6580ab;
+  color: #78a4a9;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .neighbor-list {
@@ -2254,177 +2274,54 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid rgba(107, 174, 255, 0.24);
+  border: 1px solid rgba(34, 247, 255, 0.10);
   border-radius: 999px;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.54);
-  color: #58749e;
+  background: linear-gradient(145deg, rgba(4, 46, 54, .22), rgba(2, 20, 24, .26));
+  color: #8aaeb3;
   font-size: 12px;
-  font-weight: 850;
-  backdrop-filter: blur(12px);
+  font-weight: 700;
+  backdrop-filter: blur(16px) saturate(1.12);
 }
 
 .graph-legend__item i {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  box-shadow: 0 0 12px currentColor;
+  box-shadow: 0 0 10px currentColor;
 }
 
-:global(body.theme-dark) .graph-overview__item {
-  border-color: rgba(91, 145, 220, 0.4);
-  background:
-    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.12), transparent 36%),
-    linear-gradient(145deg, rgba(22, 48, 98, 0.86), rgba(10, 28, 62, 0.78)),
-    rgba(14, 34, 72, 0.78) !important;
-  box-shadow:
-    0 0 0 1px rgba(91, 145, 220, 0.14) inset,
-    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
 }
 
-:global(body.theme-dark) .selected-node {
-  border-color: rgba(91, 145, 220, 0.42);
-  background:
-    radial-gradient(circle at 8% 0%, rgba(0, 200, 245, 0.12), transparent 40%),
-    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.78)),
-    rgba(14, 34, 72, 0.78) !important;
-  box-shadow:
-    0 0 0 1px rgba(91, 145, 220, 0.16) inset,
-    0 18px 54px rgba(0, 0, 0, 0.28) !important;
-}
-
-:global(body.theme-dark) .community-row {
-  border-color: rgba(91, 145, 220, 0.34);
-  background:
-    radial-gradient(circle at 100% 0%, rgba(89, 166, 255, 0.1), transparent 40%),
-    linear-gradient(145deg, rgba(20, 44, 90, 0.82), rgba(10, 26, 58, 0.74)),
-    rgba(12, 30, 66, 0.76) !important;
-  color: #e8f2ff !important;
-  box-shadow:
-    0 0 0 1px rgba(91, 145, 220, 0.12) inset !important;
-}
-
-:global(body.theme-dark) .community-row:hover,
-:global(body.theme-dark) .community-row.active {
-  border-color: rgba(0, 214, 255, 0.56) !important;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(0, 214, 255, 0.22), transparent 42%),
-    linear-gradient(145deg, rgba(24, 72, 138, 0.9), rgba(14, 44, 92, 0.82)),
-    rgba(18, 56, 112, 0.84) !important;
-  box-shadow:
-    0 0 0 1px rgba(0, 214, 255, 0.22) inset,
-    0 14px 40px rgba(0, 120, 220, 0.22) !important;
-}
-
-:global(body.theme-dark) .path-node {
-  border-color: rgba(91, 145, 220, 0.42) !important;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.12), transparent 40%),
-    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.8)),
-    rgba(14, 34, 72, 0.8) !important;
-  color: #d8e8ff !important;
-}
-
-:global(body.theme-dark) .path-node.skill,
-:global(body.theme-dark) .path-node.Skill {
-  border-color: rgba(0, 214, 255, 0.48) !important;
-  background:
-    radial-gradient(circle at 100% 0%, rgba(0, 214, 255, 0.2), transparent 40%),
-    linear-gradient(145deg, rgba(12, 70, 118, 0.88), rgba(8, 40, 78, 0.8)),
-    rgba(10, 50, 96, 0.8) !important;
-  color: #bef3ff !important;
-}
-
-:global(body.theme-dark) .graph-legend__item {
-  border-color: rgba(91, 145, 220, 0.36) !important;
-  background:
-    linear-gradient(145deg, rgba(20, 44, 90, 0.82), rgba(10, 26, 58, 0.72)),
-    rgba(12, 30, 66, 0.74) !important;
-  color: #9db3cf !important;
-}
-
-:global(body.theme-dark) .graph-box {
-  box-shadow:
-    inset 0 0 120px rgba(0, 200, 245, 0.12),
-    inset 0 0 72px rgba(89, 166, 255, 0.08),
-    0 22px 64px rgba(0, 0, 0, 0.32) !important;
-}
-
-:global(body.theme-dark .graph-message) {
-  background:
-    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.1), transparent 30%),
-    linear-gradient(145deg, rgba(18, 38, 78, 0.88), rgba(8, 22, 48, 0.82)),
-    rgba(12, 28, 58, 0.8) !important;
-  backdrop-filter: blur(18px) !important;
-}
+.span-8 { grid-column: span 8; }
+.span-4 { grid-column: span 4; }
 
 @keyframes nebulaSpin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes starTwinkle {
-  0%,
-  100% {
-    opacity: 0.42;
-  }
-
-  50% {
-    opacity: 0.72;
-  }
-}
-
-:global(body.theme-dark) .graph-overview strong {
-  color: #7fc8ff !important;
-  text-shadow: 0 0 18px rgba(89, 166, 255, 0.35);
-}
-
-:global(body.theme-dark) .detail-heading,
-:global(body.theme-dark) .selected-node h3,
-:global(body.theme-dark) .community-name {
-  color: #e8f2ff;
-}
-
-:global(body.theme-dark) .graph-overview span,
-:global(body.theme-dark) .detail-block span,
-:global(body.theme-dark) .community-count,
-:global(body.theme-dark) .path-shared span {
-  color: #9db3cf;
-}
-
-:global(body.theme-dark) .detail-block p {
-  color: #d8e8ff;
-}
-
-:global(body.theme-dark) .community-bar {
-  background: rgba(70, 110, 170, 0.28) !important;
-  box-shadow: inset 0 0 0 1px rgba(91, 145, 220, 0.18) !important;
-}
-
-:global(body.theme-dark) :deep(.path-shared .el-tag) {
-  border-color: rgba(0, 214, 255, 0.36) !important;
-  background:
-    linear-gradient(145deg, rgba(12, 70, 118, 0.72), rgba(8, 40, 78, 0.66)),
-    rgba(10, 50, 96, 0.64) !important;
-  color: #bef3ff !important;
+  0%, 100% { opacity: 0.22; }
+  50% { opacity: 0.52; }
 }
 
 @keyframes graphOrbit {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 @media (max-width: 1280px) {
   .graph-overview {
     grid-template-columns: repeat(2, 1fr);
   }
-
   .graph-stage,
   .graph-box {
     min-height: 560px;
     height: 560px;
   }
+  .span-8, .span-4 { grid-column: span 12; }
 }
 </style>

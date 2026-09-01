@@ -348,25 +348,25 @@ type EvidenceCard = {
 const evidenceCards = computed<EvidenceCard[]>(() => [
   {
     key: 'course', title: '个人简历', en: 'RESUME RECORDS', percent: props.resumeCount ? 100 : 0, done: props.resumeCount, total: props.resumeCount,
-    color: '#4ed8ff', rgb: '78, 216, 255',
+    color: '#22f7ff', rgb: '34, 247, 255',
     icon: '<circle cx="12" cy="9" r="5" /><path d="m9 13-2 8 5-3 5 3-2-8" />',
     items: props.resumeCount ? [`当前账号已保存 ${props.resumeCount} 份简历`] : ['当前账号尚未保存简历'],
   },
   {
     key: 'project', title: '岗位匹配', en: 'MATCH REPORTS', percent: props.matchCount ? 100 : 0, done: props.matchCount, total: props.matchCount,
-    color: '#258dff', rgb: '37, 141, 255',
+    color: '#0aa9b4', rgb: '10, 169, 180',
     icon: '<path d="m12 3 9 5-9 5-9-5Z" /><path d="m5 12.5-2 1.5 9 5 9-5-2-1.5" /><path d="m5 17-2 1.5 9 5 9-5-2-1.5" />',
     items: props.matchCount ? [`当前账号已生成 ${props.matchCount} 份匹配报告`] : ['当前账号尚未生成匹配报告'],
   },
   {
     key: 'skill', title: '画像技能', en: 'PROFILE SKILLS', percent: Math.min(100, (props.profileData.skills || []).length * 10), done: (props.profileData.skills || []).length, total: (props.profileData.skills || []).length,
-    color: '#58e6ff', rgb: '88, 230, 255',
+    color: '#4feaff', rgb: '79, 234, 255',
     icon: '<path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7Z" /><path d="M12 7.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />',
     items: (props.profileData.skills || []).map((item: any) => typeof item === 'string' ? item : item?.name).filter(Boolean),
   },
   {
     key: 'job', title: '面试记录', en: 'INTERVIEW RECORDS', percent: props.interviewCount ? 100 : 0, done: props.interviewCount, total: props.interviewCount,
-    color: '#6d8dff', rgb: '109, 141, 255',
+    color: '#8f7cff', rgb: '143, 124, 255',
     icon: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4.5L6.8 17A8.5 8.5 0 1 1 21 11.5Z" /><path d="M9 10.5h6M9 14h4" />',
     items: props.interviewCount ? [`当前账号已有 ${props.interviewCount} 条面试记录`] : ['当前账号尚无面试记录'],
   },
@@ -656,7 +656,7 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
   position: relative; min-height: 0;
   border: 1px solid rgba(96, 186, 255, .2); border-radius: 14px;
   background:
-    radial-gradient(58% 42% at 50% 66%, rgba(46, 140, 255, .16), transparent 72%),
+    radial-gradient(56% 44% at 50% 58%, rgba(46, 140, 255, .16), transparent 72%),
     linear-gradient(180deg, rgba(6, 18, 40, .5), rgba(4, 12, 30, .68));
   overflow: hidden;
 }
@@ -678,13 +678,14 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .holo-id button:hover { border-color: #7fd8ff; box-shadow: 0 0 12px rgba(96, 214, 255, .4); }
 
 .holo-figure {
-  position: absolute; left: 50%; top: 53%;
-  height: 96%; max-width: none;
+  position: absolute; left: 50%; top: 50%;
+  width: auto; height: 88%; max-width: 88%;
   object-fit: contain;
   mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(92% 86% at 50% 50%, #000 58%, transparent 90%);
-  mask-image: radial-gradient(92% 86% at 50% 50%, #000 58%, transparent 90%);
+  -webkit-mask-image: radial-gradient(96% 92% at 50% 50%, #000 58%, transparent 90%);
+  mask-image: radial-gradient(96% 92% at 50% 50%, #000 58%, transparent 90%);
   pointer-events: none; user-select: none;
+  transform: translate(-50%, -50%);
   animation: holo-drift 7s ease-in-out infinite;
 }
 
@@ -806,7 +807,7 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .toast-enter-from, .toast-leave-to { opacity: 0; transform: translate(-50%, 14px); }
 
 /* ============ 动画 ============ */
-@keyframes holo-drift { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, calc(-50% - 8px)); } }
+@keyframes holo-drift { 0%, 100% { transform: translate(-50%, calc(-50% + 0px)); } 50% { transform: translate(-50%, calc(-50% - 6px)); } }
 
 .profile-cabin-enter-active, .profile-cabin-leave-active { transition: opacity .4s ease; }
 .profile-cabin-enter-active .profile-head { transition: opacity .5s ease, transform .55s cubic-bezier(.2, .8, .2, 1); }

@@ -242,7 +242,7 @@ watch(
   }
 )
 
-const CHART_COLORS = ['#38bdf8', '#7dd3fc', '#0ea5e9', '#8f7cff', '#36d7ff', '#60a5fa', '#22d3ee', '#ffb65c']
+const CHART_COLORS = ['#22f7ff', '#8ff7f4', '#00c9d2', '#8f7cff', '#22f7ff', '#65fff6', '#22d3ee', '#ffb65c']
 
 function countBy(key: 'domain' | 'level') {
   const map = new Map<string, number>()
@@ -319,8 +319,8 @@ const levelOption = computed(() => ({
       itemStyle: {
         borderRadius: 4,
         color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 1, colorStops: [
-          { offset: 0, color: '#0ea5e9' },
-          { offset: 1, color: '#7dd3fc' }
+          { offset: 0, color: '#00c9d2' },
+          { offset: 1, color: '#8ff7f4' }
         ] },
         shadowBlur: 10,
         shadowColor: 'rgba(56, 189, 248, 0.4)'
@@ -353,13 +353,13 @@ const skillOption = computed(() => {
         itemStyle: {
           borderRadius: 5,
           color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [
-            { offset: 0, color: '#0ea5e9' },
-            { offset: 1, color: '#7dd3fc' }
+            { offset: 0, color: '#00c9d2' },
+            { offset: 1, color: '#8ff7f4' }
           ] },
           shadowBlur: 8,
           shadowColor: 'rgba(56, 189, 248, 0.45)'
         },
-        label: { show: true, position: 'right', color: '#7dd3fc', fontSize: 11, fontWeight: 700 },
+        label: { show: true, position: 'right', color: '#8ff7f4', fontSize: 11, fontWeight: 700 },
         data: data.map(([, value]) => value)
       }
     ]
@@ -602,7 +602,7 @@ body:not(.login-active) .app-main .page.jobs-page .el-select__caret {
   width: 4px;
   height: 34px;
   border-radius: 4px;
-  background: linear-gradient(180deg, #7dd3fc, #0ea5e9);
+  background: linear-gradient(180deg, #8ff7f4, #00c9d2);
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
 }
 
@@ -625,7 +625,7 @@ body:not(.login-active) .app-main .page.jobs-page .el-select__caret {
   padding: 5px 12px;
   border: 1px solid rgba(78, 200, 255, 0.3);
   border-radius: 999px;
-  color: #7dd3fc;
+  color: #8ff7f4;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.18em;
@@ -662,9 +662,9 @@ body:not(.login-active) .app-main .page.jobs-page .el-select__caret {
   border-radius: 50%;
 }
 
-.dot-blue { background: #38bdf8; box-shadow: 0 0 8px rgba(56, 189, 248, 0.8); }
+.dot-blue { background: #22f7ff; box-shadow: 0 0 8px rgba(56, 189, 248, 0.8); }
 .dot-violet { background: #8f7cff; box-shadow: 0 0 8px rgba(143, 124, 255, 0.8); }
-.dot-cyan { background: #36d7ff; box-shadow: 0 0 8px rgba(54, 215, 255, 0.8); }
+.dot-cyan { background: #22f7ff; box-shadow: 0 0 8px rgba(54, 215, 255, 0.8); }
 
 .analysis-chart {
   width: 100%;

@@ -146,7 +146,7 @@ let time = 0
 
 // ─── Blue-tech color palette ───────────────────────────────────────────────
 // High-heat / core: vivid cyan-blue
-const COLOR_HOT = new THREE.Color(0x4ed8ff)
+const COLOR_HOT = new THREE.Color(0x22f7ff)
 // Warm / important: bright ice-blue
 const COLOR_WARM = new THREE.Color(0x3d86ff)
 // Rising: light blue
@@ -882,7 +882,7 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border: 3px solid rgba(78, 216, 255, 0.2);
-  border-top-color: #4ed8ff;
+  border-top-color: #22f7ff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -916,7 +916,7 @@ onUnmounted(() => {
   border: 1px solid rgba(78, 216, 255, 0.3);
   background: rgba(8, 22, 58, 0.82);
   backdrop-filter: blur(12px);
-  color: #4ed8ff;
+  color: #22f7ff;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -957,7 +957,7 @@ onUnmounted(() => {
 
 .hint-icon {
   font-size: 14px;
-  color: #4ed8ff;
+  color: #22f7ff;
 }
 
 /* ─── Info panel ──────────────────────────────────────────────────── */
@@ -1006,7 +1006,7 @@ onUnmounted(() => {
 
 .panel-close:hover {
   background: rgba(78, 216, 255, 0.3);
-  color: #4ed8ff;
+  color: #22f7ff;
   transform: rotate(90deg);
 }
 
@@ -1057,7 +1057,7 @@ onUnmounted(() => {
 
 .heat-tag.hot {
   background: linear-gradient(135deg, rgba(78, 216, 255, 0.3), rgba(61, 134, 255, 0.3));
-  color: #4ed8ff;
+  color: #22f7ff;
   border: 1px solid rgba(78, 216, 255, 0.3);
 }
 
@@ -1081,7 +1081,7 @@ onUnmounted(() => {
 
 .trend-tag {
   background: rgba(78, 216, 255, 0.15);
-  color: #4ed8ff;
+  color: #22f7ff;
   border: 1px solid rgba(78, 216, 255, 0.2);
 }
 
@@ -1125,7 +1125,7 @@ onUnmounted(() => {
   content: '';
   width: 3px;
   height: 14px;
-  background: linear-gradient(to bottom, #4ed8ff, #3d86ff);
+  background: linear-gradient(to bottom, #22f7ff, #0aa9b4);
   border-radius: 2px;
 }
 
@@ -1179,7 +1179,7 @@ onUnmounted(() => {
   border-radius: 8px;
   border: 1px solid rgba(78, 216, 255, 0.4);
   background: linear-gradient(135deg, rgba(78, 216, 255, 0.2), rgba(61, 134, 255, 0.2));
-  color: #4ed8ff;
+  color: #22f7ff;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -1236,7 +1236,7 @@ onUnmounted(() => {
 }
 
 .action-btn.primary {
-  background: linear-gradient(135deg, #4ed8ff, #3d86ff);
+  background: linear-gradient(135deg, #22f7ff, #0aa9b4);
   color: #071124;
 }
 

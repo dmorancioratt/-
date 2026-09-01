@@ -347,7 +347,7 @@ watch(hotSkills, (skills) => { if (!skills.some((item) => item.name === activeSk
 const emergingList = computed(() => emerging.value.slice(0, 5))
 const heatBuckets = computed(() => allHotSkills.value.reduce((acc, item) => { const heat = Number(item.heat); if (heat >= 16) acc.high++; else if (heat >= 14) acc.mid++; else if (heat >= 12) acc.warm++; else acc.low++; return acc }, { high: 0, mid: 0, warm: 0, low: 0 }))
 
-function heatColor(heat: number) { return heat >= 16 ? '#ffb52e' : heat >= 12 ? '#46c8ff' : heat >= 8 ? '#a26cff' : '#258dff' }
+function heatColor(heat: number) { return heat >= 16 ? '#ffb52e' : heat >= 12 ? '#4feaff' : heat >= 8 ? '#a26cff' : '#0aa9b4' }
 function selectSkill(name: string) { if (name) activeSkillName.value = name }
 function handleSkillClick(params: any) { if (params?.data?.skillName) selectSkill(params.data.skillName) }
 function onHotFruitSelect(skill: any) { if (skill?.name) selectSkill(skill.name) }
@@ -562,7 +562,7 @@ const sunburstOption = computed(() => {
   --v-white: #eafcff;
   --v-muted: #78a9c7;
   --v-red: #ff785f;
-  --v-green: #46c8ff;
+  --v-green: #4feaff;
   position: relative;
   width: 100%;
   min-height: 900px;
@@ -1432,7 +1432,7 @@ const sunburstOption = computed(() => {
 .v-role-card > b {
   font-size: 11px;
 }
-.v-role-card strong.up { color: #46c8ff; }
+.v-role-card strong.up { color: #4feaff; }
 .v-role-card span.warn { color: #ffd25c; }
 .v-role-card i.down { color: #ff785f; font-style: normal; }
 
@@ -1541,7 +1541,7 @@ button { font: inherit; }
   content: '';
   width: 4px;
   height: 14px;
-  background: linear-gradient(180deg, #4ed8ff, #36d7ff);
+  background: linear-gradient(180deg, #22f7ff, #22f7ff);
   border-radius: 2px;
 }
 
@@ -1579,7 +1579,7 @@ button { font: inherit; }
   font-weight: 600;
 }
 
-.stat-item em.up { color: #36d7ff; }
+.stat-item em.up { color: #22f7ff; }
 .stat-item em.down { color: #ff7088; }
 
 .heat-bars {
@@ -1618,7 +1618,7 @@ button { font: inherit; }
 
 .bar-fill.hot { background: linear-gradient(90deg, #ff6b35, #ffb65c); box-shadow: 0 0 8px rgba(255, 107, 53, 0.5); }
 .bar-fill.warm { background: linear-gradient(90deg, #ffb65c, #69f0ae); box-shadow: 0 0 8px rgba(105, 240, 174, 0.4); }
-.bar-fill.cool { background: linear-gradient(90deg, #69f0ae, #4ed8ff); box-shadow: 0 0 8px rgba(78, 216, 255, 0.4); }
+.bar-fill.cool { background: linear-gradient(90deg, #69f0ae, #22f7ff); box-shadow: 0 0 8px rgba(78, 216, 255, 0.4); }
 
 .heat-bar-row b {
   width: 24px;
@@ -1663,7 +1663,7 @@ button { font: inherit; }
   height: 20px;
   border-radius: 4px;
   background: linear-gradient(135deg, rgba(78, 216, 255, 0.2), rgba(54, 215, 255, 0.2));
-  color: #4ed8ff;
+  color: #22f7ff;
   font-size: 10px;
   font-style: normal;
   font-weight: 700;
@@ -1683,6 +1683,6 @@ button { font: inherit; }
   font-size: 12px;
 }
 
-.mini-skill-btn em.up { color: #36d7ff; }
+.mini-skill-btn em.up { color: #22f7ff; }
 .mini-skill-btn em.down { color: #ff7088; }
 </style>

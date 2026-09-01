@@ -402,7 +402,7 @@ onMounted(resetCabin)
 <style scoped>
 .mission-cabin {
   --mission-accent: #58e6ff;
-  --mission-soft: #258dff;
+  --mission-soft: #0aa9b4;
   --mission-rgb: 88, 230, 255;
   position: fixed;
   inset: 0;

@@ -113,8 +113,8 @@ const reportLoading = ref(false)
 const metricsError = ref<string | null>(null)
 
 const TASK_COLORS: Record<string, string> = {
-  jd_extraction: '#2563eb',
-  resume_extraction: '#0ea5e9',
+  jd_extraction: '#0aa9b4',
+  resume_extraction: '#00c9d2',
   job_match: '#f59e0b'
 }
 

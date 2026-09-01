@@ -237,7 +237,7 @@ onBeforeUnmount(() => {
 .dot.mastered { background: #28d7f5; box-shadow: 0 0 8px rgba(40, 215, 245, 0.8); }
 .dot.growing { background: #3e83ff; box-shadow: 0 0 8px rgba(62, 131, 255, 0.8); }
 .dot.missing { background: #ffa84d; box-shadow: 0 0 8px rgba(255, 168, 77, 0.8); }
-.skill-city__axis { position: absolute; left: 16px; top: 16px; max-width: 260px; border-left: 2px solid #36d7ff; padding: 5px 0 5px 10px; }
+.skill-city__axis { position: absolute; left: 16px; top: 16px; max-width: 260px; border-left: 2px solid #22f7ff; padding: 5px 0 5px 10px; }
 .skill-city__axis b { display: block; color: #effbff; font-size: 15px; }
 .skill-city__axis small { display: block; margin-top: 5px; color: #7fa2bd; font-size: 10px; }
 .skill-city__hover { position: absolute; right: 14px; top: 14px; border: 1px solid rgba(73, 208, 255, 0.28); border-radius: 7px; padding: 6px 9px; background: rgba(3, 19, 45, 0.86); color: #b9f3ff; font-size: 11px; pointer-events: none; }

@@ -69,14 +69,14 @@
         <!-- 岗位匹配度详情 -->
         <div v-if="activePanel === 'match'" class="detail-page page-match">
           <div class="page-header">
-            <div class="header-icon" style="background: linear-gradient(135deg, #4ed8ff20, #06b6d420); border-color: #4ed8ff60;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#4ed8ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <div class="header-icon" style="background: linear-gradient(135deg, #22f7ff20, #00c9d220); border-color: #22f7ff60;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22f7ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             </div>
             <div class="header-titles">
               <h2>岗位匹配度分析</h2>
               <p>AI算法工程师 · 字节跳动</p>
             </div>
-            <div class="header-badge" style="background: linear-gradient(135deg, #4ed8ff, #06b6d4); color: #050d1f;">72%</div>
+            <div class="header-badge" style="background: linear-gradient(135deg, #22f7ff, #00c9d2); color: #050d1f;">72%</div>
           </div>
 
           <div class="hero-ring-section">
@@ -84,9 +84,9 @@
               <svg class="big-ring-svg" viewBox="0 0 240 240">
                 <defs>
                   <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#4ed8ff"/>
+                    <stop offset="0%" stop-color="#22f7ff"/>
                     <stop offset="50%" stop-color="#22d3ee"/>
-                    <stop offset="100%" stop-color="#06b6d4"/>
+                    <stop offset="100%" stop-color="#00c9d2"/>
                   </linearGradient>
                   <filter id="ringGlow"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                 </defs>
@@ -149,14 +149,14 @@
               <svg viewBox="0 0 500 160" class="trend-svg">
                 <defs>
                   <linearGradient id="trendFill" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#4ed8ff" stop-opacity="0.3"/>
-                    <stop offset="100%" stop-color="#4ed8ff" stop-opacity="0"/>
+                    <stop offset="0%" stop-color="#22f7ff" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#22f7ff" stop-opacity="0"/>
                   </linearGradient>
                 </defs>
                 <line v-for="y in [40,80,120]" :key="y" x1="40" :y1="y" x2="480" :y2="y" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-                <polyline :points="trendPoints" fill="none" stroke="#4ed8ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 6px #4ed8ff80)"/>
+                <polyline :points="trendPoints" fill="none" stroke="#22f7ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 6px #22f7ff80)"/>
                 <polygon :points="trendPoints + ' 480,150 40,150'" fill="url(#trendFill)"/>
-                <circle v-for="(p, i) in trendData" :key="i" :cx="40 + i * 62.8" :cy="150 - p.val * 1.1" r="5" fill="#050d1f" stroke="#4ed8ff" stroke-width="2"/>
+                <circle v-for="(p, i) in trendData" :key="i" :cx="40 + i * 62.8" :cy="150 - p.val * 1.1" r="5" fill="#050d1f" stroke="#22f7ff" stroke-width="2"/>
                 <text v-for="(p, i) in trendData" :key="'t'+i" :x="40 + i * 62.8" :y="168" fill="rgba(255,255,255,0.4)" font-size="11" text-anchor="middle">{{ p.month }}</text>
               </svg>
             </div>
@@ -166,8 +166,8 @@
         <!-- 能力图谱详情 -->
         <div v-if="activePanel === 'radar'" class="detail-page page-radar">
           <div class="page-header">
-            <div class="header-icon" style="background: linear-gradient(135deg, #4ed8ff20, #22d3ee20); border-color: #4ed8ff60;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#4ed8ff" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="8.5" x2="22" y2="15.5"/><line x1="22" y1="8.5" x2="2" y2="15.5"/></svg>
+            <div class="header-icon" style="background: linear-gradient(135deg, #22f7ff20, #22d3ee20); border-color: #22f7ff60;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22f7ff" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="8.5" x2="22" y2="15.5"/><line x1="22" y1="8.5" x2="2" y2="15.5"/></svg>
             </div>
             <div class="header-titles">
               <h2>能力图谱</h2>
@@ -179,16 +179,16 @@
             <svg class="radar-big-svg" viewBox="0 0 400 400">
               <defs>
                 <radialGradient id="radarFill" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="#4ed8ff" stop-opacity="0.4"/>
-                  <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.1"/>
+                  <stop offset="0%" stop-color="#22f7ff" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#00c9d2" stop-opacity="0.1"/>
                 </radialGradient>
                 <filter id="radarGlow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
               </defs>
               <g transform="translate(200,200)">
                 <polygon v-for="lv in [0.25,0.5,0.75,1]" :key="lv" :points="radarGridPts(lv)" fill="none" stroke="rgba(78,216,255,0.12)" stroke-width="1"/>
                 <line v-for="(_, i) in radarSkills" :key="'l'+i" x1="0" y1="0" :x2="radarSkills.length > 0 ? 160 * Math.cos(Math.PI*2*i/radarSkills.length - Math.PI/2) : 0" :y2="radarSkills.length > 0 ? 160 * Math.sin(Math.PI*2*i/radarSkills.length - Math.PI/2) : 0" stroke="rgba(78,216,255,0.08)" stroke-width="1"/>
-                <polygon :points="radarDataPts" fill="url(#radarFill)" stroke="#4ed8ff" stroke-width="2" filter="url(#radarGlow)"/>
-                <circle v-for="(s, i) in radarSkills" :key="'c'+i" :cx="160 * (s.val/100) * Math.cos(Math.PI*2*i/radarSkills.length - Math.PI/2)" :cy="160 * (s.val/100) * Math.sin(Math.PI*2*i/radarSkills.length - Math.PI/2)" r="6" fill="#fff" stroke="#4ed8ff" stroke-width="2.5"/>
+                <polygon :points="radarDataPts" fill="url(#radarFill)" stroke="#22f7ff" stroke-width="2" filter="url(#radarGlow)"/>
+                <circle v-for="(s, i) in radarSkills" :key="'c'+i" :cx="160 * (s.val/100) * Math.cos(Math.PI*2*i/radarSkills.length - Math.PI/2)" :cy="160 * (s.val/100) * Math.sin(Math.PI*2*i/radarSkills.length - Math.PI/2)" r="6" fill="#fff" stroke="#22f7ff" stroke-width="2.5"/>
                 <text v-for="(s, i) in radarSkills" :key="'tx'+i" :x="185 * Math.cos(Math.PI*2*i/radarSkills.length - Math.PI/2)" :y="185 * Math.sin(Math.PI*2*i/radarSkills.length - Math.PI/2) + 4" fill="rgba(255,255,255,0.7)" font-size="13" text-anchor="middle" font-weight="500">{{ s.name }}</text>
               </g>
             </svg>
@@ -197,15 +197,15 @@
           <div class="tech-section">
             <h3 class="section-title"><span class="st-line"></span>技能掌握详情</h3>
             <div class="skill-cards-grid">
-              <div class="skill-card" v-for="s in radarSkills" :key="s.name" :style="{ '--accent': s.val >= 80 ? '#37d6a5' : s.val >= 70 ? '#4ed8ff' : '#ffb65c' }">
+              <div class="skill-card" v-for="s in radarSkills" :key="s.name" :style="{ '--accent': s.val >= 80 ? '#37d6a5' : s.val >= 70 ? '#22f7ff' : '#ffb65c' }">
                 <div class="sc-header">
                   <span class="sc-name">{{ s.name }}</span>
-                  <span class="sc-val" :style="{ color: s.val >= 80 ? '#37d6a5' : s.val >= 70 ? '#4ed8ff' : '#ffb65c' }">{{ s.val }}</span>
+                  <span class="sc-val" :style="{ color: s.val >= 80 ? '#37d6a5' : s.val >= 70 ? '#22f7ff' : '#ffb65c' }">{{ s.val }}</span>
                 </div>
                 <div class="sc-mini-ring">
                   <svg viewBox="0 0 60 60">
                     <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
-                    <circle cx="30" cy="30" r="24" fill="none" :stroke="s.val >= 80 ? '#37d6a5' : s.val >= 70 ? '#4ed8ff' : '#ffb65c'" stroke-width="5" stroke-linecap="round" :stroke-dasharray="`${150.8 * s.val/100} 150.8`" transform="rotate(-90 30 30)"/>
+                    <circle cx="30" cy="30" r="24" fill="none" :stroke="s.val >= 80 ? '#37d6a5' : s.val >= 70 ? '#22f7ff' : '#ffb65c'" stroke-width="5" stroke-linecap="round" :stroke-dasharray="`${150.8 * s.val/100} 150.8`" transform="rotate(-90 30 30)"/>
                   </svg>
                 </div>
                 <div class="sc-desc">{{ s.desc }}</div>
@@ -276,8 +276,8 @@
 
         <div v-if="activePanel === 'jobs'" class="detail-page page-jobs">
           <div class="page-header">
-            <div class="header-icon" style="background: linear-gradient(135deg, #4ed8ff20, #06b6d420); border-color: #4ed8ff60;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#4ed8ff" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <div class="header-icon" style="background: linear-gradient(135deg, #22f7ff20, #00c9d220); border-color: #22f7ff60;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22f7ff" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
             <div class="header-titles">
               <h2>智能岗位推荐</h2>
@@ -304,9 +304,9 @@
                 <div class="jr-match-bar">
                   <div class="jrmb-label">匹配度</div>
                   <div class="jrmb-track">
-                    <div class="jrmb-fill" :style="{ width: j.score + '%', background: j.score >= 70 ? 'linear-gradient(90deg, #37d6a5, #22d3ee)' : 'linear-gradient(90deg, #4ed8ff, #06b6d4)' }"></div>
+                    <div class="jrmb-fill" :style="{ width: j.score + '%', background: j.score >= 70 ? 'linear-gradient(90deg, #37d6a5, #22d3ee)' : 'linear-gradient(90deg, #22f7ff, #00c9d2)' }"></div>
                   </div>
-                  <div class="jrmb-val" :style="{ color: j.score >= 70 ? '#37d6a5' : '#4ed8ff' }">{{ j.score }}%</div>
+                  <div class="jrmb-val" :style="{ color: j.score >= 70 ? '#37d6a5' : '#22f7ff' }">{{ j.score }}%</div>
                 </div>
               </div>
               <div class="jr-action">
@@ -324,7 +324,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M12 14v8"/><path d="M8 22h8"/><circle cx="12" cy="10" r="1"/></svg>
             </div>
             <div class="header-titles">
-              <h2 style="background: linear-gradient(90deg, #c084fc, #4ed8ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AI 智能学习建议</h2>
+              <h2 style="background: linear-gradient(90deg, #c084fc, #22f7ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AI 智能学习建议</h2>
               <p>基于你的学习轨迹与岗位需求，AI为你定制下一步路径</p>
             </div>
           </div>
@@ -434,8 +434,8 @@
         <!-- 模拟面试 -->
         <div v-if="activePanel === 'interview'" class="detail-page page-interview">
           <div class="page-header">
-            <div class="header-icon" style="background: linear-gradient(135deg, #4ed8ff20, #06b6d420); border-color: #4ed8ff60;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#4ed8ff" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            <div class="header-icon" style="background: linear-gradient(135deg, #22f7ff20, #00c9d220); border-color: #22f7ff60;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22f7ff" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
             </div>
             <div class="header-titles">
               <h2>AI 模拟面试</h2>
@@ -448,11 +448,11 @@
               <svg viewBox="0 0 200 200">
                 <defs>
                   <linearGradient id="intGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#4ed8ff"/><stop offset="100%" stop-color="#a855f7"/>
+                    <stop offset="0%" stop-color="#22f7ff"/><stop offset="100%" stop-color="#a855f7"/>
                   </linearGradient>
                 </defs>
                 <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
-                <circle cx="100" cy="100" r="85" fill="none" stroke="url(#intGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="416 534" transform="rotate(-90 100 100)" style="filter: drop-shadow(0 0 12px #4ed8ff80)"/>
+                <circle cx="100" cy="100" r="85" fill="none" stroke="url(#intGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="416 534" transform="rotate(-90 100 100)" style="filter: drop-shadow(0 0 12px #22f7ff80)"/>
               </svg>
               <div class="ihsr-center">
                 <span class="ihsr-num">78</span>
@@ -488,7 +488,7 @@
                   <div class="ir-pos">{{ r.position }}</div>
                   <div class="ir-tags"><span v-for="t in r.tags" :key="t">{{ t }}</span></div>
                 </div>
-                <div class="ir-score" :style="{ color: r.score >= 75 ? '#37d6a5' : r.score >= 65 ? '#4ed8ff' : '#ffb65c' }">{{ r.score }}分</div>
+                <div class="ir-score" :style="{ color: r.score >= 75 ? '#37d6a5' : r.score >= 65 ? '#22f7ff' : '#ffb65c' }">{{ r.score }}分</div>
               </div>
             </div>
           </div>
@@ -497,8 +497,8 @@
         <!-- 成长时间线 -->
         <div v-if="activePanel === 'timeline'" class="detail-page page-timeline">
           <div class="page-header">
-            <div class="header-icon" style="background: linear-gradient(135deg, #4ed8ff20, #a855f720); border-color: #4ed8ff60;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#4ed8ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div class="header-icon" style="background: linear-gradient(135deg, #22f7ff20, #a855f720); border-color: #22f7ff60;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22f7ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div class="header-titles">
               <h2>成长时间线</h2>
@@ -525,8 +525,8 @@
         <!-- 成长路径 -->
         <div v-if="activePanel === 'path'" class="detail-page page-path">
           <div class="page-header">
-            <div class="header-icon" style="background: linear-gradient(135deg, #4ed8ff20, #a855f720); border-color: #4ed8ff60;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#4ed8ff" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            <div class="header-icon" style="background: linear-gradient(135deg, #22f7ff20, #a855f720); border-color: #22f7ff60;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22f7ff" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
             </div>
             <div class="header-titles">
               <h2>成长路径</h2>
@@ -538,11 +538,11 @@
             <svg class="path-svg" viewBox="0 0 800 200">
               <defs>
                 <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#4ed8ff"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#ec4899"/>
+                  <stop offset="0%" stop-color="#22f7ff"/><stop offset="50%" stop-color="#a855f7"/><stop offset="100%" stop-color="#ec4899"/>
                 </linearGradient>
               </defs>
               <path d="M 60 150 Q 150 50 260 120 T 460 100 T 660 130 T 740 80" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 8"/>
-              <path d="M 60 150 Q 150 50 260 120 T 400 110" fill="none" stroke="url(#pathGrad)" stroke-width="4" stroke-linecap="round" style="filter: drop-shadow(0 0 8px #4ed8ff80)"/>
+              <path d="M 60 150 Q 150 50 260 120 T 400 110" fill="none" stroke="url(#pathGrad)" stroke-width="4" stroke-linecap="round" style="filter: drop-shadow(0 0 8px #22f7ff80)"/>
             </svg>
             <div class="path-nodes-horiz">
               <div v-for="(n, i) in pathNodes" :key="n.name" class="pnh-node" :class="{ done: n.done, current: n.current }" :style="{ '--c': n.color, left: (i * 130 + 40) + 'px' }">
@@ -556,7 +556,7 @@
 
           <div class="current-stage-card">
             <div class="csc-header">
-              <span class="csc-badge" style="background: linear-gradient(135deg, #60a5fa, #a855f7);">当前阶段</span>
+              <span class="csc-badge" style="background: linear-gradient(135deg, #65fff6, #a855f7);">当前阶段</span>
               <h3>RAG 知识增强</h3>
             </div>
             <p>你正在进入RAG（检索增强生成）阶段。这是连接大模型与外部知识库的核心技术，也是当前AI行业最热门的方向之一，岗位需求旺盛。</p>
@@ -584,11 +584,11 @@
               <svg viewBox="0 0 160 160">
                 <defs>
                   <linearGradient id="avGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#4ed8ff"/><stop offset="100%" stop-color="#a855f7"/>
+                    <stop offset="0%" stop-color="#22f7ff"/><stop offset="100%" stop-color="#a855f7"/>
                   </linearGradient>
                 </defs>
                 <circle cx="80" cy="80" r="72" fill="none" stroke="rgba(78,216,255,0.1)" stroke-width="4"/>
-                <circle cx="80" cy="80" r="72" fill="none" stroke="url(#avGrad)" stroke-width="4" stroke-dasharray="354 452" transform="rotate(-90 80 80)" style="filter: drop-shadow(0 0 10px #4ed8ff80)"/>
+                <circle cx="80" cy="80" r="72" fill="none" stroke="url(#avGrad)" stroke-width="4" stroke-dasharray="354 452" transform="rotate(-90 80 80)" style="filter: drop-shadow(0 0 10px #22f7ff80)"/>
               </svg>
               <div class="ph-avatar-inner">张</div>
             </div>
@@ -761,13 +761,13 @@ onMounted(loadData)
 
 const matchStats = [
   { label: '较上次提升', value: '14%', color: '#37d6a5', icon: '↑', bar: 85 },
-  { label: '超过同学', value: '72%', color: '#4ed8ff', icon: '◉', bar: 72 },
+  { label: '超过同学', value: '72%', color: '#22f7ff', icon: '◉', bar: 72 },
   { label: '技能缺口', value: '5项', color: '#ffb65c', icon: '!', bar: 40 },
   { label: '推荐课程', value: '8门', color: '#a855f7', icon: '★', bar: 60 },
 ]
 
 const matchDims = [
-  { name: '技术能力', val: 78, color: '#4ed8ff' },
+  { name: '技术能力', val: 78, color: '#22f7ff' },
   { name: '项目经验', val: 65, color: '#22d3ee' },
   { name: '算法基础', val: 82, color: '#37d6a5' },
   { name: '工程实践', val: 58, color: '#ffb65c' },
@@ -814,7 +814,7 @@ const radarDataPts = computed(() => radarSkills.map((s, i) => {
 const weakAreas = [
   { title: '工程实践能力', desc: '模型部署、Docker容器化、生产环境经验不足', suggest: '建议参与开源项目，学习vLLM/TensorRT部署', icon: '⚙', color: '#ffb65c' },
   { title: '深度学习理论', desc: 'Transformer内部机制、注意力变种理解不深', suggest: '建议系统学习CS231n/李沐深度学习课程', icon: '🧠', color: '#a855f7' },
-  { title: '大模型前沿', desc: 'Agent、多模态、RAG等新技术跟进较慢', suggest: '关注顶会论文，复现最新开源项目', icon: '🚀', color: '#4ed8ff' },
+  { title: '大模型前沿', desc: 'Agent、多模态、RAG等新技术跟进较慢', suggest: '关注顶会论文，复现最新开源项目', icon: '🚀', color: '#22f7ff' },
 ]
 
 const jobList = [
@@ -835,21 +835,21 @@ const learningPath = [
 
 const resources = [
   { type: '文档', title: 'LangChain官方中文文档', source: 'python.langchain.com', rating: 4.8, color: '#37d6a5' },
-  { type: '视频', title: 'RAG从原理到实战完整版', source: 'B站-跟李沐学AI', rating: 4.9, color: '#4ed8ff' },
+  { type: '视频', title: 'RAG从原理到实战完整版', source: 'B站-跟李沐学AI', rating: 4.9, color: '#22f7ff' },
   { type: '项目', title: 'ChatGLM3+RAG搭建企业知识库', source: 'GitHub - THUDM', rating: 4.7, color: '#a855f7' },
   { type: '论文', title: 'Retrieval-Augmented Generation', source: 'NeurIPS 2020', rating: 4.6, color: '#ffb65c' },
 ]
 const aiResources = resources.slice(0, 2)
 
 const weekStats = [
-  { label: '学习时长', value: '12.5h', icon: '⏱', color: '#4ed8ff' },
+  { label: '学习时长', value: '12.5h', icon: '⏱', color: '#22f7ff' },
   { label: '完成任务', value: '3/5', icon: '✓', color: '#37d6a5' },
   { label: '练习题数', value: '28道', icon: '📝', color: '#a855f7' },
   { label: '连续学习', value: '5天', icon: '🔥', color: '#ffb65c' },
 ]
 
 const weeklyTasks = ref([
-  { text: '完成Transformer架构学习', date: '周一', cat: '理论', catColor: '#4ed8ff', points: 100, done: true },
+  { text: '完成Transformer架构学习', date: '周一', cat: '理论', catColor: '#22f7ff', points: 100, done: true },
   { text: '阅读《Attention Is All You Need》论文', date: '周二', cat: '论文', catColor: '#a855f7', points: 80, done: true },
   { text: '动手实现Multi-Head Attention机制', date: '周三', cat: '实践', catColor: '#37d6a5', points: 150, done: true },
   { text: '学习向量数据库Milvus基础操作', date: '周四/周五', cat: '工程', catColor: '#ffb65c', points: 120, done: false },
@@ -857,7 +857,7 @@ const weeklyTasks = ref([
 ])
 
 const interviewDims = [
-  { name: '技术能力', val: 72, color: '#4ed8ff' },
+  { name: '技术能力', val: 72, color: '#22f7ff' },
   { name: '表达能力', val: 72, color: '#37d6a5' },
   { name: '逻辑思维', val: 80, color: '#a855f7' },
   { name: '项目经验', val: 65, color: '#ffb65c' },
@@ -872,24 +872,24 @@ const interviewRecords = [
 
 const timelineEvents = [
   { date: '06-12', title: '深度学习基础课程结业', desc: '完成CNN/RNN/LSTM核心原理学习，通过结业考试（92分）', icon: '🎓', color: '#37d6a5', reward: '深度学习入门徽章' },
-  { date: '06-08', title: 'Python技能升级至Lv.18', desc: '累计完成328道编程练习题，进入熟练阶段', icon: '🐍', color: '#4ed8ff', reward: '代码达人' },
+  { date: '06-08', title: 'Python技能升级至Lv.18', desc: '累计完成328道编程练习题，进入熟练阶段', icon: '🐍', color: '#22f7ff', reward: '代码达人' },
   { date: '06-01', title: '匹配度大幅提升', desc: '岗位匹配度提升14%，算法基础能力显著增强', icon: '📈', color: '#ffb65c', reward: null },
   { date: '05-25', title: '第一个ML项目完成', desc: '完成房价预测项目，准确率达到96%', icon: '🏆', color: '#a855f7', reward: '项目新手徽章' },
   { date: '05-18', title: '开始机器学习学习', desc: '完成线性回归、逻辑回归课程', icon: '📚', color: '#ec4899', reward: null },
-  { date: '05-10', title: '开启AI学习之旅', desc: '注册账号，完成入学测评，定制学习路径', icon: '🚀', color: '#06b6d4', reward: '初出茅庐徽章' },
+  { date: '05-10', title: '开启AI学习之旅', desc: '注册账号，完成入学测评，定制学习路径', icon: '🚀', color: '#00c9d2', reward: '初出茅庐徽章' },
 ]
 
 const pathNodes = [
-  { name: 'Python', sub: '入门基础', done: true, current: false, color: '#4ed8ff', icon: 'Py' },
+  { name: 'Python', sub: '入门基础', done: true, current: false, color: '#22f7ff', icon: 'Py' },
   { name: '机器学习', sub: '基础算法', done: true, current: false, color: '#22d3ee', icon: 'ML' },
   { name: '深度学习', sub: '进阶应用', done: true, current: false, color: '#a855f7', icon: 'DL' },
-  { name: 'RAG', sub: '知识增强', done: false, current: true, color: '#60a5fa', icon: 'R' },
+  { name: 'RAG', sub: '知识增强', done: false, current: true, color: '#65fff6', icon: 'R' },
   { name: 'Agent', sub: '智能体开发', done: false, current: false, color: '#818cf8', icon: 'A' },
   { name: 'AI算法工程师', sub: '目标岗位', done: false, current: false, color: '#ec4899', icon: '♛' },
 ]
 
 const profileStats = [
-  { label: '学习天数', value: '68天', icon: '📅', color: '#4ed8ff' },
+  { label: '学习天数', value: '68天', icon: '📅', color: '#22f7ff' },
   { label: '完成课程', value: '24门', icon: '📚', color: '#37d6a5' },
   { label: '练习题目', value: '328道', icon: '✏️', color: '#a855f7' },
   { label: '项目数', value: '6个', icon: '🚀', color: '#ffb65c' },
@@ -897,13 +897,13 @@ const profileStats = [
 
 const badges = [
   { icon: '🏆', name: '初出茅庐', unlocked: true, color: '#f59e0b' },
-  { icon: '⭐', name: '学习达人', unlocked: true, color: '#4ed8ff' },
+  { icon: '⭐', name: '学习达人', unlocked: true, color: '#22f7ff' },
   { icon: '🔥', name: '连续7天', unlocked: true, color: '#ef4444' },
   { icon: '💎', name: '算法能手', unlocked: false, color: '#a855f7' },
   { icon: '👑', name: '面试通关', unlocked: false, color: '#ec4899' },
   { icon: '🚀', name: '项目大师', unlocked: false, color: '#37d6a5' },
   { icon: '🎯', name: '目标达成', unlocked: true, color: '#22d3ee' },
-  { icon: '🌟', name: '知识新星', unlocked: true, color: '#60a5fa' },
+  { icon: '🌟', name: '知识新星', unlocked: true, color: '#65fff6' },
 ]
 
 // 旧详情区保持关闭；不再生成前端随机业务数据。
@@ -951,7 +951,7 @@ const heatmapData: number[][] = []
   background: linear-gradient(135deg, rgba(78,216,255,0.25), rgba(78,216,255,0.1));
   border-color: rgba(78,216,255,0.5);
   box-shadow: 0 6px 32px rgba(78,216,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-  color: #4ed8ff;
+  color: #22f7ff;
   transform: scale(1.05);
 }
 .exit-cockpit-btn:hover svg {
@@ -1042,7 +1042,7 @@ const heatmapData: number[][] = []
   background: linear-gradient(135deg, rgba(78,216,255,0.2), rgba(6,182,212,0.1));
   border: 1.5px solid rgba(78, 216, 255, 0.5);
   border-radius: 14px;
-  color: #4ed8ff;
+  color: #22f7ff;
   font-size: 15px; font-weight: 600;
   cursor: pointer;
   backdrop-filter: blur(20px);
@@ -1136,7 +1136,7 @@ const heatmapData: number[][] = []
   background: linear-gradient(180deg, rgba(9, 24, 58, 0.98) 0%, rgba(9, 24, 58, 0.92) 80%, transparent 100%);
   border: none;
   border-bottom: 1px solid rgba(78,216,255,0.1);
-  color: #4ed8ff;
+  color: #22f7ff;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -1182,7 +1182,7 @@ const heatmapData: number[][] = []
   position: absolute;
   bottom: -1px; left: 0;
   width: 80px; height: 2px;
-  background: linear-gradient(90deg, #4ed8ff, transparent);
+  background: linear-gradient(90deg, #22f7ff, transparent);
 }
 .header-icon {
   width: 48px; height: 48px;
@@ -1253,7 +1253,7 @@ const heatmapData: number[][] = []
 }
 .st-line {
   width: 3px; height: 15px;
-  background: linear-gradient(180deg, #4ed8ff, #8f7cff);
+  background: linear-gradient(180deg, #22f7ff, #8f7cff);
   border-radius: 2px;
   box-shadow: 0 0 10px rgba(78, 216, 255, 0.5);
 }
@@ -1279,7 +1279,7 @@ const heatmapData: number[][] = []
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 .br-num { font-size: 56px; font-weight: 800; color: #fff; line-height: 1; text-shadow: 0 0 30px rgba(78,216,255,0.5); }
-.br-pct { font-size: 20px; color: #4ed8ff; font-weight: 600; margin-top: 2px; }
+.br-pct { font-size: 20px; color: #22f7ff; font-weight: 600; margin-top: 2px; }
 .br-lbl { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px; letter-spacing: 1px; }
 
 .stats-grid-4 { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1346,11 +1346,11 @@ const heatmapData: number[][] = []
   padding: 2px 8px;
   background: rgba(78,216,255,0.1);
   border-radius: 4px;
-  font-size: 11px; color: #4ed8ff;
+  font-size: 11px; color: #22f7ff;
 }
 .gc-btn {
   padding: 7px 16px;
-  background: linear-gradient(135deg, #4ed8ff, #06b6d4);
+  background: linear-gradient(135deg, #22f7ff, #00c9d2);
   border: none; border-radius: 6px;
   color: #050d1f; font-size: 12px; font-weight: 600;
   cursor: pointer; flex-shrink: 0;
@@ -1397,7 +1397,7 @@ const heatmapData: number[][] = []
   font-size: 11px; font-weight: 600;
 }
 .sc-level.lv-good { background: #37d6a520; color: #37d6a5; }
-.sc-level.lv-mid { background: #4ed8ff20; color: #4ed8ff; }
+.sc-level.lv-mid { background: #22f7ff20; color: #22f7ff; }
 .sc-level.lv-weak { background: #ffb65c20; color: #ffb65c; }
 
 .weak-cards { display: flex; flex-direction: column; gap: 10px; }
@@ -1431,8 +1431,8 @@ const heatmapData: number[][] = []
 }
 .ft-btn.active, .ft-btn:hover {
   background: rgba(78,216,255,0.15);
-  border-color: #4ed8ff;
-  color: #4ed8ff;
+  border-color: #22f7ff;
+  color: #22f7ff;
 }
 
 .job-list { display: flex; flex-direction: column; gap: 10px; }
@@ -1469,7 +1469,7 @@ const heatmapData: number[][] = []
   padding: 2px 8px;
   background: rgba(78,216,255,0.1);
   border-radius: 4px;
-  font-size: 11px; color: #4ed8ff;
+  font-size: 11px; color: #22f7ff;
 }
 .jr-match-bar { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .jrmb-label { font-size: 11px; color: rgba(255,255,255,0.4); }
@@ -1479,7 +1479,7 @@ const heatmapData: number[][] = []
 .jr-action { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
 .jr-btn {
   padding: 7px 14px;
-  background: linear-gradient(135deg, #4ed8ff, #06b6d4);
+  background: linear-gradient(135deg, #22f7ff, #00c9d2);
   border: none; border-radius: 6px;
   color: #050d1f; font-size: 12px; font-weight: 600;
   cursor: pointer; transition: all 0.3s;
@@ -1490,7 +1490,7 @@ const heatmapData: number[][] = []
   background: transparent;
   border: 1px solid rgba(78,216,255,0.3);
   border-radius: 6px;
-  color: #4ed8ff; font-size: 12px;
+  color: #22f7ff; font-size: 12px;
   cursor: pointer; transition: all 0.3s;
 }
 .jr-btn-outline:hover { background: rgba(78,216,255,0.1); }
@@ -1581,7 +1581,7 @@ const heatmapData: number[][] = []
   width: 36px; height: 36px; border-radius: 50%;
   border: 2px solid rgba(78,216,255,0.4);
   background: rgba(78,216,255,0.1);
-  color: #4ed8ff;
+  color: #22f7ff;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 700;
   flex-shrink: 0; z-index: 1;
@@ -1776,7 +1776,7 @@ const heatmapData: number[][] = []
   position: absolute; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.ihsr-num { font-size: 52px; font-weight: 800; color: #4ed8ff; line-height: 1; text-shadow: 0 0 25px rgba(78,216,255,0.5); }
+.ihsr-num { font-size: 52px; font-weight: 800; color: #22f7ff; line-height: 1; text-shadow: 0 0 25px rgba(78,216,255,0.5); }
 .ihsr-total { font-size: 18px; color: rgba(255,255,255,0.3); }
 .ihsr-grade {
   margin-top: 6px;
@@ -1795,7 +1795,7 @@ const heatmapData: number[][] = []
 .ih-start-btn {
   display: flex; align-items: center; gap: 10px;
   padding: 14px 32px;
-  background: linear-gradient(135deg, #4ed8ff, #06b6d4);
+  background: linear-gradient(135deg, #22f7ff, #00c9d2);
   border: none; border-radius: 12px;
   color: #050d1f; font-size: 15px; font-weight: 700;
   cursor: pointer; transition: all 0.3s;
@@ -1963,7 +1963,7 @@ const heatmapData: number[][] = []
 .ph-avatar-inner {
   position: absolute; inset: 12px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4ed8ff, #a855f7);
+  background: linear-gradient(135deg, #22f7ff, #a855f7);
   display: flex; align-items: center; justify-content: center;
   font-size: 48px; font-weight: 800; color: #fff;
 }
@@ -1975,13 +1975,13 @@ const heatmapData: number[][] = []
   background: rgba(78,216,255,0.12);
   border: 1px solid rgba(78,216,255,0.25);
   border-radius: 20px;
-  font-size: 12px; color: #4ed8ff; font-weight: 500;
+  font-size: 12px; color: #22f7ff; font-weight: 500;
 }
 .ph-level-bar { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
 .phlb-label { font-size: 12px; color: rgba(255,255,255,0.5); }
 .phlb-track { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; max-width: 200px; }
-.phlb-fill { height: 100%; width: 78%; background: linear-gradient(90deg, #4ed8ff, #a855f7); border-radius: 4px; box-shadow: 0 0 10px rgba(78,216,255,0.4); }
-.phlb-val { font-size: 14px; font-weight: 700; color: #4ed8ff; }
+.phlb-fill { height: 100%; width: 78%; background: linear-gradient(90deg, #22f7ff, #a855f7); border-radius: 4px; box-shadow: 0 0 10px rgba(78,216,255,0.4); }
+.phlb-val { font-size: 14px; font-weight: 700; color: #22f7ff; }
 .ph-xp { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 8px; }
 .ph-xp b { color: #f59e0b; font-weight: 700; }
 

@@ -117,7 +117,7 @@ export function aggregateSkillDemand(jobs: any[], candidates: any[], graph?: { n
 
 export type EmergingItem = { name: string; count: number; percent: number; color: string }
 
-const EMERGING_PALETTE = ['#1e3a8a', '#1d4ed8', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe']
+const EMERGING_PALETTE = ['#042a30', '#066a72', '#00c9d2', '#22f7ff', '#8ff7f4', '#d7fff9']
 
 export function aggregateEmergingByCategory(emerging: any[]): EmergingItem[] {
   if (!emerging?.length) return []

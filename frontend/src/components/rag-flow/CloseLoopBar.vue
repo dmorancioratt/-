@@ -93,7 +93,7 @@ function onStepClick(key: string) {
   flex-shrink: 0;
 }
 .loop-title .el-icon {
-  color: #60a5fa;
+  color: #65fff6;
 }
 
 .loop-chain {
@@ -169,10 +169,10 @@ function onStepClick(key: string) {
 }
 .loop-chip.s-running .chip-dot {
   color: #fff;
-  background: #2563eb;
+  background: #0aa9b4;
   box-shadow: 0 0 8px rgba(96, 165, 250, 0.8);
 }
-.loop-chip.s-running .chip-label { color: #93c5fd; }
+.loop-chip.s-running .chip-label { color: #a5fffc; }
 
 .spin {
   animation: spin 1s linear infinite;
