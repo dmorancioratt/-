@@ -21,7 +21,7 @@ const routes = [
       { path: 'dashboards/hr', name: 'dashboards-hr', component: () => import('@/views/dashboards/HrDashboard.vue'), meta: { title: '企业 HR 大屏', roles: ['hr'] } },
       { path: 'dashboards/admin', name: 'dashboards-admin', component: () => import('@/views/dashboards/AdminDataHub.vue'), meta: { title: '管理员数据中枢', roles: ['admin'], fullscreen: true } },
       { path: 'cockpit', name: 'growth-cockpit-nested', component: () => import('@/views/GrowthCockpit.vue'), meta: { title: '个人成长驾驶舱', roles: candidateRoles, fullscreen: true } },
-      { path: 'personal-center', name: 'personal-center', component: () => import('@/views/GrowthCockpit.vue'), meta: { title: '个人驾驶舱', roles: candidateRoles, fullscreen: true } },
+      { path: 'personal-center', redirect: '/overview' },
       { path: 'hr-candidates', name: 'hr-candidates', component: () => import('@/views/HrCandidates.vue'), meta: { title: '候选人管理', roles: hrRoles } },
       { path: 'datasets', name: 'datasets', component: () => import('@/views/Datasets.vue'), meta: { title: '权威数据源中心', roles: hrRoles } },
       { path: 'jd-parser', name: 'jd-parser', component: () => import('@/views/JdParser.vue'), meta: { title: 'JD解析', roles: hrRoles } },

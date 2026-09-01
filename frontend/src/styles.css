@@ -1,20 +1,93 @@
 :root {
-  /* 天青蓝 Sky-Cyan Blue Theme */
-  --primary: #38bdf8;
-  --primary-dark: #0284c7;
-  --primary-soft: rgba(12, 74, 110, 0.72);
-  --cyan: #7dd3fc;
-  --cyan-soft: rgba(30, 80, 120, 0.56);
-  --green: #38bdf8;
+  /* ============================================================
+   *  荧光青 Neon-Cyan Theme (全项目蓝色→荧光青统一替换)
+   *  主色：#22F7FF（荧光青发光核心）
+   *  亮阶：#8DFFFF；主色-深：#00C9D2；极深：#007A83
+   *  背景：青黑 #031014 / 深夜青 #041C22
+   * ============================================================ */
+  /* 基础语义色（原天青蓝 Sky-Cyan 全部替换为荧光青） */
+  --primary: #22f7ff;
+  --primary-dark: #00c9d2;
+  --primary-soft: rgba(0, 142, 156, 0.72);
+  --cyan: #8dffff;
+  --cyan-soft: rgba(28, 140, 160, 0.56);
+  --green: #22f7ff;
   --orange: #f59e0b;
-  --bg: #081d3a;
-  --text: #e0f2fe;
-  --muted: #94a3b8;
-  --border: rgba(56, 189, 248, 0.32);
-  --glass: rgba(6, 30, 60, 0.72);
-  --shadow: 0 18px 54px rgba(0, 0, 0, 0.28);
+  --bg: #031014;
+  --text: #e5ffff;
+  --muted: #85aeb4;
+  --border: rgba(34, 247, 255, 0.32);
+  --glass: rgba(3, 24, 30, 0.72);
+  --shadow: 0 18px 54px rgba(0, 0, 0, 0.32);
   font-family: Inter, "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
   color: var(--text);
+
+  /* ===== Element Plus 全量主题色（原蓝 → 荧光青 10 阶） ===== */
+  --el-color-primary: #22f7ff;
+  --el-color-primary-light-3: #5dfaff;
+  --el-color-primary-light-5: #8dffff;
+  --el-color-primary-light-7: #befcff;
+  --el-color-primary-light-8: #d4fdff;
+  --el-color-primary-light-9: #ebfeff;
+  --el-color-primary-dark-2: #1bc4ca;
+
+  /* Success 偏荧光青绿，保持语义但偏青系 */
+  --el-color-success: #34f7c8;
+  --el-color-success-light-3: #6af9d8;
+  --el-color-success-light-5: #9cfbe4;
+  --el-color-success-light-7: #cdfdf0;
+  --el-color-success-light-8: #e2fef6;
+  --el-color-success-light-9: #f1fffb;
+  --el-color-success-dark-2: #26cfa1;
+
+  /* Warning / Danger 保持橙红语义不动，保持信息对比度 */
+  --el-color-warning: #ffc048;
+  --el-color-warning-light-3: #ffd077;
+  --el-color-warning-light-5: #ffe0a6;
+  --el-color-warning-light-7: #ffefd0;
+  --el-color-warning-light-8: #fff6e3;
+  --el-color-warning-light-9: #fffbf1;
+  --el-color-warning-dark-2: #d19a35;
+
+  --el-color-danger:  #ff5d7d;
+  --el-color-danger-light-3: #ff879d;
+  --el-color-danger-light-5: #ffb1c0;
+  --el-color-danger-light-7: #ffdbe2;
+  --el-color-danger-light-8: #ffe9ee;
+  --el-color-danger-light-9: #fff4f6;
+  --el-color-danger-dark-2:  #d14762;
+
+  --el-color-info: #6eb7c0;
+  --el-color-info-light-3: #94cad1;
+  --el-color-info-light-5: #bacdd1;
+  --el-color-info-light-7: #e0e9ea;
+  --el-color-info-light-8: #edf2f3;
+  --el-color-info-light-9: #f6f8f9;
+  --el-color-info-dark-2: #5a969d;
+
+  /* Element Plus 文本 / 背景 / 边框 统一青系 */
+  --el-text-color-primary: #e5ffff;
+  --el-text-color-regular: #c5eef0;
+  --el-text-color-secondary: #9cc4c8;
+  --el-text-color-placeholder: #6e9196;
+  --el-bg-color: #061a1f;
+  --el-bg-color-page: #041418;
+  --el-bg-color-overlay: #0a282e;
+  --el-border-color: rgba(34, 247, 255, 0.22);
+  --el-border-color-light: rgba(34, 247, 255, 0.30);
+  --el-border-color-lighter: rgba(34, 247, 255, 0.38);
+  --el-border-color-extra-light: rgba(34, 247, 255, 0.46);
+  --el-fill-color: rgba(34, 247, 255, 0.08);
+  --el-fill-color-light: rgba(34, 247, 255, 0.12);
+  --el-fill-color-lighter: rgba(34, 247, 255, 0.16);
+  --el-fill-color-extra-light: rgba(34, 247, 255, 0.20);
+  --el-fill-color-blank: rgba(3, 24, 30, 0.62);
+  --el-mask-color: rgba(3, 16, 20, 0.78);
+  --el-disabled-bg-color: #0a282e;
+  --el-disabled-text-color: #5a7f83;
+  --el-disabled-border-color: rgba(34, 247, 255, 0.14);
+  /* 文字阴影 + 发光，强化"荧光"感 */
+  --el-color-primary-text-shadow: 0 0 10px rgba(34, 247, 255, 0.55), 0 0 22px rgba(34, 247, 255, 0.28);
 }
 
 @property --sr-card-border-angle {
@@ -30,7 +103,7 @@
 html {
   min-width: 0;
   min-height: 100vh;
-  background: linear-gradient(180deg, #020608 0%, #030c14 50%, #010608 100%);
+  background: linear-gradient(180deg, #02090b 0%, #031318 50%, #010709 100%);
   background-attachment: fixed;
 }
 
@@ -38,7 +111,7 @@ body {
   margin: 0;
   min-width: 0;
   min-height: 100vh;
-  background: linear-gradient(180deg, #020608 0%, #030c14 50%, #010608 100%);
+  background: linear-gradient(180deg, #02090b 0%, #031318 50%, #010709 100%);
   background-attachment: fixed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -50,10 +123,10 @@ body::before {
   z-index: -3;
   inset: 0;
   content: "";
-  opacity: 0.06;
+  opacity: 0.08;
   background:
-    linear-gradient(rgba(20, 60, 80, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(20, 60, 80, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(22, 150, 170, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 150, 170, 0.06) 1px, transparent 1px);
   background-size: 50px 50px;
 }
 
@@ -111,10 +184,10 @@ body::after {
 }
 
 .app-aside {
-  border-color: rgba(56, 189, 248, 0.28);
+  border-color: rgba(34, 247, 255, 0.28);
   background:
-    radial-gradient(circle at 15% 8%, rgba(56, 189, 248, 0.18), transparent 28%),
-    linear-gradient(180deg, #042038, #031a30 52%, #020f24);
+    radial-gradient(circle at 15% 8%, rgba(34, 247, 255, 0.18), transparent 28%),
+    linear-gradient(180deg, #032228, #041d23 52%, #021216);
 }
 
 .brand-name,
@@ -126,7 +199,7 @@ body::after {
 .section-title h4,
 .candidate-title-row h3,
 .detail-grid b {
-  color: #e8f2ff;
+  color: #ecffff;
 }
 
 .header-desc,
@@ -136,7 +209,7 @@ body::after {
 .metric-label,
 .section-title span,
 .detail-grid article > span {
-  color: #9db3cf;
+  color: #86b0b5;
 }
 
 .el-table,
@@ -144,36 +217,36 @@ body::after {
 .el-table th.el-table__cell,
 .el-table tr,
 .el-table td.el-table__cell {
-  background-color: rgba(10, 24, 52, 0.78);
-  color: #d8e8ff;
+  background-color: rgba(6, 30, 36, 0.78);
+  color: #d2f2f5;
 }
 
 .el-input__wrapper,
 .el-select__wrapper,
 .el-textarea__inner {
-  border-color: rgba(91, 145, 220, 0.36);
-  background-color: rgba(10, 24, 52, 0.7);
+  border-color: rgba(34, 247, 255, 0.36);
+  background-color: rgba(6, 30, 36, 0.7);
   box-shadow: none;
 }
 
 .el-input__inner,
 .el-select__placeholder,
 .el-textarea__inner {
-  color: #d8e8ff;
+  color: #d2f2f5;
 }
 
 /* ========== PersonalCenter / 个人中心页面深色覆盖 ========== */
 .profile-page::before {
   background:
-    radial-gradient(circle at 82% 6%, rgba(55, 139, 255, 0.18), transparent 28%),
-    radial-gradient(circle at 18% 24%, rgba(0, 207, 245, 0.12), transparent 26%),
-    linear-gradient(180deg, #07182e 0%, #08172c 100%);
+    radial-gradient(circle at 82% 6%, rgba(34, 247, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 18% 24%, rgba(0, 243, 254, 0.12), transparent 26%),
+    linear-gradient(180deg, #062028 0%, #041418 100%);
 }
 
 .profile-page::after {
   background-image:
-    repeating-linear-gradient(0deg, rgba(95, 217, 255, 0.06) 0 1px, transparent 1px 36px),
-    repeating-linear-gradient(90deg, rgba(95, 217, 255, 0.06) 0 1px, transparent 1px 36px);
+    repeating-linear-gradient(0deg, rgba(34, 247, 255, 0.06) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(90deg, rgba(34, 247, 255, 0.06) 0 1px, transparent 1px 36px);
 }
 
 .profile-page .profile-glass-card,
@@ -182,46 +255,46 @@ body::after {
 .profile-page .profile-flow-card,
 .profile-page .profile-flow-summary,
 .profile-page .profile-status-card {
-  border-color: rgba(91, 145, 220, 0.36) !important;
+  border-color: rgba(34, 247, 255, 0.36) !important;
   background:
-    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.08), transparent 30%),
-    linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
-    rgba(12, 28, 58, 0.72) !important;
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28) !important;
+    radial-gradient(circle at 10% 0%, rgba(0, 243, 254, 0.08), transparent 30%),
+    linear-gradient(145deg, rgba(10, 56, 66, 0.82), rgba(4, 26, 32, 0.74)),
+    rgba(6, 36, 42, 0.72) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.32) !important;
 }
 
 .profile-page .profile-chip,
 .profile-page .certificate-chip {
-  border-color: rgba(91, 145, 220, 0.34) !important;
-  background: rgba(18, 38, 78, 0.72) !important;
-  color: #c9dcff !important;
+  border-color: rgba(34, 247, 255, 0.34) !important;
+  background: rgba(10, 56, 66, 0.72) !important;
+  color: #bff0f4 !important;
 }
 
 .profile-page .more-chip {
-  color: #59a6ff !important;
+  color: #34f0ff !important;
 }
 
 .profile-page .profile-secondary-btn {
-  border-color: rgba(91, 145, 220, 0.34) !important;
-  background: rgba(18, 38, 78, 0.62) !important;
-  color: #59a6ff !important;
+  border-color: rgba(34, 247, 255, 0.34) !important;
+  background: rgba(10, 56, 66, 0.62) !important;
+  color: #34f0ff !important;
 }
 
 .profile-page .section-head h3,
 .profile-page .experience-head h3,
 .profile-page .profile-status-card b,
 .profile-page .experience-item p {
-  color: #e8f2ff !important;
+  color: #ecffff !important;
 }
 
 .profile-page .profile-flow-card b,
 .profile-page .profile-flow-card strong,
 .profile-page .profile-status-card strong {
-  color: #d8e8ff !important;
+  color: #d2f2f5 !important;
 }
 
 .profile-page .profile-flow-summary h3 {
-  color: #e8f2ff;
+  color: #ecffff;
 }
 
 .profile-page .profile-flow-summary p,
@@ -230,27 +303,27 @@ body::after {
 .profile-page .salary-range span,
 .profile-page .salary-range em,
 .profile-page .select-meta {
-  color: #9db3cf !important;
+  color: #86b0b5 !important;
 }
 
 .profile-page :deep(.experience-item),
 .profile-page .experience-item {
-  border-color: rgba(91, 145, 220, 0.3) !important;
-  background: rgba(16, 34, 64, 0.72) !important;
+  border-color: rgba(34, 247, 255, 0.3) !important;
+  background: rgba(8, 46, 54, 0.72) !important;
   box-shadow: none !important;
 }
 
 .profile-page :deep(.experience-empty),
 .profile-page .experience-empty {
-  border-color: rgba(91, 145, 220, 0.28) !important;
+  border-color: rgba(34, 247, 255, 0.28) !important;
   background:
-    radial-gradient(circle at 50% 0%, rgba(0, 200, 245, 0.08), transparent 42%),
-    rgba(12, 28, 58, 0.52) !important;
+    radial-gradient(circle at 50% 0%, rgba(0, 243, 254, 0.08), transparent 42%),
+    rgba(6, 36, 42, 0.52) !important;
 }
 
 .profile-page :deep(.experience-empty p),
 .profile-page .experience-empty p {
-  color: #9db3cf !important;
+  color: #86b0b5 !important;
 }
 
 .profile-page :deep(.experience-remove-btn),
@@ -261,46 +334,46 @@ body::after {
 }
 
 .profile-page :deep(.el-form-item__label) {
-  color: #9db3cf !important;
+  color: #86b0b5 !important;
 }
 
 .profile-page :deep(.el-input__wrapper),
 .profile-page :deep(.el-select__wrapper),
 .profile-page :deep(.el-cascader .el-input__wrapper),
 .profile-page :deep(.el-textarea__inner) {
-  border-color: rgba(91, 145, 220, 0.3) !important;
-  background: rgba(12, 28, 58, 0.62) !important;
+  border-color: rgba(34, 247, 255, 0.3) !important;
+  background: rgba(6, 36, 42, 0.62) !important;
 }
 
 .profile-page :deep(.el-input__wrapper.is-focus),
 .profile-page :deep(.el-select__wrapper.is-focused),
 .profile-page :deep(.el-textarea__inner:focus) {
-  background: rgba(16, 38, 72, 0.78) !important;
+  background: rgba(10, 56, 66, 0.78) !important;
 }
 
 .profile-page .experience-index {
-  background: linear-gradient(135deg, rgba(51, 214, 255, 0.22), rgba(89, 166, 255, 0.24)) !important;
-  color: #59a6ff !important;
+  background: linear-gradient(135deg, rgba(0, 243, 254, 0.22), rgba(34, 247, 255, 0.24)) !important;
+  color: #22f7ff !important;
 }
 
 .profile-page .completion-panel > span {
-  color: #9db3cf;
+  color: #86b0b5;
 }
 
 /* ========== DigitalInterviewer / 数字人面试官页面深色覆盖 ========== */
 .digital-page .surface {
-  border-color: rgba(91, 145, 220, 0.36) !important;
+  border-color: rgba(34, 247, 255, 0.36) !important;
   background:
-    linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
-    rgba(12, 28, 58, 0.72) !important;
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28) !important;
+    linear-gradient(145deg, rgba(10, 56, 66, 0.82), rgba(4, 26, 32, 0.74)),
+    rgba(6, 36, 42, 0.72) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.32) !important;
 }
 
 .digital-page .section-title h3,
 .digital-page .conversation-title h3,
 .digital-page .start-card h2,
 .digital-page .report-hero > div:last-child > b {
-  color: #e8f2ff !important;
+  color: #ecffff !important;
 }
 
 .digital-page .section-title span,
@@ -321,78 +394,78 @@ body::after {
 .digital-page .start-card label,
 .digital-page .resume-upload-copy span,
 .digital-page .recent-resume-row {
-  color: #9db3cf !important;
+  color: #86b0b5 !important;
 }
 
 .digital-page .history-item:hover {
-  background: rgba(16, 34, 64, 0.78) !important;
+  background: rgba(8, 46, 54, 0.78) !important;
 }
 
 .digital-page .history-item.active {
-  border-color: rgba(0, 200, 245, 0.32) !important;
-  background: rgba(16, 68, 126, 0.42) !important;
-  box-shadow: inset 3px 0 #33d6ff !important;
+  border-color: rgba(0, 243, 254, 0.32) !important;
+  background: rgba(8, 86, 100, 0.42) !important;
+  box-shadow: inset 3px 0 #22f7ff !important;
 }
 
 .digital-page .history-item strong,
 .digital-page .resume-upload-copy strong {
-  color: #d8e8ff !important;
+  color: #d2f2f5 !important;
 }
 
 .digital-page .resume-upload-card {
-  border-color: rgba(91, 145, 220, 0.38) !important;
-  background: rgba(16, 34, 64, 0.72) !important;
+  border-color: rgba(34, 247, 255, 0.38) !important;
+  background: rgba(8, 46, 54, 0.72) !important;
 }
 
 .digital-page .resume-upload-card:hover {
-  background: rgba(22, 48, 86, 0.78) !important;
+  background: rgba(14, 76, 90, 0.78) !important;
 }
 
 .digital-page .parsed-resume-status {
-  background: rgba(16, 52, 60, 0.7) !important;
+  background: rgba(8, 60, 66, 0.7) !important;
 }
 
 .digital-page .parsed-resume-status span {
-  color: #59e0c0 !important;
+  color: #34f0ff !important;
 }
 
 .digital-page .conversation-title span {
-  background: rgba(16, 68, 126, 0.56) !important;
-  color: #59a6ff !important;
+  background: rgba(8, 86, 100, 0.56) !important;
+  color: #34f0ff !important;
 }
 
 .digital-page .composer {
-  border-top-color: rgba(91, 145, 220, 0.3) !important;
-  background: rgba(12, 28, 58, 0.62) !important;
+  border-top-color: rgba(34, 247, 255, 0.3) !important;
+  background: rgba(6, 36, 42, 0.62) !important;
 }
 
 .digital-page .avatar-stage {
-  background: linear-gradient(180deg, #08172c, #0b2246) !important;
+  background: linear-gradient(180deg, #041418, #0a2e36) !important;
 }
 
 .digital-page .interviewer-bubble {
-  border-color: rgba(91, 145, 220, 0.3) !important;
-  background: rgba(16, 34, 64, 0.8) !important;
-  color: #d8e8ff !important;
+  border-color: rgba(34, 247, 255, 0.3) !important;
+  background: rgba(8, 46, 54, 0.8) !important;
+  color: #d2f2f5 !important;
 }
 
 .digital-page .chat-bubble {
-  color: #d8e8ff !important;
+  color: #d2f2f5 !important;
 }
 
 .digital-page .candidate-mark {
-  background: rgba(51, 214, 255, 0.14) !important;
-  color: #59a6ff !important;
+  background: rgba(0, 243, 254, 0.14) !important;
+  color: #34f0ff !important;
 }
 
 .digital-page .report-hero,
 .digital-page .final-score-mini {
   background:
-    linear-gradient(135deg, rgba(16, 68, 126, 0.56), rgba(12, 46, 72, 0.54)) !important;
+    linear-gradient(135deg, rgba(8, 86, 100, 0.56), rgba(10, 56, 66, 0.54)) !important;
 }
 
 .digital-page .report-columns section {
-  background: rgba(12, 46, 72, 0.62) !important;
+  background: rgba(10, 56, 66, 0.62) !important;
 }
 
 .digital-page .report-columns .improvement-section {
@@ -412,73 +485,73 @@ body::after {
 .digital-page .report-score strong,
 .digital-page .report-dimensions strong,
 .digital-page .score-list b {
-  color: #59a6ff !important;
+  color: #22f7ff !important;
 }
 
 .digital-page .final-score-mini span,
 .digital-page .report-score span {
-  color: #9eeaff !important;
+  color: #8ef9ff !important;
 }
 
 .digital-page .report-trend {
-  border-top-color: rgba(91, 145, 220, 0.3) !important;
+  border-top-color: rgba(34, 247, 255, 0.3) !important;
 }
 
 .digital-page .connection-badge {
-  background: rgba(12, 46, 72, 0.82) !important;
-  color: #59e0c0 !important;
+  background: rgba(10, 56, 66, 0.82) !important;
+  color: #34f0ff !important;
 }
 
 .digital-page .start-kicker {
-  color: #59a6ff !important;
+  color: #22f7ff !important;
 }
 
 .digital-page .turn-feedback {
-  border-left-color: #4ae0b0 !important;
+  border-left-color: #34f0ff !important;
 }
 
 .digital-page .turn-feedback span {
-  color: #59e0c0 !important;
+  color: #34f0ff !important;
 }
 
 .digital-page .turn-feedback p {
-  color: #9db3cf !important;
+  color: #86b0b5 !important;
 }
 
 /* ========== SkillGraph / 能力图谱页面深色覆盖（补充） ========== */
 .skill-graph-page .graph-overview__item {
-  border-color: rgba(91, 145, 220, 0.36) !important;
+  border-color: rgba(34, 247, 255, 0.36) !important;
   background:
-    linear-gradient(145deg, rgba(18, 38, 78, 0.82), rgba(8, 22, 48, 0.74)),
-    rgba(12, 28, 58, 0.72) !important;
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28) !important;
+    linear-gradient(145deg, rgba(10, 56, 66, 0.82), rgba(4, 26, 32, 0.74)),
+    rgba(6, 36, 42, 0.72) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.32) !important;
 }
 
 .skill-graph-page .graph-message {
-  background: rgba(12, 28, 58, 0.72) !important;
+  background: rgba(6, 36, 42, 0.72) !important;
 }
 
 .skill-graph-page .detail-block p {
-  color: #d8e8ff !important;
+  color: #d2f2f5 !important;
 }
 
 .skill-graph-page .path-node {
-  border-color: rgba(91, 145, 220, 0.3) !important;
-  background: rgba(16, 34, 64, 0.76) !important;
-  color: #c9dcff !important;
+  border-color: rgba(34, 247, 255, 0.3) !important;
+  background: rgba(8, 46, 54, 0.76) !important;
+  color: #bff0f4 !important;
 }
 
 .skill-graph-page .path-node.skill,
 .skill-graph-page .path-node.Skill {
-  border-color: rgba(0, 200, 245, 0.34) !important;
-  background: rgba(12, 52, 68, 0.72) !important;
-  color: #9eeaff !important;
+  border-color: rgba(0, 243, 254, 0.34) !important;
+  background: rgba(12, 78, 86, 0.72) !important;
+  color: #8ef9ff !important;
 }
 
 .skill-graph-page .graph-legend__item {
-  border-color: rgba(91, 145, 220, 0.32) !important;
-  background: rgba(16, 34, 64, 0.72) !important;
-  color: #9db3cf !important;
+  border-color: rgba(34, 247, 255, 0.32) !important;
+  background: rgba(8, 46, 54, 0.72) !important;
+  color: #86b0b5 !important;
 }
 
 @keyframes sheen {
