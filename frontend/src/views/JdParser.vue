@@ -51,7 +51,9 @@
         <el-table-column label="置信度" width="90">
           <template #default="{ row }">{{ Math.round(Number(row.confidence || 0) * 100) }}%</template>
         </el-table-column>
-        <el-table-column label="操作" width="90"><template #default><el-button link type="primary">查看</el-button></template></el-table-column>
+        <el-table-column label="操作" width="90">
+          <template #default="{ row }"><el-button link type="primary" @click.stop="restoreHistory(row)">查看</el-button></template>
+        </el-table-column>
       </el-table>
     </section>
   </div>

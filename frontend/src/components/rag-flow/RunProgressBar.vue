@@ -102,7 +102,7 @@ function stepClass(stage: string, index: number): Record<string, boolean> {
   border-radius: 4px;
 }
 .state.running { color: #93c5fd; background: rgba(96, 165, 250, 0.15); }
-.state.done { color: #34d399; background: rgba(52, 211, 153, 0.15); }
+.state.done { color: #46c8ff; background: rgba(70, 200, 255, 0.15); }
 .state.idle { color: #64748b; background: rgba(30, 41, 59, 0.6); }
 
 .percent {
@@ -179,11 +179,11 @@ function stepClass(stage: string, index: number): Record<string, boolean> {
 /* 状态着色 */
 .step.s-done .step-dot {
   color: #0b1220;
-  background: #34d399;
-  border-color: #34d399;
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.5);
+  background: #46c8ff;
+  border-color: #46c8ff;
+  box-shadow: 0 0 10px rgba(70, 200, 255, 0.5);
 }
-.step.s-done .step-label { color: #34d399; }
+.step.s-done .step-label { color: #46c8ff; }
 
 .step.s-warn .step-dot {
   color: #0b1220;

@@ -3,11 +3,19 @@
     <PageHeader title="新岗位发现" desc="基于技能增长、多源一致性、技能组合新颖度、标题稳定性和场景扩散度计算新岗位指数">
       <div class="toolbar">
         <el-tag v-if="lastUpdated" effect="plain">上次更新 {{ formatTime(lastUpdated) }}</el-tag>
+        <el-button :icon="Connection" :loading="validating" @click="runCrossValidation">交叉验证</el-button>
         <el-button type="primary" :loading="loading" @click="generate(true)">
           {{ rows.length ? '更新分析' : '生成分析' }}
         </el-button>
       </div>
     </PageHeader>
+    <section v-if="validationReport?.generated_at" class="validation-strip" aria-label="数据源交叉验证结果">
+      <div><span>抄袭识别召回率</span><strong>{{ formatPercent(validationReport.summary?.plagiarism_recall) }}</strong><small>扰动基准 {{ validationReport.summary?.recall_sample_size || 0 }} 条</small></div>
+      <div><span>近似抄袭 JD</span><strong>{{ validationReport.summary?.plagiarism_count || 0 }}</strong><small>跨源与同源近似文本</small></div>
+      <div><span>过滤噪声 JD</span><strong>{{ validationReport.summary?.noise_count || 0 }}</strong><small>共核验 {{ validationReport.summary?.jd_count || 0 }} 条</small></div>
+      <div><span>时间衰减半衰期</span><strong>{{ validationReport.algorithm?.time_decay_half_life_days || '—' }}</strong><small>天 · 指数衰减</small></div>
+      <p>评分模型：来源可追溯性 27% · 有效率 25% · 独创率 20% · 时效性 18% · 数据覆盖 10%</p>
+    </section>
     <div class="dashboard-grid">
       <!-- ===== 左栏：数据源列表 ===== -->
       <div class="col col-left">
@@ -36,15 +44,17 @@
               <div v-if="data.isSource" class="source-tree-item">
                 <div class="source-top">
                   <span class="source-name">{{ data.name }}</span>
-                  <el-tag :type="data.status === 'active' ? 'success' : 'warning'" size="small" effect="dark">
-                    {{ data.status === 'active' ? '活跃' : '待更新' }}
+                  <el-tag :type="trustTagType(data.trustScore)" size="small" effect="dark">
+                    {{ data.trustScore != null ? `${Math.round(data.trustScore)} 分` : '待验证' }}
                   </el-tag>
                 </div>
                 <div class="source-meta">
                   <span class="source-updated">{{ data.updated }}</span>
                 </div>
                 <div class="source-bottom">
-                  <span class="source-count">覆盖 {{ data.jobCount }} 个新岗位</span>
+                  <span class="source-count">权重 {{ formatPercent(data.weight) }}</span>
+                  <span>噪声 {{ formatPercent(data.noiseRate) }}</span>
+                  <span>时效 {{ formatPercent(data.timeDecayWeight) }}</span>
                 </div>
               </div>
               <span v-else class="source-group-label">{{ data.label }}</span>
@@ -189,6 +199,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Connection } from '@element-plus/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { api } from '@/api/http'
 import { loadPageState, savePageState } from '@/utils/pageState'
@@ -199,119 +210,6 @@ type EmergingJobsState = {
   lastUpdated?: string
 }
 
-/* Legacy fixed preview records intentionally disabled. The dashboard now loads both
-   source metadata and emerging jobs from authenticated backend APIs.
-const MOCK_SOURCES = [
-  { id: 'mohrss', name: '人社部新职业目录', type: '政府公告', status: 'active', updated: '2025-06', jobCount: 3 },
-  { id: 'zhaopin', name: '主流招聘平台', type: '招聘数据', status: 'active', updated: '2025-06', jobCount: 5 },
-  { id: 'industry', name: '行业研究报告', type: '行业分析', status: 'active', updated: '2025-05', jobCount: 5 },
-  { id: 'tech', name: '技术社区', type: '社区数据', status: 'active', updated: '2025-06', jobCount: 4 },
-  { id: 'enterprise', name: '企业调研反馈', type: '调研数据', status: 'pending', updated: '2025-04', jobCount: 2 },
-]
-
-const MOCK_JOBS = [
-  {
-    job_name: 'AI 提示工程师',
-    emerging_index: 0.92,
-    related_skills: ['Prompt Engineering', '大模型微调', 'RAG', '思维链设计', '多模态对齐'],
-    definition: 'AI 提示工程师是专注于设计和优化大语言模型提示词（Prompt）以引导模型产出高质量结果的岗位，横跨 NLP、产品设计和领域知识三个维度。',
-    responsibilities: ['设计并迭代 Prompt 模板库', '评估不同 Prompt 策略在业务场景中的表现', '构建 RAG 检索增强链路', '与产品团队协作定义 AI 产品行为边界'],
-    required_skills: ['Prompt Engineering', '大模型微调', 'RAG', 'Python', 'NLP 基础'],
-    scenarios: ['智能客服', '内容生成', '知识管理', '代码辅助', '数据分析'],
-    review_status: 'approved',
-    evidence: [
-      { source: '人社部新职业目录', quote: '提示工程作为 AI 时代核心技能被多部委文件提及' },
-      { source: '招聘平台 JD', quote: '2024-2025 年 Prompt Engineer 岗位增长 340%' },
-    ],
-    dimensions: { skill_growth: 0.95, source_consistency: 0.88, combo_novelty: 0.93, title_stability: 0.72, scenario_diffusion: 0.85 },
-    source_coverage: ['mohrss', 'zhaopin', 'industry', 'tech', 'enterprise'],
-    source_url: 'https://www.mohrss.gov.cn',
-    source_key: 'mohrss_2025',
-    publication_status: 'published',
-    requirements: { recommended_certificates: [{ id: '1', name: '大模型应用开发认证' }, { id: '2', name: 'AWS AI Practitioner' }] },
-  },
-  {
-    job_name: '数字孪生工程技术人员',
-    emerging_index: 0.87,
-    related_skills: ['数字孪生', '三维建模', '仿真分析', '物联网', '数据治理'],
-    definition: '数字孪生工程技术人员负责构建物理世界的虚拟映射模型，通过实时数据驱动仿真分析，支持智能制造、智慧城市等场景的决策优化。',
-    responsibilities: ['搭建数字孪生平台架构', '三维模型建模与轻量化处理', '实时数据接入与融合', '仿真分析与可视化呈现'],
-    required_skills: ['数字孪生', '三维建模', '仿真分析', '物联网', 'Unity/Unreal'],
-    scenarios: ['智能制造', '智慧城市', '能源管理', '交通仿真', '建筑运维'],
-    review_status: 'approved',
-    evidence: [
-      { source: '工信部智能制造规划', quote: '数字孪生被列为智能制造关键技术之一' },
-      { source: '行业报告', quote: '2025 年数字孪生市场规模预计突破 500 亿元' },
-    ],
-    dimensions: { skill_growth: 0.91, source_consistency: 0.85, combo_novelty: 0.82, title_stability: 0.78, scenario_diffusion: 0.90 },
-    source_coverage: ['mohrss', 'zhaopin', 'industry', 'tech'],
-    source_url: 'https://www.miit.gov.cn',
-    source_key: 'miit_2025',
-    publication_status: 'published',
-    requirements: { recommended_certificates: [{ id: '3', name: '数字孪生工程师认证' }, { id: '4', name: 'BIM 高级工程师' }] },
-  },
-  {
-    job_name: '具身智能机器人应用技术员',
-    emerging_index: 0.84,
-    related_skills: ['机器人', '具身智能', '计算机视觉', '模型部署', 'ROS'],
-    definition: '具身智能机器人应用技术员负责将 AI 感知、决策与控制能力集成到物理机器人中，实现机器人在真实环境中的自主操作与交互。',
-    responsibilities: ['机器人感知系统集成与调试', '具身智能模型部署与优化', '现场测试与故障排查', '编写操作手册与培训材料'],
-    required_skills: ['机器人', 'ROS', '计算机视觉', 'Python', '嵌入式系统'],
-    scenarios: ['工业制造', '仓储物流', '医疗辅助', '家庭服务', '农业自动化'],
-    review_status: 'pending',
-    evidence: [
-      { source: '科技部重点研发计划', quote: '具身智能被列为新一代人工智能重点方向' },
-      { source: '招聘平台 JD', quote: '机器人应用工程师需求同比增长 180%' },
-    ],
-    dimensions: { skill_growth: 0.88, source_consistency: 0.80, combo_novelty: 0.86, title_stability: 0.65, scenario_diffusion: 0.78 },
-    source_coverage: ['zhaopin', 'industry', 'tech'],
-    source_url: 'https://www.most.gov.cn',
-    source_key: 'most_2025',
-    publication_status: 'draft',
-    requirements: { recommended_certificates: [] },
-  },
-  {
-    job_name: '智能体开发员',
-    emerging_index: 0.81,
-    related_skills: ['智能体编排', '大模型', 'RAG', 'Prompt Engineering', 'API 集成'],
-    definition: '智能体开发员专注于基于大语言模型构建自主 AI Agent，通过编排工具调用、记忆管理和多步推理，实现复杂任务的自动化执行。',
-    responsibilities: ['设计 Agent 架构与工具链', '实现多步推理与任务规划', '集成外部 API 与知识库', '监控 Agent 运行质量与安全'],
-    required_skills: ['智能体编排', '大模型', 'Python', 'API 集成', 'LangChain/AutoGPT'],
-    scenarios: ['自动化办公', '智能运维', '代码生成', '数据分析', '客户服务'],
-    review_status: 'pending',
-    evidence: [
-      { source: 'Gartner 技术趋势', quote: 'Agentic AI 被评为 2025 年十大战略技术趋势之首' },
-      { source: '技术社区', quote: 'GitHub 上 Agent 相关项目 Star 数半年增长 500%' },
-    ],
-    dimensions: { skill_growth: 0.85, source_consistency: 0.76, combo_novelty: 0.90, title_stability: 0.55, scenario_diffusion: 0.72 },
-    source_coverage: ['zhaopin', 'industry', 'tech'],
-    source_url: 'https://www.gartner.com',
-    source_key: 'gartner_2025',
-    publication_status: 'draft',
-    requirements: { recommended_certificates: [{ id: '5', name: 'LangChain 开发者认证' }] },
-  },
-  {
-    job_name: '运动数据分析师',
-    emerging_index: 0.76,
-    related_skills: ['统计分析', 'Python', '数据可视化', '时序数据', '运动科学'],
-    definition: '运动数据分析师利用传感器数据和统计模型，为运动员训练、比赛策略和伤病预防提供数据驱动的决策支持。',
-    responsibilities: ['采集和清洗运动传感器数据', '构建运动表现评估模型', '生成赛后分析报告', '与教练团队协作制定训练方案'],
-    required_skills: ['统计分析', 'Python', '数据可视化', '时序数据', '运动科学基础'],
-    scenarios: ['职业体育', '健身科技', '运动康复', '体育教育', '电竞分析'],
-    review_status: 'pending',
-    evidence: [
-      { source: '体育总局政策文件', quote: '体育数字化转型推动运动数据分析人才需求增长' },
-      { source: '招聘平台', quote: '运动科技公司数据分析师岗位同比增长 120%' },
-    ],
-    dimensions: { skill_growth: 0.78, source_consistency: 0.82, combo_novelty: 0.70, title_stability: 0.80, scenario_diffusion: 0.74 },
-    source_coverage: ['zhaopin', 'industry', 'tech'],
-    source_url: 'https://www.sport.gov.cn',
-    source_key: 'sport_2025',
-    publication_status: 'published',
-    requirements: { recommended_certificates: [] },
-  },
-]
-*/
 
 // ===== 默认排序：新兴岗位（大模型/智能体等）置顶，传统岗位（Java/前端等）后置 =====
 const EMERGING_KEYWORDS = [
@@ -346,7 +244,9 @@ const rows = ref<any[]>([])
 const router = useRouter()
 const current = ref<any>()
 const loading = ref(false)
+const validating = ref(false)
 const lastUpdated = ref<string>()
+const validationReport = ref<any>()
 const sources = ref<any[]>([])
 const sourceFilter = ref('')
 const sourceTreeRef = ref<any>()
@@ -395,6 +295,7 @@ function applyMarketSources(snapshot: any) {
   sources.value = sourceRows.map((source: any) => {
     const id = String(source.source_key || source.id || '')
     const updatedAt = source.last_synced_at || source.published_at || source.uploaded_at
+    const validation = source.metadata?.source_validation || {}
     return {
       id,
       name: source.source_name || source.publisher || id,
@@ -402,8 +303,88 @@ function applyMarketSources(snapshot: any) {
       status: source.status === 'archived' ? 'pending' : 'active',
       updated: updatedAt ? formatTime(updatedAt) : '—',
       jobCount: rows.value.filter((job) => job.source_key === id || job.source_coverage?.includes(id)).length,
+      trustScore: validation.trust_score,
+      weight: validation.weight,
+      noiseRate: validation.noise_rate,
+      plagiarismRate: validation.plagiarism_rate,
+      timeDecayWeight: validation.time_decay_weight,
     }
   })
+}
+
+function applyValidation(report: any) {
+  validationReport.value = report
+  const byKey = new Map<string, any>((report?.sources || []).map((source: any) => [String(source.source_key || source.id), source]))
+  const merged = sources.value.map((source) => {
+    const validation: any = byKey.get(String(source.id))
+    byKey.delete(String(source.id))
+    return validation ? {
+      ...source,
+      trustScore: validation.trust_score,
+      weight: validation.weight,
+      noiseRate: validation.noise_rate,
+      plagiarismRate: validation.plagiarism_rate,
+      timeDecayWeight: validation.time_decay_weight,
+    } : source
+  })
+  for (const [id, validation] of byKey) {
+    merged.push({
+      id,
+      name: validation.source_name || id,
+      type: '招聘 JD 数据源',
+      status: 'active',
+      updated: validation.validated_at ? formatTime(validation.validated_at) : '—',
+      jobCount: validation.valid_jd_count || 0,
+      trustScore: validation.trust_score,
+      weight: validation.weight,
+      noiseRate: validation.noise_rate,
+      plagiarismRate: validation.plagiarism_rate,
+      timeDecayWeight: validation.time_decay_weight,
+    })
+  }
+  sources.value = merged
+}
+
+function formatPercent(value: unknown) {
+  const number = Number(value)
+  return Number.isFinite(number) ? `${(number * 100).toFixed(1)}%` : '—'
+}
+
+function trustTagType(score: unknown) {
+  const value = Number(score)
+  if (!Number.isFinite(value)) return 'info'
+  if (value >= 80) return 'success'
+  if (value >= 60) return 'warning'
+  return 'danger'
+}
+
+async function loadValidation() {
+  try {
+    applyValidation(await api.sourceValidation())
+  } catch {
+    validationReport.value = undefined
+  }
+}
+
+async function loadSourceContext() {
+  try {
+    applyMarketSources(await api.marketSnapshot())
+  } catch {
+    sources.value = []
+  }
+  await loadValidation()
+}
+
+async function runCrossValidation() {
+  validating.value = true
+  try {
+    applyValidation(await api.runSourceValidation())
+    ElMessage.success('数据源交叉验证完成')
+  } catch (error: any) {
+    ElMessage.error(error?.response?.data?.detail || '数据源交叉验证失败')
+  } finally {
+    validating.value = false
+  }
 }
 
 function indexColor(val: number) {
@@ -435,21 +416,16 @@ function startMatch() {
 
 async function generate(notify = false) {
   loading.value = true
+  await loadSourceContext()
   try {
     rows.value = sortJobsByDefault(await api.emergingJobs())
     current.value = rows.value[0]
-    try {
-      applyMarketSources(await api.marketSnapshot())
-    } catch {
-      sources.value = []
-    }
     lastUpdated.value = new Date().toISOString()
     persistState()
     if (notify) ElMessage.success('新岗位分析已更新')
   } catch (error: any) {
     rows.value = []
     current.value = undefined
-    sources.value = []
     ElMessage.error(error?.response?.data?.detail || '新岗位分析生成失败')
   } finally {
     loading.value = false
@@ -469,25 +445,51 @@ onMounted(async () => {
     rows.value = sortJobsByDefault(cached.rows)
     lastUpdated.value = cached.lastUpdated
     current.value = rows.value.find((item) => item.job_name === cached.currentJobName) || rows.value[0]
-    try {
-      applyMarketSources(await api.marketSnapshot())
-      return
-    } catch {
-      sources.value = []
-    }
+    await loadSourceContext()
+    return
   }
   await generate()
 })
 </script>
 
 <style scoped>
+.validation-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin-bottom: 12px;
+  border-block: 1px solid rgba(78, 200, 255, 0.16);
+  background: rgba(5, 27, 57, 0.52);
+}
+
+.validation-strip > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  padding: 9px 14px;
+  border-right: 1px solid rgba(78, 200, 255, 0.12);
+}
+
+.validation-strip > div:last-of-type { border-right: 0; }
+.validation-strip span { color: #91acc4; font-size: 11px; }
+.validation-strip strong { grid-row: span 2; color: #7dd3fc; font-size: 20px; line-height: 1.4; }
+.validation-strip small { color: #5f7f99; font-size: 10px; }
+.validation-strip p {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 5px 14px;
+  border-top: 1px solid rgba(78, 200, 255, 0.1);
+  color: #6f91aa;
+  font-size: 10px;
+}
+
 /* ===== 三栏大屏布局 ===== */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 280px 1fr 280px;
   gap: 16px;
-  height: calc(100vh - 210px);
-  min-height: 600px;
+  height: calc(100vh - 295px);
+  min-height: 520px;
 }
 
 .col {
@@ -583,7 +585,11 @@ onMounted(async () => {
 }
 
 .source-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
   font-size: 11px;
+  color: #708ba1;
 }
 
 .source-count {
@@ -907,7 +913,7 @@ onMounted(async () => {
 }
 
 .ticker-dot.active {
-  background: #22c55e;
+  background: #46c8ff;
   box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
 }
 

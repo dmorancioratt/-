@@ -9,7 +9,6 @@
     >
       <div class="profile-cabin__veil" aria-hidden="true"></div>
       <div class="profile-cabin__grid" aria-hidden="true"></div>
-      <div class="profile-cabin__scan" aria-hidden="true"></div>
 
       <div class="profile-frame">
         <header class="profile-head">
@@ -273,6 +272,19 @@ const emit = defineEmits<{
   primary: [payload: { id: 'avatar'; route: string }]
   assist: []
 }>()
+const props = withDefaults(defineProps<{
+  profileData?: Record<string, any>
+  resumeCount?: number
+  matchCount?: number
+  interviewCount?: number
+  activityEvents?: Array<{ type: string; id: string | number; date: string; title: string; detail: string }>
+}>(), {
+  profileData: () => ({}),
+  resumeCount: 0,
+  matchCount: 0,
+  interviewCount: 0,
+  activityEvents: () => [],
+})
 
 const shell = ref<HTMLElement | null>(null)
 const toastText = ref('')
@@ -285,34 +297,26 @@ const ownerName = computed(() => {
   return user?.display_name || user?.username || ''
 })
 
-const profile = {
-  identityId: 'GID-2025-0828-7421',
-  completeness: 92,
-  evidenceTotal: 368,
-  sourceSystems: 12,
-  lastUpdated: '2025.08.28',
-}
+const profile = computed(() => {
+  const data = props.profileData || {}
+  const evidenceTotal = props.resumeCount + props.matchCount + props.interviewCount
+  return {
+    identityId: data.id ? `GID-${String(data.id).padStart(8, '0')}` : 'GID-PENDING',
+    completeness: Math.max(0, Math.min(100, Math.round(Number(data.completeness || 0)))),
+    evidenceTotal,
+    sourceSystems: [props.resumeCount, props.matchCount, props.interviewCount].filter(Boolean).length,
+    lastUpdated: props.activityEvents[0]?.date ? new Intl.DateTimeFormat('zh-CN').format(new Date(props.activityEvents[0].date)) : '暂无记录',
+  }
+})
 
-const ringStyle = computed(() => ({ '--ring-angle': `${profile.completeness * 3.6}deg` }))
+const ringStyle = computed(() => ({ '--ring-angle': `${profile.value.completeness * 3.6}deg` }))
 
-type TagTone = 'purple' | 'cyan' | 'green' | 'plain'
+type TagTone = 'cyan' | 'blue' | 'plain'
 type GrowthTag = { label: string; tone: TagTone }
-const tags = ref<GrowthTag[]>([
-  { label: '持续学习者', tone: 'purple' },
-  { label: 'AI探索者', tone: 'cyan' },
-  { label: '数据分析师', tone: 'green' },
-  { label: '项目驱动', tone: 'plain' },
-  { label: '团队协作者', tone: 'plain' },
-  { label: '问题解决者', tone: 'cyan' },
-  { label: '创新思维', tone: 'plain' },
-  { label: '高效执行', tone: 'green' },
-  { label: '领导潜质', tone: 'plain' },
-  { label: '沟通达人', tone: 'plain' },
-  { label: '用户思维', tone: 'cyan' },
-  { label: '战略思维', tone: 'plain' },
-  { label: '行业洞察', tone: 'plain' },
-  { label: '自我驱动', tone: 'purple' },
-])
+const tags = computed<GrowthTag[]>(() => (props.profileData.skills || []).map((item: any, index: number) => ({
+  label: typeof item === 'string' ? item : item?.name,
+  tone: (['cyan', 'blue', 'plain'] as TagTone[])[index % 3],
+})).filter((item: GrowthTag) => item.label))
 const tagSuggestions = ['产品思维', '全栈视野', '跨领域协作', '技术布道者']
 
 function addTag() {
@@ -321,13 +325,11 @@ function addTag() {
     showToast('AI 正在挖掘更多专属标签，稍后再来看看')
     return
   }
-  tags.value = [...tags.value, { label: next, tone: 'cyan' }]
-  showToast(`已添加标签「${next}」`)
+  showToast(`请在个人资料中添加标签「${next}」`)
 }
 
 function removeTag(label: string) {
-  tags.value = tags.value.filter(tag => tag.label !== label)
-  showToast(`已移除标签「${label}」`)
+  showToast(`请在个人资料中管理标签「${label}」`)
 }
 
 type EvidenceCard = {
@@ -343,32 +345,32 @@ type EvidenceCard = {
   items: string[]
 }
 
-const evidenceCards: EvidenceCard[] = [
+const evidenceCards = computed<EvidenceCard[]>(() => [
   {
-    key: 'course', title: '课程证书', en: 'COURSE CERTIFICATE', percent: 85, done: 136, total: 160,
+    key: 'course', title: '个人简历', en: 'RESUME RECORDS', percent: props.resumeCount ? 100 : 0, done: props.resumeCount, total: props.resumeCount,
     color: '#4ed8ff', rgb: '78, 216, 255',
     icon: '<circle cx="12" cy="9" r="5" /><path d="m9 13-2 8 5-3 5 3-2-8" />',
-    items: ['机器学习工程师认证 · 94 分', '深度学习专项课程 · 结业', 'Python 高级编程 · 优秀'],
+    items: props.resumeCount ? [`当前账号已保存 ${props.resumeCount} 份简历`] : ['当前账号尚未保存简历'],
   },
   {
-    key: 'project', title: '项目作品', en: 'PROJECT WORKS', percent: 90, done: 108, total: 120,
-    color: '#a78bfa', rgb: '167, 139, 250',
+    key: 'project', title: '岗位匹配', en: 'MATCH REPORTS', percent: props.matchCount ? 100 : 0, done: props.matchCount, total: props.matchCount,
+    color: '#258dff', rgb: '37, 141, 255',
     icon: '<path d="m12 3 9 5-9 5-9-5Z" /><path d="m5 12.5-2 1.5 9 5 9-5-2-1.5" /><path d="m5 17-2 1.5 9 5 9-5-2-1.5" />',
-    items: ['岗位技能知识图谱平台 · 主导', 'RAG 企业知识库问答 · 交付', '推荐系统离线仿真 · 协作'],
+    items: props.matchCount ? [`当前账号已生成 ${props.matchCount} 份匹配报告`] : ['当前账号尚未生成匹配报告'],
   },
   {
-    key: 'skill', title: '技能测评', en: 'SKILL ASSESSMENT', percent: 78, done: 78, total: 100,
+    key: 'skill', title: '画像技能', en: 'PROFILE SKILLS', percent: Math.min(100, (props.profileData.skills || []).length * 10), done: (props.profileData.skills || []).length, total: (props.profileData.skills || []).length,
     color: '#58e6ff', rgb: '88, 230, 255',
     icon: '<path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7Z" /><path d="M12 7.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />',
-    items: ['算法基础测评 · 前 12%', '大模型应用测评 · 82 分', '工程素养测评 · 持续上升'],
+    items: (props.profileData.skills || []).map((item: any) => typeof item === 'string' ? item : item?.name).filter(Boolean),
   },
   {
-    key: 'job', title: '岗位反馈', en: 'JOB FEEDBACK', percent: 82, done: 46, total: 56,
+    key: 'job', title: '面试记录', en: 'INTERVIEW RECORDS', percent: props.interviewCount ? 100 : 0, done: props.interviewCount, total: props.interviewCount,
     color: '#6d8dff', rgb: '109, 141, 255',
     icon: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4.5L6.8 17A8.5 8.5 0 1 1 21 11.5Z" /><path d="M9 10.5h6M9 14h4" />',
-    items: ['AI 算法岗模拟面试 · 78 分', 'NLP 工程岗一面 · 通过', '导师点评 · 项目表达清晰'],
+    items: props.interviewCount ? [`当前账号已有 ${props.interviewCount} 条面试记录`] : ['当前账号尚无面试记录'],
   },
-]
+])
 
 const expandedEvidence = ref<string | null>(null)
 
@@ -376,11 +378,11 @@ function toggleEvidence(key: string) {
   expandedEvidence.value = expandedEvidence.value === key ? null : key
 }
 
-const aiBasis = [
-  { label: '多源证据可信度', value: '98.7%' },
-  { label: '成长轨迹连续性', value: '95.3%' },
-  { label: '能力模型匹配度', value: '92.1%' },
-]
+const aiBasis = computed(() => [
+  { label: '已保存简历', value: String(props.resumeCount) },
+  { label: '岗位匹配报告', value: String(props.matchCount) },
+  { label: '面试记录', value: String(props.interviewCount) },
+])
 
 type TimelineNode = {
   key: string
@@ -392,7 +394,16 @@ type TimelineNode = {
   icon: string
 }
 
-const timelineNodes: TimelineNode[] = [
+const fallbackTimelineIcon = '<rect x="3" y="5" width="18" height="14" rx="2" /><path d="M7 9h6M7 13h4" />'
+const timelineNodes = computed<TimelineNode[]>(() => {
+  const nodes = props.activityEvents.slice(0, 5).reverse().map((event, index) => ({
+    key: `${event.type}-${event.id}`, title: event.title,
+    date: new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit' }).format(new Date(event.date)),
+    value: String(index + 1), unit: '记录', caption: event.detail, icon: fallbackTimelineIcon,
+  }))
+  return nodes.length ? nodes : [{ key: 'empty', title: '暂无成长记录', date: '等待同步', value: '0', unit: '记录', caption: '完成简历、岗位匹配或面试后将在这里形成真实轨迹', icon: fallbackTimelineIcon }]
+})
+/*
   {
     key: 'course', title: '课程学习', date: '2024.09', value: '136', unit: '证书',
     caption: '2024.09 起 136 张课程证书完成归档，奠定理论基础',
@@ -419,9 +430,10 @@ const timelineNodes: TimelineNode[] = [
     icon: '<rect x="3" y="5" width="18" height="14" rx="2" /><path d="M7 9h6M7 13h4" />',
   },
 ]
+*/
 
 const selectedTimelineIndex = ref(0)
-const selectedTimeline = computed(() => timelineNodes[selectedTimelineIndex.value])
+const selectedTimeline = computed(() => timelineNodes.value[selectedTimelineIndex.value] || timelineNodes.value[0])
 
 function selectTimeline(index: number) {
   selectedTimelineIndex.value = index
@@ -429,12 +441,12 @@ function selectTimeline(index: number) {
 
 function stepTimeline(direction: -1 | 1) {
   const next = selectedTimelineIndex.value + direction
-  if (next >= 0 && next < timelineNodes.length) selectedTimelineIndex.value = next
+  if (next >= 0 && next < timelineNodes.value.length) selectedTimelineIndex.value = next
 }
 
 async function copyIdentity() {
   try {
-    await navigator.clipboard.writeText(profile.identityId)
+    await navigator.clipboard.writeText(profile.value.identityId)
     showToast('数字身份 ID 已复制')
   } catch {
     showToast('复制失败，请手动选择复制')
@@ -477,12 +489,11 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .profile-cabin::-webkit-scrollbar-track { background: transparent; }
 
 .profile-cabin__veil,
-.profile-cabin__grid,
-.profile-cabin__scan { position: absolute; inset: 0; pointer-events: none; }
+.profile-cabin__grid { position: absolute; inset: 0; pointer-events: none; }
 .profile-cabin__veil {
   background:
     radial-gradient(circle at 50% 40%, rgba(34, 108, 210, .2), transparent 46%),
-    radial-gradient(circle at 12% 108%, rgba(88, 68, 210, .14), transparent 40%),
+    radial-gradient(circle at 12% 108%, rgba(37, 141, 255, .14), transparent 40%),
     linear-gradient(180deg, #041022 0%, #061831 48%, #030c1d 100%);
 }
 .profile-cabin__grid {
@@ -492,11 +503,6 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
     linear-gradient(90deg, rgba(96, 190, 255, .13) 1px, transparent 1px);
   background-size: 52px 52px;
   mask-image: radial-gradient(circle at 50% 42%, #000 8%, transparent 78%);
-}
-.profile-cabin__scan {
-  width: 32%;
-  background: linear-gradient(90deg, transparent, rgba(94, 214, 255, .06), transparent);
-  animation: profile-scan 7s linear infinite;
 }
 
 .profile-frame {
@@ -635,9 +641,8 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
   transition: .2s ease;
 }
 .tag-pill:hover { border-color: rgba(140, 230, 255, .7); color: #fff; transform: translateY(-1px); }
-.tag-pill--purple { border-color: rgba(160, 130, 255, .55); background: linear-gradient(130deg, rgba(124, 96, 255, .32), rgba(88, 68, 210, .16)); color: #ded4ff; }
 .tag-pill--cyan { border-color: rgba(88, 220, 255, .5); color: #8ce6ff; }
-.tag-pill--green { border-color: rgba(80, 220, 170, .45); background: rgba(46, 180, 130, .12); color: #7ce8c2; }
+.tag-pill--blue { border-color: rgba(37, 141, 255, .48); background: rgba(37, 103, 219, .14); color: #c5ddff; }
 .tag-add {
   display: inline-flex; align-self: flex-end; align-items: center; gap: 7px; margin-top: 13px;
   border: 0; background: transparent; color: #6fc8ec; font: inherit; font-size: 12px; cursor: pointer;
@@ -721,7 +726,7 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .ai-basis-card { flex-shrink: 0; }
 .ai-basis { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
 .ai-brain { display: grid; place-items: center; width: 74px; height: 74px; flex-shrink: 0; border: 1px solid rgba(150, 140, 255, .4); border-radius: 14px; background: radial-gradient(circle at 50% 40%, rgba(124, 109, 255, .24), rgba(10, 20, 46, .9) 72%); box-shadow: 0 0 24px rgba(124, 109, 255, .2); }
-.ai-brain svg { width: 40px; fill: none; stroke: #a5b8ff; stroke-width: 1.5; filter: drop-shadow(0 0 8px rgba(140, 150, 255, .6)); }
+.ai-brain svg { width: 40px; fill: none; stroke: #58e6ff; stroke-width: 1.5; filter: drop-shadow(0 0 8px rgba(70, 215, 255, .55)); }
 .ai-basis ul { flex: 1; display: flex; flex-direction: column; gap: 9px; margin: 0; padding: 0; list-style: none; }
 .ai-basis li { display: flex; align-items: center; gap: 9px; }
 .ai-basis li svg { width: 14px; flex-shrink: 0; fill: none; stroke: #58e6a8; stroke-width: 2.2; filter: drop-shadow(0 0 5px rgba(88, 230, 168, .6)); }
@@ -801,7 +806,6 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .toast-enter-from, .toast-leave-to { opacity: 0; transform: translate(-50%, 14px); }
 
 /* ============ 动画 ============ */
-@keyframes profile-scan { from { transform: translateX(-130%); } to { transform: translateX(420%); } }
 @keyframes holo-drift { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, calc(-50% - 8px)); } }
 
 .profile-cabin-enter-active, .profile-cabin-leave-active { transition: opacity .4s ease; }

@@ -8,7 +8,7 @@
       </div>
       <div class="save-indicator">
         <span class="save-dot"></span>
-        自动保存于 {{ autoSaveTime }}
+        {{ saveLabel }}
       </div>
     </div>
 
@@ -39,18 +39,22 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
+      <input ref="importInput" class="file-input" type="file" accept="application/json,.json" @change="onImportFile" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Document, DocumentCopy, MoreFilled, Upload, VideoPlay, Warning } from '@element-plus/icons-vue'
 import { useWorkflowStore } from '@/stores/workflow'
 
 const store = useWorkflowStore()
-const autoSaveTime = ref('14:32:18')
+const importInput = ref<HTMLInputElement | null>(null)
+const saveLabel = computed(() => store.lastSavedAt
+  ? `已保存于 ${new Date(store.lastSavedAt).toLocaleTimeString('zh-CN', { hour12: false })}`
+  : '尚未保存到服务器')
 
 async function onSave() {
   let name = store.configName || ''
@@ -58,7 +62,6 @@ async function onSave() {
     try {
       const cfg = await store.save(name)
       ElMessage.success(`已保存为 #${cfg.id} · ${cfg.name}`)
-      autoSaveTime.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
     } catch (e: any) {
       ElMessage.error(e?.message || '保存失败')
     }
@@ -73,7 +76,6 @@ async function onSave() {
     if (!value || !value.trim()) return
     const cfg = await store.save(value.trim())
     ElMessage.success(`已保存为 #${cfg.id} · ${cfg.name}`)
-    autoSaveTime.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
   } catch (e: any) {
     if (e === 'cancel') return
     ElMessage.error(e?.message || '保存失败')
@@ -101,6 +103,21 @@ function onCommand(cmd: string) {
     a.download = `rag-workflow-${Date.now()}.json`
     a.click()
     URL.revokeObjectURL(url)
+  } else if (cmd === 'import') {
+    importInput.value?.click()
+  }
+}
+
+async function onImportFile(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  try {
+    store.importJSON(JSON.parse(await file.text()))
+    ElMessage.success('工作流已导入，请确认后保存到服务器')
+  } catch (e: any) {
+    ElMessage.error(e?.message || '导入文件格式错误')
   }
 }
 </script>
@@ -149,8 +166,8 @@ function onCommand(cmd: string) {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #34d399;
-  box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
+  background: #46c8ff;
+  box-shadow: 0 0 6px rgba(70, 200, 255, 0.6);
 }
 
 .toolbar-right {
@@ -158,4 +175,6 @@ function onCommand(cmd: string) {
   align-items: center;
   gap: 8px;
 }
+
+.file-input { display: none; }
 </style>

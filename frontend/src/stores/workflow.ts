@@ -21,8 +21,10 @@ interface WorkflowState {
     progress: number
     logs: StageLog[]
     lastResult: TestRunResponse | null
+    lastRunAt: string | null
   }
   saving: boolean
+  lastSavedAt: string | null
   testDialogVisible: boolean
   testQuestion: string
 }
@@ -43,8 +45,10 @@ export const useWorkflowStore = defineStore('workflow', {
       progress: 0,
       logs: [],
       lastResult: null,
+      lastRunAt: null,
     },
     saving: false,
+    lastSavedAt: null,
     testDialogVisible: false,
     testQuestion: '',
   }),
@@ -191,6 +195,7 @@ export const useWorkflowStore = defineStore('workflow', {
           const cfg = await api.workflowConfigsUpdate(this.configId, payload)
           this.configId = cfg.id
           this.configName = cfg.name
+          this.lastSavedAt = cfg.updated_at || new Date().toISOString()
           this.persistDraft()
           return cfg
         } else {
@@ -209,6 +214,7 @@ export const useWorkflowStore = defineStore('workflow', {
           }
           this.configId = cfg.id
           this.configName = cfg.name
+          this.lastSavedAt = cfg.updated_at || new Date().toISOString()
           this.persistDraft()
           return cfg
         }
@@ -221,6 +227,7 @@ export const useWorkflowStore = defineStore('workflow', {
       const cfg = await api.workflowConfigsGet(configId)
       this.configId = cfg.id
       this.configName = cfg.name
+      this.lastSavedAt = cfg.updated_at || null
       const graph = (cfg.graph_json || {}) as { nodes?: FlowNode[]; edges?: FlowEdge[] }
       this.nodes = graph.nodes || buildDefaultNodes()
       this.edges = graph.edges || buildDefaultEdges()
@@ -246,32 +253,6 @@ export const useWorkflowStore = defineStore('workflow', {
       }
     },
 
-    async demoRun() {
-      // 一键跑完整闭环：上传 → 解析 → 切片/向量化 → 检索 → 生成 → 引用校验
-      const DEMO_TEXT =
-        '数融智联是专注人才数据智能的平台。核心产品为岗位能力图谱构建与分析系统，' +
-        '采用 RAG（检索增强生成）技术，把岗位 JD、候选人简历、技能图谱等文档切分并向量化，' +
-        '检索时基于语义召回最相关片段，再结合证据生成人岗匹配解释与面试追问。' +
-        '所有结论均附有可追溯的原文引用，避免幻觉。'
-      const DEMO_QUESTION = '数融智联的核心产品和技术是什么？'
-
-      // 1. 知识库为空则上传示例文档并切片向量化（上传 → 解析 → 向量化）
-      if (this.docs.length === 0) {
-        const file = new File([DEMO_TEXT], '数融智联知识库示例.txt', { type: 'text/plain' })
-        const doc = await this.uploadDoc(file)
-        await this.chunkDoc(doc.id, 500, 50)
-      }
-
-      // 2. 确保有工作流配置
-      await this.ensureConfig()
-      if (!this.configId) {
-        await this.save(this.configName || '默认 RAG 流程')
-      }
-
-      // 3. 流式运行：检索 → 生成 → 引用校验
-      await this.testRunStream(DEMO_QUESTION, 5)
-    },
-
     async testRun(question: string, topK = 5): Promise<TestRunResponse> {
       if (!this.configId) throw new Error('请先保存工作流配置')
       this.runtime.running = true
@@ -280,27 +261,30 @@ export const useWorkflowStore = defineStore('workflow', {
       // 先把所有节点重置为 idle
       this.nodes.forEach((n) => (n.data.status = 'idle'))
 
-      const result = await api.workflowConfigTestRun(this.configId, { question, top_k: topK })
-      // 模拟流转：依次把每个 stage 反映到对应节点
-      const kindToStage = [
-        ['问题解析', 'parser'],
-        ['本地知识库', 'knowledge'],
-        ['Top-K 检索', 'retrieve'],
-        ['向量检索', 'vector'],
-        ['大模型生成', 'llm'],
-        ['幻觉检测', 'guard'],
-        ['引用校验', 'citation'],
-      ] as Array<[string, string]>
-      for (const [stageLabel, kind] of kindToStage) {
-        const node = this.nodes.find((n) => n.data.kind === kind)
-        if (node) node.data.status = 'done'
-        const log = result.stages_log?.find((s: StageLog) => s.stage === stageLabel)
-        if (node && log) node.data.output = log.output
+      try {
+        const result = await api.workflowConfigTestRun(this.configId, { question, top_k: topK })
+        const kindToStage = [
+          ['问题解析', 'parser'],
+          ['本地知识库', 'knowledge'],
+          ['Top-K 检索', 'retrieve'],
+          ['向量检索', 'vector'],
+          ['大模型生成', 'llm'],
+          ['幻觉检测', 'guard'],
+          ['引用校验', 'citation'],
+        ] as Array<[string, string]>
+        for (const [stageLabel, kind] of kindToStage) {
+          const node = this.nodes.find((n) => n.data.kind === kind)
+          if (node) node.data.status = 'done'
+          const log = result.stages_log?.find((s: StageLog) => s.stage === stageLabel)
+          if (node && log) node.data.output = log.output
+        }
+        this.runtime.logs = result.stages_log || []
+        this.runtime.lastResult = result
+        return result
+      } finally {
+        this.runtime.running = false
+        this.runtime.lastRunAt = new Date().toISOString()
       }
-      this.runtime.logs = result.stages_log || []
-      this.runtime.lastResult = result
-      this.runtime.running = false
-      return result
     },
 
     async testRunStream(question: string, topK = 5): Promise<TestRunResponse | null> {
@@ -313,20 +297,21 @@ export const useWorkflowStore = defineStore('workflow', {
       this.nodes.forEach((n) => (n.data.status = 'idle'))
 
       const base = import.meta.env.VITE_API_BASE || ''
-      const res = await fetch(`${base}/api/workflow/configs/${this.configId}/test-stream`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, top_k: topK }),
-      })
-      if (!res.ok || !res.body) {
-        this.runtime.running = false
-        throw new Error('运行失败，请稍后重试')
-      }
-
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder()
-      let buf = ''
+      const token = localStorage.getItem('auth_token')
       try {
+        const res = await fetch(`${base}/api/workflow/configs/${this.configId}/test-stream`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ question, top_k: topK }),
+        })
+        if (!res.ok || !res.body) throw new Error('运行失败，请稍后重试')
+
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder()
+        let buf = ''
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
@@ -346,10 +331,11 @@ export const useWorkflowStore = defineStore('workflow', {
             this.applyStreamEvent(payload)
           }
         }
+        return this.runtime.lastResult
       } finally {
         this.runtime.running = false
+        this.runtime.lastRunAt = new Date().toISOString()
       }
-      return this.runtime.lastResult
     },
 
     applyStreamEvent(payload: any) {
@@ -450,6 +436,24 @@ export const useWorkflowStore = defineStore('workflow', {
         configName: this.configName,
         configId: this.configId,
       }
+    },
+
+    importJSON(payload: unknown) {
+      if (!payload || typeof payload !== 'object') throw new Error('JSON 内容不是有效对象')
+      const data = payload as Record<string, any>
+      if (!Array.isArray(data.nodes) || !Array.isArray(data.edges)) {
+        throw new Error('JSON 必须包含 nodes 和 edges 数组')
+      }
+      if (data.nodes.some((node: any) => !node?.id || !node?.data?.kind || !node?.position)) {
+        throw new Error('节点数据缺少 id、kind 或 position')
+      }
+      this.nodes = markRawArr(data.nodes)
+      this.edges = data.edges
+      this.configId = null
+      this.configName = typeof data.configName === 'string' && data.configName.trim()
+        ? `${data.configName.trim()}（导入）`
+        : '导入的 RAG 流程'
+      this.persistDraft()
     },
   },
 })

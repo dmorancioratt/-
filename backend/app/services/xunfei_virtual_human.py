@@ -56,7 +56,16 @@ _sessions_lock = threading.Lock()
 
 
 def is_configured() -> bool:
-    return bool(APP_ID and API_KEY and API_SECRET and AVATAR_ID)
+    return bool(SERVICE_ID and APP_ID and API_KEY and API_SECRET and AVATAR_ID)
+
+
+def _request_header(*, uid: str, session: str = "") -> dict[str, str]:
+    # The vms2d HTTP schema authenticates with app_id and signed API
+    # credentials. service_id is account metadata and is rejected here.
+    header = {"app_id": APP_ID, "uid": uid}
+    if session:
+        header["session"] = session
+    return header
 
 
 def virtual_human_status() -> dict:
@@ -95,7 +104,7 @@ def start_session(uid: str = "") -> dict:
         finally:
             _stop_local_media(session)
     payload = {
-        "header": {"app_id": APP_ID, "uid": safe_uid},
+        "header": _request_header(uid=safe_uid),
         "parameter": {
             "vmr": {
                 "stream": {"protocol": STREAM_PROTOCOL},
@@ -157,7 +166,7 @@ def speak(session_id: str, text: str) -> dict:
         raise VirtualHumanError("数字人播报文本不能超过 64KB")
     session = _get_session(session_id)
     payload = {
-        "header": {"app_id": APP_ID, "session": session.remote_session, "uid": session.uid},
+        "header": _request_header(uid=session.uid, session=session.remote_session),
         "parameter": {"tts": {"vcn": VOICE, "speed": 50, "pitch": 50, "volume": 50}},
         "payload": {
             "text": {
@@ -182,7 +191,7 @@ def ping_session(session_id: str) -> dict:
     session = _get_session(session_id)
     _post(
         "/v1/private/vms2d_ping",
-        {"header": {"app_id": APP_ID, "session": session.remote_session, "uid": session.uid}},
+        {"header": _request_header(uid=session.uid, session=session.remote_session)},
     )
     _touch_session(session_id)
     return {"provider": "xunfei", "session_id": session_id, "status": "alive"}
@@ -327,7 +336,7 @@ def _remove_stale_sessions() -> None:
 def _stop_remote_session(session: _Session) -> None:
     _post(
         "/v1/private/vms2d_stop",
-        {"header": {"app_id": APP_ID, "session": session.remote_session, "uid": session.uid}},
+        {"header": _request_header(uid=session.uid, session=session.remote_session)},
     )
 
 

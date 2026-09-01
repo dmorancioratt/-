@@ -347,7 +347,7 @@ watch(hotSkills, (skills) => { if (!skills.some((item) => item.name === activeSk
 const emergingList = computed(() => emerging.value.slice(0, 5))
 const heatBuckets = computed(() => allHotSkills.value.reduce((acc, item) => { const heat = Number(item.heat); if (heat >= 16) acc.high++; else if (heat >= 14) acc.mid++; else if (heat >= 12) acc.warm++; else acc.low++; return acc }, { high: 0, mid: 0, warm: 0, low: 0 }))
 
-function heatColor(heat: number) { return heat >= 16 ? '#ffb52e' : heat >= 12 ? '#37e6a1' : heat >= 8 ? '#a26cff' : '#28cfff' }
+function heatColor(heat: number) { return heat >= 16 ? '#ffb52e' : heat >= 12 ? '#46c8ff' : heat >= 8 ? '#a26cff' : '#258dff' }
 function selectSkill(name: string) { if (name) activeSkillName.value = name }
 function handleSkillClick(params: any) { if (params?.data?.skillName) selectSkill(params.data.skillName) }
 function onHotFruitSelect(skill: any) { if (skill?.name) selectSkill(skill.name) }
@@ -562,7 +562,7 @@ const sunburstOption = computed(() => {
   --v-white: #eafcff;
   --v-muted: #78a9c7;
   --v-red: #ff785f;
-  --v-green: #4bffd0;
+  --v-green: #46c8ff;
   position: relative;
   width: 100%;
   min-height: 900px;
@@ -1432,7 +1432,7 @@ const sunburstOption = computed(() => {
 .v-role-card > b {
   font-size: 11px;
 }
-.v-role-card strong.up { color: #4bffd0; }
+.v-role-card strong.up { color: #46c8ff; }
 .v-role-card span.warn { color: #ffd25c; }
 .v-role-card i.down { color: #ff785f; font-style: normal; }
 

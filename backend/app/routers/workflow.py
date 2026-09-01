@@ -22,9 +22,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.models import RagDocument, WorkflowConfig
+from app.models import RagDocument, User, WorkflowConfig
+from app.services.auth import require_roles
 from app.services.document_parser import extract_resume_text
 from app.services.ai_provider import AIProviderError
+from app.services.hallucination_guard import get_governance_rules, guard_payload
 from app.services.rag.chunker import split_text
 from app.services.rag.embedder import get_embedder
 from app.services.rag.errors import RagError
@@ -39,7 +41,11 @@ from app.services.rag.vector_store import (
 logger = logging.getLogger(__name__)
 
 
-router = APIRouter(prefix="/api/workflow", tags=["workflow"])
+router = APIRouter(
+    prefix="/api/workflow",
+    tags=["workflow"],
+    dependencies=[Depends(require_roles("admin", "hr"))],
+)
 
 
 UPLOAD_ROOT = Path(__file__).resolve().parents[2] / "data" / "rag_uploads"
@@ -100,12 +106,29 @@ class TestRunResponse(BaseModel):
     stages_log: list[dict] = Field(default_factory=list)
 
 
+def _valid_citations(result: dict, hits: list) -> list[dict]:
+    """Keep only model citations whose quote exists verbatim in retrieved text."""
+    citations = result.get("evidence") if isinstance(result, dict) else []
+    if not isinstance(citations, list):
+        return []
+    hit_texts = [str(hit.text or "") for hit in hits]
+    valid: list[dict] = []
+    for citation in citations:
+        if not isinstance(citation, dict):
+            continue
+        quote = str(citation.get("quote") or "").strip()
+        if quote and any(quote in hit_text for hit_text in hit_texts):
+            valid.append(citation)
+    return valid
+
+
 # ---------- 文档上传 ----------
 
 
 @router.post("/docs/upload", response_model=DocumentOut)
 async def upload_doc(
     file: UploadFile = File(...),
+    user: User = Depends(require_roles("admin", "hr")),
     db: Session = Depends(get_db),
 ) -> DocumentOut:
     if not file.filename:
@@ -143,6 +166,7 @@ async def upload_doc(
         char_count=len(text),
         chunk_count=0,
         indexed=False,
+        uploaded_by=user.id,
         storage_path=str(storage_path),
     )
     db.add(doc)
@@ -418,8 +442,22 @@ def dry_run(cfg_id: int, req: TestRunRequest, db: Session = Depends(get_db)) -> 
     except AIProviderError as exc:
         logger.warning("[workflow] 大模型生成失败：%s", exc)
         raise HTTPException(status_code=502, detail=f"大模型生成失败：{exc}") from exc
-    stages.append({"stage": "幻觉检测", "status": "warn", "output": "未执行独立幻觉判定"})
-    stages.append({"stage": "引用校验", "status": "done", "output": f"{len(hits)} 条引用"})
+    valid_citations = _valid_citations(inner, hits)
+    rules = get_governance_rules(db)
+    guard_ok, guard_issues = guard_payload(
+        {"confidence": confidence, "evidence": valid_citations},
+        rules,
+    )
+    stages.append({
+        "stage": "幻觉检测",
+        "status": "done" if guard_ok else "warn",
+        "output": "置信度与证据链校验通过" if guard_ok else "；".join(guard_issues),
+    })
+    stages.append({
+        "stage": "引用校验",
+        "status": "done" if valid_citations else "warn",
+        "output": f"{len(valid_citations)} 条引用通过原文逐字校验",
+    })
 
     return TestRunResponse(
         answer=answer,
@@ -541,13 +579,28 @@ def dry_run_stream(
             yield _sse({"event": "result", "answer": None, "evidence": evidence, "confidence": 0.0, "stages_log": stages_log})
             return
 
+        valid_citations = _valid_citations(inner, hits)
+        rules = get_governance_rules(db)
+        guard_ok, guard_issues = guard_payload(
+            {"confidence": confidence, "evidence": valid_citations},
+            rules,
+        )
+
         # 6 幻觉检测
         yield emit(5, "running", "校验事实一致性")
-        yield emit(5, "warn", "未执行独立幻觉判定")
+        yield emit(
+            5,
+            "done" if guard_ok else "warn",
+            "置信度与证据链校验通过" if guard_ok else "；".join(guard_issues),
+        )
 
         # 7 引用校验
         yield emit(6, "running", "核对引用来源")
-        yield emit(6, "done", f"{len(hits)} 条引用")
+        yield emit(
+            6,
+            "done" if valid_citations else "warn",
+            f"{len(valid_citations)} 条引用通过原文逐字校验",
+        )
 
         yield _sse({"event": "result", "answer": answer, "evidence": evidence, "confidence": confidence, "stages_log": stages_log})
 

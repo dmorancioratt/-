@@ -9,3 +9,4 @@
 <script setup lang="ts">
 defineProps<{ match: { score: number; change: number }; jobs: Array<{ rank: number; name: string; company: string; salary: string; score: number }> }>()
 </script>
+

@@ -1,5 +1,5 @@
 <template>
-  <div class="stage-log-card">
+  <div id="workflow-run-log" class="stage-log-card" tabindex="-1">
     <div class="card-header">
       <span class="card-title">
         <el-icon :size="14"><Connection /></el-icon> 运行链路
@@ -130,7 +130,7 @@ const store = useWorkflowStore()
   flex-shrink: 0;
   padding-top: 2px;
 }
-.stage-status.s-done { color: #34d399; }
+.stage-status.s-done { color: #46c8ff; }
 .stage-status.s-error { color: #f43f5e; }
 .stage-status.s-warn { color: #fbbf24; }
 .stage-status.s-running { color: #93c5fd; }

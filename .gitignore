@@ -14,6 +14,7 @@ backend/shurong_zhilian.db
 *.db
 
 # Dev logs
+*.log
 backend/devserver.*.log
 backend/qa-*.log
 frontend/qa-*.log
@@ -30,6 +31,8 @@ backend/data/rag_uploads/
 # Node / frontend
 node_modules/
 frontend/dist/
+frontend/pnpm-lock.yaml
+frontend/pnpm-workspace.yaml
 *.tsbuildinfo
 frontend/output/
 frontend/.playwright-cli/

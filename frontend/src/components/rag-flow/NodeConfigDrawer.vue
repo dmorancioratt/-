@@ -361,11 +361,11 @@ async function onRunTest() {
 .node-info-card.tone-knowledge { border-color: rgba(236, 72, 153, 0.3); }
 .node-info-card.tone-chunker { border-color: rgba(245, 158, 11, 0.3); }
 .node-info-card.tone-embedding { border-color: rgba(59, 130, 246, 0.3); }
-.node-info-card.tone-vector { border-color: rgba(20, 184, 166, 0.3); }
+.node-info-card.tone-vector { border-color: rgba(70, 200, 255, 0.3); }
 .node-info-card.tone-retrieve { border-color: rgba(91, 155, 213, 0.3); }
 .node-info-card.tone-relevance { border-color: rgba(167, 139, 250, 0.3); }
 .node-info-card.tone-llm { border-color: rgba(99, 102, 241, 0.3); }
-.node-info-card.tone-guard { border-color: rgba(52, 211, 153, 0.3); }
+.node-info-card.tone-guard { border-color: rgba(37, 141, 255, 0.3); }
 .node-info-card.tone-citation { border-color: rgba(251, 191, 36, 0.3); }
 .node-info-card.tone-output { border-color: rgba(244, 63, 94, 0.3); }
 
@@ -390,11 +390,11 @@ async function onRunTest() {
 .tone-knowledge .node-icon-box { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
 .tone-chunker .node-icon-box { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
 .tone-embedding .node-icon-box { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-.tone-vector .node-icon-box { background: rgba(20, 184, 166, 0.15); color: #2dd4bf; }
+.tone-vector .node-icon-box { background: rgba(70, 200, 255, 0.15); color: #46c8ff; }
 .tone-retrieve .node-icon-box { background: rgba(91, 155, 213, 0.15); color: #60a5fa; }
 .tone-relevance .node-icon-box { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
 .tone-llm .node-icon-box { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
-.tone-guard .node-icon-box { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+.tone-guard .node-icon-box { background: rgba(37, 141, 255, 0.15); color: #258dff; }
 .tone-citation .node-icon-box { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
 .tone-output .node-icon-box { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
 
@@ -436,7 +436,7 @@ async function onRunTest() {
 
 .status-idle .status-dot { background: #64748b; }
 .status-running .status-dot { background: #fbbf24; }
-.status-done .status-dot { background: #34d399; }
+.status-done .status-dot { background: #46c8ff; }
 .status-error .status-dot { background: #f43f5e; }
 .status-warn .status-dot { background: #fbbf24; }
 
@@ -660,7 +660,7 @@ async function onRunTest() {
 }
 .stage-name { color: #93c5fd; font-weight: 600; }
 .stage-status { font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
-.stage-status.s-done { color: #34d399; }
+.stage-status.s-done { color: #46c8ff; }
 .stage-status.s-error { color: #f43f5e; }
 .stage-status.s-warn { color: #fbbf24; }
 .stage-out { color: #cbd5e1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

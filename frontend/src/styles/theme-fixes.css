@@ -1,16 +1,28 @@
 /* Final dark-theme normalization. Loaded after page styles to prevent light surfaces leaking into the workspace. */
 body.theme-dark {
-  --bg: #07111d;
-  --text: #e6f0f4;
-  --muted: #8fa7b4;
-  --border: rgba(83, 139, 164, 0.3);
-  --glass: #0a1b2a;
-  background: #07111d;
+  --sr-bg: #020817;
+  --sr-bg-deep: #020612;
+  --sr-surface: #061a38;
+  --sr-surface-strong: #082245;
+  --sr-surface-soft: rgba(6, 31, 68, 0.78);
+  --sr-border: rgba(55, 172, 255, 0.34);
+  --sr-border-strong: rgba(72, 196, 255, 0.58);
+  --sr-text: #eef8ff;
+  --sr-text-secondary: #b9d8ee;
+  --sr-muted: #7fa6c3;
+  --sr-accent: #46c8ff;
+  --sr-accent-strong: #258dff;
+  --bg: var(--sr-bg);
+  --text: var(--sr-text);
+  --muted: var(--sr-muted);
+  --border: var(--sr-border);
+  --glass: var(--sr-surface);
+  background: var(--sr-bg);
 }
 
 body.theme-dark::before {
   opacity: 1;
-  background: #07111d;
+  background: var(--sr-bg);
 }
 
 body.theme-dark::after,
@@ -22,6 +34,14 @@ body.theme-dark .candidate-hero::after,
 body.theme-dark .detail-grid article::after,
 body.theme-dark .graph-overview__item::after {
   display: none !important;
+}
+
+/* Full-screen cockpits keep their depth and orbit geometry. */
+body.theme-dark .cockpit-container .workspace-backdrop,
+body.theme-dark .cockpit-container .graph-box::before,
+body.theme-dark .cockpit-container .graph-box::after,
+body.theme-dark .cockpit-container .graph-orbit {
+  display: block !important;
 }
 
 body.theme-dark .app-main:not(.app-main--dashboard) {
@@ -71,8 +91,8 @@ body.theme-dark .app-main:not(.app-main--dashboard) :is(
   .eval-card,
   .evaluation-card
 ) {
-  border-color: rgba(78, 200, 255, 0.18) !important;
-  background: rgba(6, 50, 48, 0.35) !important;
+  border-color: var(--sr-border) !important;
+  background: var(--sr-surface-soft) !important;
   box-shadow:
     inset 0 1px 0 rgba(161, 231, 255, 0.08),
     0 8px 32px rgba(0, 10, 40, 0.25) !important;
@@ -272,7 +292,7 @@ body.theme-dark .identity-card > span { background: #112b3b !important; color: #
 
 body.theme-dark .el-alert {
   border: 1px solid rgba(78, 200, 255, 0.18) !important;
-  background: rgba(6, 50, 48, 0.35) !important;
+  background: var(--sr-surface-soft) !important;
   box-shadow:
     inset 0 1px 0 rgba(161, 231, 255, 0.08),
     0 8px 32px rgba(0, 10, 40, 0.25) !important;
@@ -292,4 +312,303 @@ body.theme-dark .el-alert__description { color: #8fa7b4 !important; }
 
 @media (prefers-reduced-motion: reduce) {
   body.theme-dark *, body.theme-dark *::before, body.theme-dark *::after { animation: none !important; }
+}
+
+/* Unified navy palette: color-only overrides shared by candidate, HR and admin pages. */
+body.theme-dark {
+  color: var(--sr-text);
+  background-color: var(--sr-bg) !important;
+}
+
+body.theme-dark :is(.app-shell, .app-main, .page, .dashboard-page) {
+  color: var(--sr-text);
+}
+
+body.theme-dark :is(.app-titlebar, .topbar, .dashboard-header) {
+  border-color: var(--sr-border) !important;
+  background-color: rgba(3, 15, 35, 0.96) !important;
+}
+
+body.theme-dark .app-main:not(.app-main--dashboard) :is(
+  .panel, .card, .metric-card, .stat-card, .page-toolbar, .section-card,
+  .source-summary article, .source-card, .upload-card, .resume-upload-card,
+  .empty-report, .dimension-card, .identity-card, .quality-grid > div,
+  .report-columns section, .report-columns .improvement-section,
+  .chat-bubble, .interviewer-bubble, .parsed-resume-status, .recent-resume-row
+) {
+  border-color: var(--sr-border) !important;
+  background-color: var(--sr-surface-soft) !important;
+  color: var(--sr-text) !important;
+}
+
+body.theme-dark .page :is(h1, h2, h3, h4, h5, h6, strong, b),
+body.theme-dark :is(.section-title h3, .conversation-title h3, .empty-report h3,
+  .identity-card h3, .dimension-name b, .history-head b, .field-block > label,
+  .selection-card b, .job-preview b, .skill-box > b, .resume-upload-copy strong,
+  .connection-empty strong, .connection-loading strong) {
+  color: var(--sr-text) !important;
+}
+
+body.theme-dark .page :is(p, small),
+body.theme-dark :is(.dimension-name small, .dimension-detail > p, .quality-grid span,
+  .quality-panel > p, .evidence-lines p, .recent-resume-row, .el-form-item__label) {
+  color: var(--sr-text-secondary) !important;
+}
+
+body.theme-dark :is(.section-title > span, .history-head > span, .identity-card > span,
+  .ai-summary > span, .expand-label, .start-kicker, .plain-link) {
+  color: var(--sr-accent) !important;
+}
+
+body.theme-dark :is(.el-input__wrapper, .el-select__wrapper, .el-textarea__inner,
+  .el-cascader .el-input__wrapper, .el-input-number, .el-date-editor) {
+  border-color: var(--sr-border) !important;
+  background-color: var(--sr-surface) !important;
+  color: var(--sr-text) !important;
+}
+
+body.theme-dark :is(.el-input__inner, .el-textarea__inner, .el-select__selected-item,
+  .el-select__placeholder, .el-input-number__decrease, .el-input-number__increase) {
+  color: var(--sr-text) !important;
+}
+
+body.theme-dark :is(.el-input__inner, .el-textarea__inner)::placeholder {
+  color: var(--sr-muted) !important;
+}
+
+body.theme-dark :is(.el-table, .el-table__inner-wrapper, .el-table tr,
+  .el-table th.el-table__cell, .el-table td.el-table__cell) {
+  border-color: rgba(55, 172, 255, 0.22) !important;
+  background-color: var(--sr-surface) !important;
+  color: var(--sr-text-secondary) !important;
+}
+
+body.theme-dark .el-table th.el-table__cell {
+  background-color: var(--sr-surface-strong) !important;
+  color: var(--sr-text) !important;
+}
+
+body.theme-dark .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+  background-color: rgba(16, 63, 123, 0.72) !important;
+}
+
+body.theme-dark :is(.el-dialog, .el-message-box, .el-drawer, .el-popover.el-popper,
+  .el-select__popper, .el-dropdown__popper, .el-picker__popper) {
+  border-color: var(--sr-border) !important;
+  background-color: var(--sr-surface) !important;
+  color: var(--sr-text) !important;
+}
+
+body.theme-dark .el-upload-dragger,
+body.theme-dark :is(.resume-upload-card, .upload-card) {
+  border-color: rgba(70, 190, 255, 0.45) !important;
+  background-color: var(--sr-surface) !important;
+  color: var(--sr-text) !important;
+}
+
+body.theme-dark .el-upload-dragger:hover,
+body.theme-dark :is(.resume-upload-card, .upload-card):hover {
+  border-color: var(--sr-border-strong) !important;
+  background-color: var(--sr-surface-strong) !important;
+}
+
+body.theme-dark :is(.el-upload__text, .el-upload__text *, .el-upload-dragger .el-icon,
+  .resume-upload-copy strong, .upload-card strong) {
+  color: #d9efff !important;
+}
+
+body.theme-dark :is(.el-upload__tip, .el-upload__tip *, .resume-upload-copy span,
+  .upload-card small) {
+  color: #8fb6d2 !important;
+}
+
+body.theme-dark :is(.el-upload__text em, .el-upload__text a, .el-link,
+  .el-pager li.is-active) {
+  color: var(--sr-accent) !important;
+}
+
+body.theme-dark :is(.el-button--primary, .profile-save-btn) {
+  border-color: #2f9eff !important;
+  background-color: #1677d2 !important;
+  color: #fff !important;
+}
+
+body.theme-dark :is(.el-button--primary:hover, .profile-save-btn:hover) {
+  border-color: var(--sr-accent) !important;
+  background-color: #238eea !important;
+}
+
+body.theme-dark :is(.el-radio-button__original-radio:checked + .el-radio-button__inner,
+  .el-tabs__active-bar, .el-progress-bar__inner) {
+  border-color: var(--sr-accent-strong) !important;
+  background-color: var(--sr-accent-strong) !important;
+}
+
+body.theme-dark :is(.el-tabs__item.is-active, .el-radio-button__original-radio:checked + .el-radio-button__inner) {
+  color: #fff !important;
+}
+
+/* Replace non-semantic green highlights with the same cyan-blue used by the skill graph. */
+body.theme-dark :is(.score-progress, .trend-box path) {
+  stroke: var(--sr-accent) !important;
+  filter: drop-shadow(0 0 6px rgba(70, 200, 255, 0.68)) !important;
+}
+
+body.theme-dark :is(.focus-progress span, .dimension-list em, .quality-list em) {
+  background: linear-gradient(90deg, var(--sr-accent-strong), var(--sr-accent)) !important;
+  box-shadow: 0 0 12px rgba(70, 200, 255, 0.5) !important;
+}
+
+body.theme-dark :is(.score-verdict b.success, .trend-box b, .trend-box i,
+  .source-state.ok, .source-sync i.ok, .service-grid b.healthy,
+  .stage-status.s-done, .step.s-done .step-label, .loop-chip.s-done .chip-label,
+  .loop-chip.s-done .chip-meta, .v-role-card strong.up) {
+  color: var(--sr-accent) !important;
+}
+
+body.theme-dark :is(.source-state.ok, .source-sync i.ok, .source-dot.dot-success,
+  .status-done .status-dot, .loop-chip.s-done::before) {
+  background-color: var(--sr-accent) !important;
+  box-shadow: 0 0 8px rgba(70, 200, 255, 0.62) !important;
+}
+
+body.theme-dark :is(.state.done, .step.s-done .step-dot) {
+  border-color: var(--sr-accent) !important;
+  background-color: rgba(70, 200, 255, 0.16) !important;
+  color: var(--sr-accent) !important;
+}
+
+body.theme-dark :is(.tone-vector, .tone-guard, .rag-base-node.status-done) {
+  border-left-color: var(--sr-accent) !important;
+}
+
+body.theme-dark :is(.tone-vector .node-icon-box, .tone-guard .node-icon-box,
+  .item-vector .node-icon, .item-guard .node-icon) {
+  background-color: rgba(70, 200, 255, 0.15) !important;
+  color: var(--sr-accent) !important;
+}
+
+body.theme-dark :is(.active-skill-readout strong, .ranking-list button em,
+  .level-mid, .skill-pill small, .profile-summary b em) {
+  color: var(--sr-accent) !important;
+}
+
+body.theme-dark .heat-donut {
+  background: radial-gradient(circle, rgba(5, 35, 84, 0.15) 54%, transparent 56%),
+    conic-gradient(#46d7ff 0 18%, #258dff 18% 44%, #54b8ff 44% 72%, #1769d6 72%) !important;
+}
+
+body.theme-dark :is(.milestone-list li.done > span, .progress-meter span,
+  .evidence-progress i) {
+  border-color: var(--sr-accent) !important;
+  background: linear-gradient(90deg, var(--sr-accent-strong), var(--sr-accent)) !important;
+  box-shadow: 0 0 10px rgba(70, 200, 255, 0.55) !important;
+}
+
+body.theme-dark :is(.route-stop--two, .skill-box.success) {
+  border-color: var(--sr-border-strong) !important;
+}
+
+body.theme-dark .route-stop--two b {
+  color: var(--sr-accent) !important;
+}
+
+body.theme-dark :is(.role-tag, .connection-badge) {
+  border-color: var(--sr-border) !important;
+  background-color: var(--sr-surface-strong) !important;
+  color: var(--sr-text-secondary) !important;
+}
+
+body.theme-dark .el-message {
+  border-color: var(--sr-border) !important;
+  background-color: var(--sr-surface-strong) !important;
+  color: var(--sr-text) !important;
+  box-shadow: 0 10px 30px rgba(0, 8, 30, 0.42) !important;
+}
+
+body.theme-dark .el-message :is(.el-message__content, .el-message__icon) {
+  color: inherit !important;
+}
+
+body.theme-dark .el-message--error {
+  border-color: rgba(255, 105, 132, 0.42) !important;
+  color: #ff9bb0 !important;
+}
+
+body.theme-dark .el-message--warning {
+  border-color: rgba(255, 189, 99, 0.42) !important;
+  color: #ffd08a !important;
+}
+
+body.theme-dark .app-main:not(.app-main--dashboard) :is(
+  .surface, .tag-panel, .experience-block, .resume-snippet,
+  .detail-meta > div, .evidence-box, .certificate-list > div,
+  .report-meta span, .evidence-lines p, .method-note, .error-item,
+  .job-requirement-preview span, .parsed-resume-status,
+  .conversation-title span, .candidate-mark, .turn-feedback,
+  .final-score-mini, .report-hero, .report-dimensions,
+  .report-trend, .profile-glass-card, .profile-card,
+  .identity-targets span, .profile-secondary-btn,
+  .requirement-hint, .requirement-hint button, .experience-item
+) {
+  border-color: var(--sr-border) !important;
+  background-color: var(--sr-surface-soft) !important;
+  color: var(--sr-text-secondary) !important;
+}
+
+body.theme-dark .profile-page::before {
+  background: linear-gradient(180deg, var(--sr-bg) 0%, var(--sr-bg-deep) 100%) !important;
+}
+
+body.theme-dark .profile-page::after {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(55, 172, 255, 0.06) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(90deg, rgba(55, 172, 255, 0.06) 0 1px, transparent 1px 36px) !important;
+}
+
+body.theme-dark .completion-ring::before {
+  border-color: rgba(55, 172, 255, 0.28) !important;
+  background-color: var(--sr-surface) !important;
+}
+
+body.theme-dark .completion-ring::after {
+  background: conic-gradient(from -90deg, var(--sr-accent-strong) 0 var(--completion-degree), rgba(55, 172, 255, 0.16) var(--completion-degree) 360deg) !important;
+}
+
+body.theme-dark :is(.school-cell b, .education-cell, .job-name-cell,
+  .description-ellipsis, .detail-meta span, .detail-body section p,
+  .evidence-box, .requirement-block > b, .requirement-note,
+  .certificate-list span, .history-item strong, .empty-steps,
+  .dimension-progress strong, .evidence-group > b, .evidence-lines > b,
+  .skill-box > div > span, .ai-summary p, .ai-column ol, .ai-column ul,
+  .chat-bubble, .turn-feedback span, .final-score-mini span,
+  .report-hero > div:last-child > b, .report-columns h4, .report-trend b,
+  .identity-summary, .requirement-hint b) {
+  color: var(--sr-text-secondary) !important;
+}
+
+body.theme-dark :is(.detail-header h3, .detail-meta b, .detail-body section h4,
+  .certificate-list b, .conversation-title h3, .start-card h2,
+  .final-score-mini > strong, .final-score-mini b, .score-list b,
+  .report-score strong, .report-dimensions strong,
+  .section-head h3, .experience-head h3) {
+  color: var(--sr-text) !important;
+}
+
+body.theme-dark :is(.el-upload-dragger p, .el-upload-dragger p *,
+  .upload-title) {
+  color: #d9efff !important;
+}
+
+body.theme-dark :is(.parsed-resume-status span, .turn-feedback span,
+  .final-score-mini span, .report-hero > div:last-child > b,
+  .report-columns h4) {
+  color: var(--sr-accent) !important;
+}
+
+body.theme-dark :is(.parsed-resume-status i, .report-columns p::before,
+  .profile-completion > i span, .profile-quality .done i) {
+  border-color: var(--sr-accent) !important;
+  background-color: var(--sr-accent) !important;
+  color: var(--sr-accent) !important;
 }

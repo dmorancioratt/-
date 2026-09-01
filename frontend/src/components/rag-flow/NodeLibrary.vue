@@ -175,11 +175,11 @@ function onDragStart(e: DragEvent, kind: NodeKind) {
 .item-knowledge .node-icon { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
 .item-chunker .node-icon { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
 .item-embedding .node-icon { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-.item-vector .node-icon { background: rgba(20, 184, 166, 0.15); color: #2dd4bf; }
+.item-vector .node-icon { background: rgba(70, 200, 255, 0.15); color: #46c8ff; }
 .item-retrieve .node-icon { background: rgba(91, 155, 213, 0.15); color: #60a5fa; }
 .item-relevance .node-icon { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
 .item-llm .node-icon { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
-.item-guard .node-icon { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+.item-guard .node-icon { background: rgba(37, 141, 255, 0.15); color: #258dff; }
 .item-citation .node-icon { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
 .item-output .node-icon { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
 

@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import os
 from contextlib import suppress
 from contextlib import asynccontextmanager
 
@@ -10,6 +12,10 @@ from app.db.init_db import seed_database
 from app.routers import graph_explore_router, rag_router, router, workflow_router
 from app.services.ai_provider import AIProviderError
 from app.services.xunfei_virtual_human import cleanup_stale_sessions, stop_all_sessions
+from app.services.source_trust import scheduled_source_validation
+
+
+logger = logging.getLogger(__name__)
 
 
 async def cleanup_virtual_human_sessions():
@@ -18,16 +24,32 @@ async def cleanup_virtual_human_sessions():
         cleanup_stale_sessions()
 
 
+async def refresh_source_trust_scores():
+    interval = max(60, int(os.getenv("SOURCE_VALIDATION_INTERVAL_SECONDS", "3600")))
+    initial_delay = max(0, int(os.getenv("SOURCE_VALIDATION_INITIAL_DELAY_SECONDS", "15")))
+    await asyncio.sleep(initial_delay)
+    while True:
+        try:
+            await asyncio.to_thread(scheduled_source_validation)
+        except Exception:
+            logger.exception("数据源交叉验证定时任务失败")
+        await asyncio.sleep(interval)
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     seed_database()
     cleanup_task = asyncio.create_task(cleanup_virtual_human_sessions())
+    source_validation_task = asyncio.create_task(refresh_source_trust_scores())
     try:
         yield
     finally:
         cleanup_task.cancel()
+        source_validation_task.cancel()
         with suppress(asyncio.CancelledError):
             await cleanup_task
+        with suppress(asyncio.CancelledError):
+            await source_validation_task
         stop_all_sessions()
 
 

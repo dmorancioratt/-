@@ -17,6 +17,21 @@ class JobUpdateRequest(BaseModel):
     evidence_sources: list[str] = Field(default_factory=list)
 
 
+class GovernanceSettingsRequest(BaseModel):
+    evidence_required: bool
+    low_confidence_review: bool
+    version_history: bool
+    confidence_threshold: float = Field(ge=0.5, le=0.95)
+
+
+class LearningTaskUpdateRequest(BaseModel):
+    status: str
+
+
+class LearningProgressRequest(BaseModel):
+    progress: int = Field(ge=0, le=100)
+
+
 class ResumeParseRequest(BaseModel):
     text: str
 

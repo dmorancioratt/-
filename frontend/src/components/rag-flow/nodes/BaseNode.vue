@@ -112,7 +112,7 @@ function handleClick() {
 /* 节点状态颜色 */
 .rag-base-node.status-idle { border-left: 3px solid rgba(148,163,184,0.5); }
 .rag-base-node.status-running { border-left: 3px solid #fbbf24; animation: pulse-running 1.2s ease-in-out infinite; }
-.rag-base-node.status-done { border-left: 3px solid #34d399; }
+.rag-base-node.status-done { border-left: 3px solid #46c8ff; }
 .rag-base-node.status-error { border-left: 3px solid #f43f5e; }
 .rag-base-node.status-warn { border-left: 3px solid #fbbf24; }
 
@@ -124,11 +124,11 @@ function handleClick() {
 .tone-knowledge { border-left-color: #ec4899; }
 .tone-chunker { border-left-color: #f59e0b; }
 .tone-embedding { border-left-color: #3b82f6; }
-.tone-vector { border-left-color: #14b8a6; }
+.tone-vector { border-left-color: #46c8ff; }
 .tone-retrieve { border-left-color: #5B9BD5; }
 .tone-relevance { border-left-color: #a78bfa; }
 .tone-llm { border-left-color: #6366f1; }
-.tone-guard { border-left-color: #34d399; }
+.tone-guard { border-left-color: #258dff; }
 .tone-citation { border-left-color: #fbbf24; }
 .tone-output { border-left-color: #f43f5e; }
 
@@ -148,11 +148,11 @@ function handleClick() {
 .tone-knowledge .node-icon { background: rgba(236,72,153,0.18); color: #f9a8d4; }
 .tone-chunker .node-icon { background: rgba(245,158,11,0.18); color: #fcd34d; }
 .tone-embedding .node-icon { background: rgba(59,130,246,0.18); color: #93c5fd; }
-.tone-vector .node-icon { background: rgba(20,184,166,0.18); color: #5eead4; }
+.tone-vector .node-icon { background: rgba(70,200,255,0.18); color: #6ed8ff; }
 .tone-retrieve .node-icon { background: rgba(91,155,213,0.18); color: #93c5fd; }
 .tone-relevance .node-icon { background: rgba(167,139,250,0.18); color: #c4b5fd; }
 .tone-llm .node-icon { background: rgba(99,102,241,0.18); color: #a5b4fc; }
-.tone-guard .node-icon { background: rgba(52,211,153,0.18); color: #6ee7b7; }
+.tone-guard .node-icon { background: rgba(37,141,255,0.18); color: #75b9ff; }
 .tone-citation .node-icon { background: rgba(251,191,36,0.18); color: #fcd34d; }
 .tone-output .node-icon { background: rgba(244,63,94,0.18); color: #fda4af; }
 
@@ -182,7 +182,7 @@ function handleClick() {
 }
 .status-idle .status-dot { background: rgba(148,163,184,0.6); }
 .status-running .status-dot { background: #fbbf24; animation: pulse-dot 1s ease-in-out infinite; }
-.status-done .status-dot { background: #34d399; }
+.status-done .status-dot { background: #46c8ff; }
 .status-error .status-dot { background: #f43f5e; }
 .status-warn .status-dot { background: #fbbf24; }
 

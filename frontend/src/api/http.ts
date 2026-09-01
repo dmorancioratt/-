@@ -28,6 +28,8 @@ export const api = {
   datasets: () => http.get('/api/datasets').then((res) => res.data),
   dataSourceStatus: () => http.get('/api/data-sources/status').then((res) => res.data),
   syncDataSources: () => http.post('/api/data-sources/sync', {}, { timeout: 180000 }).then((res) => res.data),
+  sourceValidation: () => http.get('/api/data-sources/validation').then((res) => res.data),
+  runSourceValidation: () => http.post('/api/data-sources/validation/run', {}, { timeout: 180000 }).then((res) => res.data),
   marketSnapshot: () => http.get('/api/market/snapshot').then((res) => res.data),
   marketCatalog: (params?: { keyword?: string; item_type?: string; limit?: number }) =>
     http.get('/api/market/catalog', { params }).then((res) => res.data),
@@ -77,6 +79,15 @@ export const api = {
   evaluation: () => http.get('/api/evaluation/metrics').then((res) => res.data),
   governanceHealth: () => http.get('/api/governance/health').then((res) => res.data),
   hallucinationStats: () => http.get('/api/governance/hallucination').then((res) => res.data),
+  governanceSettings: () => http.get('/api/settings/governance').then((res) => res.data),
+  updateGovernanceSettings: (payload: unknown) => http.put('/api/settings/governance', payload).then((res) => res.data),
+  systemMetrics: () => http.get('/api/system/metrics').then((res) => res.data),
+  learningTasks: () => http.get('/api/learning/tasks').then((res) => res.data),
+  updateLearningTask: (id: number, status: 'pending' | 'completed') =>
+    http.put(`/api/learning/tasks/${id}`, { status }).then((res) => res.data),
+  learningResources: () => http.get('/api/learning/resources').then((res) => res.data),
+  updateLearningResource: (id: number, progress: number) =>
+    http.put(`/api/learning/resources/${id}`, { progress }).then((res) => res.data),
   resumes: () => http.get('/api/resumes').then((res) => res.data),
   saveParsedResume: (payload: { resume: Record<string, unknown>; source_filename?: string; raw_text?: string }) =>
     http.post('/api/resumes/save-parsed', payload).then((res) => res.data),

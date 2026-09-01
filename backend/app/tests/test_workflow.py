@@ -13,19 +13,24 @@ from sqlalchemy import delete
 os.environ.setdefault("AI_PROVIDER", "mock")
 
 from app.db.database import Base, SessionLocal, engine  # noqa: E402
+from app.db.init_db import seed_database  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models import RagDocument, WorkflowConfig  # noqa: E402
 
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_db():
-    Base.metadata.create_all(bind=engine)
+    seed_database()
     yield
 
 
 @pytest.fixture
 def client():
-    return TestClient(app)
+    test_client = TestClient(app)
+    login = test_client.post("/api/auth/login", json={"username": "admin_demo", "password": "Demo@123"})
+    assert login.status_code == 200
+    test_client.headers.update({"Authorization": f"Bearer {login.json()['token']}"})
+    return test_client
 
 
 @pytest.fixture
@@ -66,6 +71,16 @@ def test_upload_document(client):
     assert data["char_count"] > 0
     assert data["chunk_count"] == 0
     assert data["indexed"] is False
+    with SessionLocal() as db:
+        assert db.get(RagDocument, data["id"]).uploaded_by is not None
+
+
+def test_workflow_requires_management_role():
+    unauthenticated = TestClient(app)
+    assert unauthenticated.get("/api/workflow/docs").status_code == 401
+    login = unauthenticated.post("/api/auth/login", json={"username": "student_demo", "password": "Demo@123"})
+    headers = {"Authorization": f"Bearer {login.json()['token']}"}
+    assert unauthenticated.get("/api/workflow/docs", headers=headers).status_code == 403
 
 
 def test_list_and_delete_documents(client):

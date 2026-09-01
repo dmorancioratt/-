@@ -2,6 +2,7 @@ import ast
 import csv
 import io
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -23,6 +24,8 @@ from app.models import (
     JobEntity,
     JobCertificateRelation,
     JobSkillRelation,
+    LearningResourceProgress,
+    LearningTask,
     MatchAnalysisRecord,
     MatchReport,
     ParsedJD,
@@ -30,6 +33,7 @@ from app.models import (
     Resume,
     ResumeSkill,
     ReviewTask,
+    SystemSetting,
     SkillEntity,
     TestCase,
     User,
@@ -44,6 +48,9 @@ from app.schemas import (
     DigitalHumanSpeakRequest,
     DigitalInterviewRequest,
     JDParseRequest,
+    GovernanceSettingsRequest,
+    LearningProgressRequest,
+    LearningTaskUpdateRequest,
     JobUpdateRequest,
     LoginRequest,
     MatchAnalysisRequest,
@@ -70,10 +77,11 @@ from app.services.constants import SKILLS
 from app.services.document_parser import DocumentParseError, MAX_UPLOAD_BYTES, extract_resume_text
 from app.services.capability_catalog import enriched_job, job_authority, job_requirements, resolve_onet
 from app.services.emerging_jobs import build_emerging_candidate
-from app.services.hallucination_guard import MIN_CONFIDENCE, guard_payload
+from app.services.hallucination_guard import guard_payload, get_governance_rules
 from app.services.jd_parser import text_hash
 from app.services.matching import score_match
 from app.services.official_data import catalog_to_dict, market_snapshot, source_to_dict, sync_official_data, sync_status
+from app.services.source_trust import source_validation_report, validate_source_trust
 from app.services.xunfei_virtual_human import (
     VirtualHumanError,
     get_media_file,
@@ -563,6 +571,7 @@ def _guard_stats(db: Session) -> dict:
     ).all()
     flagged = []
     rule_hits = {"missing_evidence": 0, "low_confidence": 0}
+    rules = get_governance_rules(db)
     for row in rows:
         try:
             evidence = json.loads(row.evidence or "{}")
@@ -570,7 +579,7 @@ def _guard_stats(db: Session) -> dict:
             evidence = {}
         issues = evidence.get("guard_issues")
         if issues is None:
-            ok, issues = guard_payload({"confidence": row.confidence, "evidence": evidence.get("evidence_sources")})
+            ok, issues = guard_payload({"confidence": row.confidence, "evidence": evidence.get("evidence_sources")}, rules)
             if ok:
                 issues = []
         if "缺少 evidence 字段" in issues:
@@ -593,9 +602,9 @@ def _guard_stats(db: Session) -> dict:
         "passed": passed,
         "flagged": len(flagged),
         "pass_rate": round(passed / sample * 100, 1) if sample else 0,
-        "min_confidence": MIN_CONFIDENCE,
+        "min_confidence": rules.confidence_threshold,
         "rules": [
-            {"key": "low_confidence", "label": "置信度阈值检测", "detail": f"解析结果置信度低于 {MIN_CONFIDENCE} 时标记待复核", "hits": rule_hits["low_confidence"]},
+            {"key": "low_confidence", "label": "置信度阈值检测", "detail": f"解析结果置信度低于 {rules.confidence_threshold} 时标记待复核", "hits": rule_hits["low_confidence"]},
             {"key": "missing_evidence", "label": "证据链缺失检测", "detail": "结构化输出缺少 evidence 字段时拒绝直接发布", "hits": rule_hits["missing_evidence"]},
         ],
         "recent_events": flagged[:6],
@@ -606,6 +615,185 @@ def _guard_stats(db: Session) -> dict:
 @router.get("/governance/hallucination")
 def governance_hallucination(db: Session = Depends(get_db)):
     return _guard_stats(db)
+
+
+def _settings_payload(row: SystemSetting) -> dict:
+    return {
+        "evidence_required": bool(row.evidence_required),
+        "low_confidence_review": bool(row.low_confidence_review),
+        "version_history": bool(row.version_history),
+        "confidence_threshold": float(row.confidence_threshold),
+        "updated_by": row.updated_by,
+        "updated_at": row.updated_at,
+    }
+
+
+@router.get("/settings/governance")
+def governance_settings(
+    _: User = Depends(require_roles("admin", "hr")),
+    db: Session = Depends(get_db),
+):
+    get_governance_rules(db)
+    db.commit()
+    return _settings_payload(db.get(SystemSetting, 1))
+
+
+@router.put("/settings/governance")
+def update_governance_settings(
+    req: GovernanceSettingsRequest,
+    user: User = Depends(require_roles("admin", "hr")),
+    db: Session = Depends(get_db),
+):
+    row = db.get(SystemSetting, 1) or SystemSetting(id=1)
+    row.evidence_required = req.evidence_required
+    row.low_confidence_review = req.low_confidence_review
+    row.version_history = req.version_history
+    row.confidence_threshold = req.confidence_threshold
+    row.updated_by = user.id
+    row.updated_at = datetime.utcnow()
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _settings_payload(row)
+
+
+@router.get("/system/metrics")
+def system_metrics(_: User = Depends(require_roles("admin"))):
+    """Read live host metrics; values are sampled from the running backend host."""
+    try:
+        import psutil
+    except ImportError as exc:
+        raise HTTPException(status_code=503, detail="后端缺少 psutil，无法读取真实系统指标") from exc
+    memory = psutil.virtual_memory()
+    disk = psutil.disk_usage(str(Path(__file__).resolve().anchor))
+    network = psutil.net_io_counters()
+    process = psutil.Process(os.getpid())
+    return {
+        "sampled_at": datetime.utcnow(),
+        "cpu_percent": psutil.cpu_percent(interval=0.1),
+        "cpu_count": psutil.cpu_count(logical=True) or 0,
+        "memory_percent": memory.percent,
+        "memory_used_bytes": memory.used,
+        "memory_total_bytes": memory.total,
+        "disk_percent": disk.percent,
+        "disk_used_bytes": disk.used,
+        "disk_total_bytes": disk.total,
+        "network_sent_bytes": network.bytes_sent,
+        "network_received_bytes": network.bytes_recv,
+        "process_memory_bytes": process.memory_info().rss,
+        "process_uptime_seconds": max(0, int(datetime.utcnow().timestamp() - process.create_time())),
+    }
+
+
+def _latest_learning_report(db: Session, user_id: int) -> MatchAnalysisRecord | None:
+    return db.scalar(
+        select(MatchAnalysisRecord)
+        .where(MatchAnalysisRecord.user_id == user_id)
+        .order_by(MatchAnalysisRecord.created_at.desc(), MatchAnalysisRecord.id.desc())
+    )
+
+
+def _report_learning_inputs(report: MatchAnalysisRecord) -> tuple[list[str], list[str]]:
+    try:
+        deterministic = json.loads(report.deterministic_result or "{}")
+    except (json.JSONDecodeError, TypeError):
+        deterministic = {}
+    try:
+        ai = json.loads(report.ai_analysis or "{}")
+    except (json.JSONDecodeError, TypeError):
+        ai = {}
+    skills = [str(item).strip() for item in deterministic.get("missing_skills", []) if str(item).strip()]
+    suggestions = [str(item).strip() for item in ai.get("suggestions", []) if str(item).strip()]
+    if not suggestions:
+        suggestions = [str(item).strip() for item in deterministic.get("suggestions", []) if str(item).strip()]
+    return list(dict.fromkeys(skills)), list(dict.fromkeys(suggestions))
+
+
+def _sync_learning_records(db: Session, user_id: int) -> None:
+    report = _latest_learning_report(db, user_id)
+    if report is None:
+        return
+    skills, suggestions = _report_learning_inputs(report)
+    for index, skill in enumerate(skills[:8]):
+        title = f"完成 {skill} 能力补强"
+        existing_task = db.scalar(select(LearningTask).where(
+            LearningTask.user_id == user_id,
+            LearningTask.source_report_id == report.id,
+            LearningTask.title == title,
+        ))
+        if existing_task is None:
+            db.add(LearningTask(
+                user_id=user_id,
+                source_report_id=report.id,
+                title=title,
+                description=suggestions[index] if index < len(suggestions) else f"根据最近岗位匹配报告补齐 {skill} 能力证据。",
+            ))
+        existing_resource = db.scalar(select(LearningResourceProgress).where(
+            LearningResourceProgress.user_id == user_id,
+            LearningResourceProgress.source_report_id == report.id,
+            LearningResourceProgress.skill_name == skill,
+        ))
+        if existing_resource is None:
+            db.add(LearningResourceProgress(
+                user_id=user_id,
+                source_report_id=report.id,
+                skill_name=skill,
+                title=f"{skill} 专题学习与项目实践",
+            ))
+    db.commit()
+
+
+@router.get("/learning/tasks")
+def learning_tasks(user: User = Depends(require_roles("candidate")), db: Session = Depends(get_db)):
+    _sync_learning_records(db, user.id)
+    rows = db.scalars(select(LearningTask).where(LearningTask.user_id == user.id).order_by(LearningTask.created_at.desc())).all()
+    return [to_dict(row) for row in rows]
+
+
+@router.put("/learning/tasks/{task_id}")
+def update_learning_task(
+    task_id: int,
+    req: LearningTaskUpdateRequest,
+    user: User = Depends(require_roles("candidate")),
+    db: Session = Depends(get_db),
+):
+    if req.status not in {"pending", "completed"}:
+        raise HTTPException(status_code=400, detail="任务状态仅支持 pending 或 completed")
+    row = db.get(LearningTask, task_id)
+    if row is None or row.user_id != user.id:
+        raise HTTPException(status_code=404, detail="学习任务不存在")
+    row.status = req.status
+    row.completed_at = datetime.utcnow() if req.status == "completed" else None
+    row.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(row)
+    return to_dict(row)
+
+
+@router.get("/learning/resources")
+def learning_resources(user: User = Depends(require_roles("candidate")), db: Session = Depends(get_db)):
+    _sync_learning_records(db, user.id)
+    rows = db.scalars(select(LearningResourceProgress).where(
+        LearningResourceProgress.user_id == user.id
+    ).order_by(LearningResourceProgress.updated_at.desc())).all()
+    return [to_dict(row) for row in rows]
+
+
+@router.put("/learning/resources/{resource_id}")
+def update_learning_resource(
+    resource_id: int,
+    req: LearningProgressRequest,
+    user: User = Depends(require_roles("candidate")),
+    db: Session = Depends(get_db),
+):
+    row = db.get(LearningResourceProgress, resource_id)
+    if row is None or row.user_id != user.id:
+        raise HTTPException(status_code=404, detail="学习资源不存在")
+    row.progress = req.progress
+    row.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(row)
+    return to_dict(row)
 
 
 @router.get("/governance/health")
@@ -671,7 +859,9 @@ def data_sources_status(_: User = Depends(current_user), db: Session = Depends(g
 @router.post("/data-sources/sync")
 def sync_data_sources(_: User = Depends(require_roles("admin")), db: Session = Depends(get_db)):
     try:
-        return sync_official_data(db, include_network=True)
+        result = sync_official_data(db, include_network=True)
+        result["validation"] = validate_source_trust(db)
+        return result
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"权威数据源同步失败：{exc}") from exc
 
@@ -679,6 +869,16 @@ def sync_data_sources(_: User = Depends(require_roles("admin")), db: Session = D
 @router.get("/market/snapshot")
 def get_market_snapshot(_: User = Depends(current_user), db: Session = Depends(get_db)):
     return market_snapshot(db)
+
+
+@router.get("/data-sources/validation")
+def get_source_validation(_: User = Depends(require_roles("admin", "hr")), db: Session = Depends(get_db)):
+    return source_validation_report(db)
+
+
+@router.post("/data-sources/validation/run")
+def run_source_validation(_: User = Depends(require_roles("admin", "hr")), db: Session = Depends(get_db)):
+    return validate_source_trust(db)
 
 
 @router.get("/market/catalog")
@@ -748,7 +948,8 @@ def _analyze_and_persist_jd(source_text: str, db: Session, raw_jd: RawJD | None 
         parsed["evidence_sources"] = parsed.pop("evidence", [])
     parsed["ai_provider"] = ai_response["provider"]
     parsed["ai_task_type"] = ai_response["task_type"]
-    ok, issues = guard_payload({"confidence": parsed["confidence"], "evidence": parsed["evidence_sources"]})
+    rules = get_governance_rules(db)
+    ok, issues = guard_payload({"confidence": parsed["confidence"], "evidence": parsed["evidence_sources"]}, rules)
     parsed["guard_status"] = "passed" if ok else "needs_review"
     parsed["guard_issues"] = issues
 
@@ -982,11 +1183,13 @@ async def import_jds(
         source.status = "parsed"
     elif parsed_count or failed_count:
         source.status = "partially_parsed"
+    validation = validate_source_trust(db, commit=False)
     db.commit()
     return {
         **_jd_import_batch_to_dict(db, source),
         "parsed_now": parsed_count,
         "failed_now": failed_count,
+        "validation": validation,
     }
 
 
@@ -1106,6 +1309,9 @@ def update_job(
         raise HTTPException(status_code=404, detail="岗位不存在")
     if not req.update_note.strip():
         raise HTTPException(status_code=400, detail="请填写本次更新说明")
+    rules = get_governance_rules(db)
+    if rules.evidence_required and not any(item.strip() for item in req.evidence_sources):
+        raise HTTPException(status_code=400, detail="当前治理规则要求岗位更新必须填写证据来源")
 
     existing_relations = list(job.skill_relations)
     existing_required = {row.skill.name for row in existing_relations if row.relation_type == "requires"}
@@ -1155,25 +1361,26 @@ def update_job(
             ))
 
     previous_version = job.version
-    next_version = _next_job_version(db, job.id)
+    next_version = _next_job_version(db, job.id) if rules.version_history else previous_version
     modified = metadata_changes + [
         {"skill": skill, "change": "必备能力与加分能力之间调整"}
         for skill in changed_relation
     ]
-    event = EvolutionEvent(
-        job_id=job.id,
-        added_skills=json.dumps(sorted(new_all - old_all), ensure_ascii=False),
-        removed_skills=json.dumps(sorted(old_all - new_all), ensure_ascii=False),
-        modified_skills=json.dumps(modified, ensure_ascii=False),
-        update_note=req.update_note.strip(),
-        data_sources=json.dumps(req.evidence_sources or ["管理员人工复核"], ensure_ascii=False),
-        confidence=1.0,
-        version_record=json.dumps([previous_version, next_version], ensure_ascii=False),
-        evidence=f"人工优化记录；依据：{source_note}",
-    )
-    job.version = next_version
-    job.evidence = f"{job.evidence}\n人工优化 {next_version}：{req.update_note.strip()}；依据：{source_note}"
-    db.add(event)
+    if rules.version_history:
+        event = EvolutionEvent(
+            job_id=job.id,
+            added_skills=json.dumps(sorted(new_all - old_all), ensure_ascii=False),
+            removed_skills=json.dumps(sorted(old_all - new_all), ensure_ascii=False),
+            modified_skills=json.dumps(modified, ensure_ascii=False),
+            update_note=req.update_note.strip(),
+            data_sources=json.dumps(req.evidence_sources or ["管理员人工复核"], ensure_ascii=False),
+            confidence=1.0,
+            version_record=json.dumps([previous_version, next_version], ensure_ascii=False),
+            evidence=f"人工优化记录；依据：{source_note}",
+        )
+        job.version = next_version
+        db.add(event)
+    job.evidence = f"{job.evidence}\n人工优化：{req.update_note.strip()}；依据：{source_note}"
     db.commit()
     db.refresh(job)
     return enriched_job(db, job)

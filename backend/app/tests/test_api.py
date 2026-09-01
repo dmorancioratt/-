@@ -7,7 +7,8 @@ from uuid import uuid4
 from app.main import app
 from app.db.database import SessionLocal
 from app.db.init_db import seed_database
-from app.models import DataSource, EvolutionEvent, InterviewSession, InterviewTurn, JobCertificateRelation, JobEntity, JobSkillRelation, ParsedJD, RawJD, ReviewTask, SkillEntity
+from app.models import DataSource, EvolutionEvent, InterviewSession, InterviewTurn, JobCertificateRelation, JobEntity, JobSkillRelation, LearningResourceProgress, LearningTask, MatchAnalysisRecord, ParsedJD, RawJD, ReviewTask, SkillEntity, SystemSetting, User
+from app.services.hallucination_guard import get_governance_rules, guard_payload
 from app.services.jd_parser import text_hash
 
 
@@ -78,6 +79,97 @@ def test_data_source_sync_requires_admin():
     headers = {"Authorization": f"Bearer {login.json()['token']}"}
     response = client.post("/api/data-sources/sync", headers=headers)
     assert response.status_code == 403
+
+
+def test_governance_settings_are_persisted_and_enforced():
+    admin_login = client.post("/api/auth/login", json={"username": "admin_demo", "password": "Demo@123"})
+    admin_headers = {"Authorization": f"Bearer {admin_login.json()['token']}"}
+    original = client.get("/api/settings/governance", headers=admin_headers)
+    assert original.status_code == 200
+    try:
+        update = client.put("/api/settings/governance", headers=admin_headers, json={
+            "evidence_required": False,
+            "low_confidence_review": True,
+            "version_history": False,
+            "confidence_threshold": 0.91,
+        })
+        assert update.status_code == 200
+        with SessionLocal() as db:
+            row = db.get(SystemSetting, 1)
+            assert row.confidence_threshold == 0.91
+            rules = get_governance_rules(db)
+            ok, issues = guard_payload({"confidence": 0.90, "evidence": []}, rules)
+            assert ok is False
+            assert issues == ["置信度低于阈值"]
+
+        candidate_login = client.post("/api/auth/login", json={"username": "student_demo", "password": "Demo@123"})
+        candidate_headers = {"Authorization": f"Bearer {candidate_login.json()['token']}"}
+        assert client.get("/api/settings/governance", headers=candidate_headers).status_code == 403
+    finally:
+        client.put("/api/settings/governance", headers=admin_headers, json={
+            "evidence_required": original.json()["evidence_required"],
+            "low_confidence_review": original.json()["low_confidence_review"],
+            "version_history": original.json()["version_history"],
+            "confidence_threshold": original.json()["confidence_threshold"],
+        })
+
+
+def test_rag_routes_require_login_and_index_management_role():
+    assert client.get("/api/rag/stats").status_code == 401
+    candidate_login = client.post("/api/auth/login", json={"username": "student_demo", "password": "Demo@123"})
+    headers = {"Authorization": f"Bearer {candidate_login.json()['token']}"}
+    assert client.get("/api/rag/stats", headers=headers).status_code == 200
+    assert client.post("/api/rag/index", headers=headers, json={"force_rebuild": False}).status_code == 403
+
+
+def test_admin_system_metrics_are_live_and_role_protected():
+    admin_login = client.post("/api/auth/login", json={"username": "admin_demo", "password": "Demo@123"})
+    admin_headers = {"Authorization": f"Bearer {admin_login.json()['token']}"}
+    response = client.get("/api/system/metrics", headers=admin_headers)
+    assert response.status_code == 200
+    assert 0 <= response.json()["memory_percent"] <= 100
+    assert response.json()["memory_total_bytes"] > 0
+
+    hr_login = client.post("/api/auth/login", json={"username": "hr_admin", "password": "Demo@123"})
+    hr_headers = {"Authorization": f"Bearer {hr_login.json()['token']}"}
+    assert client.get("/api/system/metrics", headers=hr_headers).status_code == 403
+
+
+def test_candidate_learning_tasks_and_progress_are_persisted():
+    login = client.post("/api/auth/login", json={"username": "student_demo", "password": "Demo@123"})
+    headers = {"Authorization": f"Bearer {login.json()['token']}"}
+    skill = f"验收技能-{uuid4().hex[:6]}"
+    report_id = None
+    try:
+        with SessionLocal() as db:
+            user = db.scalar(select(User).where(User.username == "student_demo"))
+            report = MatchAnalysisRecord(
+                user_id=user.id,
+                job_id=db.scalar(select(JobEntity.id).limit(1)),
+                candidate_name=user.display_name,
+                total_score=60,
+                deterministic_result=json.dumps({"missing_skills": [skill], "suggestions": [f"完成 {skill} 实践"]}, ensure_ascii=False),
+                ai_analysis=json.dumps({"suggestions": [f"完成 {skill} 实践"]}, ensure_ascii=False),
+            )
+            db.add(report)
+            db.commit()
+            db.refresh(report)
+            report_id = report.id
+
+        tasks = client.get("/api/learning/tasks", headers=headers)
+        resources = client.get("/api/learning/resources", headers=headers)
+        assert tasks.status_code == resources.status_code == 200
+        task = next(item for item in tasks.json() if skill in item["title"])
+        resource = next(item for item in resources.json() if item["skill_name"] == skill)
+        assert client.put(f"/api/learning/tasks/{task['id']}", headers=headers, json={"status": "completed"}).json()["status"] == "completed"
+        assert client.put(f"/api/learning/resources/{resource['id']}", headers=headers, json={"progress": 50}).json()["progress"] == 50
+    finally:
+        if report_id:
+            with SessionLocal() as db:
+                db.execute(delete(LearningTask).where(LearningTask.source_report_id == report_id))
+                db.execute(delete(LearningResourceProgress).where(LearningResourceProgress.source_report_id == report_id))
+                db.execute(delete(MatchAnalysisRecord).where(MatchAnalysisRecord.id == report_id))
+                db.commit()
 
 
 def test_jd_parse():
@@ -553,3 +645,19 @@ def test_register_rejects_invalid_username():
         },
     )
     assert response.status_code == 400
+
+
+def test_hr_can_run_and_read_source_cross_validation():
+    login = client.post("/api/auth/login", json={"username": "hr_admin", "password": "Demo@123"})
+    headers = {"Authorization": f"Bearer {login.json()['token']}"}
+
+    result = client.post("/api/data-sources/validation/run", headers=headers)
+    assert result.status_code == 200
+    payload = result.json()
+    assert payload["algorithm"]["version"] == "source-trust-v1"
+    assert payload["sources"]
+    assert abs(sum(item["weight"] for item in payload["sources"]) - 1.0) < 1e-5
+
+    saved = client.get("/api/data-sources/validation", headers=headers)
+    assert saved.status_code == 200
+    assert saved.json()["generated_at"]

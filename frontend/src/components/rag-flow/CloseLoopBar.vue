@@ -153,15 +153,15 @@ function onStepClick(key: string) {
 
 /* 状态 */
 .loop-chip.s-done {
-  border-color: rgba(52, 211, 153, 0.5);
-  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(70, 200, 255, 0.5);
+  background: rgba(70, 200, 255, 0.12);
 }
 .loop-chip.s-done .chip-dot {
   color: #0b1220;
-  background: #34d399;
+  background: #46c8ff;
 }
-.loop-chip.s-done .chip-label { color: #34d399; }
-.loop-chip.s-done .chip-meta { color: #34d399; }
+.loop-chip.s-done .chip-label { color: #46c8ff; }
+.loop-chip.s-done .chip-meta { color: #46c8ff; }
 
 .loop-chip.s-running {
   border-color: rgba(96, 165, 250, 0.6);

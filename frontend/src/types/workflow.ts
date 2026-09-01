@@ -46,6 +46,8 @@ export interface WorkflowConfig {
     edges: FlowEdge[]
   }
   node_settings: Record<string, any>
+  created_at?: string
+  updated_at?: string
 }
 
 export interface DocumentInfo {

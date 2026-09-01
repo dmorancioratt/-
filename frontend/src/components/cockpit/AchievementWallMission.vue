@@ -84,7 +84,6 @@
           <i class="stage-disc stage-disc--base"></i>
           <i class="stage-disc stage-disc--mid"></i>
           <i class="stage-disc stage-disc--top"></i>
-          <i class="stage-sweep"></i>
         </div>
         <div class="stage-crest" aria-hidden="true">卓越成就</div>
       </div>
@@ -188,6 +187,9 @@ import trophyOrbitCup from '@/assets/cockpit/trophy-orbit-cup.png'
 import trophyShieldCup from '@/assets/cockpit/trophy-shield.png'
 
 const emit = defineEmits<{ close: [] }>()
+const props = withDefaults(defineProps<{
+  activityEvents?: Array<{ type: string; id: string | number; date: string; title: string; detail: string }>
+}>(), { activityEvents: () => [] })
 
 const heroTrophyImages = [trophyCrownCup, trophyStarCup, trophyDiamondCup, trophyOrbitCup, trophyShieldCup]
 let trophyTimer: number | undefined
@@ -217,7 +219,7 @@ type Achievement = {
   showcase?: boolean
 }
 
-const achievements: Achievement[] = [
+const achievementCatalog: Achievement[] = [
   {
     id: 'national-2nd',
     name: '国家级成就二等奖',
@@ -324,14 +326,36 @@ const achievements: Achievement[] = [
   },
 ]
 
-const stats = { total: 24, points: 3680, rankPercent: 12 }
+const achievements = computed<Achievement[]>(() => {
+  const mapped = props.activityEvents.slice(0, 9).map((event, index) => {
+    const style = achievementCatalog[index % achievementCatalog.length]
+    return {
+      ...style,
+      id: `${event.type}-${event.id}`,
+      name: event.title,
+      date: new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit' }).format(new Date(event.date)),
+      category: event.type === 'interview' ? '实践类' as const : '学习类' as const,
+      points: 0,
+      rarity: '普通' as const,
+      desc: event.detail,
+      evidence: [`记录来源：当前账号`, `记录时间：${new Intl.DateTimeFormat('zh-CN').format(new Date(event.date))}`],
+      showcase: index < 5,
+    }
+  })
+  return mapped.length ? mapped : [{
+    ...achievementCatalog[0], id: 'empty', name: '暂无真实成长记录', date: '等待同步',
+    category: '学习类', points: 0, rarity: '普通', desc: '完成简历、岗位匹配或面试后，这里会展示当前账号的真实成长记录。',
+    evidence: ['当前账号尚无可展示记录'], showcase: true,
+  }]
+})
+const stats = computed(() => ({ total: props.activityEvents.length, points: 0, rankPercent: 0 }))
 
 const categories = ['全部', '学习类', '竞赛类', '实践类'] as const
 type FilterCategory = (typeof categories)[number]
 const activeCategory = ref<FilterCategory>('全部')
 
 const filteredAchievements = computed(() => {
-  const sorted = [...achievements].sort((a, b) => (a.date < b.date ? 1 : -1))
+  const sorted = [...achievements.value].sort((a, b) => (a.date < b.date ? 1 : -1))
   if (activeCategory.value === '全部') return sorted
   return sorted.filter(item => item.category === activeCategory.value)
 })
@@ -349,20 +373,20 @@ const rarityColors: Record<Rarity, string> = {
   传说: '#ffc86b',
 }
 
-const focusId = ref(achievements[0].id)
-const focusAchievement = computed(() => achievements.find(item => item.id === focusId.value) ?? achievements[0])
+const focusId = ref('')
+const focusAchievement = computed(() => achievements.value.find(item => item.id === focusId.value) ?? achievements.value[0])
 
 function selectAchievement(ach: Achievement) {
   focusId.value = ach.id
-  const showcaseIndex = showcaseAchievements.findIndex(item => item.id === ach.id)
+  const showcaseIndex = showcaseAchievements.value.findIndex(item => item.id === ach.id)
   if (showcaseIndex >= 0) selectCarouselItem(showcaseIndex)
 }
 
-const showcaseAchievements = achievements.filter(item => item.showcase)
-const carouselItems = showcaseAchievements.map((achievement, index) => ({
+const showcaseAchievements = computed(() => achievements.value.filter(item => item.showcase))
+const carouselItems = computed(() => showcaseAchievements.value.map((achievement, index) => ({
   achievement,
-  image: heroTrophyImages[index],
-}))
+  image: heroTrophyImages[index % heroTrophyImages.length],
+})))
 const carouselIndex = ref(0)
 
 const carouselSlots = [
@@ -374,7 +398,7 @@ const carouselSlots = [
 ]
 
 function carouselSlotIndex(itemIndex: number) {
-  const offset = (itemIndex - carouselIndex.value + carouselItems.length) % carouselItems.length
+  const offset = (itemIndex - carouselIndex.value + carouselItems.value.length) % carouselItems.value.length
   return [2, 3, 4, 0, 1][offset]
 }
 
@@ -392,20 +416,20 @@ function carouselItemStyle(itemIndex: number) {
 function startTrophyCycle() {
   if (trophyTimer) window.clearInterval(trophyTimer)
   trophyTimer = window.setInterval(() => {
-    carouselIndex.value = (carouselIndex.value + 1) % carouselItems.length
-    focusId.value = carouselItems[carouselIndex.value].achievement.id
+    carouselIndex.value = (carouselIndex.value + 1) % carouselItems.value.length
+    focusId.value = carouselItems.value[carouselIndex.value].achievement.id
   }, 4800)
 }
 
 function selectCarouselItem(index: number) {
   carouselIndex.value = index
-  focusId.value = carouselItems[index].achievement.id
+  focusId.value = carouselItems.value[index].achievement.id
   startTrophyCycle()
 }
 
 function handleCarouselClick(index: number) {
   if (index === carouselIndex.value) {
-    openDetail(carouselItems[index].achievement)
+    openDetail(carouselItems.value[index].achievement)
     return
   }
   selectCarouselItem(index)
@@ -849,20 +873,6 @@ onBeforeUnmount(() => {
   border-radius: 50%;
   border: 1px solid rgba(255, 200, 235, 0.25);
 }
-.stage-sweep {
-  position: absolute;
-  bottom: 40%;
-  left: 50%;
-  width: 50%; aspect-ratio: 1.35;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  border: 1px dashed rgba(255, 180, 220, 0.3);
-  animation: sweep-spin 16s linear infinite;
-}
-@keyframes sweep-spin {
-  from { transform: translateX(-50%) rotate(0deg); }
-  to { transform: translateX(-50%) rotate(360deg); }
-}
 .stage-crest {
   position: absolute;
   left: 50%; bottom: 9%;
@@ -1165,7 +1175,6 @@ onBeforeUnmount(() => {
 @media (prefers-reduced-motion: reduce) {
   .podium-case__trophy,
   .showcase__trophy,
-  .stage-sweep,
   .arch-glow,
   .hall-bg__magenta { animation: none; }
   .wall-appear-enter-active,
@@ -1255,7 +1264,6 @@ onBeforeUnmount(() => {
 .stage-disc--base { background: linear-gradient(180deg, rgba(16, 48, 97, .96), rgba(2, 12, 32, .98)); border-color: rgba(63, 174, 255, .62); box-shadow: 0 0 36px rgba(27, 132, 255, .48), inset 0 12px 24px rgba(102, 196, 255, .16); }
 .stage-disc--mid { background: linear-gradient(180deg, rgba(24, 66, 119, .96), rgba(4, 18, 46, .98)); border-color: rgba(255, 202, 94, .55); box-shadow: 0 0 32px rgba(37, 152, 255, .42); }
 .stage-disc--top { background: radial-gradient(ellipse, rgba(255, 210, 126, .28), rgba(15, 57, 112, .92) 58%, rgba(2, 17, 46, .98)); border-color: rgba(255, 217, 139, .72); box-shadow: 0 0 38px rgba(255, 183, 68, .22), 0 0 70px rgba(31, 143, 255, .42); }
-.stage-sweep { border-color: rgba(70, 205, 255, .5); }
 .stage-crest { z-index: 4; bottom: 13%; background: linear-gradient(180deg, #5b3b12, #19130d); border-color: rgba(255, 213, 132, .76); color: #ffe2a6; box-shadow: 0 0 22px rgba(255, 176, 50, .28); }
 
 .trophy-carousel { position: absolute; inset: 5% -4% 22%; z-index: 3; perspective: 1500px; transform-style: preserve-3d; pointer-events: none; }

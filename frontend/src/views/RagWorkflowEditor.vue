@@ -31,15 +31,15 @@
           <div class="status-row">
             <span class="status-label">工作流状态</span>
             <span class="status-group">
-              <span class="status-item active">空闲</span>
-              <span class="status-item">运行</span>
+              <span class="status-item" :class="{ active: !store.runtime.running }">空闲</span>
+              <span class="status-item" :class="{ active: store.runtime.running }">运行</span>
             </span>
           </div>
           <div class="status-row">
             <span class="status-label">上次运行</span>
-            <span class="status-value">14:32:18</span>
+            <span class="status-value">{{ lastRunLabel }}</span>
           </div>
-          <div class="status-link">查看日志</div>
+          <button type="button" class="status-link" @click="focusRunLog">查看日志</button>
         </div>
         <RagEngineStatus />
         <RunStageLog />
@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useWorkflowStore } from '@/stores/workflow'
 import WorkflowToolbar from '@/components/rag-flow/WorkflowToolbar.vue'
 import NodeLibrary from '@/components/rag-flow/NodeLibrary.vue'
@@ -64,6 +64,14 @@ import RunProgressBar from '@/components/rag-flow/RunProgressBar.vue'
 import CloseLoopBar from '@/components/rag-flow/CloseLoopBar.vue'
 
 const store = useWorkflowStore()
+const lastRunLabel = computed(() => store.runtime.lastRunAt
+  ? new Date(store.runtime.lastRunAt).toLocaleTimeString('zh-CN', { hour12: false })
+  : '尚未运行')
+
+function focusRunLog() {
+  document.getElementById('workflow-run-log')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  document.getElementById('workflow-run-log')?.focus({ preventScroll: true })
+}
 
 onMounted(async () => {
   store.loadDraft()
@@ -185,8 +193,8 @@ onMounted(async () => {
 }
 
 .status-item.active {
-  color: #34d399;
-  background: rgba(52, 211, 153, 0.15);
+  color: #46c8ff;
+  background: rgba(70, 200, 255, 0.15);
 }
 
 .status-value {
@@ -196,6 +204,10 @@ onMounted(async () => {
 }
 
 .status-link {
+  display: inline-block;
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-size: 11px;
   color: #60a5fa;
   cursor: pointer;

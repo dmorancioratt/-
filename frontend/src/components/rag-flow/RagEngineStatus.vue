@@ -138,7 +138,7 @@ onMounted(refresh)
   flex-shrink: 0;
   background: #64748b;
 }
-.source-dot.dot-success { background: #34d399; }
+.source-dot.dot-success { background: #46c8ff; }
 .source-dot.dot-failed { background: #f43f5e; }
 .source-dot.dot-running { background: #fbbf24; }
 .source-dot.dot-never { background: #475569; }

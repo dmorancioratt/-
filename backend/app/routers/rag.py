@@ -3,7 +3,7 @@
 设计要点：
 - Embedder / VectorStores / Retriever 都是模块级单例，首次调用懒加载。
 - 索引文件不存在时，/index 端点会重新构建；/query 端点若命中失败会返回 503。
-- RAG 不强制鉴权，遵循 /api/graph/* 风格。
+- 查询与状态要求登录，索引重建仅允许 HR/管理员。
 """
 
 from __future__ import annotations
@@ -17,7 +17,8 @@ from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.models import RagIndexJob
+from app.models import RagIndexJob, User
+from app.services.auth import current_user, require_roles
 from app.schemas.rag import (
     IndexRequest,
     IndexStats,
@@ -51,7 +52,11 @@ from app.services.rag.vector_store import FaissVectorStore, VectorStore, get_use
 logger = logging.getLogger(__name__)
 
 
-router = APIRouter(prefix="/api/rag", tags=["rag"])
+router = APIRouter(
+    prefix="/api/rag",
+    tags=["rag"],
+    dependencies=[Depends(current_user)],
+)
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +178,11 @@ def _stats_for(db: Session) -> list[IndexStats]:
 
 
 @router.post("/index", response_model=list[IndexStats])
-def index_all(req: IndexRequest, db: Session = Depends(get_db)) -> list[IndexStats]:
+def index_all(
+    req: IndexRequest,
+    _: User = Depends(require_roles("admin", "hr")),
+    db: Session = Depends(get_db),
+) -> list[IndexStats]:
     """重建全部 4 个数据源索引。"""
     embedder = _get_embedder()
     stores = _get_stores()
@@ -182,7 +191,12 @@ def index_all(req: IndexRequest, db: Session = Depends(get_db)) -> list[IndexSta
 
 
 @router.post("/index/{source}", response_model=IndexStats)
-def index_one(source: str, req: IndexRequest, db: Session = Depends(get_db)) -> IndexStats:
+def index_one(
+    source: str,
+    req: IndexRequest,
+    _: User = Depends(require_roles("admin", "hr")),
+    db: Session = Depends(get_db),
+) -> IndexStats:
     if source not in SOURCE_REGISTRY:
         raise HTTPException(status_code=400, detail=f"未知数据源：{source}")
     embedder = _get_embedder()

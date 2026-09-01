@@ -95,8 +95,12 @@
             <div><span>AI 模型</span><b>{{ aiStatus.model || '未配置' }}</b></div>
             <div><span>AI 状态</span><b :class="aiStatus.configured ? 'healthy' : 'warning'">{{ aiStatus.configured ? '已配置' : '未配置' }}</b></div>
             <div><span>RAG 引擎</span><b :class="ragStatus.available || ragStatus.status === 'ready' ? 'healthy' : 'warning'">{{ ragStatus.status || (ragStatus.available ? 'ready' : '未就绪') }}</b></div>
+            <div><span>CPU</span><b>{{ metricPercent(systemMetrics.cpu_percent) }}</b></div>
+            <div><span>内存</span><b>{{ metricPercent(systemMetrics.memory_percent) }}</b></div>
+            <div><span>存储</span><b>{{ metricPercent(systemMetrics.disk_percent) }}</b></div>
+            <div><span>网络收发</span><b>{{ networkTraffic }}</b></div>
           </div>
-          <p class="monitor-note">CPU、内存、存储和网络指标未接入后端监控，因此不展示随机模拟数值。</p>
+          <p class="monitor-note">实时采样于后端运行主机 · {{ systemMetrics.sampled_at ? formatDateTime(systemMetrics.sampled_at) : '等待采样' }}</p>
           <button class="panel-action" type="button" @click="router.push('/settings')">查看系统设置</button>
         </article>
       </section>
@@ -122,6 +126,7 @@ const hallucination = ref<any>({})
 const reviews = ref<any[]>([])
 const aiStatus = ref<any>({})
 const ragStatus = ref<any>({})
+const systemMetrics = ref<any>({})
 let timer: number | undefined
 
 const PanelHeader = defineComponent({ props: { title: String, code: String }, setup(props) { return () => h('header', { class: 'panel-header' }, [h('div', [h('small', props.code), h('h2', props.title)])]) } })
@@ -132,7 +137,7 @@ const governanceDimensions = computed(() => governance.value.dimensions || [])
 const healthScore = computed(() => governance.value.overall == null ? null : formatPercent(governance.value.overall))
 const pendingReviews = computed(() => reviews.value.filter((item) => item.status === 'pending'))
 const jobDistribution = computed(() => overview.value.job_distribution || [])
-const palette = ['#43d9ff', '#4a8dff', '#39ddb1', '#ffbc62', '#9b8cff', '#ff7894']
+const palette = ['#43d9ff', '#4a8dff', '#258dff', '#ffbc62', '#9b8cff', '#ff7894']
 const kpis = computed(() => [
   { label: '权威数据源', value: compact(sources.value.length), note: '未归档记录', icon: Collection },
   { label: '岗位实体', value: compact(overview.value.job_count), note: '数据库聚合', icon: Document },
@@ -157,6 +162,10 @@ const qualityMetrics = computed(() => [
 const syncHealthy = computed(() => !['error', 'failed'].includes(String(syncStatus.value.status || '').toLowerCase()))
 const syncStatusText = computed(() => syncStatus.value.status ? `同步状态：${syncStatus.value.status}` : '尚无同步状态记录')
 const syncUpdatedAt = computed(() => syncStatus.value.last_synced_at || syncStatus.value.updated_at || overview.value.market_last_synced_at || '未记录同步时间')
+const networkTraffic = computed(() => `${formatBytes(systemMetrics.value.network_received_bytes)} / ${formatBytes(systemMetrics.value.network_sent_bytes)}`)
+function metricPercent(value: unknown) { return value == null ? '未采样' : `${Math.round(Number(value) * 10) / 10}%` }
+function formatBytes(value: unknown) { const bytes = Number(value || 0); return bytes >= 1073741824 ? `${(bytes / 1073741824).toFixed(1)} GB` : `${(bytes / 1048576).toFixed(1)} MB` }
+function formatDateTime(value: string) { return new Date(value).toLocaleString('zh-CN', { hour12: false }) }
 function qualityValue(source: any) { const value = source.quality_score ?? source.health_score; return value == null ? '未评估' : `${Math.round(Number(value) * 10) / 10}%` }
 function sourceTone(source: any) { return ['active', 'ready', 'healthy', 'published'].includes(String(source.status).toLowerCase()) ? 'ok' : ['error', 'failed'].includes(String(source.status).toLowerCase()) ? 'bad' : 'warn' }
 function dimensionScoreNumber(item: any) { return Math.max(0, Math.min(100, Number(item.score ?? item.value ?? 0))) }
@@ -165,9 +174,10 @@ function distributionWidth(value: unknown) { const max = Math.max(...jobDistribu
 function tick() { clock.value = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'medium', hour12: false }).format(new Date()) }
 async function loadData() {
   loading.value = true; error.value = ''
-  const results = await Promise.allSettled([api.overview(), api.datasets(), api.dataSourceStatus(), api.governanceHealth(), api.hallucinationStats(), api.reviewTasks(), api.aiStatus(), api.ragStatus()])
+  const results = await Promise.allSettled([api.overview(), api.datasets(), api.dataSourceStatus(), api.governanceHealth(), api.hallucinationStats(), api.reviewTasks(), api.aiStatus(), api.ragStatus(), api.systemMetrics()])
   const read = <T,>(index: number, fallback: T): T => results[index].status === 'fulfilled' ? (results[index] as PromiseFulfilledResult<T>).value : fallback
   overview.value = read(0, {}); sources.value = read(1, []); syncStatus.value = read(2, {}); governance.value = read(3, {}); hallucination.value = read(4, {}); reviews.value = read(5, []); aiStatus.value = read(6, {}); ragStatus.value = read(7, {})
+  systemMetrics.value = read(8, {})
   const failures = results.filter((item) => item.status === 'rejected').length
   if (failures) error.value = `${failures} 个后端数据接口暂不可用，其余区域仍展示已成功读取的真实数据。`
   loading.value = false

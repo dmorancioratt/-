@@ -25,6 +25,7 @@ def test_signed_url_contains_hmac_parameters(monkeypatch):
 
 
 def test_start_speak_ping_and_stop(monkeypatch, tmp_path):
+    monkeypatch.setattr(vms, "SERVICE_ID", "test-service")
     monkeypatch.setattr(vms, "APP_ID", "test-app")
     monkeypatch.setattr(vms, "API_KEY", "test-key")
     monkeypatch.setattr(vms, "API_SECRET", "test-secret")
@@ -44,11 +45,13 @@ def test_start_speak_ping_and_stop(monkeypatch, tmp_path):
     started = vms.start_session("user-1")
     assert started["stream_url"] == "rtmp://example/live/1"
     assert started["capabilities"]["avatar_driver"] == "connected"
+    assert "service_id" not in calls[0][1]["header"]
 
     spoken = vms.speak(started["session_id"], "你好，欢迎参加面试。")
     assert spoken["status"] == "speaking"
     encoded_text = calls[-1][1]["payload"]["text"]["text"]
     assert base64.b64decode(encoded_text).decode() == "你好，欢迎参加面试。"
+    assert "service_id" not in calls[-1][1]["header"]
     assert "seq" not in calls[-1][1]["payload"]["text"]
     assert "seq" not in calls[-1][1]["payload"]["ctrl_w"]
 

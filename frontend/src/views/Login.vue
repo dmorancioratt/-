@@ -33,10 +33,7 @@
           <span class="fx-grid" aria-hidden="true"></span>
           <span class="fx-nebula" aria-hidden="true"></span>
           <span class="fx-pointer" aria-hidden="true"></span>
-          <span class="fx-sweep" aria-hidden="true"></span>
           <span class="fx-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-          <span class="fx-head" aria-hidden="true"></span>
-          <span class="fx-head-b" aria-hidden="true"></span>
 
           <header class="auth-head">
             <div class="brand-chip">
@@ -110,31 +107,57 @@
             <div v-else key="register" class="auth-form">
               <div class="input-wrap">
                 <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21a8 8 0 0 0-16 0"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input v-model="registerForm.displayName" type="text" placeholder="真实姓名" class="form-input" autocomplete="name" />
+              </div>
+              <div class="input-wrap">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <input v-model="registerForm.username" type="text" placeholder="用户名" class="form-input" />
+                <input v-model="registerForm.username" type="text" placeholder="用户名（6-20 位字母和数字）" class="form-input" autocomplete="username" />
               </div>
               <div class="input-wrap">
                 <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                   <polyline points="22,6 12,13 2,6"/>
                 </svg>
-                <input v-model="registerForm.email" type="email" placeholder="邮箱" class="form-input" />
+                <input v-model="registerForm.email" type="email" placeholder="邮箱" class="form-input" autocomplete="email" />
               </div>
               <div class="input-wrap">
                 <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
-                <input v-model="registerForm.password" type="password" placeholder="设置密码" class="form-input" />
+                <input v-model="registerForm.password" type="password" placeholder="设置密码（至少 8 位）" class="form-input" autocomplete="new-password" />
               </div>
               <div class="input-wrap">
                 <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                   <path d="M9 12l2 2 4-4"/>
                 </svg>
-                <input v-model="registerForm.confirmPassword" type="password" placeholder="确认密码" class="form-input" @keyup.enter="submitRegister" />
+                <input v-model="registerForm.confirmPassword" type="password" placeholder="确认密码" class="form-input" autocomplete="new-password" />
+              </div>
+              <div class="captcha-row">
+                <div class="input-wrap captcha-input">
+                  <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9.5 9a3 3 0 1 1 5.2 2c-1.2 1.1-2.7 1.5-2.7 3"/>
+                    <path d="M12 18h.01"/>
+                    <circle cx="12" cy="12" r="10"/>
+                  </svg>
+                  <input v-model="registerForm.captchaAnswer" inputmode="numeric" placeholder="验证码结果" class="form-input" @keyup.enter="submitRegister" />
+                </div>
+                <div class="captcha-question" :class="{ loading: captchaLoading }">
+                  <span>{{ captchaQuestion || '加载中...' }}</span>
+                  <button type="button" title="刷新验证码" aria-label="刷新验证码" :disabled="captchaLoading" @click="loadCaptcha">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/>
+                      <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
               <button type="button" class="submit-button" :disabled="loading" @click="submitRegister">
                 <span>{{ loading ? '注册中...' : '注　册' }}</span>
@@ -148,9 +171,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { api } from '@/api/http'
 import { useAuthStore } from '@/stores/auth'
 
 const mode = ref('login')
@@ -167,11 +191,16 @@ const auth = useAuthStore()
 
 const loginForm = reactive({ username: '', password: '' })
 const registerForm = reactive({
+  displayName: '',
   username: '',
   email: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  captchaAnswer: ''
 })
+const captchaQuestion = ref('')
+const captchaToken = ref('')
+const captchaLoading = ref(false)
 
 const cardTiltStyle = computed(() => ({
   transform: `perspective(1100px) rotateX(${cardTiltX.value}deg) rotateY(${cardTiltY.value}deg)`,
@@ -228,10 +257,30 @@ onBeforeUnmount(() => {
   document.body.classList.remove('login-active')
 })
 
+watch(mode, (value) => {
+  if (value === 'register' && !captchaToken.value) void loadCaptcha()
+})
+
+async function loadCaptcha() {
+  captchaLoading.value = true
+  try {
+    const data = await api.captcha()
+    captchaQuestion.value = data.question || ''
+    captchaToken.value = data.token || ''
+    registerForm.captchaAnswer = ''
+  } catch (error: any) {
+    captchaQuestion.value = '加载失败'
+    captchaToken.value = ''
+    ElMessage.error(error?.response?.data?.detail || '验证码加载失败')
+  } finally {
+    captchaLoading.value = false
+  }
+}
+
 async function submitLogin() {
   loading.value = true
   try {
-    const user = await auth.login(loginForm.username, loginForm.password)
+    const user = await auth.login(loginForm.username.trim(), loginForm.password)
     ElMessage.success('登录成功')
     router.push((route.query.redirect as string) || (user.role === 'candidate' ? '/personal-center' : '/overview'))
   } catch (error: any) {
@@ -242,7 +291,7 @@ async function submitLogin() {
 }
 
 async function submitRegister() {
-  if (!registerForm.username || !registerForm.email || !registerForm.password) {
+  if (!registerForm.displayName.trim() || !registerForm.username.trim() || !registerForm.email.trim() || !registerForm.password || !registerForm.captchaAnswer.trim()) {
     ElMessage.warning('请填写完整信息')
     return
   }
@@ -250,12 +299,27 @@ async function submitRegister() {
     ElMessage.warning('两次密码输入不一致')
     return
   }
+  if (!captchaToken.value) {
+    ElMessage.warning('请刷新验证码后重试')
+    return
+  }
   loading.value = true
   try {
+    await auth.register({
+      username: registerForm.username.trim(),
+      password: registerForm.password,
+      confirm_password: registerForm.confirmPassword,
+      role: 'candidate',
+      display_name: registerForm.displayName.trim(),
+      email: registerForm.email.trim(),
+      captcha_token: captchaToken.value,
+      captcha_answer: registerForm.captchaAnswer.trim()
+    })
     ElMessage.success('注册成功')
-    mode.value = 'login'
+    await router.push((route.query.redirect as string) || '/personal-center')
   } catch (error: any) {
     ElMessage.error(error?.response?.data?.detail || '注册失败')
+    await loadCaptcha()
   } finally {
     loading.value = false
   }
@@ -570,50 +634,12 @@ async function submitRegister() {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(155deg, rgba(140, 230, 255, 0.5), rgba(64, 118, 255, 0.14) 34%, rgba(10, 30, 70, 0.1) 62%, rgba(150, 110, 255, 0.38));
+  background: linear-gradient(155deg, rgba(140, 230, 255, 0.5), rgba(45, 148, 255, 0.2) 45%, rgba(30, 102, 225, 0.34));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
   pointer-events: none;
-}
-
-/* 彗星流光：真实的光带沿边框路径环绕飞行 */
-.fx-head,
-.fx-head-b {
-  display: none;
-  position: absolute;
-  pointer-events: none;
-  z-index: 4;
-  offset-rotate: auto;
-}
-
-@supports (offset-path: inset(0 round 1px)) {
-  .fx-head,
-  .fx-head-b {
-    display: block;
-  }
-}
-
-.fx-head {
-  width: 96px;
-  height: 4px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(0, 214, 255, 0.08) 28%, rgba(120, 240, 255, 0.9) 74%, #f4ffff);
-  filter: drop-shadow(0 0 6px rgba(0, 228, 255, 0.95)) drop-shadow(0 0 20px rgba(0, 195, 255, 0.7)) drop-shadow(0 0 44px rgba(90, 160, 255, 0.45));
-  offset-path: inset(-4px round 30px);
-  animation: headTravel 3.2s linear infinite;
-}
-
-/* 第二颗彗星：紫色，反向环绕，速度不同制造交错感 */
-.fx-head-b {
-  width: 74px;
-  height: 3px;
-  border-radius: 999px;
-  background: linear-gradient(270deg, transparent, rgba(190, 140, 255, 0.08) 28%, rgba(216, 175, 255, 0.9) 74%, #fdf8ff);
-  filter: drop-shadow(0 0 6px rgba(198, 152, 255, 0.95)) drop-shadow(0 0 20px rgba(150, 100, 255, 0.6));
-  offset-path: inset(-4px round 30px);
-  animation: headTravel 5.6s linear infinite reverse;
 }
 
 /* 卡片内部：缓慢漂移的科技网格 */
@@ -632,7 +658,7 @@ async function submitRegister() {
   pointer-events: none;
 }
 
-/* 卡片内部：两团缓慢游走的蓝紫星云 */
+/* 卡片内部的低对比度蓝色环境光。 */
 .fx-nebula {
   position: absolute;
   inset: 0;
@@ -664,7 +690,7 @@ async function submitRegister() {
   height: 42%;
   right: -16%;
   bottom: -14%;
-  background: radial-gradient(circle, rgba(140, 90, 255, 0.18), transparent 65%);
+  background: radial-gradient(circle, rgba(40, 126, 255, 0.16), transparent 65%);
   filter: blur(30px);
   animation: nebulaB 15s ease-in-out infinite alternate;
 }
@@ -680,29 +706,6 @@ async function submitRegister() {
   transition: opacity 0.35s ease;
   pointer-events: none;
   z-index: 1;
-}
-
-/* 每隔几秒扫过卡片的一道柔光 */
-.fx-sweep {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.fx-sweep::before {
-  content: "";
-  position: absolute;
-  top: -25%;
-  bottom: -25%;
-  left: -35%;
-  width: 24%;
-  background: linear-gradient(105deg, transparent, rgba(170, 235, 255, 0.13), transparent);
-  transform: rotate(8deg) translateX(0);
-  filter: blur(7px);
-  animation: cardSweep 7s ease-in-out infinite;
 }
 
 /* HUD 四角呼吸灯 */
@@ -775,10 +778,6 @@ async function submitRegister() {
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-@keyframes headTravel {
-  to { offset-distance: 100%; }
-}
-
 @keyframes gridShift {
   to { background-position: 34px 34px; }
 }
@@ -789,11 +788,6 @@ async function submitRegister() {
 
 @keyframes nebulaB {
   to { transform: translate(-52%, -38%) scale(1.12); }
-}
-
-@keyframes cardSweep {
-  0%, 58% { transform: rotate(8deg) translateX(0); }
-  88%, 100% { transform: rotate(8deg) translateX(660%); }
 }
 
 @keyframes cornerPulse {
@@ -878,7 +872,7 @@ async function submitRegister() {
   border-radius: 999px;
   background:
     linear-gradient(180deg, rgba(7, 24, 54, 0.88), rgba(4, 14, 34, 0.92)) padding-box,
-    linear-gradient(120deg, rgba(0, 209, 255, 0.5), rgba(46, 92, 255, 0.26) 45%, rgba(147, 96, 255, 0.48)) border-box;
+    linear-gradient(120deg, rgba(0, 209, 255, 0.5), rgba(46, 132, 255, 0.38) 55%, rgba(36, 98, 230, 0.48)) border-box;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -8px 16px rgba(0, 8, 24, 0.5),
@@ -892,7 +886,7 @@ async function submitRegister() {
   left: 5px;
   width: calc(50% - 5px);
   border-radius: 999px;
-  background: linear-gradient(120deg, #1f7bff 0%, #3f8cff 42%, #8b5cf6 100%);
+  background: linear-gradient(120deg, #1597ff 0%, #247cff 48%, #2563eb 100%);
   box-shadow:
     0 6px 18px rgba(47, 124, 255, 0.5),
     0 0 26px rgba(96, 140, 255, 0.4),
@@ -910,16 +904,6 @@ async function submitRegister() {
   top: 3px;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
-}
-
-.switch-thumb::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, 0.38) 50%, transparent 68%);
-  transform: translateX(-130%);
-  animation: thumbShine 3.8s ease-in-out infinite;
 }
 
 .mode-switch.is-register .switch-thumb {
@@ -976,6 +960,79 @@ async function submitRegister() {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.auth-register {
+  padding-top: 28px;
+  padding-bottom: 22px;
+}
+
+.auth-register .auth-head {
+  margin-bottom: 16px;
+}
+
+.auth-register .mode-switch {
+  margin-bottom: 16px;
+}
+
+.auth-register .auth-form {
+  gap: 10px;
+}
+
+.auth-register .input-wrap {
+  height: 46px;
+}
+
+.captcha-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 154px;
+  gap: 10px;
+}
+
+.captcha-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  height: 46px;
+  padding: 0 8px 0 14px;
+  border: 1px solid rgba(0, 190, 255, 0.24);
+  border-radius: 13px;
+  background: rgba(4, 16, 40, 0.72);
+  color: #dff8ff;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.captcha-question.loading {
+  opacity: 0.7;
+}
+
+.captcha-question button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #65dcff;
+  cursor: pointer;
+}
+
+.captcha-question button:hover {
+  background: rgba(69, 199, 255, 0.12);
+}
+
+.captcha-question button:disabled {
+  cursor: progress;
+  opacity: 0.45;
+}
+
+.captcha-question svg {
+  width: 17px;
+  height: 17px;
 }
 
 .input-wrap {
@@ -1116,7 +1173,7 @@ async function submitRegister() {
   overflow: hidden;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(90deg, #2e8bff 0%, #4f7dff 48%, #8a5cff 100%);
+  background: linear-gradient(90deg, #168fff 0%, #2677f5 52%, #2563eb 100%);
   color: #fff;
   font-size: 16px;
   font-weight: 700;
@@ -1124,20 +1181,8 @@ async function submitRegister() {
   text-indent: 0.4em;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 12px 32px rgba(70, 110, 255, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 12px 32px rgba(35, 112, 240, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-}
-
-.submit-button::before {
-  position: absolute;
-  top: -40%;
-  left: -30%;
-  width: 34%;
-  height: 180%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-  transform: rotate(18deg);
-  animation: buttonShine 3s ease-in-out infinite;
-  content: "";
 }
 
 .submit-button::after {
@@ -1152,7 +1197,7 @@ async function submitRegister() {
 .submit-button:hover {
   transform: translateY(-2px);
   filter: brightness(1.08);
-  box-shadow: 0 18px 42px rgba(90, 120, 255, 0.52), 0 0 28px rgba(138, 92, 255, 0.32);
+  box-shadow: 0 18px 42px rgba(45, 126, 245, 0.52), 0 0 28px rgba(28, 139, 255, 0.28);
 }
 
 .submit-button:active {
@@ -1269,16 +1314,6 @@ async function submitRegister() {
   50% { opacity: 1; transform: translateY(-10px); }
 }
 
-@keyframes buttonShine {
-  0%, 45% { left: -45%; }
-  70%, 100% { left: 120%; }
-}
-
-@keyframes thumbShine {
-  0%, 55% { transform: translateX(-130%); }
-  85%, 100% { transform: translateX(130%); }
-}
-
 @media (max-width: 1600px) {
   .auth-card {
     width: clamp(430px, 36vw, 520px);
@@ -1316,9 +1351,6 @@ async function submitRegister() {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fx-head,
-  .fx-head-b,
-  .fx-sweep::before,
   .fx-grid,
   .fx-nebula::before,
   .fx-nebula::after,

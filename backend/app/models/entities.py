@@ -417,3 +417,43 @@ class WorkflowConfig(Base):
     node_settings: Mapped[str] = mapped_column(Text, default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class SystemSetting(Base):
+    """Persisted governance rules shared by parsing and graph write paths."""
+
+    __tablename__ = "system_settings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    evidence_required: Mapped[bool] = mapped_column(Boolean, default=True)
+    low_confidence_review: Mapped[bool] = mapped_column(Boolean, default=True)
+    version_history: Mapped[bool] = mapped_column(Boolean, default=True)
+    confidence_threshold: Mapped[float] = mapped_column(Float, default=0.72)
+    updated_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class LearningTask(Base):
+    __tablename__ = "learning_tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    source_report_id: Mapped[int | None] = mapped_column(ForeignKey("match_analysis_records.id"), nullable=True, index=True)
+    title: Mapped[str] = mapped_column(String(240))
+    description: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(40), default="pending", index=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class LearningResourceProgress(Base):
+    __tablename__ = "learning_resource_progress"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    source_report_id: Mapped[int | None] = mapped_column(ForeignKey("match_analysis_records.id"), nullable=True, index=True)
+    skill_name: Mapped[str] = mapped_column(String(160), index=True)
+    title: Mapped[str] = mapped_column(String(240))
+    progress: Mapped[int] = mapped_column(Integer, default=0)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
