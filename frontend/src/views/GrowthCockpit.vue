@@ -1,7 +1,7 @@
 <template>
   <div class="cockpit-container" :class="{ 'panel-open': activePanel }">
-    <!-- 返回概览按钮已隐藏（通过路由菜单返回） -->
-    <button v-if="false && !activePanel" class="exit-cockpit-btn" @click="goToOverview">
+    <!-- 返回概览按钮（面板打开时自动隐藏） -->
+    <button v-if="!activePanel" class="exit-cockpit-btn" @click="goToOverview">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       <span>返回概览</span>
     </button>
