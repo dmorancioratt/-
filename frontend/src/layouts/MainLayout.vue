@@ -1,19 +1,32 @@
 <template>
   <div class="app-shell">
-    <div class="workspace-atmosphere" aria-hidden="true">
-      <CosmosBackground />
-    </div>
+    <Teleport to="body">
+      <div class="workspace-atmosphere" aria-hidden="true">
+        <CosmosBackground />
+      </div>
+    </Teleport>
 
     <header class="app-header" v-if="!$route.meta.fullscreen">
       <div class="header-brand">
         <div class="brand-mark"><span>SR</span></div>
         <div class="brand-copy">
           <div class="brand-name">数融智联</div>
-          <div class="brand-desc">岗位能力图谱分析系统</div>
+          <div class="brand-desc">智能驱动人才成长</div>
         </div>
       </div>
 
       <nav class="top-nav" ref="navRef">
+        <button
+          v-for="entry in visibleDirect"
+          :key="'direct-' + entry.path"
+          class="nav-trigger"
+          :class="{ active: isDirectActive(entry) }"
+          type="button"
+          @click="navigateTo(entry.path)"
+        >
+          <el-icon v-if="entry.icon"><component :is="entry.icon" /></el-icon>
+          <span>{{ entry.label }}</span>
+        </button>
         <template v-for="group in visibleGroups" :key="group.key">
           <div class="nav-group" :ref="(el) => setTriggerRef(group.key, el as HTMLElement | null)">
             <button
@@ -24,17 +37,18 @@
             >
               <el-icon v-if="group.icon"><component :is="group.icon" /></el-icon>
               <span>{{ group.label }}</span>
-              <span class="caret" :class="{ open: activeGroupKey === group.key }"></span>
             </button>
           </div>
         </template>
       </nav>
 
       <div class="header-actions">
-        <el-tag effect="light" type="primary">{{ roleLabel }}</el-tag>
+        <span class="role-tag">{{ roleLabel }}</span>
         <el-dropdown trigger="click" @command="handleUserCommand">
           <button class="user-chip">
-            <el-avatar class="user-avatar" :size="32" :src="userAvatar || undefined">{{ userAvatar ? '' : userInitial }}</el-avatar>
+            <div class="user-avatar-wrap">
+              <el-avatar class="user-avatar" :size="34" :src="userAvatar || undefined">{{ userAvatar ? '' : avatarText }}</el-avatar>
+            </div>
             <span>{{ auth.user?.display_name || auth.user?.username }}</span>
           </button>
           <template #dropdown>
@@ -70,15 +84,8 @@
     </Teleport>
 
     <main class="app-main" :class="{ 'app-main--fullscreen': $route.meta.fullscreen }">
-      <div class="app-titlebar" v-if="!$route.meta.fullscreen">
-        <div class="header-title-row">
-          <span class="section-mark"></span>
-          <div class="header-title">{{ $route.meta.title }}</div>
-        </div>
-        <div class="header-desc">{{ headerSubtitle }}</div>
-      </div>
 
-      <button v-if="$route.meta.fullscreen" class="fullscreen-exit-btn" @click="router.push('/overview')" title="返回系统概览">
+      <button v-if="$route.meta.fullscreen && !fullscreenPagesWithOwnHeader.includes(String($route.name))" class="fullscreen-exit-btn" @click="router.push('/overview')" title="返回系统概览">
         <el-icon><ArrowLeft /></el-icon>
         <span>返回</span>
       </button>
@@ -104,8 +111,8 @@ import {
   Files,
   Histogram,
   List,
+  MagicStick,
   Management,
-  Monitor,
   Operation,
   Reading,
   Setting,
@@ -122,10 +129,14 @@ import CosmosBackground from '@/components/CosmosBackground.vue'
 type MenuItem = { path: string; label: string; icon: any; hint: string }
 type MenuGroup = { key: string; label: string; icon: any; items: MenuItem[] }
 
+// 这些全屏页面自带页头（含返回/全屏控制），隐藏左上角固定的"返回"按钮避免遮挡
+const fullscreenPagesWithOwnHeader = ['personal-center', 'dashboards-admin']
+
 const rawMenus: MenuItem[] = [
   { path: '/overview', label: '系统概览', icon: Histogram, hint: '指标概览' },
-  { path: '/growth-cockpit', label: '成长驾驶舱', icon: Monitor, hint: '技能星系 成长全景' },
-  { path: '/personal-center', label: '个人中心', icon: User, hint: '画像 能力 证书' },
+  { path: '/dashboards/hr', label: 'HR 大屏', icon: Histogram, hint: '岗位供需 候选人匹配' },
+  { path: '/dashboards/admin', label: '管理员大屏', icon: Setting, hint: '平台治理 风险与发布' },
+  { path: '/personal-center', label: '个人驾驶舱', icon: User, hint: '技能星系 成长全景' },
   { path: '/hr-candidates', label: '候选人管理', icon: User, hint: '候选人 简历 画像' },
   { path: '/datasets', label: '数据源管理', icon: Files, hint: '数据源 上传 质量' },
   { path: '/jd-parser', label: 'JD解析', icon: Document, hint: 'JD 解析 岗位抽取' },
@@ -140,36 +151,57 @@ const rawMenus: MenuItem[] = [
   { path: '/digital-interviewer', label: '数字人面试官', icon: VideoCamera, hint: '数字人 面试' },
   { path: '/review-tasks', label: '人工审核', icon: List, hint: '人工审核' },
   { path: '/evaluation', label: '测试评估', icon: DataAnalysis, hint: '测试评估' },
+  { path: '/rag-admin', label: 'RAG 检索增强', icon: MagicStick, hint: '向量检索 知识问答' },
   { path: '/settings', label: '系统设置', icon: Setting, hint: '系统设置' },
   { path: '/account-settings', label: '账号设置', icon: Setting, hint: '账号 密码 邮箱' }
 ]
 
 const roleRouteMap: Record<string, string[]> = {
   candidate: [
-    '/overview', '/growth-cockpit', '/personal-center', '/skill-graph', '/capability-evolution',
+    '/overview', '/personal-center', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/learning-path', '/digital-interviewer', '/account-settings'
   ],
   hr: [
     '/overview', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
     '/emerging-jobs', '/job-evolution', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/digital-interviewer',
-    '/review-tasks', '/evaluation', '/settings', '/account-settings'
+    '/review-tasks', '/evaluation', '/settings', '/account-settings',
+    '/rag-admin'
   ],
   admin: [
-    '/overview', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
+    '/overview', '/dashboards/admin', '/hr-candidates', '/datasets', '/jd-parser', '/jobs',
     '/emerging-jobs', '/job-evolution', '/skill-graph', '/capability-evolution',
     '/resume-parser', '/match-analysis', '/digital-interviewer',
-    '/review-tasks', '/evaluation', '/settings', '/account-settings'
+    '/review-tasks', '/evaluation', '/settings', '/account-settings',
+    '/rag-admin'
   ]
 }
 
 const groupDefs: Array<{ key: string; label: string; icon: any; items: string[] }> = [
-  { key: 'overview', label: '概览', icon: Histogram, items: ['/overview', '/growth-cockpit', '/hr-candidates', '/personal-center'] },
+  { key: 'overview', label: '概览', icon: Histogram, items: ['/dashboards/hr', '/dashboards/admin', '/hr-candidates'] },
   { key: 'jobs', label: '岗位管理', icon: Management, items: ['/datasets', '/jd-parser', '/jobs', '/emerging-jobs', '/job-evolution'] },
   { key: 'graph', label: '能力分析', icon: Connection, items: ['/skill-graph', '/capability-evolution'] },
   { key: 'match', label: '人岗匹配', icon: Aim, items: ['/resume-parser', '/match-analysis', '/learning-path'] },
   { key: 'ai', label: 'AI 互动', icon: VideoCamera, items: ['/digital-interviewer'] },
-  { key: 'ops', label: '运营管理', icon: Setting, items: ['/review-tasks', '/evaluation', '/settings', '/account-settings'] }
+  { key: 'ops', label: '运营管理', icon: Setting, items: ['/review-tasks', '/evaluation', '/rag-admin', '/settings', '/account-settings'] }
+]
+
+const hrGroupDefs: Array<{ key: string; label: string; icon: any; items: string[] }> = [
+  { key: 'overview', label: '概览', icon: Histogram, items: ['/overview', '/hr-candidates'] },
+  { key: 'data-fusion', label: '多元数据融合中心', icon: Files, items: ['/datasets'] },
+  { key: 'jobs', label: '岗位管理', icon: Management, items: ['/jd-parser', '/jobs', '/emerging-jobs', '/job-evolution'] },
+  { key: 'graph', label: '能力分析', icon: Connection, items: ['/skill-graph', '/capability-evolution'] },
+  { key: 'match', label: '人岗匹配', icon: Aim, items: ['/resume-parser', '/match-analysis'] },
+  { key: 'ai', label: 'AI 互动', icon: VideoCamera, items: ['/digital-interviewer'] },
+  { key: 'ops', label: '运营管理', icon: Setting, items: ['/review-tasks', '/evaluation', '/rag-admin', '/settings', '/account-settings'] }
+]
+
+const adminGroupDefs: Array<{ key: string; label: string; icon: any; items: string[] }> = [
+  { key: 'overview', label: '概览', icon: Histogram, items: ['/overview', '/dashboards/admin', '/hr-candidates'] },
+  { key: 'jobs', label: '岗位管理', icon: Management, items: ['/datasets', '/jd-parser', '/jobs', '/emerging-jobs', '/job-evolution'] },
+  { key: 'graph', label: '能力分析', icon: Connection, items: ['/skill-graph', '/capability-evolution'] },
+  { key: 'match', label: '人岗匹配', icon: Aim, items: ['/resume-parser', '/match-analysis'] },
+  { key: 'ops', label: '运营管理', icon: Setting, items: ['/review-tasks', '/evaluation', '/rag-admin', '/settings', '/account-settings'] }
 ]
 
 const auth = useAuthStore()
@@ -206,20 +238,46 @@ const dropdownStyle = computed(() => {
 
 const visibleGroups = computed<MenuGroup[]>(() => {
   const allowed = new Set(roleRouteMap[auth.role || 'candidate'] || roleRouteMap.candidate)
-  return groupDefs
+  const isHr = auth.role === 'hr'
+  const isAdmin = auth.role === 'admin'
+  const groups = isHr ? hrGroupDefs : isAdmin ? adminGroupDefs : groupDefs
+  return groups
     .map((g) => ({
       key: g.key,
       label: g.label,
       icon: g.icon,
       items: g.items
-        .map((p) => rawMenus.find((m) => m.path === p))
-        .filter((m): m is MenuItem => Boolean(m && allowed.has(m.path)))
+        .map((p) => {
+          const menu = rawMenus.find((m) => m.path === p)
+          if (!menu || !allowed.has(p)) return null
+          if (isHr && p === '/overview') return { ...menu, path: '/dashboards/hr' }
+          if (isHr && p === '/datasets') return { ...menu, label: '多数据源' }
+          return menu
+        })
+        .filter((m): m is MenuItem => Boolean(m))
     }))
     .filter((g) => g.items.length > 0)
 })
 
+// 平级直达入口：系统概览 / 驾驶舱 由下拉改为顶导直接按钮
+const directEntries: Array<{ path: string; label: string; icon: any }> = [
+  { path: '/overview', label: '系统概览', icon: Histogram },
+  { path: '/personal-center', label: '驾驶舱', icon: User },
+]
 
-const roleLabel = computed(() => (auth.role === 'hr' ? '企业 HR' : auth.role === 'admin' ? '管理员' : '求职者/学生'))
+const visibleDirect = computed(() => {
+  if (auth.role !== 'candidate') return []
+  const allowed = new Set(roleRouteMap.candidate)
+  return directEntries.filter((e) => allowed.has(e.path))
+})
+
+function isDirectActive(entry: { path: string }) {
+  return route.path === entry.path
+}
+
+
+const roleLabel = computed(() => (auth.role === 'hr' ? '企业 HR' : auth.role === 'admin' ? '管理员' : '求职端/学生'))
+const avatarText = computed(() => (auth.role === 'hr' ? 'HR' : auth.role === 'admin' ? '管' : '学'))
 const userInitial = computed(() => (auth.user?.display_name || auth.user?.username || '用').slice(0, 1))
 const userAvatar = computed(() => (auth.role === 'candidate' ? candidateAvatar.value : ''))
 
@@ -272,8 +330,9 @@ async function navigateTo(path: string) {
 const headerSubtitle = computed(() => {
   const map: Record<string, string> = {
     '/overview': '查看岗位数据、能力图谱、解析质量和系统运行概况',
-    '/growth-cockpit': '360°技能星系全景，掌握能力现状、成长路径与岗位匹配',
-    '/personal-center': '维护个人画像，查看匹配分析、学习路径和面试练习',
+    '/dashboards/hr': '岗位供需、人才优先联系、招聘动作与产业趋势全景',
+    '/dashboards/admin': '数据源质量、治理重点、评测基线与可信发布链路',
+    '/personal-center': '360°技能星系全景，掌握能力现状、成长路径与岗位匹配',
     '/hr-candidates': '查看求职者提交的个人画像、简历、技能证书和匹配准备情况',
     '/datasets': '管理多源 JD 数据，观察质量评分、重复率、噪声率和处理状态',
     '/jd-parser': '输入岗位 JD 文本，提取岗位名称、职责、技能、工具、证书、场景和证据来源',
@@ -346,31 +405,16 @@ async function handleUserCommand(command: string) {
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 18px;
-  height: 72px;
+  gap: 24px;
+  height: 70px;
   flex: 0 0 auto;
   overflow: visible;
-  border-bottom: 1px solid rgba(100, 220, 255, 0.4);
-  background:
-    radial-gradient(circle at 15% 0%, rgba(0, 200, 245, 0.35), transparent 35%),
-    radial-gradient(circle at 85% 20%, rgba(30, 123, 255, 0.35), transparent 35%),
-    linear-gradient(180deg, rgba(10, 40, 90, 0.92), rgba(8, 50, 110, 0.85));
-  box-shadow: 0 8px 32px rgba(0, 150, 255, 0.2), 0 0 60px rgba(0, 200, 245, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.app-header::after {
-  position: absolute;
-  left: 24px;
-  bottom: 0;
-  width: 176px;
-  height: 3px;
-  content: "";
-  border-radius: 99px;
-  background: linear-gradient(90deg, #1e7bff, #00e5ff, #00c8f5);
-  box-shadow: 0 0 24px rgba(0, 229, 255, 0.6), 0 0 40px rgba(30, 123, 255, 0.4);
-  animation: headerLineBreath 4.8s ease-in-out infinite;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.25);
+  background: linear-gradient(180deg, rgba(7, 20, 50, 0.98) 0%, rgba(8, 25, 60, 0.96) 100%);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  padding: 0 24px;
 }
 
 .header-brand {
@@ -378,24 +422,19 @@ async function handleUserCommand(command: string) {
   align-items: center;
   gap: 10px;
   flex: 0 0 auto;
-  padding-left: 6px;
-  padding-right: 4px;
 }
 
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 14px;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.92), transparent 28%),
-    linear-gradient(135deg, #2563eb, #06b6d4);
-  box-shadow: 0 0 24px rgba(6, 182, 212, 0.28);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #0ea5e9 100%);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
   color: #fff;
-  font-size: 15px;
-  font-weight: 950;
+  font-size: 16px;
+  font-weight: 900;
 }
 
 .brand-copy {
@@ -403,24 +442,25 @@ async function handleUserCommand(command: string) {
 }
 
 .brand-name {
-  color: #ecf8ff;
-  font-size: 17px;
-  font-weight: 950;
-  line-height: 1.1;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
 }
 
 .brand-desc {
-  margin-top: 3px;
-  color: #9cc4e8;
+  margin-top: 2px;
+  color: rgba(148, 197, 255, 0.8);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .top-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex: 1 1 auto;
   min-width: 0;
   height: 100%;
@@ -444,83 +484,78 @@ async function handleUserCommand(command: string) {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 40px;
-  border: 1px solid transparent;
-  border-radius: 14px;
-  padding: 0 14px;
-  background: rgba(30, 123, 255, 0.1);
-  color: #e0f4ff;
+  gap: 7px;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  padding: 0 18px;
+  background: transparent;
+  color: rgba(186, 220, 255, 0.85);
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition: all 200ms ease;
 }
 
 .nav-trigger .el-icon {
-  font-size: 16px;
-  color: #4dd0ff;
-  transition: transform 200ms ease, color 200ms ease;
-  filter: drop-shadow(0 0 6px rgba(77, 208, 255, 0.5));
+  font-size: 17px;
+  color: rgba(96, 165, 250, 0.9);
+  transition: all 200ms ease;
 }
 
 .nav-trigger:hover {
-  border-color: rgba(100, 220, 255, 0.5);
-  background: linear-gradient(135deg, rgba(30, 123, 255, 0.35), rgba(0, 200, 245, 0.25));
+  background: rgba(59, 130, 246, 0.12);
   color: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 180, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
 }
 
-.nav-trigger:hover .el-icon,
-.nav-trigger.active .el-icon {
-  color: #00e5ff;
-  filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
+.nav-trigger:hover .el-icon {
+  color: #60a5fa;
 }
 
 .nav-trigger.active {
-  border-color: rgba(100, 220, 255, 0.6);
-  background: linear-gradient(135deg, rgba(30, 123, 255, 0.45), rgba(0, 200, 245, 0.35));
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.6), rgba(14, 165, 233, 0.5));
   color: #ffffff;
-  box-shadow: 0 6px 28px rgba(0, 180, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
 }
 
-.caret {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  margin-left: 2px;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid currentColor;
-  transition: transform 200ms ease;
-  opacity: 0.7;
+.nav-trigger.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.8), 0 0 20px rgba(14, 165, 233, 0.5);
 }
 
-.caret.open {
-  transform: rotate(180deg);
-  opacity: 1;
+.nav-trigger.active .el-icon {
+  color: #93c5fd;
+  filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.6));
 }
 
 .nav-dropdown {
   position: fixed;
   z-index: 2147483647;
-  top: calc(100% + 2px);
+  top: calc(100% + 4px);
   left: 0;
   min-width: 280px;
   max-height: calc(100vh - 92px);
   overflow-y: auto;
-  border: 1px solid rgba(100, 220, 255, 0.5);
-  border-radius: 18px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 14px;
   padding: 8px;
-  background: linear-gradient(180deg, rgba(10, 50, 110, 0.95), rgba(8, 40, 90, 0.95));
-  box-shadow: 0 20px 60px rgba(0, 100, 200, 0.4), 0 0 40px rgba(0, 200, 245, 0.15);
+  background: linear-gradient(180deg, rgba(10, 25, 60, 0.98), rgba(8, 22, 55, 0.98));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(37, 99, 235, 0.15);
   animation: dropdownIn 220ms ease;
   pointer-events: auto !important;
   user-select: none;
   isolation: isolate;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .nav-dropdown::before {
@@ -530,10 +565,10 @@ async function handleUserCommand(command: string) {
   width: 12px;
   height: 12px;
   content: "";
-  border-top: 1px solid rgba(100, 220, 255, 0.5);
-  border-left: 1px solid rgba(100, 220, 255, 0.5);
+  border-top: 1px solid rgba(59, 130, 246, 0.3);
+  border-left: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 3px;
-  background: rgba(10, 50, 110, 0.95);
+  background: rgba(10, 25, 60, 0.98);
   transform: rotate(45deg);
 }
 
@@ -543,12 +578,12 @@ async function handleUserCommand(command: string) {
   gap: 12px;
   width: 100%;
   height: auto;
-  min-height: 48px;
+  min-height: 46px;
   border: 1px solid transparent;
-  border-radius: 13px;
+  border-radius: 10px;
   padding: 8px 12px;
   background: transparent;
-  color: #e6f5ff;
+  color: rgba(214, 233, 255, 0.9);
   text-align: left;
   text-decoration: none;
   cursor: pointer;
@@ -558,9 +593,8 @@ async function handleUserCommand(command: string) {
 .dropdown-item .el-icon {
   flex: 0 0 auto;
   font-size: 18px;
-  color: #4dd0ff;
+  color: #60a5fa;
   transition: transform 200ms ease, color 200ms ease;
-  filter: drop-shadow(0 0 4px rgba(77, 208, 255, 0.4));
 }
 
 .dropdown-item .item-copy {
@@ -572,19 +606,18 @@ async function handleUserCommand(command: string) {
 
 .dropdown-item b {
   display: block;
-  color: #f0faff;
+  color: #f0f7ff;
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 600;
   line-height: 1.2;
-  text-shadow: 0 0 8px rgba(0, 200, 245, 0.3);
 }
 
 .dropdown-item small {
   display: block;
   margin-top: 3px;
-  color: #8ec8f0;
+  color: rgba(148, 185, 230, 0.8);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -594,88 +627,109 @@ async function handleUserCommand(command: string) {
   flex: 0 0 auto;
   margin-left: auto;
   font-size: 14px;
-  color: #4dd0ff;
+  color: #60a5fa;
   opacity: 0;
   transition: opacity 200ms ease, transform 200ms ease;
 }
 
 .dropdown-item:hover {
-  border-color: rgba(100, 220, 255, 0.5);
-  background: linear-gradient(135deg, rgba(30, 123, 255, 0.35), rgba(0, 200, 245, 0.25));
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(59, 130, 246, 0.15);
   transform: translateX(3px);
-  box-shadow: 0 4px 16px rgba(0, 180, 255, 0.25), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
 .dropdown-item:hover .el-icon,
 .dropdown-item.active .el-icon {
-  color: #00e5ff;
-  transform: scale(1.1);
-  filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.7));
+  color: #93c5fd;
+  transform: scale(1.08);
 }
 
 .dropdown-item:hover .item-arrow,
 .dropdown-item.active .item-arrow {
   opacity: 1;
   transform: translateX(2px);
-  color: #00e5ff;
+  color: #93c5fd;
 }
 
 .dropdown-item.active {
-  border-color: rgba(100, 220, 255, 0.5);
-  background: linear-gradient(135deg, rgba(30, 123, 255, 0.4), rgba(0, 200, 245, 0.3));
-  box-shadow: 0 4px 20px rgba(0, 180, 255, 0.3);
+  border-color: rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.2);
 }
 
 .dropdown-item.active b {
   color: #ffffff;
-  text-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex: 0 0 auto;
-  padding-right: 4px;
 }
 
-.user-avatar {
-  background: linear-gradient(135deg, var(--primary), var(--cyan));
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25);
-  font-weight: 950;
+.role-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  background: #ffffff;
+  color: #1e40af;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .user-chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  max-width: 176px;
-  border: 1px solid rgba(99, 207, 255, 0.36);
-  border-radius: 14px;
-  padding: 4px 10px 4px 4px;
-  background: rgba(4, 27, 68, 0.66);
-  color: #eaf7ff;
-  font-weight: 850;
+  gap: 10px;
+  border: none;
+  border-radius: 999px;
+  padding: 3px 14px 3px 3px;
+  background: rgba(59, 130, 246, 0.15);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease;
+}
+
+.user-chip:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+.user-avatar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+  font-weight: 800;
+  font-size: 15px;
+  border: 2px solid rgba(255,255,255,0.2);
 }
 
 .user-chip span {
   overflow: hidden;
   min-width: 0;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .app-main {
   position: relative;
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 70px);
   padding: 18px 22px 28px;
   background: transparent !important;
 }
 
 .app-main--fullscreen {
   padding: 0;
-  min-height: 100vh;
+  height: 100vh;
   background: transparent !important;
   overflow-y: auto;
   overflow-x: hidden;
@@ -690,24 +744,22 @@ async function handleUserCommand(command: string) {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: rgba(10, 25, 60, 0.75);
+  background: rgba(10, 25, 60, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 245, 255, 0.3);
-  border-radius: 8px;
-  color: #00f5ff;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 10px;
+  color: #93c5fd;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 0 20px rgba(0, 245, 255, 0.15);
 }
 
 .fullscreen-exit-btn:hover {
-  background: rgba(0, 245, 255, 0.15);
-  border-color: rgba(0, 245, 255, 0.6);
-  box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
-  transform: translateX(-2px);
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(96, 165, 250, 0.6);
+  color: #ffffff;
 }
 
 .fullscreen-exit-btn .el-icon {
@@ -718,8 +770,12 @@ async function handleUserCommand(command: string) {
   position: relative;
   z-index: 1;
   margin-bottom: 14px;
-  padding: 4px 4px 14px;
-  border-bottom: 1px solid rgba(105, 213, 255, 0.26);
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .app-titlebar .header-title-row {
@@ -732,26 +788,25 @@ async function handleUserCommand(command: string) {
   width: 4px;
   height: 24px;
   border-radius: 99px;
-  background: linear-gradient(180deg, #2563eb, #06b6d4);
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.3);
+  background: linear-gradient(180deg, #2563eb, #0ea5e9);
+  box-shadow: 0 0 14px rgba(14, 165, 233, 0.4);
 }
 
 .app-titlebar .header-title {
-  color: #ecf8ff;
+  color: #ffffff;
   font-size: 22px;
-  font-weight: 950;
+  font-weight: 800;
   line-height: 1.2;
 }
 
 .app-titlebar .header-desc {
   margin-top: 6px;
-  color: #9cc4e8;
+  color: rgba(148, 197, 255, 0.8);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 }
 
-.app-main > :deep(.RouterView),
-.app-main > :deep(> *) {
+.app-main > :deep(*) {
   position: relative;
   z-index: 1;
 }
@@ -767,12 +822,12 @@ async function handleUserCommand(command: string) {
 
 @media (max-width: 1380px) {
   .app-header {
-    gap: 10px;
+    gap: 12px;
+    padding: 0 16px;
   }
 
   .header-brand {
     gap: 8px;
-    padding-right: 0;
   }
 
   .brand-desc {
@@ -780,15 +835,15 @@ async function handleUserCommand(command: string) {
   }
 
   .header-actions {
-    gap: 6px;
-  }
-
-  .user-chip {
-    padding: 3px;
+    gap: 8px;
   }
 
   .user-chip > span {
     display: none;
+  }
+
+  .nav-trigger {
+    padding: 0 12px;
   }
 }
 
@@ -802,23 +857,18 @@ async function handleUserCommand(command: string) {
     transform: translateY(0);
   }
 }
-
-@keyframes headerLineBreath {
-  0%,
-  100% {
-    opacity: 0.72;
-    width: 176px;
-  }
-
-  50% {
-    opacity: 1;
-    width: 236px;
-  }
-}
 </style>
 
 <style>
 html body.theme-dark .app-main {
   background: transparent !important;
+}
+
+html body.theme-dark #app .app-main .app-titlebar {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 </style>

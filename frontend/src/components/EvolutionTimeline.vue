@@ -1,8 +1,6 @@
 <template>
   <section class="evo-dashboard">
-    <div class="scanline-global"></div>
-
-    <section class="summary-row">
+<section class="summary-row">
       <div v-for="(item, i) in summaryCards" :key="i" class="summary-card">
         <div class="frame"></div>
         <div class="inner">
@@ -224,19 +222,6 @@ function onPanelMouseLeave(e: MouseEvent) {
 .evo-dashboard::before { top: 2px; }
 .evo-dashboard::after { bottom: 3px; }
 
-.scanline-global {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -8%;
-  height: 7%;
-  z-index: 3;
-  pointer-events: none;
-  background: linear-gradient(180deg,transparent,rgba(87,239,255,.035),transparent);
-  animation: globalScan 9s linear infinite;
-  mix-blend-mode: screen;
-}
-@keyframes globalScan { to { top: 108%; } }
 
 .summary-row {
   display: grid;

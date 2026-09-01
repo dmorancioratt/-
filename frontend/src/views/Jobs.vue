@@ -17,6 +17,31 @@
       </div>
     </PageHeader>
 
+    <div class="panel job-analysis">
+      <div class="analysis-head">
+        <span class="analysis-mark"></span>
+        <div class="analysis-title">
+          <b>岗位数据分析</b>
+          <small>领域分布 · 等级结构 · 热门技能需求 · 随筛选实时联动</small>
+        </div>
+        <span class="analysis-badge">VISUAL ANALYTICS</span>
+      </div>
+      <div class="analysis-grid">
+        <div class="analysis-card">
+          <div class="analysis-card-title"><i class="dot dot-blue"></i>领域分布 · 玫瑰光谱</div>
+          <EChart :option="roseOption" class="analysis-chart" />
+        </div>
+        <div class="analysis-card">
+          <div class="analysis-card-title"><i class="dot dot-violet"></i>等级结构 · 极坐标雷达柱</div>
+          <EChart :option="levelOption" class="analysis-chart" />
+        </div>
+        <div class="analysis-card">
+          <div class="analysis-card-title"><i class="dot dot-cyan"></i>热门技能需求 TOP8 · 能量条</div>
+          <EChart :option="skillOption" class="analysis-chart" />
+        </div>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="toolbar job-toolbar">
         <el-select v-model="domain" clearable placeholder="所属领域" style="width: 180px">
@@ -32,7 +57,7 @@
         <span class="result-count">当前显示 {{ filtered.length }} 条</span>
       </div>
 
-      <el-table :data="filtered" stripe class="job-table" @row-dblclick="openDetail">
+      <el-table :data="paged" stripe class="job-table" @row-dblclick="openDetail">
         <el-table-column prop="name" label="岗位名称" min-width="190">
           <template #default="{ row }">
             <div class="job-name-cell">
@@ -61,6 +86,17 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <div class="table-pagination">
+        <el-pagination
+          v-model:current-page="page"
+          :page-size="pageSize"
+          :total="filtered.length"
+          :pager-count="7"
+          background
+          layout="total, prev, pager, next, jumper"
+        />
+      </div>
     </div>
 
     <el-dialog v-model="detailVisible" class="tech-dialog" width="680px" destroy-on-close align-center>
@@ -157,9 +193,10 @@
 
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
+import EChart from '@/components/EChart.vue'
 import { api } from '@/api/http'
 import { useAuthStore } from '@/stores/auth'
 
@@ -188,6 +225,146 @@ const filtered = computed(() =>
       (!level.value || row.level === level.value)
   )
 )
+
+const page = ref(1)
+const pageSize = 12
+const paged = computed(() =>
+  filtered.value.slice((page.value - 1) * pageSize, page.value * pageSize)
+)
+watch([domain, type, level], () => {
+  page.value = 1
+})
+watch(
+  () => filtered.value.length,
+  (len) => {
+    const maxPage = Math.max(1, Math.ceil(len / pageSize))
+    if (page.value > maxPage) page.value = maxPage
+  }
+)
+
+const CHART_COLORS = ['#38bdf8', '#7dd3fc', '#0ea5e9', '#8f7cff', '#36d7ff', '#60a5fa', '#22d3ee', '#ffb65c']
+
+function countBy(key: 'domain' | 'level') {
+  const map = new Map<string, number>()
+  filtered.value.forEach((row) => map.set(row[key], (map.get(row[key]) || 0) + 1))
+  return [...map.entries()].sort((a, b) => b[1] - a[1])
+}
+
+const domainStats = computed(() => countBy('domain'))
+const levelStats = computed(() => countBy('level'))
+const skillStats = computed(() => {
+  const map = new Map<string, number>()
+  filtered.value.forEach((row) =>
+    (row.requirements?.required_skills || []).forEach((skill: string) => {
+      if (skill) map.set(skill, (map.get(skill) || 0) + 1)
+    })
+  )
+  return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8)
+})
+
+const tooltipStyle = {
+  backgroundColor: 'rgba(7, 26, 53, 0.92)',
+  borderColor: 'rgba(78, 200, 255, 0.35)',
+  borderWidth: 1,
+  textStyle: { color: '#d6f1ff', fontSize: 12 }
+}
+
+const roseOption = computed(() => ({
+  backgroundColor: 'transparent',
+  color: CHART_COLORS,
+  tooltip: { trigger: 'item', ...tooltipStyle },
+  series: [
+    {
+      type: 'pie',
+      roseType: 'area',
+      radius: ['16%', '76%'],
+      center: ['50%', '52%'],
+      itemStyle: {
+        borderRadius: 6,
+        borderColor: 'rgba(7, 26, 53, 0.9)',
+        borderWidth: 2,
+        shadowBlur: 14,
+        shadowColor: 'rgba(56, 189, 248, 0.35)'
+      },
+      label: { color: '#bfe3ff', fontSize: 11 },
+      labelLine: { lineStyle: { color: 'rgba(125, 211, 252, 0.4)' } },
+      data: domainStats.value.map(([name, value]) => ({ name, value }))
+    }
+  ]
+}))
+
+const levelOption = computed(() => ({
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', ...tooltipStyle, axisPointer: { type: 'shadow' } },
+  polar: { radius: ['16%', '70%'], center: ['50%', '52%'] },
+  angleAxis: {
+    data: levelStats.value.map(([name]) => name),
+    startAngle: 90,
+    axisLine: { lineStyle: { color: 'rgba(125, 211, 252, 0.25)' } },
+    axisTick: { show: false },
+    axisLabel: { color: '#bfe3ff', fontSize: 11 }
+  },
+  radiusAxis: {
+    axisLine: { show: false },
+    axisTick: { show: false },
+    axisLabel: { color: 'rgba(168, 207, 232, 0.55)', fontSize: 10 },
+    splitLine: { lineStyle: { color: 'rgba(125, 211, 252, 0.12)' } }
+  },
+  series: [
+    {
+      type: 'bar',
+      coordinateSystem: 'polar',
+      roundCap: true,
+      barWidth: '55%',
+      itemStyle: {
+        borderRadius: 4,
+        color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 1, colorStops: [
+          { offset: 0, color: '#0ea5e9' },
+          { offset: 1, color: '#7dd3fc' }
+        ] },
+        shadowBlur: 10,
+        shadowColor: 'rgba(56, 189, 248, 0.4)'
+      },
+      data: levelStats.value.map(([, value]) => value)
+    }
+  ]
+}))
+
+const skillOption = computed(() => {
+  const data = skillStats.value.slice().reverse()
+  return {
+    backgroundColor: 'transparent',
+    tooltip: { trigger: 'axis', ...tooltipStyle, axisPointer: { type: 'shadow' } },
+    grid: { left: 10, right: 44, top: 8, bottom: 8, containLabel: true },
+    xAxis: { type: 'value', show: false },
+    yAxis: {
+      type: 'category',
+      data: data.map(([name]) => name),
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#bfe3ff', fontSize: 11 }
+    },
+    series: [
+      {
+        type: 'bar',
+        barWidth: 9,
+        showBackground: true,
+        backgroundStyle: { color: 'rgba(56, 189, 248, 0.08)', borderRadius: 5 },
+        itemStyle: {
+          borderRadius: 5,
+          color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [
+            { offset: 0, color: '#0ea5e9' },
+            { offset: 1, color: '#7dd3fc' }
+          ] },
+          shadowBlur: 8,
+          shadowColor: 'rgba(56, 189, 248, 0.45)'
+        },
+        label: { show: true, position: 'right', color: '#7dd3fc', fontSize: 11, fontWeight: 700 },
+        data: data.map(([, value]) => value)
+      }
+    ]
+  }
+})
 
 function resetFilters() {
   domain.value = ''
@@ -273,6 +450,102 @@ onMounted(async () => {
 })
 </script>
 
+<style>
+/* Unscoped glass overrides — specificity must beat theme-fixes.css (loaded after page styles).
+   theme-fixes: body.theme-dark .app-main:not(.app-main--dashboard) :is(.panel,.page-toolbar,.job-summary>div,...) { background:#0a1c2b!important; box-shadow:none!important }
+   styles.css:  body:not(.login-active) .app-main :is(.panel,.page-toolbar,...) { background:linear-gradient(...)!important }
+   Both ≈ 0-0-41. We add .page.jobs-page + per-element classes to reach 0-0-61+. */
+
+/* === 1. .page-toolbar 工具栏（包裹 job-summary） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .page-toolbar,
+body:not(.login-active) .app-main .page.jobs-page .page-toolbar {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  padding: 12px 16px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .page-toolbar::before,
+body:not(.login-active) .app-main .page.jobs-page .page-toolbar::before {
+  display: none !important;
+}
+
+/* === 2. .job-summary > div 三张统计小卡（theme-fixes 将其强制 #0a1c2b） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .job-summary > div,
+body:not(.login-active) .app-main .page.jobs-page .job-summary > div {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  padding: 10px 12px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .job-summary b,
+body:not(.login-active) .app-main .page.jobs-page .job-summary b {
+  color: #effbff !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .job-summary span,
+body:not(.login-active) .app-main .page.jobs-page .job-summary span {
+  color: #85a9c4 !important;
+}
+
+/* === 3. .panel 主面板（包裹 job-toolbar + job-table） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page > .panel,
+body:not(.login-active) .app-main .page.jobs-page > .panel {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 13px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(161, 231, 255, 0.08),
+    0 8px 32px rgba(0, 10, 40, 0.25) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: none !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page > .panel::before,
+body:not(.login-active) .app-main .page.jobs-page > .panel::before {
+  display: none !important;
+}
+
+/* === 4. .el-select__wrapper 三个下拉筛选器（theme-fixes 将其强制 #0a1d2c 实色） === */
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__wrapper,
+body:not(.login-active) .app-main .page.jobs-page .el-select__wrapper {
+  border: 1px solid rgba(78, 200, 255, 0.18) !important;
+  border-radius: 10px !important;
+  background: rgba(8, 42, 92, 0.35) !important;
+  box-shadow: inset 0 1px 0 rgba(161, 231, 255, 0.08) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__wrapper:hover,
+body:not(.login-active) .app-main .page.jobs-page .el-select__wrapper:hover {
+  border-color: rgba(78, 200, 255, 0.35) !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__wrapper.is-focused,
+body:not(.login-active) .app-main .page.jobs-page .el-select__wrapper.is-focused {
+  border-color: rgba(78, 200, 255, 0.45) !important;
+  box-shadow: inset 0 1px 0 rgba(161, 231, 255, 0.08), 0 0 0 3px rgba(54, 215, 255, 0.12) !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__placeholder,
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__selected-item,
+body:not(.login-active) .app-main .page.jobs-page .el-select__placeholder,
+body:not(.login-active) .app-main .page.jobs-page .el-select__selected-item {
+  color: #d6f1ff !important;
+}
+body.theme-dark .app-main:not(.app-main--dashboard) .page.jobs-page .el-select__caret,
+body:not(.login-active) .app-main .page.jobs-page .el-select__caret {
+  color: #85b8d6 !important;
+}
+</style>
+
 <style scoped>
 .job-summary {
   display: grid;
@@ -311,6 +584,104 @@ onMounted(async () => {
   color: #64748b;
   font-size: 13px;
   font-weight: 800;
+}
+
+/* ===== 数据分析面板 ===== */
+.job-analysis {
+  margin-bottom: 16px;
+}
+
+.analysis-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.analysis-mark {
+  width: 4px;
+  height: 34px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #7dd3fc, #0ea5e9);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
+}
+
+.analysis-title b {
+  display: block;
+  color: #eaf8ff;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.analysis-title small {
+  color: #85a9c4;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.analysis-badge {
+  margin-left: auto;
+  padding: 5px 12px;
+  border: 1px solid rgba(78, 200, 255, 0.3);
+  border-radius: 999px;
+  color: #7dd3fc;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.analysis-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(78, 200, 255, 0.16);
+  border-radius: 12px;
+  padding: 12px 12px 6px;
+  background: rgba(7, 28, 62, 0.35);
+}
+
+.analysis-card-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+  color: #a8d4ef;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.analysis-card-title .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.dot-blue { background: #38bdf8; box-shadow: 0 0 8px rgba(56, 189, 248, 0.8); }
+.dot-violet { background: #8f7cff; box-shadow: 0 0 8px rgba(143, 124, 255, 0.8); }
+.dot-cyan { background: #36d7ff; box-shadow: 0 0 8px rgba(54, 215, 255, 0.8); }
+
+.analysis-chart {
+  width: 100%;
+  height: 248px;
+}
+
+@media (max-width: 1100px) {
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== 表格分页 ===== */
+.table-pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 14px;
 }
 
 .job-name-cell {

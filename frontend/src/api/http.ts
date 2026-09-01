@@ -75,6 +75,8 @@ export const api = {
   approveTask: (id: number) => http.post(`/api/review-tasks/${id}/approve`).then((res) => res.data),
   rejectTask: (id: number) => http.post(`/api/review-tasks/${id}/reject`).then((res) => res.data),
   evaluation: () => http.get('/api/evaluation/metrics').then((res) => res.data),
+  governanceHealth: () => http.get('/api/governance/health').then((res) => res.data),
+  hallucinationStats: () => http.get('/api/governance/hallucination').then((res) => res.data),
   resumes: () => http.get('/api/resumes').then((res) => res.data),
   saveParsedResume: (payload: { resume: Record<string, unknown>; source_filename?: string; raw_text?: string }) =>
     http.post('/api/resumes/save-parsed', payload).then((res) => res.data),
@@ -92,5 +94,41 @@ export const api = {
   pingVirtualHuman: (session_id: string) =>
     http.post('/api/digital-interviewer/virtual-human/ping', { session_id }, { timeout: 45000 }).then((res) => res.data),
   stopVirtualHuman: (session_id: string) =>
-    http.post('/api/digital-interviewer/virtual-human/stop', { session_id }, { timeout: 45000 }).then((res) => res.data)
+    http.post('/api/digital-interviewer/virtual-human/stop', { session_id }, { timeout: 45000 }).then((res) => res.data),
+
+  // ---------- RAG ----------
+  ragStats: () => http.get('/api/rag/stats').then((res) => res.data),
+  ragStatus: () => http.get('/api/rag/status').then((res) => res.data),
+  ragIndex: (payload: { source?: string; force_rebuild?: boolean }) =>
+    http.post('/api/rag/index', payload, { timeout: 180000 }).then((res) => res.data),
+  ragIndexSource: (source: string, payload: { force_rebuild?: boolean }) =>
+    http.post(`/api/rag/index/${source}`, payload, { timeout: 180000 }).then((res) => res.data),
+  ragQueryJob: (payload: { question: string; top_k?: number }) =>
+    http.post('/api/rag/query/job', payload, { timeout: 60000 }).then((res) => res.data),
+  ragQuerySkill: (payload: { question: string; top_k?: number }) =>
+    http.post('/api/rag/query/skill', payload, { timeout: 60000 }).then((res) => res.data),
+  ragQueryMatchExplain: (payload: { candidate_id: number; job_id: number; question?: string; top_k?: number }) =>
+    http.post('/api/rag/query/match-explain', payload, { timeout: 60000 }).then((res) => res.data),
+  ragQueryInterviewHint: (payload: { candidate_id: number; job_id: number; focus_skill: string; top_k?: number }) =>
+    http.post('/api/rag/query/interview-hint', payload, { timeout: 60000 }).then((res) => res.data),
+
+  // ---------- Workflow Editor ----------
+  workflowDocsList: () => http.get('/api/workflow/docs').then((res) => res.data),
+  workflowDocsUpload: (file: File) => {
+    const form = new FormData()
+    form.append('file', file, file.name)
+    return http.post('/api/workflow/docs/upload', form, { timeout: 60000 }).then((res) => res.data)
+  },
+  workflowDocsDelete: (id: number) => http.delete(`/api/workflow/docs/${id}`).then((res) => res.data),
+  workflowDocsChunk: (id: number, payload: { chunk_size?: number; chunk_overlap?: number }) =>
+    http.post(`/api/workflow/docs/${id}/chunk`, payload, { timeout: 120000 }).then((res) => res.data),
+  workflowConfigsList: () => http.get('/api/workflow/configs').then((res) => res.data),
+  workflowConfigsGet: (id: number) => http.get(`/api/workflow/configs/${id}`).then((res) => res.data),
+  workflowConfigsSave: (payload: unknown) =>
+    http.post('/api/workflow/configs', payload).then((res) => res.data),
+  workflowConfigsUpdate: (id: number, payload: unknown) =>
+    http.put(`/api/workflow/configs/${id}`, payload).then((res) => res.data),
+  workflowConfigsDelete: (id: number) => http.delete(`/api/workflow/configs/${id}`).then((res) => res.data),
+  workflowConfigTestRun: (id: number, payload: { question: string; top_k?: number }) =>
+    http.post(`/api/workflow/configs/${id}/test`, payload, { timeout: 60000 }).then((res) => res.data),
 }

@@ -515,6 +515,14 @@ def _normalize_result(task_type: str, result: dict[str, Any], payload: dict[str,
             )
         return {"items": items}
 
+    if task_type.startswith("rag_query_"):
+        # RAG 问答：保留 answer/summary/confidence，evidence 由调用方根据 hits 组装
+        return {
+            "answer": _string(result.get("answer")),
+            "summary": _string(result.get("summary")),
+            "confidence": _ratio(result.get("confidence"), 0.5),
+        }
+
     scores = result.get("score_preview") if isinstance(result.get("score_preview"), dict) else {}
     normalized_scores = {
         name: _score(scores.get(name), 0)

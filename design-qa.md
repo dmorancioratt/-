@@ -46,3 +46,54 @@
 - 页面快照会跨路由和刷新保留，只有用户主动点击更新时才重新请求。
 - 前端生产构建通过。
 - 后端测试 24 项全部通过。
+
+---
+
+# 个人成长智能驾驶舱 3D QA（2026-08-25）
+
+## Evidence
+
+- Source visual truth: `F:\下载\ChatGPT Image 2026年8月25日 15_07_30.png`
+- Implementation screenshot: `growth-cockpit-1920x1080.png`
+- Full-view comparison: `growth-cockpit-comparison.png` (source on the left; implementation on the right)
+- Desktop viewport: 1920 × 1080, room idle state.
+- Narrow desktop viewport: 1366 × 768, room idle state; no horizontal overflow.
+- Interaction state checked: AI assistant hover → actual mouse click → camera focus → AI overlay; overlay close → room return.
+
+## Findings
+
+- No actionable P0/P1/P2 findings for the agreed build target. The implementation keeps the source image's dark metallic enclosure, electric-blue structural lighting, left/center/right station hierarchy, and central control zone while using the supplied seven independent GLB assets as the real interactive content.
+- The supplied GLBs intentionally differ from the illustration's bespoke wall screens, desk electronics, chair, plants, and trophy props. The scene compensates with wall stations, recessed panels, floor docks, edge rails, a central desk silhouette, and restrained holographic surfaces rather than creating fake stand-in assets.
+
+## Required Fidelity Surfaces
+
+- Fonts and typography: readable Chinese labels use the existing project font stack with a compact technical readout; labels remain legible at both tested desktop widths.
+- Spacing and layout rhythm: models occupy distinct left, upper-center, upper-right, lower-right, and center stations; the panel retains room visibility instead of covering the whole scene.
+- Colors and visual tokens: black-blue metallic base, cyan-blue edge rails, low-opacity holographic panels, and restrained bloom follow the source's visual hierarchy.
+- Image quality and asset fidelity: all visible functional objects are optimized supplied GLBs; no placeholder image assets replace them.
+- Copy and content: Chinese module labels and English subtitles correspond to the mapped business panels.
+
+## Focused Comparison
+
+No focused crop was required: the provided image is a concept illustration rather than a pixel-identical screen target, and the acceptance criteria are the room composition plus working 3D interaction. The full-view comparison exposes both the intentional asset differences and the shared spatial direction.
+
+## Patches Made Since Previous Review
+
+- Added a structured lab shell, recessed wall stations, floor docks, central control desk silhouette, blue rails, and subtle emissive pulses.
+- Tuned camera framing and model label offsets.
+- Made camera focus lock interaction and open the overlay from the completed focus sequence; closing the overlay restores the default camera and controls.
+- Added model-load fallback messaging and cleanup for renderer resources.
+
+## Implementation Checklist
+
+- [x] Seven GLBs load as independent selectable scene devices.
+- [x] Hover gives outline, lift, scale, pointer, and contextual label feedback.
+- [x] Click focuses camera and opens mapped overlay panel.
+- [x] Close restores the cockpit.
+- [x] 1920 × 1080 and 1366 × 768 views checked.
+
+## Follow-up Polish
+
+- [P3] A later art pass could introduce purpose-built wall-screen, chair, and plant GLBs if closer illustration fidelity is needed.
+
+final result: passed

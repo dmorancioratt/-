@@ -1276,7 +1276,7 @@ onMounted(loadProfile)
 }
 
 .profile-status-card.done .status-check {
-  background: linear-gradient(135deg, #10b981, #00c8f5);
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
 }
 
 .status-check {

@@ -291,7 +291,7 @@ const radarOption = computed(() => ({
     axisLine: { lineStyle: { color: 'rgba(148,163,184,.32)' } },
     indicator: dimensions.value.map((item) => ({ name: item.name, max: 100 }))
   },
-  series: [{ type: 'radar', areaStyle: { color: 'rgba(37,99,235,.2)' }, lineStyle: { color: '#2563eb', width: 2 }, itemStyle: { color: '#06b6d4' }, data: [{ value: dimensions.value.map((item) => item.score || 0) }] }]
+  series: [{ type: 'radar', areaStyle: { color: 'rgba(37,99,235,.2)' }, lineStyle: { color: '#2563eb', width: 2 }, itemStyle: { color: '#0ea5e9' }, data: [{ value: dimensions.value.map((item) => item.score || 0) }] }]
 }))
 
 async function loadBaseData() {
@@ -311,6 +311,12 @@ async function loadBaseData() {
     profile.value = profileRow
     const queryJobId = Number(route.query.jobId || 0)
     if (queryJobId && jobs.value.some((item) => item.id === queryJobId)) jobId.value = queryJobId
+    // 支持按岗位名称定位（例如从能力演化树"查看岗位详情"跳转而来）
+    const queryJobName = String(route.query.jobName || '')
+    if (!jobId.value && queryJobName) {
+      const matchedJob = jobs.value.find((item: any) => item.name === queryJobName || item.name.includes(queryJobName) || queryJobName.includes(item.name))
+      if (matchedJob) jobId.value = matchedJob.id
+    }
     if (!jobId.value) jobId.value = jobs.value[0]?.id
     if (!resumeId.value) resumeId.value = resumes.value[0]?.id
     const cachedReportId = cachedState?.reportId
@@ -412,7 +418,7 @@ onMounted(loadBaseData)
 .source-switch :deep(.el-radio-button) { flex: 1; }
 .source-switch :deep(.el-radio-button__inner) { width: 100%; }
 .selection-card { display: grid; grid-template-columns: 52px minmax(0,1fr); align-items: center; gap: 12px; min-height: 84px; border-radius: 15px; padding: 12px; background: #eff7ff; }
-.selection-avatar { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 17px; color: #fff; background: linear-gradient(135deg,#2563eb,#06b6d4); font-size: 20px; font-weight: 950; }
+.selection-avatar { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 17px; color: #fff; background: linear-gradient(135deg,#2563eb,#0ea5e9); font-size: 20px; font-weight: 950; }
 .selection-card b, .job-preview b { color: #0f2148; }
 .selection-card p, .job-preview p { margin: 5px 0 0; color: #53657e; font-size: 12px; font-weight: 700; line-height: 1.5; }
 .selection-card span, .job-preview span { display: block; margin-top: 5px; color: #718096; font-size: 11px; font-weight: 750; }
@@ -435,15 +441,15 @@ onMounted(loadBaseData)
 .history-item strong { color: #2563eb; }
 .history-item small { grid-column: 1 / -1; color: #718096; }
 .empty-report { display: grid; grid-template-columns: 66px minmax(0,1fr) auto; align-items: center; gap: 18px; min-height: 150px; }
-.empty-mark { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 20px; color: #fff; background: linear-gradient(135deg,#2563eb,#06b6d4); font-weight: 950; }
+.empty-mark { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 20px; color: #fff; background: linear-gradient(135deg,#2563eb,#0ea5e9); font-weight: 950; }
 .empty-report h3 { margin: 0 0 8px; color: #0f2148; }.empty-report p { margin: 0; color: #64748b; }
 .empty-steps { display: flex; align-items: center; gap: 10px; color: #53657e; font-size: 12px; font-weight: 800; }.empty-steps i { color: #06a6cc; font-style: normal; }
 .result-hero { display: grid; grid-template-columns: 1fr 1fr 230px; gap: 16px; }
 .identity-card { min-height: 138px; border: 1px solid rgba(190,213,242,.72); border-radius: 18px; padding: 18px; background: rgba(255,255,255,.58); }
 .identity-card h3 { margin: 8px 0; color: #071a3d; font-size: 23px; }.identity-card p { margin: 0 0 12px; color: #53657e; font-weight: 700; }
 .skill-line { display: flex; flex-wrap: wrap; gap: 6px; }
-.score-card { display: flex; flex-direction: column; justify-content: center; min-height: 138px; overflow: hidden; border-radius: 20px; padding: 22px; color: #fff; background: linear-gradient(135deg,#0f2f78,#2563eb 54%,#06b6d4); box-shadow: 0 18px 42px rgba(37,99,235,.24); }
-.score-card strong { margin: 8px 0; font-size: 46px; line-height: 1; }.score-card em { font-style: normal; font-weight: 900; }.score-card.medium { background: linear-gradient(135deg,#1d4ed8,#0ea5e9 54%,#22c55e); }.score-card.low { background: linear-gradient(135deg,#334155,#2563eb 55%,#f59e0b); }
+.score-card { display: flex; flex-direction: column; justify-content: center; min-height: 138px; overflow: hidden; border-radius: 20px; padding: 22px; color: #fff; background: linear-gradient(135deg,#0f2f78,#2563eb 54%,#0ea5e9); box-shadow: 0 18px 42px rgba(37,99,235,.24); }
+.score-card strong { margin: 8px 0; font-size: 46px; line-height: 1; }.score-card em { font-style: normal; font-weight: 900; }.score-card.medium { background: linear-gradient(135deg,#1d4ed8,#0ea5e9 54%,#38bdf8); }.score-card.low { background: linear-gradient(135deg,#334155,#2563eb 55%,#f59e0b); }
 .report-meta { display: flex; flex-wrap: wrap; gap: 8px; }.report-meta span { border: 1px solid rgba(190,213,242,.7); border-radius: 999px; padding: 6px 10px; background: rgba(255,255,255,.66); color: #53657e; font-size: 11px; font-weight: 800; }
 .report-grid { display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 18px; }.dimensions-panel { grid-column: span 7; }.radar-panel { grid-column: span 5; }.skills-panel { grid-column: span 8; }.quality-panel { grid-column: span 4; }
 .dimension-list { display: grid; gap: 10px; }.dimension-card { border: 1px solid rgba(190,213,242,.72); border-radius: 15px; background: rgba(255,255,255,.58); }.dimension-card summary { display: grid; grid-template-columns: 135px minmax(0,1fr) 72px; align-items: center; gap: 14px; padding: 13px; cursor: pointer; list-style: none; }.dimension-card summary::-webkit-details-marker { display:none; }

@@ -68,6 +68,13 @@ export interface TargetRole {
   matchedCoreCount: number
   categoryName: string
   icon: string
+  matchDetails?: {
+    proSkill: number
+    projectExp: number
+    toolAbility: number
+    generalAbility: number
+    jobPrep: number
+  }
 }
 
 export interface MatchBreakdown {

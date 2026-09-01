@@ -1,17 +1,20 @@
 <template>
   <div class="page evolution-page">
-    <WaveGridBackground />
     <PageHeader title="能力演化" desc="岗位能力随时间的新增、淘汰与迁移趋势分析">
-      <el-radio-group v-model="tab" @change="onTabChange">
-        <el-radio-button value="timeline">演化时间线</el-radio-button>
+      <el-radio-group v-if="isAdminSide" v-model="tab" @change="onTabChange">
         <el-radio-button value="version">版本对比</el-radio-button>
-        <el-radio-button value="hotspot">能力热点</el-radio-button>
         <el-radio-button value="compare">领域对比</el-radio-button>
       </el-radio-group>
       <el-button type="primary" :loading="loading" @click="loadAll">刷新数据</el-button>
     </PageHeader>
 
-    <EvolutionTimeline v-if="tab === 'timeline'" :timeline="timeline" />
+    <!-- 求职者端：演化时间线 + 能力热点（生命树）合并为单页，无tab -->
+    <template v-if="!isAdminSide">
+      <EvolutionTimeline :timeline="timeline" />
+      <div class="evo-merge-label">能力热点 · 生命演化树</div>
+      <EvolutionViews mode="hotspot" :hotspot="hotspot" :compare="compare" :cards="versionCards" />
+    </template>
+    <!-- HR/管理端：版本对比 / 领域对比（已迁移，后续用于大屏展示） -->
     <EvolutionViews v-else :mode="tab" :hotspot="hotspot" :compare="compare" :cards="versionCards" />
 
     <!-- Legacy view code retained but disabled while the new dashboard is active. -->
@@ -165,17 +168,20 @@ import PageHeader from '@/components/PageHeader.vue'
 import EChart from '@/components/EChart.vue'
 import EvolutionTimeline from '@/components/EvolutionTimeline.vue'
 import EvolutionViews from '@/components/EvolutionViews.vue'
-import WaveGridBackground from '@/components/WaveGridBackground.vue'
 import { api } from '@/api/http'
+import { useAuthStore } from '@/stores/auth'
 
-const tab = ref('timeline')
+const auth = useAuthStore()
+// 版本对比 / 领域对比 已迁移至管理端（后续用于大屏展示）；求职者端为时间线+热点单页
+const isAdminSide = computed(() => auth.role === 'hr' || auth.role === 'admin')
+const tab = ref('version')
 const loading = ref(false)
 const timeline = ref<any>({ timeline: [], events: [], total: 0 })
 const hotspot = ref<any>({ rising: [], declining: [], emerging: [] })
 const compare = ref<any>({ categories: [], domains: [], matrix: [] })
 const versionCards = ref<any[]>([])
 
-const PALETTE = ['#2563eb', '#06b6d4', '#7c3aed', '#18b981', '#f59e0b', '#ec4899', '#0ea5e9']
+const PALETTE = ['#2563eb', '#0ea5e9', '#7c3aed', '#0ea5e9', '#f59e0b', '#ec4899', '#0ea5e9']
 
 function sum(key: string) {
   return (timeline.value.timeline || []).reduce((acc: number, b: any) => acc + (b[key] || 0), 0)
@@ -191,7 +197,7 @@ const timelineOption = computed(() => {
     xAxis: { type: 'category', data: rows.map((r: any) => r.date), axisLine: { lineStyle: { color: 'rgba(120,150,190,0.4)' } } },
     yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(120,150,190,0.14)' } } },
     series: [
-      { name: '新增', type: 'bar', stack: 'x', data: rows.map((r: any) => r.added), itemStyle: { color: '#18b981', borderRadius: [4, 4, 0, 0] } },
+      { name: '新增', type: 'bar', stack: 'x', data: rows.map((r: any) => r.added), itemStyle: { color: '#0ea5e9', borderRadius: [4, 4, 0, 0] } },
       { name: '淘汰', type: 'bar', stack: 'x', data: rows.map((r: any) => r.removed), itemStyle: { color: '#f43f5e' } },
       { name: '修改', type: 'bar', stack: 'x', data: rows.map((r: any) => r.modified), itemStyle: { color: '#f59e0b' } },
       {
@@ -296,7 +302,7 @@ onMounted(loadAll)
   min-width: 0;
   overflow-x: clip;
   position: relative;
-  z-index: 2;
+  background: transparent;
 }
 
 .evolution-page :deep(.page-toolbar) {
@@ -322,6 +328,32 @@ onMounted(loadAll)
   color: #effdff;
   background: linear-gradient(180deg, rgba(31, 155, 255, 0.65), rgba(5, 82, 171, 0.55));
   box-shadow: inset 0 -2px #55e8ff, 0 0 12px rgba(35, 190, 255, 0.3);
+}
+
+.evo-merge-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 14px;
+  color: var(--cyan);
+  font-size: 14px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+}
+
+.evo-merge-label::before {
+  width: 4px;
+  height: 16px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary), var(--cyan));
+  content: "";
+}
+
+.evo-merge-label::after {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.35), transparent);
+  content: "";
 }
 
 .evo-metrics {

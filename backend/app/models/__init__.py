@@ -14,6 +14,8 @@ from app.models.entities import (
     MatchAnalysisRecord,
     MatchReport,
     ParsedJD,
+    RagDocument,
+    RagIndexJob,
     RawJD,
     Resume,
     ResumeSkill,
@@ -22,6 +24,7 @@ from app.models.entities import (
     TestCase,
     User,
     UserSession,
+    WorkflowConfig,
 )
 
 __all__ = [
@@ -40,6 +43,8 @@ __all__ = [
     "MatchAnalysisRecord",
     "MatchReport",
     "ParsedJD",
+    "RagDocument",
+    "RagIndexJob",
     "RawJD",
     "Resume",
     "ResumeSkill",
@@ -48,4 +53,5 @@ __all__ = [
     "TestCase",
     "User",
     "UserSession",
+    "WorkflowConfig",
 ]

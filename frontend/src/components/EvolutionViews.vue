@@ -1,9 +1,6 @@
 <template>
   <section v-if="mode === 'version'" class="version-dashboard">
-    <div class="v-starfield-bg"></div>
-    <div class="v-grid-overlay"></div>
-
-    <div class="v-top-bar">
+<div class="v-top-bar">
       <div class="v-title-box">
         <div class="v-title-main">版本对比战场态势</div>
         <div class="v-title-sub">VERSION COMPARISON BATTLEFIELD SITUATION</div>
@@ -692,31 +689,7 @@ const sunburstOption = computed(() => {
   border: 1px solid rgba(70, 200, 255, 0.2);
 }
 
-.v-starfield-bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 50% 26%, rgba(0, 128, 212, .13), transparent 36%);
-  pointer-events: none;
-}
 
-.v-grid-overlay {
-  position: absolute;
-  inset: 0;
-  opacity: .38;
-  background-image:
-    linear-gradient(rgba(0, 195, 255, .07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 195, 255, .07) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(180deg, rgba(0,0,0,.75), rgba(0,0,0,.35));
-  pointer-events: none;
-}
-.v-grid-overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, transparent 0 45%, rgba(0,0,0,.6) 93%);
-}
 
 .v-top-bar {
   position: relative;
@@ -1592,7 +1565,7 @@ button { font: inherit; }
 .graph-command, .domain-command { position: relative; min-width: 0; overflow: hidden; background: linear-gradient(180deg, rgba(4,18,39,.1), rgba(0,6,18,.12)); border: 1px solid rgba(83,203,255,.2); backdrop-filter: blur(6px) saturate(1.05); border-radius: 8px; }.graph-command { min-height: 690px; }.graph-command::after, .domain-command::after { width: auto; height: auto; inset: 0; opacity: .15; background-image: radial-gradient(circle, rgba(104, 222, 255, .32) 0 1px, transparent 1px), linear-gradient(rgba(34, 142, 217, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 142, 217, .03) 1px, transparent 1px); background-size: 31px 31px, 58px 58px, 58px 58px; box-shadow: none; }.graph-title { position: absolute; z-index: 5; top: 17px; left: 21px; display: flex; right: 21px; align-items: end; justify-content: space-between; }.graph-title > span { color: #6fb9db; font-size: 9px; }.hotspot-chart { position: relative; z-index: 2; height: 640px; margin-top: 36px; }.hotspot-chart::before, .hotspot-chart::after { position: absolute; z-index: 1; top: 50%; left: 50%; border: 1px solid rgba(85, 222, 255, .15); border-radius: 50%; content: ''; pointer-events: none; }.hotspot-chart::before { width: 440px; height: 210px; box-shadow: 0 0 28px rgba(22, 165, 255, .06), inset 0 0 24px rgba(22, 165, 255, .04); transform: translate(-50%, -50%) rotate(17deg); animation: gyroA 13s cubic-bezier(.45,.05,.55,.95) infinite alternate; }.hotspot-chart::after { width: 300px; height: 520px; border-style: dashed; opacity: .4; transform: translate(-50%, -50%) rotate(-28deg); animation: gyroB 17s cubic-bezier(.45,.05,.55,.95) infinite alternate; }.active-skill-readout { position: absolute; z-index: 6; top: 79px; right: 18px; display: grid; min-width: 130px; border-right: 1px solid #83edff; padding: 7px 10px; text-align: right; background: linear-gradient(90deg, transparent, rgba(1, 22, 40, .2)); backdrop-filter: blur(6px); }.active-skill-readout span { color: #32dfff; font-size: 7px; letter-spacing: .18em; }.active-skill-readout b { color: #effdff; font-size: 12px; }.active-skill-readout strong { color: #45edbf; font-size: 21px; }.active-skill-readout em { color: #72aeca; font-size: 8px; font-style: normal; }.graph-legend { position: absolute; z-index: 6; bottom: 16px; left: 50%; display: flex; gap: 15px; border: 1px solid rgba(65, 193, 255, .15); padding: 7px 14px; color: #a5d5e9; font-size: 9px; background: rgba(0, 8, 19, .2); transform: translateX(-50%); backdrop-filter: blur(6px); }.graph-legend span::before { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 0; background: currentColor; content: ''; transform: rotate(45deg); }.level-high { color: #ffb52e !important; }.level-mid { color: #37e6a1 !important; }.level-warm { color: #a26cff !important; }.level-low { color: #28cfff !important; }
 .graph-hit-targets { position: absolute; z-index: 5; inset: 60px 0 45px; pointer-events: none; }.graph-hit-targets button { position: absolute; width: 82px; height: 82px; border: 0; background: transparent; cursor: pointer; pointer-events: auto; transform: translate(-50%, -50%); clip-path: polygon(50% 0, 92% 25%, 92% 75%, 50% 100%, 8% 75%, 8% 25%); }.graph-hit-targets button:hover { outline: 1px dashed rgba(116, 238, 255, .5); outline-offset: 4px; box-shadow: 0 0 20px rgba(50, 217, 255, .1); }
 .skill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }.skill-chips button { border: 1px solid rgba(91, 214, 255, .2); padding: 4px 9px; color: #bff4ff; font-size: 10px; background: rgba(6, 45, 89, .12); cursor: pointer; backdrop-filter: blur(4px); }.skill-chips button:hover { border-color: #69efff; color: #fff; box-shadow: 0 0 10px rgba(42, 201, 255, .15); }
-.sparkline { height: 28px; margin-bottom: 10px; border-radius: 4px; background: linear-gradient(90deg, rgba(55, 232, 173, .04), transparent); }.sparkline.red-line { background: linear-gradient(90deg, rgba(255, 117, 149, .04), transparent); }
+.sparkline { height: 28px; margin-bottom: 10px; border-radius: 4px; background: linear-gradient(90deg, rgba(54, 215, 255, .04), transparent); }.sparkline.red-line { background: linear-gradient(90deg, rgba(255, 117, 149, .04), transparent); }
 .ranking-list { display: grid; gap: 6px; }.ranking-list button { display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; width: 100%; border: 1px solid rgba(63, 178, 237, .12); padding: 7px 9px; color: #bce4f4; font-size: 10px; text-align: left; background: rgba(3, 32, 67, .1); cursor: pointer; backdrop-filter: blur(4px); }.ranking-list button:hover { border-color: rgba(95, 222, 255, .3); background: rgba(8, 52, 99, .15); }.ranking-list button i { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 4px; color: #19d3ff; font-size: 9px; font-style: normal; background: rgba(13, 72, 118, .15); backdrop-filter: blur(4px); }.ranking-list button b { color: #e8fbff; font-weight: 800; }.ranking-list button em { color: #54d1aa; font-size: 9px; font-style: normal; }.declining-panel .ranking-list button em { color: #ff7e94; }
 .domain-command { min-height: 640px; }.domain-chart { position: relative; z-index: 2; height: 560px; margin-top: 30px; }
 .domain-focus { position: absolute; z-index: 6; top: 74px; left: 50%; display: grid; justify-items: center; gap: 2px; transform: translateX(-50%); text-align: center; }.domain-focus small { color: #3fdcff; font-size: 8px; letter-spacing: .16em; }.domain-focus b { color: #effcff; font-size: 19px; font-weight: 900; text-shadow: 0 0 12px rgba(50, 195, 255, .25); }.domain-focus strong { color: #7ef3ff; font-size: 31px; font-weight: 900; text-shadow: 0 0 16px rgba(50, 202, 255, .35); }.domain-focus span { max-width: 320px; color: #7ab0ca; font-size: 10px; line-height: 1.5; }
@@ -1680,7 +1653,7 @@ button { font: inherit; }
   content: '';
   width: 4px;
   height: 14px;
-  background: linear-gradient(180deg, #4ed8ff, #37d6a5);
+  background: linear-gradient(180deg, #4ed8ff, #36d7ff);
   border-radius: 2px;
 }
 
@@ -1718,7 +1691,7 @@ button { font: inherit; }
   font-weight: 600;
 }
 
-.stat-item em.up { color: #37d6a5; }
+.stat-item em.up { color: #36d7ff; }
 .stat-item em.down { color: #ff7088; }
 
 .heat-bars {
@@ -1801,7 +1774,7 @@ button { font: inherit; }
   width: 20px;
   height: 20px;
   border-radius: 4px;
-  background: linear-gradient(135deg, rgba(78, 216, 255, 0.2), rgba(55, 214, 165, 0.2));
+  background: linear-gradient(135deg, rgba(78, 216, 255, 0.2), rgba(54, 215, 255, 0.2));
   color: #4ed8ff;
   font-size: 10px;
   font-style: normal;
@@ -1822,6 +1795,6 @@ button { font: inherit; }
   font-size: 12px;
 }
 
-.mini-skill-btn em.up { color: #37d6a5; }
+.mini-skill-btn em.up { color: #36d7ff; }
 .mini-skill-btn em.down { color: #ff7088; }
 </style>
