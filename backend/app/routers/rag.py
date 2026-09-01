@@ -9,7 +9,6 @@
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
 from typing import Any
 
@@ -28,8 +27,8 @@ from app.schemas.rag import (
     RagQueryRequest,
     RagQueryResponse,
 )
-from app.services.ai_provider import AIProviderError, analyze_with_ai
-from app.services.rag.embedder import BGESmallZhEmbedder, Embedder, FakeEmbedder
+from app.services.ai_provider import AIProviderError
+from app.services.rag.embedder import Embedder, FakeEmbedder, get_embedder
 from app.services.rag.errors import RagError, RagInitError
 from app.services.rag.indexer import (
     RAG_DATA_DIR,
@@ -41,12 +40,12 @@ from app.services.rag.indexer import (
 )
 from app.services.rag.models import Hit
 from app.services.rag.prompts import (
+    analyze_rag,
     build_user_payload,
-    install_mock_patch,
     register_rag_tasks,
 )
 from app.services.rag.retriever import retrieve
-from app.services.rag.vector_store import FaissVectorStore, VectorStore
+from app.services.rag.vector_store import FaissVectorStore, VectorStore, get_user_docs_store
 
 
 logger = logging.getLogger(__name__)
@@ -59,22 +58,14 @@ router = APIRouter(prefix="/api/rag", tags=["rag"])
 # 模块级单例
 # ---------------------------------------------------------------------------
 
-_embedder: Embedder | None = None
 _stores: dict[str, VectorStore] | None = None
-_use_fake_embedder = False  # 测试或开发机无网络时可通过环境变量强制 fake
 
 
 def _get_embedder() -> Embedder:
-    global _embedder
-    if _embedder is None:
-        if _use_fake_embedder:
-            _embedder = FakeEmbedder(dim=64)
-        else:
-            try:
-                _embedder = BGESmallZhEmbedder(cache_dir=RAG_MODEL_DIR)
-            except RagInitError as exc:
-                raise HTTPException(status_code=503, detail=f"RAG 真实嵌入模型不可用：{exc}") from exc
-    return _embedder
+    try:
+        return get_embedder()
+    except RagInitError as exc:
+        raise HTTPException(status_code=503, detail=f"RAG 真实嵌入模型不可用：{exc}") from exc
 
 
 def _get_stores() -> dict[str, VectorStore]:
@@ -96,10 +87,8 @@ def _ensure_indexes_loaded() -> dict[str, VectorStore]:
     return stores
 
 
-# 生产环境只注册真实任务；mock 补丁仅供自动化测试使用。
+# 启动时立即注册 RAG task 定义
 register_rag_tasks()
-if os.getenv("APP_ENV", "production").strip().lower() == "test":
-    install_mock_patch()
 
 
 # ---------------------------------------------------------------------------
@@ -227,19 +216,28 @@ def _do_query(
     extra: dict[str, Any] | None,
     db: Session,
 ) -> RagQueryResponse:
+    embedder = _get_embedder()
     stores = _ensure_indexes_loaded()
     if not stores:
         raise HTTPException(status_code=503, detail="RAG 索引未初始化")
+    # 融入本地知识库（用户上传文档）作为额外检索源
+    try:
+        user_docs = get_user_docs_store(dim=int(embedder.dim))
+    except Exception as exc:
+        logger.warning("[RAG] 加载本地知识库失败：%s", exc)
+        user_docs = None
+    if user_docs is not None and user_docs.size() > 0:
+        stores = dict(stores)
+        stores["user_docs"] = user_docs
+
     missing = [s for s in SOURCE_REGISTRY if stores.get(s) and stores[s].size() == 0]
     if missing:
-        embedder = _get_embedder()
         for source in missing:
             try:
                 build_index(source, db, embedder, stores[source])
             except Exception as exc:
                 logger.warning("[RAG] 自动构建 %s 失败：%s", source, exc)
 
-    embedder = _get_embedder()
     hits = retrieve(
         req.question,
         embedder,
@@ -251,7 +249,7 @@ def _do_query(
     payload = build_user_payload(req.question, hits, extra=extra)
     payload["_rag_hits"] = hits
     try:
-        ai_result = analyze_with_ai(task_type, payload)
+        ai_result = analyze_rag(task_type, payload)
     except AIProviderError as exc:
         raise HTTPException(status_code=502, detail=str(exc))
     return _to_query_response(hits, ai_result, task_type)

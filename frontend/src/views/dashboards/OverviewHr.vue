@@ -13,8 +13,6 @@
           <el-option label="全部岗位概览" :value="0" />
           <el-option v-for="job in model.jobs" :key="job.id" :label="job.name" :value="job.id" />
         </el-select>
-        <span class="cockpit-updated">更新于 {{ updatedLabel }}</span>
-        <button class="cockpit-button" type="button" :disabled="refreshing" @click="refresh(true)"><el-icon><Refresh /></el-icon>{{ refreshing ? '更新中' : '更新数据' }}</button>
       </div>
     </header>
 
@@ -83,6 +81,19 @@
         </div>
       </article>
     </section>
+
+    <!-- 底部数据状态栏：更新时间与更新操作集中在此，头部专注筛选决策 -->
+    <footer class="overview-footer">
+      <div class="overview-footer__status">
+        <span class="status-dot" :class="{ busy: refreshing }"></span>
+        <span>{{ refreshing ? '正在重新计算人才供需…' : '数据就绪' }}</span>
+        <span class="footer-divider"></span>
+        <span>更新于 {{ updatedLabel }}</span>
+      </div>
+      <button class="cockpit-button" type="button" :disabled="refreshing" @click="refresh(true)">
+        <el-icon :class="{ 'fa-spin': refreshing }"><Refresh /></el-icon>{{ refreshing ? '更新中' : '更新数据' }}
+      </button>
+    </footer>
   </div>
 </template>
 
@@ -190,6 +201,14 @@ onMounted(() => refresh(false))
 
 <style scoped>
 .hr-dashboard { max-width: 1680px; margin: 0 auto; }.job-filter { width: 220px; }.job-filter :deep(.el-select__wrapper) { min-height: 38px; border: 1px solid rgba(63,191,246,.28); border-radius: 8px; background: rgba(4,23,52,.88); box-shadow: none; }
+/* ===== 底部数据状态栏（更新操作集中在页面底部） ===== */
+.overview-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 16px; border: 1px solid rgba(71,191,255,.16); border-radius: 10px; padding: 13px 18px; background: rgba(5,23,52,.6); }
+.overview-footer__status { display: flex; align-items: center; gap: 10px; color: #7c9db8; font-size: 12px; }
+.overview-footer__status .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #57dfc5; box-shadow: 0 0 8px rgba(87,223,197,.7); }
+.overview-footer__status .status-dot.busy { background: #ffb65c; box-shadow: 0 0 8px rgba(255,182,92,.7); animation: footer-busy 1s ease-in-out infinite; }
+@keyframes footer-busy { 50% { opacity: .35; } }
+.footer-divider { width: 1px; height: 12px; background: rgba(99,150,187,.3); }
+@media (max-width: 620px) { .overview-footer { flex-direction: column; align-items: flex-start; } }
 .decision-brief { display: grid; grid-template-columns: minmax(390px,1.35fr) repeat(4,minmax(180px,.7fr)); gap: 12px; margin-bottom: 14px; }.decision-brief article,.decision-brief > button { min-height: 124px; border: 1px solid rgba(71,191,255,.22); border-radius: 10px; background: rgba(5,23,52,.84); box-shadow: 0 14px 34px rgba(0,3,18,.2); }.role-focus { padding: 17px 20px; }.role-focus > span { color: #65daf4; font-size: 11px; font-weight: 800; }.role-focus h2 { margin: 6px 0 0; color: #f0fbff; font-size: 20px; }.role-focus p { margin: 7px 0 0; color: #89a9bf; font-size: 12px; line-height: 1.55; }.role-focus button { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; border: 0; padding: 0; color: #81e3f8; background: transparent; font: inherit; font-size: 11px; cursor: pointer; }
 .decision-brief > button { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto auto; gap: 5px; padding: 18px; color: inherit; font: inherit; text-align: left; cursor: pointer; }.decision-brief > button:hover { border-color: rgba(76,211,255,.5); background: rgba(8,39,78,.9); }.decision-brief > button span { color: #88a9c4; font-size: 12px; }.decision-brief > button strong { grid-column: 1; color: #f3fcff; font-size: 24px; }.decision-brief > button small { grid-column: 1; color: #6f91ad; font-size: 10px; }.decision-brief > button .el-icon { grid-row: 1 / 4; grid-column: 2; align-self: start; color: #4ed8ff; font-size: 19px; }
 .hr-workspace { display: grid; grid-template-columns: minmax(640px,1.6fr) minmax(380px,.75fr); gap: 14px; }.gap-chart { height: 335px; padding: 0 8px; }.gap-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 0 16px 16px; }.gap-summary button { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; border: 1px solid rgba(76,146,194,.16); border-radius: 8px; padding: 10px 12px; color: inherit; background: rgba(6,31,64,.54); font: inherit; text-align: left; cursor: pointer; }.gap-summary button:hover { border-color: rgba(74,207,240,.4); }.gap-summary b,.gap-summary small { display: block; }.gap-summary b { color: #e9f9ff; font-size: 12px; }.gap-summary small { margin-top: 4px; color: #7898b0; font-size: 10px; }.gap-summary strong { color: #72e0c5; font-size: 11px; white-space: nowrap; }.gap-summary strong.short { color: #ffb772; }

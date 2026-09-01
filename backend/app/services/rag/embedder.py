@@ -57,10 +57,33 @@ class BGESmallZhEmbedder:
             self._cache_dir.mkdir(parents=True, exist_ok=True)
             os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", str(self._cache_dir))
 
+        cache_folder = str(self._cache_dir) if self._cache_dir else None
+        local = self._find_local_snapshot()
+
+        # 1) 优先直接用本地缓存的模型目录加载（零网络请求）
+        if local is not None:
+            try:
+                os.environ["HF_HUB_OFFLINE"] = "1"
+                os.environ["TRANSFORMERS_OFFLINE"] = "1"
+                self._model = SentenceTransformer(str(local))
+                return
+            except Exception:
+                os.environ.pop("HF_HUB_OFFLINE", None)
+                os.environ.pop("TRANSFORMERS_OFFLINE", None)
+
+        # 2) 回退：按 model_name 加载（缓存缺失时触发下载）
         try:
-            self._model = SentenceTransformer(self.model_name, cache_folder=str(self._cache_dir) if self._cache_dir else None)
+            self._model = SentenceTransformer(self.model_name, cache_folder=cache_folder)
         except Exception as exc:
             raise RagInitError(f"BGE 模型加载失败：{exc}") from exc
+
+    def _find_local_snapshot(self) -> Path | None:
+        if not self._cache_dir or not self._cache_dir.exists():
+            return None
+        for snap in self._cache_dir.glob("models--*/snapshots/*"):
+            if snap.is_dir() and ((snap / "model.safetensors").exists() or (snap / "pytorch_model.bin").exists()):
+                return snap
+        return None
 
     def encode(self, texts: list[str]) -> np.ndarray:
         if not texts:
@@ -104,3 +127,38 @@ class FakeEmbedder:
 
     def encode_one(self, text: str) -> np.ndarray:
         return self.encode([text])[0]
+
+
+# ---------------------------------------------------------------------------
+# 共享 embedder 单例
+# ---------------------------------------------------------------------------
+
+# 与 indexer.RAG_MODEL_DIR 保持同一目录；embedder 不能 import indexer（避免循环依赖）
+_DEFAULT_MODEL_CACHE_DIR = Path(__file__).resolve().parents[3] / "data" / "rag" / "models"
+
+_shared_embedder: "Embedder | None" = None
+
+
+def get_embedder(cache_dir: Path | None = None, *, force_fake: bool | None = None) -> Embedder:
+    """模块级懒加载单例：生产环境使用 BGE，测试环境可使用 FakeEmbedder。
+
+    rag 主线与 workflow 本地知识库线共用同一实例，保证向量维度（512）与语义一致。
+    只有 APP_ENV=test 时才允许通过 RAG_EMBEDDER=fake 使用伪向量。
+    """
+    global _shared_embedder
+    if _shared_embedder is None:
+        is_test = os.getenv("APP_ENV", "production").strip().lower() == "test"
+        if force_fake is None:
+            env = os.getenv("RAG_EMBEDDER", "").strip().lower()
+            force_fake = env in {"fake", "mock", "0"}
+        if force_fake:
+            if not is_test:
+                raise RagInitError("FakeEmbedder 仅允许在 APP_ENV=test 时使用")
+            logger.info("[RAG] 强制使用 FakeEmbedder（RAG_EMBEDDER=fake）")
+            _shared_embedder = FakeEmbedder(dim=512)
+        else:
+            candidate = BGESmallZhEmbedder(cache_dir=cache_dir or _DEFAULT_MODEL_CACHE_DIR)
+            # 立即预热，确保模型不可用时请求返回明确错误，而不是生成伪向量。
+            candidate.encode(["embedder 预热检测"])
+            _shared_embedder = candidate
+    return _shared_embedder

@@ -25,6 +25,7 @@ backend/data/external/
 # RAG 运行时产物（faiss 索引 + BGE 模型缓存，~92MB，可通过 POST /api/rag/index 重建）
 backend/data/rag/
 /data/
+backend/data/rag_uploads/
 
 # Node / frontend
 node_modules/

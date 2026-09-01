@@ -1,5 +1,63 @@
 <template>
-  <section class="image-cabin" aria-label="个人学习成长仓">
+  <section class="image-cabin" :class="{ 'image-cabin--editing': editorEnabled }" aria-label="个人学习成长仓">
+    <div class="image-cabin__ambience" aria-hidden="true"></div>
+
+    <div v-if="false && showLayoutEditor" class="image-cabin__dev-controls" aria-label="成长仓开发工具">
+      <button
+        type="button"
+        class="image-cabin__dev-button"
+        :class="{ active: frameTunerOpen }"
+        @click="toggleFrameTuner"
+      >
+        {{ frameTunerOpen ? '收起框调节' : '框调节' }}
+      </button>
+      <button
+        type="button"
+        class="image-cabin__dev-button"
+        :class="{ active: editorEnabled }"
+        @click="toggleEditor"
+      >
+        {{ editorEnabled ? '退出布局编辑' : '编辑布局' }}
+      </button>
+    </div>
+
+    <aside
+      v-if="showLayoutEditor && frameTunerOpen && selectedZone"
+      class="image-cabin__tuner"
+      aria-label="模块点击框调节面板"
+    >
+      <header>
+        <span>IMAGE HOTSPOT TUNER</span>
+        <strong>模块点击框调节</strong>
+      </header>
+
+      <label class="image-cabin__module-select">
+        <span>当前模块</span>
+        <select v-model="selectedModuleId">
+          <option v-for="item in modules" :key="item.id" :value="item.id">{{ item.label }}</option>
+        </select>
+      </label>
+
+      <label v-for="control in zoneControls" :key="control.key" class="image-cabin__tuner-row">
+        <span>{{ control.label }}</span>
+        <input
+          type="range"
+          :min="control.min"
+          :max="controlMax(control.key)"
+          :step="control.step"
+          :value="selectedZone[control.key]"
+          @input="updateSelectedZone(control.key, $event)"
+        />
+        <i>{{ selectedZone[control.key].toFixed(1) }}%</i>
+      </label>
+
+      <div class="image-cabin__tuner-actions">
+        <button type="button" @click="resetSelectedZone">恢复当前</button>
+        <button type="button" @click="copyZoneLayout">复制全部参数</button>
+      </div>
+      <p>{{ copyStatus || '点击图中框选择模块；拖动滑块会实时生效。' }}</p>
+    </aside>
+
     <div class="image-cabin__canvas">
       <img class="image-cabin__image" src="/growth-cabin-reference.png" alt="个人学习成长仓模块总览" />
       <button
@@ -7,52 +65,165 @@
         :key="item.id"
         type="button"
         class="image-cabin__zone"
-        :class="`image-cabin__zone--${item.id}`"
+        :class="[
+          `image-cabin__zone--${item.id}`,
+          { 'is-editing': editorEnabled, 'is-selected': editorEnabled && selectedModuleId === item.id },
+        ]"
         :style="zoneStyle(item)"
-        :aria-label="`打开${item.label}`"
-        @click="emit('select', item.id)"
+        :aria-label="editorEnabled ? `选择${item.label}调节框` : `打开${item.label}`"
+        @click="handleZoneClick(item)"
       >
-        <span class="image-cabin__dash"></span>
-        <span class="image-cabin__tag"><b>{{ item.index }}</b>{{ item.label }}</span>
+        <span class="image-cabin__frame" aria-hidden="true"></span>
+        <span class="image-cabin__hint">{{ editorEnabled ? `正在调节 ${item.label}` : `点击进入 ${item.label}` }}</span>
       </button>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-type ModuleId = 'match' | 'radar' | 'jobs' | 'ai-suggest' | 'weekly-plan' | 'interview' | 'timeline' | 'path' | 'avatar'
-type ModuleZone = { id: ModuleId; label: string; index: string; x: number; y: number; width: number; height: number }
+import { computed, ref } from 'vue'
+import type { MissionCabinId } from './missionCabinData'
 
-const emit = defineEmits<{ select: [id: ModuleId] }>()
+type ModuleZone = { id: MissionCabinId; label: string; x: number; y: number; width: number; height: number }
+type ZoneMetric = 'x' | 'y' | 'width' | 'height'
+type ZoneControl = { key: ZoneMetric; label: string; min: number; step: number }
 
-const modules: ModuleZone[] = [
-  { id: 'radar',       label: '能力图谱', index: '02', x: 7.5,  y: 10,   width: 27, height: 29 },
-  { id: 'path',        label: '学习路径', index: '03', x: 38,   y: 10,   width: 27, height: 25 },
-  { id: 'timeline',    label: '成长档案', index: '04', x: 67,   y: 12,   width: 25, height: 19 },
-  { id: 'weekly-plan', label: '计划日历', index: '05', x: 65,   y: 29,   width: 30, height: 30 },
-  { id: 'jobs',        label: '资源库',   index: '06', x: 7.5,  y: 43,   width: 20, height: 31 },
-  { id: 'interview',   label: '成就墙',   index: '07', x: 68,   y: 55,   width: 28, height: 25 },
-  { id: 'avatar',      label: '智能桌台', index: '01', x: 38,   y: 40,   width: 25, height: 27 },
-  { id: 'ai-suggest',  label: 'AI 助手',  index: '08', x: 28,   y: 38,   width: 15, height: 24 },
-  { id: 'match',       label: '数据看板', index: '09', x: 18,   y: 75.5, width: 36, height: 16 },
+const emit = defineEmits<{ select: [id: MissionCabinId] }>()
+const showLayoutEditor = false
+
+const defaultModules: ModuleZone[] = [
+  { id: 'radar',            label: '能力图谱', x: 13.6, y: 10.8, width: 16.5, height: 31.2 },
+  { id: 'path',             label: '学习路径', x: 33.5, y: 11.2, width: 34.8, height: 29.2 },
+  { id: 'avatar',           label: '成长档案', x: 70.5, y: 9.2,  width: 19.0, height: 23.8 },
+  { id: 'resource-library', label: '资源库',   x: 5.6,  y: 42.4, width: 21.0, height: 50.1 },
+  { id: 'ai-suggest',       label: 'AI 助手',  x: 41.1, y: 40.4, width: 14.5, height: 21.0 },
+  { id: 'weekly-plan',      label: '计划日历', x: 70.3, y: 33.0, width: 22.0, height: 25.0 },
+  { id: 'timeline',         label: '成就墙',   x: 70.2, y: 58.0, width: 25.4, height: 30.0 },
 ]
+
+const modules = ref<ModuleZone[]>(defaultModules.map(item => ({ ...item })))
+const editorEnabled = ref(false)
+const frameTunerOpen = ref(false)
+const selectedModuleId = ref<MissionCabinId>('radar')
+const copyStatus = ref('')
+let copyStatusTimer: number | undefined
+
+const zoneControls: ZoneControl[] = [
+  { key: 'x', label: '横向位置 X', min: 0, step: 0.1 },
+  { key: 'y', label: '纵向位置 Y', min: 0, step: 0.1 },
+  { key: 'width', label: '框宽度', min: 4, step: 0.1 },
+  { key: 'height', label: '框高度', min: 4, step: 0.1 },
+]
+
+const selectedZone = computed(() => modules.value.find(item => item.id === selectedModuleId.value))
 
 function zoneStyle(item: ModuleZone) {
   return { left: `${item.x}%`, top: `${item.y}%`, width: `${item.width}%`, height: `${item.height}%` }
 }
+
+function handleZoneClick(item: ModuleZone) {
+  if (editorEnabled.value) {
+    selectedModuleId.value = item.id
+    return
+  }
+  emit('select', item.id)
+}
+
+function toggleFrameTuner() {
+  frameTunerOpen.value = !frameTunerOpen.value
+  if (frameTunerOpen.value) editorEnabled.value = true
+}
+
+function toggleEditor() {
+  editorEnabled.value = !editorEnabled.value
+  if (!editorEnabled.value) frameTunerOpen.value = false
+}
+
+function controlMax(key: ZoneMetric) {
+  const zone = selectedZone.value
+  if (!zone) return 100
+  if (key === 'x') return 100 - zone.width
+  if (key === 'y') return 100 - zone.height
+  if (key === 'width') return 100 - zone.x
+  return 100 - zone.y
+}
+
+function updateSelectedZone(key: ZoneMetric, event: Event) {
+  const zone = selectedZone.value
+  if (!zone) return
+  zone[key] = Number((event.target as HTMLInputElement).value)
+}
+
+function resetSelectedZone() {
+  const zone = selectedZone.value
+  const defaults = defaultModules.find(item => item.id === selectedModuleId.value)
+  if (!zone || !defaults) return
+  Object.assign(zone, defaults)
+  showCopyStatus('已恢复当前模块默认值')
+}
+
+async function copyZoneLayout() {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(modules.value, null, 2))
+    showCopyStatus('全部模块参数已复制')
+  } catch {
+    showCopyStatus('复制失败，请检查浏览器剪贴板权限')
+  }
+}
+
+function showCopyStatus(message: string) {
+  copyStatus.value = message
+  if (copyStatusTimer) window.clearTimeout(copyStatusTimer)
+  copyStatusTimer = window.setTimeout(() => { copyStatus.value = '' }, 2200)
+}
 </script>
 
 <style scoped>
-.image-cabin { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 46%, #072667 0%, #020715 68%); }
-.image-cabin__canvas { position: relative; width: min(100vw, calc(100vh * 1.774)); aspect-ratio: 1672 / 942; overflow: hidden; }
-.image-cabin__image { display: block; width: 100%; height: 100%; user-select: none; }
-.image-cabin__zone { position: absolute; z-index: 2; display: block; padding: 0; border: 0; border-radius: 10px; background: transparent; cursor: pointer; }
-.image-cabin__dash { position: absolute; inset: 0; border: 2px dashed rgba(108, 227, 255, .72); border-radius: 10px; box-shadow: inset 0 0 22px rgba(19, 180, 255, .12), 0 0 15px rgba(11, 149, 255, .12); opacity: .68; transition: .22s ease; pointer-events: none; }
-.image-cabin__tag { position: absolute; top: -12px; left: 50%; display: flex; align-items: center; gap: 5px; padding: 3px 8px 3px 4px; border: 1px solid rgba(123, 235, 255, .82); border-radius: 999px; background: rgba(1, 17, 49, .9); box-shadow: 0 0 14px rgba(30, 185, 255, .4); color: #f1fbff; font-size: clamp(8px, .9vw, 14px); font-weight: 800; white-space: nowrap; opacity: 0; transform: translateX(-50%) scale(.92); transition: .22s ease; pointer-events: none; }
-.image-cabin__tag b { display: grid; width: clamp(17px, 1.8vw, 28px); height: clamp(17px, 1.8vw, 28px); place-items: center; border-radius: 50%; background: linear-gradient(135deg, #67eaff, #3878ff); box-shadow: 0 0 10px #48cfff; color: #031535; font-size: .75em; }
-.image-cabin__zone:hover .image-cabin__dash, .image-cabin__zone:focus-visible .image-cabin__dash { border-color: #d7fbff; background: rgba(40, 211, 255, .12); box-shadow: inset 0 0 34px rgba(34, 209, 255, .24), 0 0 28px rgba(27, 199, 255, .72); opacity: 1; }
-.image-cabin__zone:hover .image-cabin__tag, .image-cabin__zone:focus-visible .image-cabin__tag { opacity: 1; transform: translateX(-50%) scale(1.08); box-shadow: 0 0 24px rgba(63, 222, 255, .82); }
-.image-cabin__zone:focus-visible { outline: 0; }
+.image-cabin { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; background: #061026; }
+.image-cabin__ambience { position: absolute; inset: -28px; background: linear-gradient(rgba(3, 12, 35, .18), rgba(3, 12, 35, .18)), url('/growth-cabin-reference.png') center / cover no-repeat; filter: blur(24px) saturate(.9) brightness(.55); transform: scale(1.08); }
+.image-cabin__canvas { position: relative; z-index: 1; width: min(100vw, calc(100vh * 1.776833)); aspect-ratio: 1672 / 941; overflow: hidden; background: #07122b; box-shadow: 0 0 90px rgba(9, 83, 211, .28); animation: cabin-reveal .7s ease-out both; }
+.image-cabin__image { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+.image-cabin__zone { position: absolute; z-index: 2; display: block; padding: 0; border: 0; border-radius: clamp(5px, .8vw, 14px); background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.image-cabin__frame { position: absolute; inset: 0; border: 1px solid rgba(103, 230, 255, 0); border-radius: inherit; background: radial-gradient(circle at 50% 50%, rgba(60, 196, 255, 0), rgba(29, 112, 255, 0)); box-shadow: inset 0 0 0 1px rgba(116, 235, 255, 0), 0 0 0 rgba(30, 151, 255, 0); transition: border-color .22s ease, background .22s ease, box-shadow .22s ease; pointer-events: none; }
+.image-cabin__frame::before, .image-cabin__frame::after { content: ''; position: absolute; inset: clamp(4px, .45vw, 8px); opacity: 0; transition: opacity .22s ease; pointer-events: none; }
+.image-cabin__frame::before { border-top: 2px solid #d9fbff; border-left: 2px solid #d9fbff; clip-path: polygon(0 0, 34% 0, 34% 2px, 2px 2px, 2px 34%, 0 34%); filter: drop-shadow(0 0 7px #28baff); }
+.image-cabin__frame::after { border-right: 2px solid #d9fbff; border-bottom: 2px solid #d9fbff; clip-path: polygon(66% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 66%, 100% 66%, 100% 100%, 66% 100%); filter: drop-shadow(0 0 7px #28baff); }
+.image-cabin__hint { position: absolute; bottom: clamp(7px, .9vw, 15px); left: 50%; padding: clamp(4px, .45vw, 8px) clamp(8px, .8vw, 14px); border: 1px solid rgba(113, 232, 255, .78); border-radius: 999px; background: rgba(2, 23, 68, .9); box-shadow: 0 0 20px rgba(44, 184, 255, .45); color: #effcff; font-size: clamp(8px, .75vw, 13px); font-weight: 700; letter-spacing: .04em; white-space: nowrap; opacity: 0; transform: translate(-50%, 6px); transition: opacity .2s ease, transform .2s ease; pointer-events: none; }
+.image-cabin__zone:hover .image-cabin__frame, .image-cabin__zone:focus-visible .image-cabin__frame { border-color: rgba(137, 238, 255, .76); background: radial-gradient(circle at 50% 50%, rgba(64, 204, 255, .16), rgba(33, 105, 255, .04)); box-shadow: inset 0 0 32px rgba(73, 203, 255, .18), 0 0 28px rgba(34, 164, 255, .42); }
+.image-cabin__zone:hover .image-cabin__frame::before, .image-cabin__zone:hover .image-cabin__frame::after, .image-cabin__zone:focus-visible .image-cabin__frame::before, .image-cabin__zone:focus-visible .image-cabin__frame::after, .image-cabin__zone:hover .image-cabin__hint, .image-cabin__zone:focus-visible .image-cabin__hint { opacity: 1; }
+.image-cabin__zone:hover .image-cabin__hint, .image-cabin__zone:focus-visible .image-cabin__hint { transform: translate(-50%, 0); }
+.image-cabin__zone:focus-visible { outline: 2px solid #bdf6ff; outline-offset: 3px; }
 .image-cabin__zone--ai-suggest { z-index: 4; }
-@media (max-width: 700px) { .image-cabin__tag { top: -9px; padding: 2px 5px 2px 3px; gap: 3px; } .image-cabin__dash { border-width: 1px; border-radius: 5px; } }
+.image-cabin__zone.is-editing { cursor: crosshair; }
+.image-cabin__zone.is-editing .image-cabin__frame { border-color: rgba(101, 222, 255, .55); background: rgba(22, 126, 255, .055); box-shadow: inset 0 0 18px rgba(67, 197, 255, .11); }
+.image-cabin__zone.is-editing .image-cabin__frame::before, .image-cabin__zone.is-editing .image-cabin__frame::after { opacity: .56; }
+.image-cabin__zone.is-selected { z-index: 6; }
+.image-cabin__zone.is-selected .image-cabin__frame { border-color: #d9fbff; background: radial-gradient(circle, rgba(69, 208, 255, .18), rgba(30, 115, 255, .075)); box-shadow: inset 0 0 36px rgba(78, 211, 255, .2), 0 0 32px rgba(26, 164, 255, .58); }
+.image-cabin__zone.is-selected .image-cabin__frame::before, .image-cabin__zone.is-selected .image-cabin__frame::after, .image-cabin__zone.is-selected .image-cabin__hint { opacity: 1; }
+.image-cabin__zone.is-selected .image-cabin__hint { transform: translate(-50%, 0); }
+
+.image-cabin__dev-controls { position: fixed; top: 24px; right: 24px; z-index: 220; display: flex; gap: 10px; }
+.image-cabin__dev-button { min-width: 94px; height: 42px; border: 1px solid rgba(109, 225, 255, .5); border-radius: 10px; padding: 0 16px; background: linear-gradient(180deg, rgba(7, 35, 78, .9), rgba(3, 18, 48, .94)); box-shadow: 0 8px 24px rgba(0, 7, 30, .38), inset 0 1px rgba(255, 255, 255, .08); color: #dff9ff; font: 700 13px/1 "Microsoft YaHei", sans-serif; cursor: pointer; backdrop-filter: blur(18px); transition: .2s ease; }
+.image-cabin__dev-button:hover, .image-cabin__dev-button.active { border-color: #7ce8ff; background: linear-gradient(180deg, rgba(13, 74, 117, .94), rgba(5, 35, 76, .96)); box-shadow: 0 0 24px rgba(44, 190, 255, .32), inset 0 1px rgba(255, 255, 255, .12); color: #fff; }
+
+.image-cabin__tuner { position: fixed; top: 78px; right: 24px; z-index: 219; width: min(328px, calc(100vw - 48px)); border: 1px solid rgba(87, 211, 255, .42); border-radius: 14px; padding: 18px; background: linear-gradient(155deg, rgba(4, 24, 61, .96), rgba(2, 13, 38, .97)); box-shadow: 0 20px 55px rgba(0, 5, 25, .56), inset 0 1px rgba(255, 255, 255, .07); color: #dff8ff; backdrop-filter: blur(22px); }
+.image-cabin__tuner header { display: grid; gap: 4px; padding-bottom: 14px; border-bottom: 1px solid rgba(99, 221, 255, .16); }
+.image-cabin__tuner header span { color: #6ddfff; font: 700 9px/1 Bahnschrift, sans-serif; letter-spacing: .18em; }
+.image-cabin__tuner header strong { font-size: 15px; }
+.image-cabin__module-select { display: grid; grid-template-columns: 76px 1fr; align-items: center; gap: 10px; margin: 15px 0 12px; }
+.image-cabin__module-select > span, .image-cabin__tuner-row > span { color: #9bc9d7; font-size: 11px; }
+.image-cabin__module-select select { min-width: 0; border: 1px solid rgba(88, 218, 255, .28); border-radius: 7px; padding: 7px 9px; outline: 0; background: #071c40; color: #effcff; font: inherit; font-size: 12px; }
+.image-cabin__module-select select:focus { border-color: #71e6ff; box-shadow: 0 0 0 2px rgba(55, 196, 255, .12); }
+.image-cabin__tuner-row { display: grid; grid-template-columns: 76px 1fr 47px; align-items: center; gap: 10px; min-height: 38px; }
+.image-cabin__tuner-row input[type="range"] { width: 100%; accent-color: #55dfff; cursor: ew-resize; }
+.image-cabin__tuner-row i { color: #72e5ff; font: 700 11px/1 Bahnschrift, monospace; text-align: right; }
+.image-cabin__tuner-actions { display: grid; grid-template-columns: 1fr 1.25fr; gap: 8px; margin-top: 14px; }
+.image-cabin__tuner-actions button { border: 1px solid rgba(94, 222, 255, .3); border-radius: 8px; padding: 9px 10px; background: rgba(12, 67, 112, .48); color: #e9fbff; font: 700 11px/1 "Microsoft YaHei", sans-serif; cursor: pointer; }
+.image-cabin__tuner-actions button:hover { border-color: #78eaff; background: #0d4a75; }
+.image-cabin__tuner > p { min-height: 28px; margin: 12px 0 0; color: #729ead; font-size: 10px; line-height: 1.45; }
+
+@keyframes cabin-reveal { from { opacity: 0; transform: scale(1.025); } to { opacity: 1; transform: scale(1); } }
+
+@media (max-width: 700px) { .image-cabin__hint { display: none; } .image-cabin__frame::before, .image-cabin__frame::after { border-width: 1px; } .image-cabin__dev-controls { top: 12px; right: 12px; gap: 6px; } .image-cabin__dev-button { min-width: 78px; height: 36px; padding: 0 10px; font-size: 11px; } .image-cabin__tuner { top: 58px; right: 12px; width: calc(100vw - 24px); max-height: calc(100vh - 70px); overflow-y: auto; padding: 14px; } }
+@media (prefers-reduced-motion: reduce) { .image-cabin__canvas { animation: none; } .image-cabin__frame, .image-cabin__hint { transition: none; } }
 </style>

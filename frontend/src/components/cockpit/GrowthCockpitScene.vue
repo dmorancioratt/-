@@ -1,5 +1,8 @@
 <template>
   <div ref="host" class="growth-scene" aria-label="个人成长智能驾驶舱三维空间">
+    <div class="growth-scene__bgwrap">
+      <video class="growth-scene__bgv" src="/Digital_path_transforms_into_river_202608242002.mp4" autoplay loop muted playsinline preload="auto"></video>
+    </div>
     <div v-if="loading" class="growth-scene__loading">
       <span class="growth-scene__loader-orbit"></span>
       <p>ASSEMBLING THE GROWTH LAB</p>
@@ -32,8 +35,81 @@
       <small>{{ reviewLabel.label }}</small>
     </div>
 
+    <AutoFitModuleFrames
+      v-show="!editorEnabled"
+      :frames="moduleFrames"
+      :layer-w="frameLayer.w"
+      :layer-h="frameLayer.h"
+      :padding="frameOptions.padding"
+      :skew="frameOptions.skew"
+      :stroke-scale="frameOptions.strokeScale"
+      :ui-scale="frameOptions.uiScale"
+      :opacity="frameOptions.opacity"
+      :smooth="frameOptions.smooth"
+      :radius="frameOptions.radius"
+    />
+
     <button
-      v-if="showLayoutEditor"
+      v-if="false && showLayoutEditor"
+      class="frame-tuner__toggle"
+      :class="{ active: frameTunerOpen }"
+      type="button"
+      @click="frameTunerOpen = !frameTunerOpen"
+    >
+      {{ frameTunerOpen ? '收起框调节' : '框调节' }}
+    </button>
+
+    <aside v-if="frameTunerOpen" class="frame-tuner" aria-label="模块外框调节面板">
+      <header>
+        <span>FRAME TUNER</span>
+        <strong>模块外框实时调节</strong>
+      </header>
+
+      <label class="frame-tuner__row">
+        <span>框边距（外扩）</span>
+        <input type="range" min="0" max="0.3" step="0.01" v-model.number="frameOptions.padding" />
+        <i>{{ frameOptions.padding.toFixed(2) }}</i>
+      </label>
+      <label class="frame-tuner__row">
+        <span>成就墙斜切比例</span>
+        <input type="range" min="0" max="0.4" step="0.01" v-model.number="frameOptions.skew" />
+        <i>{{ frameOptions.skew.toFixed(2) }}</i>
+      </label>
+      <label class="frame-tuner__row">
+        <span>描边粗细</span>
+        <input type="range" min="0.4" max="3" step="0.1" v-model.number="frameOptions.strokeScale" />
+        <i>{{ frameOptions.strokeScale.toFixed(1) }}</i>
+      </label>
+      <label class="frame-tuner__row">
+        <span>标签/按钮大小</span>
+        <input type="range" min="0.6" max="1.6" step="0.05" v-model.number="frameOptions.uiScale" />
+        <i>{{ frameOptions.uiScale.toFixed(2) }}</i>
+      </label>
+      <label class="frame-tuner__row">
+        <span>整体透明度</span>
+        <input type="range" min="0.1" max="1" step="0.05" v-model.number="frameOptions.opacity" />
+        <i>{{ frameOptions.opacity.toFixed(2) }}</i>
+      </label>
+      <label class="frame-tuner__row">
+        <span>跟随灵敏度</span>
+        <input type="range" min="0.08" max="1" step="0.02" v-model.number="frameOptions.smooth" />
+        <i>{{ frameOptions.smooth.toFixed(2) }}</i>
+      </label>
+      <label class="frame-tuner__row">
+        <span>圆角半径</span>
+        <input type="range" min="0" max="36" step="1" v-model.number="frameOptions.radius" />
+        <i>{{ frameOptions.radius }}</i>
+      </label>
+
+      <div class="frame-tuner__actions">
+        <button type="button" @click="resetFrameOptions">恢复默认</button>
+        <button type="button" @click="copyFrameOptions">复制参数</button>
+      </div>
+      <p class="frame-tuner__hint">拖动滑块实时生效；调好后点「复制参数」粘贴到代码里固定。</p>
+    </aside>
+
+    <button
+      v-if="false && showLayoutEditor"
       class="layout-editor__toggle"
       :class="{ active: editorEnabled }"
       type="button"
@@ -112,6 +188,7 @@ import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { cockpitModules, defaultCamera, type CockpitModuleConfig } from './cockpitModuleConfig'
+import AutoFitModuleFrames, { type RawFrame } from './AutoFitModuleFrames.vue'
 
 type MaterialState = {
   material: THREE.MeshStandardMaterial
@@ -146,6 +223,32 @@ const failedModules = ref<string[]>([])
 const showLayoutEditor = import.meta.env.DEV
 const showReviewLabels = ref(import.meta.env.DEV)
 const reviewLabels = ref<ReviewLabel[]>([])
+const frameLayer = reactive({ w: 1920, h: 1080 })
+const moduleFrames = ref<RawFrame[]>([])
+const bboxByRoot = new WeakMap<THREE.Group, THREE.Box3>()
+
+// 模块外框实时调节参数（通过页面上「框调节」面板拖滑块修改）
+const FRAME_DEFAULTS = {
+  padding: 0.1,
+  skew: 0.16,
+  strokeScale: 1,
+  uiScale: 1,
+  opacity: 1,
+  smooth: 0.22,
+  radius: 18,
+}
+const frameTunerOpen = ref(false)
+const frameOptions = reactive({ ...FRAME_DEFAULTS })
+function resetFrameOptions() { Object.assign(frameOptions, FRAME_DEFAULTS) }
+async function copyFrameOptions() {
+  const text = JSON.stringify(frameOptions, null, 2)
+  try {
+    await navigator.clipboard.writeText(text)
+    editorMessage.value = '框参数已复制到剪贴板'
+  } catch {
+    editorMessage.value = '浏览器未授权剪贴板，请手动抄录'
+  }
+}
 const editorEnabled = ref(false)
 const editorMode = ref<TransformMode>('translate')
 const editorSelected = ref<CockpitModuleConfig | null>(null)
@@ -432,6 +535,7 @@ async function loadModule(config: CockpitModuleConfig, loader: GLTFLoader) {
   configByRoot.set(root, config)
   interactiveRoots.push(root)
   scene!.add(root)
+  bboxByRoot.set(root, new THREE.Box3().setFromObject(root))
 }
 
 function roundLayoutValue(value: number) {
@@ -699,6 +803,52 @@ function resize() {
   composer.setSize(width, height)
 }
 
+function projectVec(v: THREE.Vector3, w: number, h: number, cam: THREE.PerspectiveCamera) {
+  v.project(cam)
+  return { x: (v.x * 0.5 + 0.5) * w, y: (-v.y * 0.5 + 0.5) * h, z: v.z }
+}
+
+// 投影 3D 包围盒 → 屏幕原始矩形，交给 AutoFitModuleFrames 自适应渲染
+function updateModuleFrames() {
+  if (!camera || !host.value) { moduleFrames.value = []; return }
+  const rect = host.value.getBoundingClientRect()
+  const w = rect.width, h = rect.height
+  frameLayer.w = w; frameLayer.h = h
+  const cam = camera
+  const v = new THREE.Vector3()
+
+  moduleFrames.value = interactiveRoots.map((root) => {
+    const config = configByRoot.get(root)!
+    const bbox = bboxByRoot.get(root) ?? new THREE.Box3().setFromObject(root)
+    const min = bbox.min, max = bbox.max
+    const pts = [
+      new THREE.Vector3(min.x, max.y, min.z), new THREE.Vector3(max.x, max.y, min.z),
+      new THREE.Vector3(min.x, min.y, min.z), new THREE.Vector3(max.x, min.y, min.z),
+      new THREE.Vector3(min.x, max.y, max.z), new THREE.Vector3(max.x, max.y, max.z),
+      new THREE.Vector3(min.x, min.y, max.z), new THREE.Vector3(max.x, min.y, max.z),
+    ].map(p => projectVec(v.copy(p), w, h, cam))
+    const behind = pts.some(p => p.z <= -1.02 || p.z >= 1.02)
+    const x0 = Math.min(...pts.map(p => p.x)), x1 = Math.max(...pts.map(p => p.x))
+    const y0 = Math.min(...pts.map(p => p.y)), y1 = Math.max(...pts.map(p => p.y))
+    const rectW = Math.max(40, x1 - x0), rectH = Math.max(32, y1 - y0)
+    const padX = Math.min(w * 0.03, rectW * 0.10)
+    const padTop = Math.min(h * 0.06, rectH * 0.18)
+    const padBot = Math.min(h * 0.04, rectH * 0.12)
+    const bx = Math.max(4, x0 - padX)
+    const by = Math.max(4, y0 - padTop)
+    const bw = Math.min(w - 8 - bx, rectW + padX * 2)
+    const bh = Math.min(h - 8 - by, rectH + padTop + padBot)
+    const id = config.id
+    return {
+      id,
+      kind: id === 'achievement' ? 'parallelogram' : id === 'resource' ? 'rectBase' : 'rect',
+      title: config.label,
+      box: { x: bx, y: by, w: bw, h: bh },
+      visible: !behind && bw > 60 && bh > 50,
+    } satisfies RawFrame
+  })
+}
+
 function updateReviewLabelProjection() {
   if (!showReviewLabels.value || editorEnabled.value || !camera || !host.value) {
     reviewLabels.value = []
@@ -786,6 +936,7 @@ function animate() {
   })
 
   updateReviewLabelProjection()
+  updateModuleFrames()
   controls.update()
   composer.render()
 }
@@ -961,6 +1112,27 @@ onBeforeUnmount(() => {
   background: radial-gradient(circle at 50% 44%, transparent 75%, rgba(1, 6, 16, .035) 100%);
 }
 
+.growth-scene__bgwrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #020713;
+}
+.growth-scene__bgwrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .5;
+  filter: saturate(1.15) blur(1px);
+}
+.growth-scene__bgwrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 42%, rgba(4, 18, 48, .12), rgba(2, 7, 19, .72) 80%);
+}
+
 .growth-scene :deep(canvas) {
   position: absolute;
   inset: 0;
@@ -1132,6 +1304,87 @@ onBeforeUnmount(() => {
   border-color: #73e5ff;
   background: #0a3b5d;
   color: #fff;
+}
+
+/* ===== 模块外框调节面板 ===== */
+.frame-tuner__toggle {
+  position: absolute;
+  top: 18px;
+  right: 128px;
+  z-index: 5;
+  padding: 9px 13px;
+  border: 1px solid rgba(93, 211, 255, .5);
+  border-radius: 6px;
+  background: rgba(3, 18, 43, .86);
+  color: #d9f6ff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .28);
+  cursor: pointer;
+  font: 600 11px/1 "Microsoft YaHei", sans-serif;
+  backdrop-filter: blur(12px);
+}
+.frame-tuner__toggle.active {
+  border-color: #73e5ff;
+  background: #0a3b5d;
+  color: #fff;
+}
+
+.frame-tuner {
+  position: absolute;
+  top: 62px;
+  right: 128px;
+  z-index: 5;
+  display: grid;
+  gap: 10px;
+  width: 268px;
+  padding: 14px;
+  border: 1px solid rgba(93, 211, 255, .35);
+  border-radius: 10px;
+  background: rgba(3, 18, 43, .92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .4);
+}
+.frame-tuner header { display: grid; gap: 3px; }
+.frame-tuner header span { color: #7ce8ff; font: 700 9px/1 Bahnschrift, sans-serif; letter-spacing: .16em; }
+.frame-tuner header strong { color: #eafaff; font: 600 12px/1.2 "Microsoft YaHei", sans-serif; }
+
+.frame-tuner__row {
+  display: grid;
+  grid-template-columns: 88px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(217, 246, 255, .85);
+}
+.frame-tuner__row input[type="range"] {
+  width: 100%;
+  height: 14px;
+  accent-color: #55d6ff;
+  cursor: pointer;
+}
+.frame-tuner__row i {
+  font: 700 10px/1 Bahnschrift, monospace;
+  color: #8fe9ff;
+  text-align: right;
+  font-style: normal;
+}
+
+.frame-tuner__actions { display: flex; gap: 8px; }
+.frame-tuner__actions button {
+  flex: 1;
+  padding: 8px 0;
+  border: 1px solid rgba(93, 211, 255, .55);
+  border-radius: 6px;
+  background: rgba(10, 59, 93, .9);
+  color: #dff9ff;
+  cursor: pointer;
+  font: 600 11px/1 "Microsoft YaHei", sans-serif;
+}
+.frame-tuner__actions button:hover { background: #0d4a75; }
+.frame-tuner__hint {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: rgba(185, 225, 245, .55);
 }
 
 .layout-editor {

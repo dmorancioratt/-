@@ -56,11 +56,7 @@ router.beforeEach((to) => {
   if (!token || !user) return { path: '/login', query: { redirect: to.fullPath } }
   const roles = (to.meta.roles as string[] | undefined) || allRoles
   if (!roles.includes(user.role)) {
-    return user.role === 'candidate' ? '/personal-center' : user.role === 'hr' ? '/dashboards/hr' : '/overview'
-  }
-  // HR 角色的系统概览直接落到 HR 大屏
-  if (user.role === 'hr' && to.path === '/overview') {
-    return { path: '/dashboards/hr' }
+    return user.role === 'candidate' ? '/personal-center' : '/overview'
   }
   return true
 })

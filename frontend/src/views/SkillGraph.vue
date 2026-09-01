@@ -38,6 +38,7 @@
         <el-select v-model="nodeType" clearable placeholder="全部节点" style="width: 144px" @change="renderGraph">
           <el-option v-for="item in types" :key="item" :label="typeLabels[item] || item" :value="item" />
         </el-select>
+        <el-button :class="{ 'radar-active': showRadar }" @click="showRadar = !showRadar">图谱结构雷达</el-button>
         <el-button @click="resetView">重置视角</el-button>
         <el-button type="primary" :loading="loading" @click="loadGraph">刷新图谱</el-button>
       </div>
@@ -63,6 +64,43 @@
               <span>{{ typeLabels[hovered.type] || hovered.type }}</span>
             </div>
           </div>
+          <transition name="radar-fade">
+            <div v-if="showRadar" class="skill-radar-panel" aria-label="图谱结构雷达">
+              <div class="skill-radar-head">
+                <div>
+                  <span class="skill-radar-title">图谱结构雷达</span>
+                  <small>STRUCTURE RADAR</small>
+                </div>
+                <button class="skill-radar-close" type="button" aria-label="关闭雷达图" @click="showRadar = false">×</button>
+              </div>
+              <svg class="skill-radar-svg" viewBox="0 0 400 400" role="img" aria-label="八类节点数量占比雷达图">
+                <defs>
+                  <radialGradient id="skillRadarFill" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#4ed8ff" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.08" />
+                  </radialGradient>
+                  <filter id="skillRadarGlow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+                </defs>
+                <circle cx="200" cy="200" r="152" fill="none" stroke="rgba(78,216,255,0.14)" stroke-width="1" />
+                <polygon v-for="lv in [0.25, 0.5, 0.75, 1]" :key="'g' + lv" :points="radarGrid(lv)" fill="none" stroke="rgba(78,216,255,0.12)" stroke-width="1" />
+                <line v-for="(s, i) in radarSpokes()" :key="'s' + i" x1="200" y1="200" :x2="s.x2" :y2="s.y2" stroke="rgba(78,216,255,0.08)" stroke-width="1" />
+                <polygon :points="radarPolygon" fill="url(#skillRadarFill)" stroke="#4ed8ff" stroke-width="2" filter="url(#skillRadarGlow)" />
+                <circle v-for="g in radarGroups" :key="g.type" :cx="g.x" :cy="g.y" r="5.5" fill="#fff" stroke="#4ed8ff" stroke-width="2.5" />
+                <text v-for="g in radarGroups" :key="g.type + 't'" :x="g.lx" :y="g.ly" fill="rgba(236,247,255,0.86)" font-size="13" text-anchor="middle" font-weight="600">{{ g.label }}</text>
+                <text v-for="g in radarGroups" :key="g.type + 'c'" :class="{ 'radar-count--zero': g.count === 0 }" :x="g.x" :y="g.y + 4" fill="#202f46" font-size="11" font-weight="700" text-anchor="middle">{{ g.count }}</text>
+              </svg>
+              <ul class="radar-desc-list" aria-label="各类能力数据说明">
+                <li v-for="g in radarGroups" :key="'d-' + g.type" :class="{ zero: g.count === 0 }">
+                  <div class="rd-top">
+                    <span class="rd-name">{{ g.label }}</span>
+                    <span class="rd-num">{{ g.count }} 项 / {{ g.share }}%</span>
+                  </div>
+                  <p class="rd-desc">{{ g.desc }}</p>
+                </li>
+              </ul>
+              <div class="skill-radar-foot">共 {{ raw.nodes.length }} 节点 · 按 {{ radarGroups.length }} 类构成分布 · 数据实时来自后端图谱接口</div>
+            </div>
+          </transition>
           <div v-if="!loading && graphError" class="graph-message">
             <el-empty description="图谱暂时无法加载">
               <el-button type="primary" @click="loadGraph">重新加载</el-button>
@@ -230,6 +268,7 @@ const nodeCommunityMap = ref<Record<string, number>>({})
 const pathFrom = ref<number | null>(null)
 const pathTo = ref<number | null>(null)
 const pathResult = ref<PathResult | null>(null)
+const showRadar = ref(true)
 
 let scene: THREE.Scene | undefined
 let camera: THREE.PerspectiveCamera | undefined
@@ -296,6 +335,64 @@ const typeRadius: Record<string, number> = {
 const types = computed(() => Array.from(new Set(raw.value.nodes.map((node) => node.type))))
 const jobNodes = computed(() => raw.value.nodes.filter((node) => node.type === 'Job'))
 const visibleData = computed(() => filteredData())
+
+const RADAR_TYPES = ['Job', 'Skill', 'Tool', 'Certificate', 'Responsibility', 'IndustryScenario', 'Course', 'Level']
+const radarRadius = 150
+const radarLabelRadius = 196
+// 各类能力在图谱中的业务含义（说明文字模板，数据部分由后端真实节点动态填充）
+const radarRoleDesc: Record<string, string> = {
+  Job: '市场在招职位方向，是图谱需求侧的锚点',
+  Skill: '岗位要求的具体能力项，是学习与匹配的核心维度',
+  Tool: '能力落地的工具与平台，反映岗位的实操环境',
+  Certificate: '可验证的资质凭证，支撑能力可信度',
+  Responsibility: '岗位核心职责，描述工作内容边界',
+  IndustryScenario: '能力应用的行业场景，指示就业流向',
+  Course: '与能力对应的学习资源，支撑补齐路径',
+  Level: '能力掌握等级，刻画从入门到精通的刻度'
+}
+const radarGroups = computed(() => {
+  const total = raw.value.nodes.length
+  const counts = RADAR_TYPES.map((type) => raw.value.nodes.filter((node) => node.type === type).length)
+  const maxCount = Math.max(1, ...counts)
+  return RADAR_TYPES.map((type, index) => {
+    const angle = (Math.PI * 2 * index) / RADAR_TYPES.length - Math.PI / 2
+    const rad = counts[index] / maxCount
+    const nodesOfType = raw.value.nodes.filter((node) => node.type === type)
+    const examples = nodesOfType.slice(0, 3).map((node) => node.label).filter(Boolean)
+    const share = total ? ((counts[index] / total) * 100).toFixed(1) : '0.0'
+    const role = radarRoleDesc[type] || '图谱节点'
+    // 说明文字与后端真实数据联动：数量、占比、代表节点均来自接口返回
+    const desc = counts[index]
+      ? `${role}；当前 ${counts[index]} 项，占图谱 ${share}%${examples.length ? `，代表：${examples.join('、')}` : ''}`
+      : `${role}；后端当前未返回该类节点，雷达对应维度收拢为 0`
+    return {
+      type,
+      label: typeLabels[type] || type,
+      count: counts[index],
+      share,
+      desc,
+      examples,
+      x: 200 + radarRadius * rad * Math.cos(angle),
+      y: 200 + radarRadius * rad * Math.sin(angle),
+      lx: 200 + radarLabelRadius * Math.cos(angle),
+      ly: 200 + radarLabelRadius * Math.sin(angle) + 4
+    }
+  })
+})
+const radarPolygon = computed(() => radarGroups.value.map((g) => `${g.x},${g.y}`).join(' '))
+function radarGrid(level: number) {
+  return RADAR_TYPES.map((_, index) => {
+    const angle = (Math.PI * 2 * index) / RADAR_TYPES.length - Math.PI / 2
+    return `${200 + radarRadius * level * Math.cos(angle)},${200 + radarRadius * level * Math.sin(angle)}`
+  }).join(' ')
+}
+function radarSpokes() {
+  return RADAR_TYPES.map((_, index) => {
+    const angle = (Math.PI * 2 * index) / RADAR_TYPES.length - Math.PI / 2
+    return { x2: 200 + radarRadius * Math.cos(angle), y2: 200 + radarRadius * Math.sin(angle) }
+  })
+}
+
 const metricCards = computed(() => [
   { label: '总节点', value: graphStats.value.nodeCount ?? raw.value.nodes.length },
   { label: '岗位数', value: graphStats.value.jobCount ?? raw.value.nodes.filter((node) => node.type === 'Job').length },
@@ -1768,6 +1865,63 @@ onBeforeUnmount(() => {
   position: relative;
   min-height: 740px;
 }
+
+/* ===== 图谱结构雷达 ===== */
+.skill-radar-panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  width: 264px;
+  padding: 12px 12px 10px;
+  border: 1px solid rgba(92, 199, 255, 0.22);
+  border-radius: 16px;
+  background: rgba(7, 19, 41, 0.72);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 44px rgba(4, 12, 30, 0.45), inset 0 1px 0 rgba(190, 235, 255, 0.08);
+  pointer-events: auto;
+}
+.skill-radar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0 4px 8px;
+}
+.skill-radar-title { display: block; color: #ecf7ff; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+.skill-radar-head small { color: #5f87ab; font-size: 9px; letter-spacing: 0.18em; }
+.skill-radar-close {
+  width: 22px; height: 22px; border: 0; border-radius: 7px; cursor: pointer;
+  color: #9cc4e8; background: rgba(92, 199, 255, 0.12); font-size: 16px; line-height: 1;
+}
+.skill-radar-close:hover { color: #fff; background: rgba(255, 92, 128, 0.55); }
+.skill-radar-svg { display: block; width: 100%; height: auto; }
+/* ===== 雷达能力说明列表（每类一条，数据与后端联动） ===== */
+.radar-desc-list {
+  margin: 6px 0 0;
+  padding: 6px 2px 2px;
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  border-top: 1px solid rgba(92, 199, 255, 0.16);
+}
+.radar-desc-list::-webkit-scrollbar { width: 4px; }
+.radar-desc-list::-webkit-scrollbar-thumb { border-radius: 2px; background: rgba(92, 199, 255, 0.3); }
+.radar-desc-list li { padding: 6px 4px 5px; border-radius: 8px; }
+.radar-desc-list li + li { margin-top: 2px; border-top: 1px dashed rgba(92, 199, 255, 0.1); }
+.radar-desc-list li.zero { opacity: 0.55; }
+.rd-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.rd-name { color: #cdeeff; font-size: 12px; font-weight: 700; }
+.rd-num { color: #4ed8ff; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.radar-desc-list li.zero .rd-num { color: #6b8fae; }
+.rd-desc { margin: 3px 0 0; color: #8fb4d4; font-size: 11px; line-height: 1.55; text-align: justify; }
+.skill-radar-foot {
+  padding-top: 8px; text-align: center; color: #6b8fae; font-size: 10px; letter-spacing: 0.04em;
+}
+.radar-count--zero { fill: #f2fbff !important; }
+.radar-fade-enter-active, .radar-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.radar-fade-enter-from, .radar-fade-leave-to { opacity: 0; transform: translateY(6px) scale(0.98); }
+.el-button.radar-active { color: #dff6ff; border-color: #4ed8ff; background: rgba(78, 216, 255, 0.16); }
+.el-button.radar-active:hover { color: #fff; border-color: #6ee2ff; background: rgba(78, 216, 255, 0.24); }
 
 .graph-box {
   position: relative;
