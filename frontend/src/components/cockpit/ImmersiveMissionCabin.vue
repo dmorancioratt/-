@@ -401,7 +401,7 @@ onMounted(resetCabin)
 
 <style scoped>
 .mission-cabin {
-  --mission-accent: #58e6ff;
+  --mission-accent: #52ddff;
   --mission-soft: #0aa9b4;
   --mission-rgb: 88, 230, 255;
   position: fixed;
@@ -560,7 +560,7 @@ onMounted(resetCabin)
 .mission-task-empty li small { margin-top: 2px; color: #688895; font-size: 8px; }
 .mission-evidence { margin-top: 26px; border-top: 1px solid rgba(var(--mission-rgb), .15); padding-top: 17px; }.mission-evidence > span { color: var(--mission-accent); font-size: 9px; letter-spacing: .16em; }.mission-evidence ul { display: flex; flex-direction: column; gap: 9px; margin: 13px 0 0; padding: 0; list-style: none; }.mission-evidence li { position: relative; padding-left: 13px; color: #7897a4; font-size: 10px; line-height: 1.45; }.mission-evidence li::before { content: ""; position: absolute; top: 6px; left: 0; width: 4px; height: 4px; background: var(--mission-accent); box-shadow: 0 0 8px var(--mission-accent); }
 .mission-primary { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 24px; border: 1px solid var(--mission-accent); padding: 14px 16px; background: linear-gradient(90deg, rgba(var(--mission-rgb), .22), rgba(var(--mission-rgb), .07)); color: #f4fdff; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px)); }.mission-primary:hover { background: var(--mission-accent); color: #03101f; box-shadow: 0 0 28px rgba(var(--mission-rgb), .25); }.mission-primary svg { width: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; }
-.mission-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(var(--mission-rgb), .18); padding: 0 28px; background: rgba(2, 9, 24, .8); color: #5f7c89; font-size: 8px; letter-spacing: .15em; }.mission-footer span:first-child { color: #82a0ac; }.mission-footer i { display: inline-block; width: 5px; height: 5px; margin-right: 7px; border-radius: 50%; background: #63efb6; box-shadow: 0 0 8px #63efb6; }
+.mission-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(var(--mission-rgb), .18); padding: 0 28px; background: rgba(2, 9, 24, .8); color: #5f7c89; font-size: 8px; letter-spacing: .15em; }.mission-footer span:first-child { color: #82a0ac; }.mission-footer i { display: inline-block; width: 5px; height: 5px; margin-right: 7px; border-radius: 50%; background: #66d0e0; box-shadow: 0 0 8px #66d0e0; }
 
 .is-done { --node-opacity: 1; }.is-next { opacity: .72; }.is-locked { opacity: .42; filter: grayscale(.3); }
 

@@ -430,8 +430,8 @@ async function handleUserCommand(command: string) {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #066a72 0%, #00c9d2 50%, #22f7ff 100%);
-  box-shadow: 0 4px 16px rgba(34, 247, 255, 0.34), inset 0 1px 0 rgba(255,255,255,0.2);
+  background: linear-gradient(135deg, #066a72 0%, #0aa9b4 50%, #52ddff 100%);
+  box-shadow: 0 4px 16px rgba(82, 221, 255, 0.34), inset 0 1px 0 rgba(255,255,255,0.2);
   color: #fff;
   font-size: 16px;
   font-weight: 900;
@@ -505,16 +505,16 @@ async function handleUserCommand(command: string) {
 }
 
 .nav-trigger:hover {
-  background: rgba(34, 247, 255, 0.10);
+  background: rgba(82, 221, 255, 0.10);
   color: #ffffff;
 }
 
 .nav-trigger:hover .el-icon {
-  color: #65fff6;
+  color: #88ddff;
 }
 
 .nav-trigger.active {
-  background: linear-gradient(135deg, rgba(6, 106, 114, 0.55), rgba(0, 201, 210, 0.45));
+  background: linear-gradient(135deg, rgba(6, 106, 114, 0.55), rgba(10, 169, 180, 0.45));
   color: #ffffff;
   box-shadow: 0 4px 16px rgba(10, 169, 180, 0.28), inset 0 1px 0 rgba(255,255,255,0.15);
 }
@@ -528,8 +528,8 @@ async function handleUserCommand(command: string) {
   width: 60%;
   height: 3px;
   border-radius: 3px;
-  background: linear-gradient(90deg, #00c9d2, #22f7ff);
-  box-shadow: 0 0 12px rgba(34, 247, 255, 0.72), 0 0 20px rgba(0, 201, 210, 0.48);
+  background: linear-gradient(90deg, #0aa9b4, #52ddff);
+  box-shadow: 0 0 12px rgba(82, 221, 255, 0.72), 0 0 20px rgba(10, 169, 180, 0.48);
 }
 
 .nav-trigger.active .el-icon {
@@ -545,11 +545,11 @@ async function handleUserCommand(command: string) {
   min-width: 280px;
   max-height: calc(100vh - 92px);
   overflow-y: auto;
-  border: 1px solid rgba(34, 247, 255, 0.24);
+  border: 1px solid rgba(82, 221, 255, 0.24);
   border-radius: 14px;
   padding: 8px;
   background: linear-gradient(180deg, rgba(3, 28, 36, 0.98), rgba(2, 22, 30, 0.98));
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(34, 247, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(82, 221, 255, 0.12);
   animation: dropdownIn 220ms ease;
   pointer-events: auto !important;
   user-select: none;
@@ -565,8 +565,8 @@ async function handleUserCommand(command: string) {
   width: 12px;
   height: 12px;
   content: "";
-  border-top: 1px solid rgba(34, 247, 255, 0.24);
-  border-left: 1px solid rgba(34, 247, 255, 0.24);
+  border-top: 1px solid rgba(82, 221, 255, 0.24);
+  border-left: 1px solid rgba(82, 221, 255, 0.24);
   border-radius: 3px;
   background: rgba(3, 28, 36, 0.98);
   transform: rotate(45deg);
@@ -593,7 +593,7 @@ async function handleUserCommand(command: string) {
 .dropdown-item .el-icon {
   flex: 0 0 auto;
   font-size: 18px;
-  color: #65fff6;
+  color: #88ddff;
   transition: transform 200ms ease, color 200ms ease;
 }
 
@@ -627,14 +627,14 @@ async function handleUserCommand(command: string) {
   flex: 0 0 auto;
   margin-left: auto;
   font-size: 14px;
-  color: #65fff6;
+  color: #88ddff;
   opacity: 0;
   transition: opacity 200ms ease, transform 200ms ease;
 }
 
 .dropdown-item:hover {
-  border-color: rgba(34, 247, 255, 0.24);
-  background: rgba(34, 247, 255, 0.12);
+  border-color: rgba(82, 221, 255, 0.24);
+  background: rgba(82, 221, 255, 0.12);
   transform: translateX(3px);
 }
 
@@ -652,8 +652,8 @@ async function handleUserCommand(command: string) {
 }
 
 .dropdown-item.active {
-  border-color: rgba(34, 247, 255, 0.30);
-  background: rgba(34, 247, 255, 0.17);
+  border-color: rgba(82, 221, 255, 0.30);
+  background: rgba(82, 221, 255, 0.17);
 }
 
 .dropdown-item.active b {
@@ -686,7 +686,7 @@ async function handleUserCommand(command: string) {
   border: none;
   border-radius: 999px;
   padding: 3px 14px 3px 3px;
-  background: rgba(34, 247, 255, 0.14);
+  background: rgba(82, 221, 255, 0.14);
   color: #ffffff;
   font-weight: 600;
   cursor: pointer;
@@ -694,7 +694,7 @@ async function handleUserCommand(command: string) {
 }
 
 .user-chip:hover {
-  background: rgba(34, 247, 255, 0.22);
+  background: rgba(82, 221, 255, 0.22);
 }
 
 .user-avatar-wrap {
@@ -704,7 +704,7 @@ async function handleUserCommand(command: string) {
 }
 
 .user-avatar {
-  background: linear-gradient(135deg, #0aa9b4, #22f7ff) !important;
+  background: linear-gradient(135deg, #0aa9b4, #52ddff) !important;
   box-shadow: 0 2px 8px rgba(10, 169, 180, 0.36);
   font-weight: 800;
   font-size: 15px;
@@ -747,7 +747,7 @@ async function handleUserCommand(command: string) {
   background: rgba(3, 28, 36, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(34, 247, 255, 0.26);
+  border: 1px solid rgba(82, 221, 255, 0.26);
   border-radius: 10px;
   color: #a5fffc;
   font-size: 14px;
@@ -757,7 +757,7 @@ async function handleUserCommand(command: string) {
 }
 
 .fullscreen-exit-btn:hover {
-  background: rgba(34, 247, 255, 0.18);
+  background: rgba(82, 221, 255, 0.18);
   border-color: rgba(101, 255, 246, 0.55);
   color: #ffffff;
 }
@@ -788,8 +788,8 @@ async function handleUserCommand(command: string) {
   width: 4px;
   height: 24px;
   border-radius: 99px;
-  background: linear-gradient(180deg, #0aa9b4, #22f7ff);
-  box-shadow: 0 0 14px rgba(34, 247, 255, 0.36);
+  background: linear-gradient(180deg, #0aa9b4, #52ddff);
+  box-shadow: 0 0 14px rgba(82, 221, 255, 0.36);
 }
 
 .app-titlebar .header-title {

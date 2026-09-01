@@ -137,7 +137,7 @@ const governanceDimensions = computed(() => governance.value.dimensions || [])
 const healthScore = computed(() => governance.value.overall == null ? null : formatPercent(governance.value.overall))
 const pendingReviews = computed(() => reviews.value.filter((item) => item.status === 'pending'))
 const jobDistribution = computed(() => overview.value.job_distribution || [])
-const palette = ['#4feaff', '#0aa9b4', '#0aa9b4', '#ffbc62', '#9b8cff', '#ff7894']
+const palette = ['#52ddff', '#0aa9b4', '#0aa9b4', '#ffbc62', '#9b8cff', '#ff7894']
 const kpis = computed(() => [
   { label: '权威数据源', value: compact(sources.value.length), note: '未归档记录', icon: Collection },
   { label: '岗位实体', value: compact(overview.value.job_count), note: '数据库聚合', icon: Document },

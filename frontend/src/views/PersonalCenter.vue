@@ -216,7 +216,7 @@
         <svg class="flow-aurora-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <defs>
             <linearGradient id="flowAuroraGradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
-              <stop offset="0%" stop-color="#22f7ff" stop-opacity="0.22" />
+              <stop offset="0%" stop-color="#52ddff" stop-opacity="0.22" />
               <stop offset="24%" stop-color="#4df5ff" stop-opacity="0.72" />
               <stop offset="50%" stop-color="#0aa9b4" stop-opacity="0.82" />
               <stop offset="76%" stop-color="#7c3aed" stop-opacity="0.58" />
@@ -238,7 +238,7 @@
         <svg class="flow-aurora-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <defs>
             <linearGradient id="flowAuroraGradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
-              <stop offset="0%" stop-color="#22f7ff" stop-opacity="0.22" />
+              <stop offset="0%" stop-color="#52ddff" stop-opacity="0.22" />
               <stop offset="24%" stop-color="#4df5ff" stop-opacity="0.72" />
               <stop offset="50%" stop-color="#0aa9b4" stop-opacity="0.82" />
               <stop offset="76%" stop-color="#7c3aed" stop-opacity="0.58" />
@@ -802,7 +802,7 @@ onMounted(loadProfile)
 .profile-page :deep(.el-button--primary) {
   border: 0;
   border-radius: 14px;
-  background: linear-gradient(135deg, #0aa9b4, #00c9d2);
+  background: linear-gradient(135deg, #0aa9b4, #0aa9b4);
   box-shadow: 0 12px 26px rgba(30, 123, 255, 0.25);
   font-weight: 850;
 }
@@ -838,7 +838,7 @@ onMounted(loadProfile)
   border-radius: 28px;
   background:
     radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.95), transparent 30%),
-    linear-gradient(135deg, #032a30, #0aa9b4 58%, #22f7ff);
+    linear-gradient(135deg, #032a30, #0aa9b4 58%, #52ddff);
   box-shadow: 0 20px 48px rgba(30, 123, 255, 0.24);
   color: #fff;
   cursor: pointer;
@@ -1276,7 +1276,7 @@ onMounted(loadProfile)
 }
 
 .profile-status-card.done .status-check {
-  background: linear-gradient(135deg, #00c9d2, #22f7ff);
+  background: linear-gradient(135deg, #0aa9b4, #52ddff);
 }
 
 .status-check {
@@ -1415,13 +1415,13 @@ onMounted(loadProfile)
 }
 
 .elite-badge-211 {
-  background: linear-gradient(135deg, #0aa9b4 0%, #22f7ff 100%);
+  background: linear-gradient(135deg, #0aa9b4 0%, #52ddff 100%);
   animation-delay: 0.18s;
 }
 
 .elite-badge-double {
   min-width: 70px;
-  background: linear-gradient(135deg, #6d5dfc 0%, #0aa9b4 54%, #22f7ff 100%);
+  background: linear-gradient(135deg, #6d5dfc 0%, #0aa9b4 54%, #52ddff 100%);
   animation-delay: 0.36s;
 }
 
@@ -1685,7 +1685,7 @@ onMounted(loadProfile)
   width: 36px;
   height: 36px;
   border-radius: 13px;
-  background: linear-gradient(90deg, #0aa9b4, #22f7ff);
+  background: linear-gradient(90deg, #0aa9b4, #52ddff);
   box-shadow: 0 0 16px rgba(0, 200, 245, 0.34);
 }
 

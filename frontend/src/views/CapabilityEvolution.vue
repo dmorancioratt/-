@@ -181,7 +181,7 @@ const hotspot = ref<any>({ rising: [], declining: [], emerging: [] })
 const compare = ref<any>({ categories: [], domains: [], matrix: [] })
 const versionCards = ref<any[]>([])
 
-const PALETTE = ['#22f7ff', '#00c9d2', '#9ad8c5', '#4feaff', '#ffc048', '#c19aff', '#6ffaff']
+const PALETTE = ['#52ddff', '#0aa9b4', '#8cc8d8', '#52ddff', '#ffc048', '#c19aff', '#7fd4ff']
 
 function sum(key: string) {
   return (timeline.value.timeline || []).reduce((acc: number, b: any) => acc + (b[key] || 0), 0)
@@ -194,10 +194,10 @@ const timelineOption = computed(() => {
     tooltip: { trigger: 'axis' },
     legend: { data: ['新增', '淘汰', '修改'], top: 0, textStyle: { color: '#8fb7bd' } },
     grid: { left: 40, right: 20, top: 40, bottom: 30 },
-    xAxis: { type: 'category', data: rows.map((r: any) => r.date), axisLine: { lineStyle: { color: 'rgba(34,247,255,0.20)' } }, axisLabel: { color: '#78a4a9' } },
-    yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(34,247,255,0.10)' } }, axisLabel: { color: '#78a4a9' } },
+    xAxis: { type: 'category', data: rows.map((r: any) => r.date), axisLine: { lineStyle: { color: 'rgba(82, 221, 255,0.20)' } }, axisLabel: { color: '#78a4a9' } },
+    yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(82, 221, 255,0.10)' } }, axisLabel: { color: '#78a4a9' } },
     series: [
-      { name: '新增', type: 'bar', stack: 'x', data: rows.map((r: any) => r.added), itemStyle: { color: '#22f7ff', borderRadius: [4, 4, 0, 0], shadowColor: 'rgba(34,247,255,0.28)', shadowBlur: 8 } },
+      { name: '新增', type: 'bar', stack: 'x', data: rows.map((r: any) => r.added), itemStyle: { color: '#52ddff', borderRadius: [4, 4, 0, 0], shadowColor: 'rgba(82, 221, 255,0.28)', shadowBlur: 8 } },
       { name: '淘汰', type: 'bar', stack: 'x', data: rows.map((r: any) => r.removed), itemStyle: { color: '#ff5d7d' } },
       { name: '修改', type: 'bar', stack: 'x', data: rows.map((r: any) => r.modified), itemStyle: { color: '#ffc048' } },
       {
@@ -205,9 +205,9 @@ const timelineOption = computed(() => {
         type: 'line',
         smooth: true,
         data: rows.map((r: any) => r.events),
-        lineStyle: { color: '#00c9d2', width: 3 },
-        itemStyle: { color: '#22f7ff', shadowColor: 'rgba(34,247,255,0.45)', shadowBlur: 8 },
-        areaStyle: { color: 'rgba(0,201,210,0.10)' }
+        lineStyle: { color: '#0aa9b4', width: 3 },
+        itemStyle: { color: '#52ddff', shadowColor: 'rgba(82, 221, 255,0.45)', shadowBlur: 8 },
+        areaStyle: { color: 'rgba(10, 169, 180,0.10)' }
       }
     ]
   }
@@ -219,11 +219,11 @@ const hotspotOption = computed(() => {
     textStyle: { color: '#78a4a9' },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     grid: { left: 90, right: 30, top: 20, bottom: 30 },
-    xAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(34,247,255,0.10)' } }, axisLabel: { color: '#78a4a9' } },
+    xAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(82, 221, 255,0.10)' } }, axisLabel: { color: '#78a4a9' } },
     yAxis: {
       type: 'category',
       data: rows.map((r: any) => r.name),
-      axisLine: { lineStyle: { color: 'rgba(34,247,255,0.20)' } },
+      axisLine: { lineStyle: { color: 'rgba(82, 221, 255,0.20)' } },
       axisLabel: { color: '#bcd8dd' }
     },
     series: [
@@ -231,7 +231,7 @@ const hotspotOption = computed(() => {
         type: 'bar',
         data: rows.map((r: any, i: number) => ({
           value: r.heat,
-          itemStyle: { color: PALETTE[i % PALETTE.length], borderRadius: [0, 6, 6, 0], shadowColor: 'rgba(34,247,255,0.25)', shadowBlur: 6 }
+          itemStyle: { color: PALETTE[i % PALETTE.length], borderRadius: [0, 6, 6, 0], shadowColor: 'rgba(82, 221, 255,0.25)', shadowBlur: 6 }
         })),
         barWidth: '58%',
         label: { show: true, position: 'right', formatter: '{c}', color: '#bcd8dd', fontWeight: 700 }
@@ -249,8 +249,8 @@ const compareOption = computed(() => {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     legend: { data: cats, top: 0, type: 'scroll', textStyle: { color: '#8fb7bd' } },
     grid: { left: 40, right: 20, top: 40, bottom: 60 },
-    xAxis: { type: 'category', data: domains, axisLabel: { interval: 0, rotate: 24, color: '#bcd8dd' }, axisLine: { lineStyle: { color: 'rgba(34,247,255,0.20)' } } },
-    yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(34,247,255,0.10)' } }, axisLabel: { color: '#78a4a9' } },
+    xAxis: { type: 'category', data: domains, axisLabel: { interval: 0, rotate: 24, color: '#bcd8dd' }, axisLine: { lineStyle: { color: 'rgba(82, 221, 255,0.20)' } } },
+    yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(82, 221, 255,0.10)' } }, axisLabel: { color: '#78a4a9' } },
     series: cats.map((cat: string, i: number) => ({
       name: cat,
       type: 'bar',
@@ -305,14 +305,14 @@ onMounted(loadAll)
   overflow-x: clip;
   position: relative;
   background: transparent;
-  --panel: rgba(3, 28, 36, .30);
-  --edge: rgba(34, 247, 255, .11);
-  --cyan: #22f7ff;
-  --teal: #00c9d2;
-  --text: #e5ffff;
-  --muted: #78a4a9;
-  --primary: #22f7ff;
-  --success: #9ad8c5;
+  --panel: rgba(2, 24, 30, .38);
+  --edge: rgba(21, 197, 199, .10);
+  --cyan: #15c5c7;
+  --teal: #079ea2;
+  --text: #d8f2f3;
+  --muted: #6f999e;
+  --primary: #15c5c7;
+  --success: #8ad8bb;
   --warn: #ffc048;
   --danger: #ff5d7d;
   color: var(--text);
@@ -334,17 +334,17 @@ onMounted(loadAll)
 .evolution-page :deep(.page-toolbar) {
   min-height: 42px;
   margin-bottom: 14px;
-  border: 1px solid rgba(34, 247, 255, 0.14);
+  border: 1px solid rgba(82, 221, 255, 0.14);
   border-radius: 12px;
   padding: 6px 10px;
   background: linear-gradient(90deg, rgba(2, 18, 22, 0.22), rgba(4, 54, 63, 0.24));
-  box-shadow: inset 0 0 24px rgba(34, 247, 255, 0.04);
+  box-shadow: inset 0 0 24px rgba(82, 221, 255, 0.04);
   backdrop-filter: blur(20px) saturate(1.15);
 }
 
 .evolution-page :deep(.page-toolbar .el-radio-button__inner) {
   min-width: 86px;
-  border-color: rgba(34, 247, 255, 0.18);
+  border-color: rgba(82, 221, 255, 0.18);
   color: #8fb7bd;
   background: rgba(3, 36, 44, 0.26);
   box-shadow: none;
@@ -353,7 +353,7 @@ onMounted(loadAll)
 .evolution-page :deep(.page-toolbar .el-radio-button__original-radio:checked + .el-radio-button__inner) {
   color: #eaffff;
   background: linear-gradient(180deg, rgba(0, 178, 188, 0.55), rgba(4, 44, 54, 0.58));
-  box-shadow: inset 0 -2px rgba(141, 255, 255, 0.38), 0 0 12px rgba(34, 247, 255, 0.28);
+  box-shadow: inset 0 -2px rgba(141, 255, 255, 0.38), 0 0 12px rgba(82, 221, 255, 0.28);
 }
 
 .evo-merge-label {
@@ -365,7 +365,7 @@ onMounted(loadAll)
   font-size: 14px;
   font-weight: 850;
   letter-spacing: 0.06em;
-  text-shadow: 0 0 8px rgba(34, 247, 255, .30);
+  text-shadow: 0 0 8px rgba(82, 221, 255, .30);
 }
 
 .evo-merge-label::before {
@@ -379,7 +379,7 @@ onMounted(loadAll)
 .evo-merge-label::after {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(34, 247, 255, 0.28), transparent);
+  background: linear-gradient(90deg, rgba(82, 221, 255, 0.28), transparent);
   content: "";
 }
 
@@ -393,7 +393,7 @@ onMounted(loadAll)
   justify-content: space-between;
   margin-bottom: 14px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(34, 247, 255, .08);
+  border-bottom: 1px solid rgba(82, 221, 255, .08);
 }
 
 .panel-heading span {
@@ -408,7 +408,7 @@ onMounted(loadAll)
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.14em;
-  text-shadow: 0 0 8px rgba(34, 247, 255, .30);
+  text-shadow: 0 0 8px rgba(82, 221, 255, .30);
 }
 
 /* Version comparison */
@@ -416,7 +416,7 @@ onMounted(loadAll)
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgba(34, 247, 255, 0.16);
+  border: 1px solid rgba(82, 221, 255, 0.16);
   border-radius: 14px;
   padding: 12px 16px;
   background: rgba(3, 36, 44, 0.20);
@@ -430,7 +430,7 @@ onMounted(loadAll)
   flex: 0 0 auto;
   color: var(--cyan);
   font-size: 18px;
-  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
+  text-shadow: 0 0 6px rgba(82, 221, 255, .35);
 }
 
 .version-cards {
@@ -478,16 +478,16 @@ onMounted(loadAll)
 }
 
 .ver--from {
-  border: 1px solid rgba(34, 247, 255, 0.16);
+  border: 1px solid rgba(82, 221, 255, 0.16);
   background: rgba(3, 36, 44, 0.18);
   color: var(--muted);
 }
 
 .ver--to {
-  border: 1px solid rgba(34, 247, 255, 0.28);
-  background: linear-gradient(135deg, rgba(0, 178, 188, 0.18), rgba(34, 247, 255, 0.16));
+  border: 1px solid rgba(82, 221, 255, 0.28);
+  background: linear-gradient(135deg, rgba(0, 178, 188, 0.18), rgba(82, 221, 255, 0.16));
   color: var(--cyan);
-  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
+  text-shadow: 0 0 6px rgba(82, 221, 255, .35);
 }
 
 .ver-arrow {
@@ -512,7 +512,7 @@ onMounted(loadAll)
   border-radius: 14px;
   padding: 12px;
   background: rgba(3, 36, 44, 0.20);
-  border: 1px solid rgba(34, 247, 255, 0.12);
+  border: 1px solid rgba(82, 221, 255, 0.12);
   backdrop-filter: blur(16px) saturate(1.12);
 }
 
@@ -540,7 +540,7 @@ onMounted(loadAll)
 
 .diff-label b {
   color: var(--cyan);
-  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
+  text-shadow: 0 0 6px rgba(82, 221, 255, .35);
 }
 
 .diff-tags {
@@ -559,7 +559,7 @@ onMounted(loadAll)
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  border-top: 1px solid rgba(34, 247, 255, 0.08);
+  border-top: 1px solid rgba(82, 221, 255, 0.08);
   padding-top: 10px;
 }
 
@@ -567,7 +567,7 @@ onMounted(loadAll)
   color: var(--cyan);
   font-size: 12px;
   font-weight: 800;
-  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
+  text-shadow: 0 0 6px rgba(82, 221, 255, .35);
 }
 
 .version-count {
@@ -586,7 +586,7 @@ onMounted(loadAll)
 }
 
 .event-item {
-  border: 1px solid rgba(34, 247, 255, 0.12);
+  border: 1px solid rgba(82, 221, 255, 0.12);
   border-radius: 14px;
   padding: 12px 14px;
   background: rgba(3, 36, 44, 0.22);
@@ -629,7 +629,7 @@ onMounted(loadAll)
   color: var(--cyan);
   font-size: 12px;
   font-weight: 800;
-  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
+  text-shadow: 0 0 6px rgba(82, 221, 255, .35);
 }
 
 .hot-side {
@@ -665,7 +665,7 @@ onMounted(loadAll)
 .emerging-chip b {
   color: var(--cyan);
   font-size: 11px;
-  text-shadow: 0 0 6px rgba(34, 247, 255, .35);
+  text-shadow: 0 0 6px rgba(82, 221, 255, .35);
 }
 
 .decline-list {
@@ -678,7 +678,7 @@ onMounted(loadAll)
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(34, 247, 255, 0.08);
+  border-bottom: 1px solid rgba(82, 221, 255, 0.08);
   padding: 8px 2px;
   color: var(--text);
   font-weight: 700;
@@ -733,7 +733,7 @@ onMounted(loadAll)
   height: 100%;
   border-radius: 99px;
   background: linear-gradient(90deg, var(--teal), var(--cyan));
-  box-shadow: 0 0 8px rgba(34, 247, 255, .42);
+  box-shadow: 0 0 8px rgba(82, 221, 255, .42);
 }
 
 @media (max-width: 1100px) {

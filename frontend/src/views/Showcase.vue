@@ -153,10 +153,10 @@ const kpis = computed(() => [
 
 const flow = [
   { t: '多源采集', d: 'JD / 行业标准 / 课程', c: '#0aa9b4' },
-  { t: '能力抽取', d: '证据约束 + 幻觉防护', c: '#00c9d2' },
-  { t: '图谱构建', d: '岗位-技能知识图谱', c: '#00c9d2' },
-  { t: '动态演化', d: '版本化能力更新', c: '#22f7ff' },
-  { t: '简历解析', d: '结构化画像', c: '#00c9d2' },
+  { t: '能力抽取', d: '证据约束 + 幻觉防护', c: '#0aa9b4' },
+  { t: '图谱构建', d: '岗位-技能知识图谱', c: '#0aa9b4' },
+  { t: '动态演化', d: '版本化能力更新', c: '#52ddff' },
+  { t: '简历解析', d: '结构化画像', c: '#0aa9b4' },
   { t: '匹配诊断', d: '差距 + 证据', c: '#f59e0b' },
   { t: '学习路径', d: '差距转行动', c: '#ec4899' },
   { t: '人工审核', d: '低置信度治理', c: '#7c3aed' },
@@ -167,7 +167,7 @@ const innovations = [
   {
     title: '岗位能力下沉到技能级',
     desc: '把岗位能力从"岗位级标签"下沉到"技能级实体"，并做版本化、可追溯的动态演化，能一眼看出岗位新增、弱化、替代了什么能力及依据。',
-    color: '#00c9d2'
+    color: '#0aa9b4'
   },
   {
     title: '大模型限制在证据与审核链条内',
@@ -177,7 +177,7 @@ const innovations = [
   {
     title: '解析-诊断-学习闭环对齐',
     desc: '把简历解析、能力差距诊断、学习路径推荐串成一条闭环，并给出准确率与错误案例，让"人岗对齐"可量化、可复现。',
-    color: '#00c9d2'
+    color: '#0aa9b4'
   }
 ]
 
@@ -310,7 +310,7 @@ onMounted(async () => {
   width: 46px;
   height: 46px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #0aa9b4, #00c9d2);
+  background: linear-gradient(135deg, #0aa9b4, #0aa9b4);
   box-shadow: 0 0 26px rgba(6, 182, 212, 0.4);
   font-weight: 950;
   color: #fff;
@@ -355,7 +355,7 @@ onMounted(async () => {
   font-size: 14px;
   cursor: pointer;
   color: #fff;
-  background: linear-gradient(135deg, #0aa9b4, #00c9d2);
+  background: linear-gradient(135deg, #0aa9b4, #0aa9b4);
   box-shadow: 0 10px 26px rgba(37, 99, 235, 0.35);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
@@ -395,7 +395,7 @@ onMounted(async () => {
 }
 
 .grad {
-  background: linear-gradient(120deg, #22f7ff, #22f7ff, #818cf8);
+  background: linear-gradient(120deg, #52ddff, #52ddff, #818cf8);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -641,7 +641,7 @@ onMounted(async () => {
 
 .sc-ver-col.add span,
 .sc-ver-col.add em {
-  color: #22f7ff;
+  color: #52ddff;
 }
 
 .sc-ver-col.mod span,
@@ -731,7 +731,7 @@ onMounted(async () => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #22f7ff, #818cf8);
+  background: linear-gradient(135deg, #52ddff, #818cf8);
   box-shadow: 0 0 10px rgba(34, 211, 238, 0.7);
 }
 

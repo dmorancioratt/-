@@ -1,44 +1,44 @@
 :root {
   /* ============================================================
-   *  荧光青 Neon-Cyan Theme (全项目蓝色→荧光青统一替换)
-   *  主色：#22F7FF（荧光青发光核心）
-   *  亮阶：#8DFFFF；主色-深：#00C9D2；极深：#007A83
-   *  背景：青黑 #031014 / 深夜青 #041C22
+   *  Mission Calendar Blue-Cyan Theme (计划日历偏蓝青蓝风格)
+   *  主色：#52ddff (weekly-plan accent, 偏蓝青蓝去绿)
+   *  深主色：#0aa9b4 (accentSoft)；亮阶：#88ddff
+   *  背景：#0d3347 / #0f3b55 / #0b2c44 / #071f33 (深蓝青蓝渐变)
    * ============================================================ */
-  /* 基础语义色（原天青蓝 Sky-Cyan 全部替换为荧光青） */
-  --primary: #22f7ff;
-  --primary-dark: #00c9d2;
-  --primary-soft: rgba(0, 142, 156, 0.72);
-  --cyan: #8dffff;
-  --cyan-soft: rgba(28, 140, 160, 0.56);
-  --green: #22f7ff;
+  /* 基础语义色（计划日历偏蓝青蓝基调，整体降饱和增蓝去绿） */
+  --primary: #0aa9b4;
+  --primary-dark: #09828b;
+  --primary-soft: rgba(10, 138, 148, 0.68);
+  --cyan: #52ddff;
+  --cyan-soft: rgba(82, 180, 220, 0.48);
+  --green: #3ab6d4;
   --orange: #f59e0b;
-  --bg: #031014;
-  --text: #e5ffff;
-  --muted: #85aeb4;
-  --border: rgba(34, 247, 255, 0.32);
-  --glass: rgba(3, 24, 30, 0.72);
-  --shadow: 0 18px 54px rgba(0, 0, 0, 0.32);
+  --bg: #000000;
+  --text: #d8eef5;
+  --muted: #6e96a8;
+  --border: rgba(82, 221, 255, 0.20);
+  --glass: rgba(8, 28, 46, 0.78);
+  --shadow: 0 18px 54px rgba(0, 0, 0, 0.42);
   font-family: Inter, "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
   color: var(--text);
 
-  /* ===== Element Plus 全量主题色（原蓝 → 荧光青 10 阶） ===== */
-  --el-color-primary: #22f7ff;
-  --el-color-primary-light-3: #5dfaff;
-  --el-color-primary-light-5: #8dffff;
-  --el-color-primary-light-7: #befcff;
-  --el-color-primary-light-8: #d4fdff;
-  --el-color-primary-light-9: #ebfeff;
-  --el-color-primary-dark-2: #1bc4ca;
+  /* ===== Element Plus 全量主题色 (计划日历蓝青调) ===== */
+  --el-color-primary: #0aa9b4;
+  --el-color-primary-light-3: #3ec3d3;
+  --el-color-primary-light-5: #52ddff;
+  --el-color-primary-light-7: #a5e8f7;
+  --el-color-primary-light-8: #c5effa;
+  --el-color-primary-light-9: #e5f7fd;
+  --el-color-primary-dark-2: #08858e;
 
-  /* Success 偏荧光青绿，保持语义但偏青系 */
-  --el-color-success: #34f7c8;
-  --el-color-success-light-3: #6af9d8;
-  --el-color-success-light-5: #9cfbe4;
-  --el-color-success-light-7: #cdfdf0;
-  --el-color-success-light-8: #e2fef6;
-  --el-color-success-light-9: #f1fffb;
-  --el-color-success-dark-2: #26cfa1;
+  /* Success 蓝青调 (去绿转蓝青) */
+  --el-color-success: #3ab6d4;
+  --el-color-success-light-3: #6bc9df;
+  --el-color-success-light-5: #8cc8d8;
+  --el-color-success-light-7: #c6e4ee;
+  --el-color-success-light-8: #dceff5;
+  --el-color-success-light-9: #eff7fa;
+  --el-color-success-dark-2: #2e91aa;
 
   /* Warning / Danger 保持橙红语义不动，保持信息对比度 */
   --el-color-warning: #ffc048;
@@ -57,37 +57,37 @@
   --el-color-danger-light-9: #fff4f6;
   --el-color-danger-dark-2:  #d14762;
 
-  --el-color-info: #6eb7c0;
-  --el-color-info-light-3: #94cad1;
-  --el-color-info-light-5: #bacdd1;
-  --el-color-info-light-7: #e0e9ea;
-  --el-color-info-light-8: #edf2f3;
+  --el-color-info: #6e9cb5;
+  --el-color-info-light-3: #94b8ca;
+  --el-color-info-light-5: #bac9d1;
+  --el-color-info-light-7: #dfe7ec;
+  --el-color-info-light-8: #eceff2;
   --el-color-info-light-9: #f6f8f9;
-  --el-color-info-dark-2: #5a969d;
+  --el-color-info-dark-2: #5a7e93;
 
-  /* Element Plus 文本 / 背景 / 边框 统一青系 */
-  --el-text-color-primary: #e5ffff;
-  --el-text-color-regular: #c5eef0;
-  --el-text-color-secondary: #9cc4c8;
-  --el-text-color-placeholder: #6e9196;
-  --el-bg-color: #061a1f;
-  --el-bg-color-page: #041418;
-  --el-bg-color-overlay: #0a282e;
-  --el-border-color: rgba(34, 247, 255, 0.22);
-  --el-border-color-light: rgba(34, 247, 255, 0.30);
-  --el-border-color-lighter: rgba(34, 247, 255, 0.38);
-  --el-border-color-extra-light: rgba(34, 247, 255, 0.46);
-  --el-fill-color: rgba(34, 247, 255, 0.08);
-  --el-fill-color-light: rgba(34, 247, 255, 0.12);
-  --el-fill-color-lighter: rgba(34, 247, 255, 0.16);
-  --el-fill-color-extra-light: rgba(34, 247, 255, 0.20);
-  --el-fill-color-blank: rgba(3, 24, 30, 0.62);
-  --el-mask-color: rgba(3, 16, 20, 0.78);
-  --el-disabled-bg-color: #0a282e;
-  --el-disabled-text-color: #5a7f83;
-  --el-disabled-border-color: rgba(34, 247, 255, 0.14);
-  /* 文字阴影 + 发光，强化"荧光"感 */
-  --el-color-primary-text-shadow: 0 0 10px rgba(34, 247, 255, 0.55), 0 0 22px rgba(34, 247, 255, 0.28);
+  /* Element Plus 文本 / 背景 / 边框 统一深蓝青蓝系 */
+  --el-text-color-primary: #d8eef5;
+  --el-text-color-regular: #b4cfdb;
+  --el-text-color-secondary: #8aa7b6;
+  --el-text-color-placeholder: #607d8c;
+  --el-bg-color: #000000;
+  --el-bg-color-page: #000000;
+  --el-bg-color-overlay: #050505;
+  --el-disabled-bg-color: #050505;
+  --el-border-color: rgba(82, 221, 255, 0.15);
+  --el-border-color-light: rgba(82, 221, 255, 0.22);
+  --el-border-color-lighter: rgba(82, 221, 255, 0.28);
+  --el-border-color-extra-light: rgba(82, 221, 255, 0.36);
+  --el-fill-color: rgba(82, 221, 255, 0.05);
+  --el-fill-color-light: rgba(82, 221, 255, 0.09);
+  --el-fill-color-lighter: rgba(82, 221, 255, 0.13);
+  --el-fill-color-extra-light: rgba(82, 221, 255, 0.17);
+  --el-fill-color-blank: rgba(8, 28, 46, 0.72);
+  --el-mask-color: rgba(4, 16, 28, 0.84);
+  --el-disabled-text-color: #4e6e7e;
+  --el-disabled-border-color: rgba(82, 221, 255, 0.11);
+  /* 文字阴影发光减弱, 偏蓝青 */
+  --el-color-primary-text-shadow: 0 0 8px rgba(82, 221, 255, 0.36), 0 0 18px rgba(82, 221, 255, 0.17);
 }
 
 @property --sr-card-border-angle {
@@ -103,7 +103,7 @@
 html {
   min-width: 0;
   min-height: 100vh;
-  background: linear-gradient(180deg, #02090b 0%, #031318 50%, #010709 100%);
+  background: #000000;
   background-attachment: fixed;
 }
 
@@ -111,7 +111,7 @@ body {
   margin: 0;
   min-width: 0;
   min-height: 100vh;
-  background: linear-gradient(180deg, #02090b 0%, #031318 50%, #010709 100%);
+  background: #000000;
   background-attachment: fixed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -123,11 +123,11 @@ body::before {
   z-index: -3;
   inset: 0;
   content: "";
-  opacity: 0.08;
+  opacity: 0.045;
   background:
-    linear-gradient(rgba(22, 150, 170, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22, 150, 170, 0.06) 1px, transparent 1px);
-  background-size: 50px 50px;
+    linear-gradient(rgba(20, 140, 150, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 140, 150, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
 }
 
 body::after {
@@ -176,18 +176,18 @@ body::after {
 .todo-item,
 .side-block,
 .avatar-panel {
-  border-color: rgba(56, 189, 248, 0.32);
+  border-color: rgba(21, 197, 199, 0.26);
   background:
-    linear-gradient(145deg, rgba(14, 48, 88, 0.82), rgba(8, 28, 58, 0.74)),
-    rgba(12, 36, 70, 0.72);
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28);
+    linear-gradient(145deg, rgba(6, 38, 44, 0.74), rgba(3, 22, 26, 0.68)),
+    rgba(4, 30, 34, 0.66);
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.36);
 }
 
 .app-aside {
-  border-color: rgba(34, 247, 255, 0.28);
+  border-color: rgba(21, 197, 199, 0.24);
   background:
-    radial-gradient(circle at 15% 8%, rgba(34, 247, 255, 0.18), transparent 28%),
-    linear-gradient(180deg, #032228, #041d23 52%, #021216);
+    radial-gradient(circle at 15% 8%, rgba(21, 197, 199, 0.14), transparent 28%),
+    linear-gradient(180deg, #02161a, #021014 52%, #01080b);
 }
 
 .brand-name,
@@ -199,7 +199,7 @@ body::after {
 .section-title h4,
 .candidate-title-row h3,
 .detail-grid b {
-  color: #ecffff;
+  color: #e3f7f8;
 }
 
 .header-desc,
@@ -209,7 +209,7 @@ body::after {
 .metric-label,
 .section-title span,
 .detail-grid article > span {
-  color: #86b0b5;
+  color: #78a2a7;
 }
 
 .el-table,
@@ -217,36 +217,36 @@ body::after {
 .el-table th.el-table__cell,
 .el-table tr,
 .el-table td.el-table__cell {
-  background-color: rgba(6, 30, 36, 0.78);
-  color: #d2f2f5;
+  background-color: rgba(4, 22, 26, 0.82);
+  color: #c9edef;
 }
 
 .el-input__wrapper,
 .el-select__wrapper,
 .el-textarea__inner {
-  border-color: rgba(34, 247, 255, 0.36);
-  background-color: rgba(6, 30, 36, 0.7);
+  border-color: rgba(21, 197, 199, 0.30);
+  background-color: rgba(4, 22, 26, 0.74);
   box-shadow: none;
 }
 
 .el-input__inner,
 .el-select__placeholder,
 .el-textarea__inner {
-  color: #d2f2f5;
+  color: #c9edef;
 }
 
 /* ========== PersonalCenter / 个人中心页面深色覆盖 ========== */
 .profile-page::before {
   background:
-    radial-gradient(circle at 82% 6%, rgba(34, 247, 255, 0.18), transparent 28%),
-    radial-gradient(circle at 18% 24%, rgba(0, 243, 254, 0.12), transparent 26%),
-    linear-gradient(180deg, #062028 0%, #041418 100%);
+    radial-gradient(circle at 82% 6%, rgba(21, 197, 199, 0.14), transparent 28%),
+    radial-gradient(circle at 18% 24%, rgba(15, 155, 157, 0.10), transparent 26%),
+    linear-gradient(180deg, #04161b 0%, #020c10 100%);
 }
 
 .profile-page::after {
   background-image:
-    repeating-linear-gradient(0deg, rgba(34, 247, 255, 0.06) 0 1px, transparent 1px 36px),
-    repeating-linear-gradient(90deg, rgba(34, 247, 255, 0.06) 0 1px, transparent 1px 36px);
+    repeating-linear-gradient(0deg, rgba(21, 197, 199, 0.05) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(90deg, rgba(21, 197, 199, 0.05) 0 1px, transparent 1px 36px);
 }
 
 .profile-page .profile-glass-card,
@@ -255,17 +255,17 @@ body::after {
 .profile-page .profile-flow-card,
 .profile-page .profile-flow-summary,
 .profile-page .profile-status-card {
-  border-color: rgba(34, 247, 255, 0.36) !important;
+  border-color: rgba(21, 197, 199, 0.30) !important;
   background:
-    radial-gradient(circle at 10% 0%, rgba(0, 243, 254, 0.08), transparent 30%),
-    linear-gradient(145deg, rgba(10, 56, 66, 0.82), rgba(4, 26, 32, 0.74)),
-    rgba(6, 36, 42, 0.72) !important;
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.32) !important;
+    radial-gradient(circle at 10% 0%, rgba(7, 158, 162, 0.07), transparent 30%),
+    linear-gradient(145deg, rgba(6, 40, 46, 0.74), rgba(3, 20, 24, 0.68)),
+    rgba(4, 28, 32, 0.66) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.38) !important;
 }
 
 .profile-page .profile-chip,
 .profile-page .certificate-chip {
-  border-color: rgba(34, 247, 255, 0.34) !important;
+  border-color: rgba(82, 221, 255, 0.34) !important;
   background: rgba(10, 56, 66, 0.72) !important;
   color: #bff0f4 !important;
 }
@@ -275,7 +275,7 @@ body::after {
 }
 
 .profile-page .profile-secondary-btn {
-  border-color: rgba(34, 247, 255, 0.34) !important;
+  border-color: rgba(82, 221, 255, 0.34) !important;
   background: rgba(10, 56, 66, 0.62) !important;
   color: #34f0ff !important;
 }
@@ -308,14 +308,14 @@ body::after {
 
 .profile-page :deep(.experience-item),
 .profile-page .experience-item {
-  border-color: rgba(34, 247, 255, 0.3) !important;
+  border-color: rgba(82, 221, 255, 0.3) !important;
   background: rgba(8, 46, 54, 0.72) !important;
   box-shadow: none !important;
 }
 
 .profile-page :deep(.experience-empty),
 .profile-page .experience-empty {
-  border-color: rgba(34, 247, 255, 0.28) !important;
+  border-color: rgba(82, 221, 255, 0.28) !important;
   background:
     radial-gradient(circle at 50% 0%, rgba(0, 243, 254, 0.08), transparent 42%),
     rgba(6, 36, 42, 0.52) !important;
@@ -341,7 +341,7 @@ body::after {
 .profile-page :deep(.el-select__wrapper),
 .profile-page :deep(.el-cascader .el-input__wrapper),
 .profile-page :deep(.el-textarea__inner) {
-  border-color: rgba(34, 247, 255, 0.3) !important;
+  border-color: rgba(82, 221, 255, 0.3) !important;
   background: rgba(6, 36, 42, 0.62) !important;
 }
 
@@ -352,8 +352,8 @@ body::after {
 }
 
 .profile-page .experience-index {
-  background: linear-gradient(135deg, rgba(0, 243, 254, 0.22), rgba(34, 247, 255, 0.24)) !important;
-  color: #22f7ff !important;
+  background: linear-gradient(135deg, rgba(0, 243, 254, 0.22), rgba(82, 221, 255, 0.24)) !important;
+  color: #52ddff !important;
 }
 
 .profile-page .completion-panel > span {
@@ -362,7 +362,7 @@ body::after {
 
 /* ========== DigitalInterviewer / 数字人面试官页面深色覆盖 ========== */
 .digital-page .surface {
-  border-color: rgba(34, 247, 255, 0.36) !important;
+  border-color: rgba(82, 221, 255, 0.36) !important;
   background:
     linear-gradient(145deg, rgba(10, 56, 66, 0.82), rgba(4, 26, 32, 0.74)),
     rgba(6, 36, 42, 0.72) !important;
@@ -404,7 +404,7 @@ body::after {
 .digital-page .history-item.active {
   border-color: rgba(0, 243, 254, 0.32) !important;
   background: rgba(8, 86, 100, 0.42) !important;
-  box-shadow: inset 3px 0 #22f7ff !important;
+  box-shadow: inset 3px 0 #52ddff !important;
 }
 
 .digital-page .history-item strong,
@@ -413,7 +413,7 @@ body::after {
 }
 
 .digital-page .resume-upload-card {
-  border-color: rgba(34, 247, 255, 0.38) !important;
+  border-color: rgba(82, 221, 255, 0.38) !important;
   background: rgba(8, 46, 54, 0.72) !important;
 }
 
@@ -435,7 +435,7 @@ body::after {
 }
 
 .digital-page .composer {
-  border-top-color: rgba(34, 247, 255, 0.3) !important;
+  border-top-color: rgba(82, 221, 255, 0.3) !important;
   background: rgba(6, 36, 42, 0.62) !important;
 }
 
@@ -444,7 +444,7 @@ body::after {
 }
 
 .digital-page .interviewer-bubble {
-  border-color: rgba(34, 247, 255, 0.3) !important;
+  border-color: rgba(82, 221, 255, 0.3) !important;
   background: rgba(8, 46, 54, 0.8) !important;
   color: #d2f2f5 !important;
 }
@@ -485,7 +485,7 @@ body::after {
 .digital-page .report-score strong,
 .digital-page .report-dimensions strong,
 .digital-page .score-list b {
-  color: #22f7ff !important;
+  color: #52ddff !important;
 }
 
 .digital-page .final-score-mini span,
@@ -494,7 +494,7 @@ body::after {
 }
 
 .digital-page .report-trend {
-  border-top-color: rgba(34, 247, 255, 0.3) !important;
+  border-top-color: rgba(82, 221, 255, 0.3) !important;
 }
 
 .digital-page .connection-badge {
@@ -503,7 +503,7 @@ body::after {
 }
 
 .digital-page .start-kicker {
-  color: #22f7ff !important;
+  color: #52ddff !important;
 }
 
 .digital-page .turn-feedback {
@@ -520,7 +520,7 @@ body::after {
 
 /* ========== SkillGraph / 能力图谱页面深色覆盖（补充） ========== */
 .skill-graph-page .graph-overview__item {
-  border-color: rgba(34, 247, 255, 0.36) !important;
+  border-color: rgba(82, 221, 255, 0.36) !important;
   background:
     linear-gradient(145deg, rgba(10, 56, 66, 0.82), rgba(4, 26, 32, 0.74)),
     rgba(6, 36, 42, 0.72) !important;
@@ -536,7 +536,7 @@ body::after {
 }
 
 .skill-graph-page .path-node {
-  border-color: rgba(34, 247, 255, 0.3) !important;
+  border-color: rgba(82, 221, 255, 0.3) !important;
   background: rgba(8, 46, 54, 0.76) !important;
   color: #bff0f4 !important;
 }
@@ -549,7 +549,7 @@ body::after {
 }
 
 .skill-graph-page .graph-legend__item {
-  border-color: rgba(34, 247, 255, 0.32) !important;
+  border-color: rgba(82, 221, 255, 0.32) !important;
   background: rgba(8, 46, 54, 0.72) !important;
   color: #86b0b5 !important;
 }
@@ -860,13 +860,13 @@ body::after {
 .el-textarea__inner:hover,
 .el-select__wrapper:hover {
   background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 0 0 1px rgba(34, 247, 255, 0.30) inset, 0 10px 24px rgba(34, 247, 255, 0.05);
+  box-shadow: 0 0 0 1px rgba(82, 221, 255, 0.30) inset, 0 10px 24px rgba(82, 221, 255, 0.05);
 }
 
 .el-input__wrapper.is-focus,
 .el-select__wrapper.is-focused,
 .el-textarea__inner:focus {
-  box-shadow: 0 0 0 1px rgba(34, 247, 255, 0.38) inset, 0 0 0 4px rgba(34, 247, 255, 0.07), 0 14px 28px rgba(34, 247, 255, 0.07);
+  box-shadow: 0 0 0 1px rgba(82, 221, 255, 0.38) inset, 0 0 0 4px rgba(82, 221, 255, 0.07), 0 14px 28px rgba(82, 221, 255, 0.07);
   transform: translateY(-1px);
 }
 
@@ -885,7 +885,7 @@ body::after {
 }
 
 .el-table__row:hover {
-  box-shadow: inset 3px 0 0 rgba(0, 201, 210, 0.48), 0 10px 24px rgba(34, 247, 255, 0.05);
+  box-shadow: inset 3px 0 0 rgba(10, 169, 180, 0.48), 0 10px 24px rgba(82, 221, 255, 0.05);
   transform: translateX(2px);
 }
 
@@ -968,15 +968,15 @@ body::after {
 
 .elite-badge-211 {
   --badge-a: #0aa9b4;
-  --badge-b: #00c9d2;
-  --badge-c: #8ff7f4;
+  --badge-b: #0aa9b4;
+  --badge-c: #b9e5ff;
 }
 
 .elite-badge-double {
   min-width: 68px;
   --badge-a: #7c3aed;
-  --badge-b: #00c9d2;
-  --badge-c: #4feaff;
+  --badge-b: #0aa9b4;
+  --badge-c: #52ddff;
 }
 
 @keyframes eliteBadgeSheen {
@@ -1798,7 +1798,7 @@ body:not(.login-active) .app-main :is(
 }
 
 .eval-page .report-cmd code {
-  border-color: rgba(34, 247, 255, 0.28) !important;
+  border-color: rgba(82, 221, 255, 0.28) !important;
   background:
     linear-gradient(145deg, rgba(12, 56, 106, 0.82), rgba(8, 34, 72, 0.76)),
     rgba(10, 44, 88, 0.78) !important;

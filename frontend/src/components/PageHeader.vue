@@ -22,7 +22,7 @@ defineProps<{ title: string; desc?: string }>()
 .page-toolbar :deep(.el-button--primary) {
   border: 0;
   border-radius: 13px;
-  background: linear-gradient(135deg, #0aa9b4, #00c9d2);
+  background: linear-gradient(135deg, #0aa9b4, #0aa9b4);
   box-shadow: 0 10px 22px rgba(30, 123, 255, 0.2);
   font-weight: 850;
 }

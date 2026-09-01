@@ -114,7 +114,7 @@ const metricsError = ref<string | null>(null)
 
 const TASK_COLORS: Record<string, string> = {
   jd_extraction: '#0aa9b4',
-  resume_extraction: '#00c9d2',
+  resume_extraction: '#0aa9b4',
   job_match: '#f59e0b'
 }
 

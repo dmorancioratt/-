@@ -93,7 +93,7 @@ function onStepClick(key: string) {
   flex-shrink: 0;
 }
 .loop-title .el-icon {
-  color: #65fff6;
+  color: #88ddff;
 }
 
 .loop-chain {

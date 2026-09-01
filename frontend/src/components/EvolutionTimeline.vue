@@ -70,12 +70,12 @@ const summaryCards = computed(() => [
   display: grid;
   gap: 16px;
   color: #e5ffff;
-  --panel: rgba(3, 28, 36, .28);
-  --edge: rgba(34, 247, 255, .11);
-  --cyan: #22f7ff;
-  --teal: #00c9d2;
-  --muted: #78a4a9;
-  --text: #e5ffff;
+  --panel: rgba(2, 24, 30, .36);
+  --edge: rgba(21, 197, 199, .10);
+  --cyan: #15c5c7;
+  --teal: #079ea2;
+  --muted: #6f999e;
+  --text: #d8f2f3;
 }
 
 .summary-row {
@@ -115,7 +115,7 @@ const summaryCards = computed(() => [
   transform: translateX(-50%);
   width: 34%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(34, 247, 255, 0.42), transparent);
+  background: linear-gradient(90deg, transparent, rgba(82, 221, 255, 0.42), transparent);
 }
 
 .summary-card::after {
@@ -125,13 +125,13 @@ const summaryCards = computed(() => [
   right: 14px;
   bottom: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(34, 247, 255, 0.10), transparent);
+  background: linear-gradient(90deg, transparent, rgba(82, 221, 255, 0.10), transparent);
 }
 
 .summary-card strong {
   color: var(--cyan);
   font: 800 34px/1.1 Consolas, monospace;
-  text-shadow: 0 0 10px rgba(34, 247, 255, .30);
+  text-shadow: 0 0 10px rgba(82, 221, 255, .30);
   letter-spacing: 0.02em;
 }
 
@@ -147,7 +147,7 @@ header {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border-bottom: 1px solid rgba(34, 247, 255, .08);
+  border-bottom: 1px solid rgba(82, 221, 255, .08);
   padding: 18px 22px;
 }
 
@@ -155,7 +155,7 @@ header small {
   color: var(--cyan);
   font: 800 10px Consolas, monospace;
   letter-spacing: 0.20em;
-  text-shadow: 0 0 8px rgba(34, 247, 255, .28);
+  text-shadow: 0 0 8px rgba(82, 221, 255, .28);
 }
 
 header h2 {
@@ -181,7 +181,7 @@ header > span {
   grid-template-columns: 140px 1fr auto;
   align-items: center;
   gap: 18px;
-  border-bottom: 1px solid rgba(34, 247, 255, .07);
+  border-bottom: 1px solid rgba(82, 221, 255, .07);
   padding: 16px 2px;
 }
 
@@ -241,7 +241,7 @@ header > span {
 }
 
 .event-card {
-  border: 1px solid rgba(34, 247, 255, .12);
+  border: 1px solid rgba(82, 221, 255, .12);
   border-radius: 14px;
   padding: 14px 16px;
   background: linear-gradient(150deg, rgba(4, 46, 54, .20), rgba(2, 20, 24, .22));
@@ -254,9 +254,9 @@ header > span {
 }
 
 .event-card:hover {
-  border-color: rgba(34, 247, 255, .24);
+  border-color: rgba(82, 221, 255, .24);
   transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(0, 10, 14, .18), 0 0 18px rgba(34, 247, 255, .08);
+  box-shadow: 0 12px 30px rgba(0, 10, 14, .18), 0 0 18px rgba(82, 221, 255, .08);
 }
 
 .event-card b {

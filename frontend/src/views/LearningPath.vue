@@ -194,14 +194,14 @@ watch(() => route.query.reportId, (next, previous) => {
 
 <style scoped>
 .learning-page {
-  --panel: rgba(3, 28, 36, .30);
-  --edge: rgba(34, 247, 255, .11);
-  --cyan: #22f7ff;
-  --teal: #00c9d2;
-  --amber: #ffb65c;
+  --panel: rgba(2, 24, 30, .38);
+  --edge: rgba(21, 197, 199, .10);
+  --cyan: #15c5c7;
+  --teal: #079ea2;
+  --amber: #ffc048;
   display: grid;
   gap: 16px;
-  color: #e7f1f4;
+  color: #d8f2f3;
 }
 
 .panel {
@@ -236,8 +236,8 @@ watch(() => route.query.reportId, (next, previous) => {
 
 .match-number {
   align-items: center;
-  border-right: 1px solid rgba(34, 247, 255, .10);
-  border-left: 1px solid rgba(34, 247, 255, .10);
+  border-right: 1px solid rgba(82, 221, 255, .10);
+  border-left: 1px solid rgba(82, 221, 255, .10);
   text-align: center;
 }
 
@@ -273,7 +273,7 @@ watch(() => route.query.reportId, (next, previous) => {
   font-size: 42px;
   line-height: 1;
   font-weight: 900;
-  text-shadow: 0 0 10px rgba(34, 247, 255, .24);
+  text-shadow: 0 0 10px rgba(82, 221, 255, .24);
 }
 
 .match-number span {
@@ -310,7 +310,7 @@ watch(() => route.query.reportId, (next, previous) => {
 
 .weekly-panel {
   padding: 26px;
-  border-right: 1px solid rgba(34, 247, 255, .10);
+  border-right: 1px solid rgba(82, 221, 255, .10);
   background: linear-gradient(145deg, rgba(4, 46, 54, .18), rgba(2, 20, 24, .22));
 }
 
@@ -336,7 +336,7 @@ watch(() => route.query.reportId, (next, previous) => {
   grid-template-columns: 24px minmax(0, 1fr);
   gap: 11px;
   padding: 15px 0;
-  border-top: 1px solid rgba(34, 247, 255, .08);
+  border-top: 1px solid rgba(82, 221, 255, .08);
 }
 
 .weekly-list i {
@@ -344,13 +344,13 @@ watch(() => route.query.reportId, (next, previous) => {
   place-items: center;
   width: 23px;
   height: 23px;
-  border: 1px solid rgba(34, 247, 255, .30);
+  border: 1px solid rgba(82, 221, 255, .30);
   border-radius: 50%;
   color: var(--cyan);
   font-size: 10px;
   font-style: normal;
   font-weight: 700;
-  box-shadow: 0 0 8px rgba(34, 247, 255, .12);
+  box-shadow: 0 0 8px rgba(82, 221, 255, .12);
 }
 
 .weekly-list span {
@@ -387,12 +387,12 @@ watch(() => route.query.reportId, (next, previous) => {
 .route-list {
   margin: 0;
   padding: 0;
-  border-bottom: 1px solid rgba(34, 247, 255, .08);
+  border-bottom: 1px solid rgba(82, 221, 255, .08);
   list-style: none;
 }
 
 .route-list > li {
-  border-top: 1px solid rgba(34, 247, 255, .08);
+  border-top: 1px solid rgba(82, 221, 255, .08);
   transition: background 150ms ease;
 }
 
@@ -416,10 +416,10 @@ watch(() => route.query.reportId, (next, previous) => {
   transition: background 180ms ease;
 }
 
-.route-row:hover { background: rgba(34, 247, 255, .04); }
+.route-row:hover { background: rgba(82, 221, 255, .04); }
 
 .route-row:focus-visible {
-  outline: 2px solid rgba(34, 247, 255, .42);
+  outline: 2px solid rgba(82, 221, 255, .42);
   outline-offset: -2px;
 }
 
@@ -461,7 +461,7 @@ watch(() => route.query.reportId, (next, previous) => {
 }
 
 .route-detail dl > div {
-  border-left: 2px solid rgba(34, 247, 255, .34);
+  border-left: 2px solid rgba(82, 221, 255, .34);
   padding-left: 11px;
 }
 
@@ -476,7 +476,7 @@ watch(() => route.query.reportId, (next, previous) => {
   justify-content: space-between;
   gap: 20px;
   min-height: 58px;
-  border-top: 1px solid rgba(34, 247, 255, .10);
+  border-top: 1px solid rgba(82, 221, 255, .10);
   padding: 8px 2px 0;
 }
 
@@ -485,14 +485,14 @@ watch(() => route.query.reportId, (next, previous) => {
 
 @media (max-width: 980px) {
   .learning-overview { grid-template-columns: 1fr 150px; }
-  .priority-copy { grid-column: 1 / -1; border-top: 1px solid rgba(34, 247, 255, .10); }
+  .priority-copy { grid-column: 1 / -1; border-top: 1px solid rgba(82, 221, 255, .10); }
   .learning-workspace { grid-template-columns: 1fr; }
-  .weekly-panel { border-right: 0; border-bottom: 1px solid rgba(34, 247, 255, .10); }
+  .weekly-panel { border-right: 0; border-bottom: 1px solid rgba(82, 221, 255, .10); }
 }
 
 @media (max-width: 640px) {
   .learning-overview { grid-template-columns: 1fr; }
-  .match-number { align-items: flex-start; border: 0; border-top: 1px solid rgba(34, 247, 255, .10); text-align: left; }
+  .match-number { align-items: flex-start; border: 0; border-top: 1px solid rgba(82, 221, 255, .10); text-align: left; }
   .goal-copy, .match-number, .priority-copy, .weekly-panel, .route-panel { padding: 20px 17px; }
   .route-heading, .learning-footer { align-items: flex-start; flex-direction: column; }
   .route-row > span { align-items: flex-start; flex-direction: column; gap: 3px; }

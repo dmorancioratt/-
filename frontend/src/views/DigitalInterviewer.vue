@@ -893,7 +893,7 @@ onBeforeUnmount(() => {
 .connection-empty p { max-width: 240px; margin: -5px 10px 0; color: #b42318; font-size: 11px; line-height: 1.5; text-align: center; }
 .connection-loading span { width: 25px; height: 25px; border: 3px solid rgba(10, 169, 180,.18); border-top-color: #0aa9b4; border-radius: 50%; animation: spin .8s linear infinite; }
 .connection-badge { position: absolute; top: 12px; left: 12px; z-index: 3; display: flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 9px; background: rgba(255,255,255,.88); color: #066a72; font-size: 11px; font-weight: 800; box-shadow: 0 7px 20px rgba(15,23,42,.08); }
-.connection-badge i { width: 6px; height: 6px; border-radius: 50%; background: #22f7ff; }
+.connection-badge i { width: 6px; height: 6px; border-radius: 50%; background: #52ddff; }
 .stop-button { position: absolute; top: 10px; right: 10px; z-index: 3; }
 .score-card { padding: 18px; }
 .final-score-mini { display: flex; align-items: center; gap: 10px; margin-top: 18px; border-radius: 16px; padding: 14px 16px; background: linear-gradient(135deg,#edf5ff,#f2fbf7); }

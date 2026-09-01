@@ -348,7 +348,7 @@ type EvidenceCard = {
 const evidenceCards = computed<EvidenceCard[]>(() => [
   {
     key: 'course', title: '个人简历', en: 'RESUME RECORDS', percent: props.resumeCount ? 100 : 0, done: props.resumeCount, total: props.resumeCount,
-    color: '#22f7ff', rgb: '34, 247, 255',
+    color: '#52ddff', rgb: '34, 247, 255',
     icon: '<circle cx="12" cy="9" r="5" /><path d="m9 13-2 8 5-3 5 3-2-8" />',
     items: props.resumeCount ? [`当前账号已保存 ${props.resumeCount} 份简历`] : ['当前账号尚未保存简历'],
   },
@@ -360,7 +360,7 @@ const evidenceCards = computed<EvidenceCard[]>(() => [
   },
   {
     key: 'skill', title: '画像技能', en: 'PROFILE SKILLS', percent: Math.min(100, (props.profileData.skills || []).length * 10), done: (props.profileData.skills || []).length, total: (props.profileData.skills || []).length,
-    color: '#4feaff', rgb: '79, 234, 255',
+    color: '#52ddff', rgb: '79, 234, 255',
     icon: '<path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7Z" /><path d="M12 7.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />',
     items: (props.profileData.skills || []).map((item: any) => typeof item === 'string' ? item : item?.name).filter(Boolean),
   },
@@ -552,7 +552,7 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 }
 .profile-user i {
   display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
-  background: linear-gradient(140deg, #58e6ff, #7c6dff); color: #041224; font-size: 13px; font-weight: 800; font-style: normal;
+  background: linear-gradient(140deg, #52ddff, #7c6dff); color: #041224; font-size: 13px; font-weight: 800; font-style: normal;
 }
 .profile-user svg { width: 17px; fill: none; stroke: #7fa8c4; stroke-width: 1.6; }
 .profile-assist {
@@ -576,7 +576,7 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 /* ============ 个人信息录入 ============ */
 .profile-info-entry { border-top: 1px solid rgba(96, 186, 255, .18); padding-top: 18px; }
 .pi-divider { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; padding-left: 12px; }
-.pi-divider::before { content: ""; width: 4px; height: 15px; align-self: center; border-radius: 2px; background: linear-gradient(180deg, #58e6ff, #7c6dff); box-shadow: 0 0 8px rgba(88, 230, 255, .8); }
+.pi-divider::before { content: ""; width: 4px; height: 15px; align-self: center; border-radius: 2px; background: linear-gradient(180deg, #52ddff, #7c6dff); box-shadow: 0 0 8px rgba(88, 230, 255, .8); }
 .pi-divider span { color: #ecf7ff; font-size: 16px; font-weight: 800; letter-spacing: .06em; }
 .pi-divider em { color: #5f7f95; font-size: 10px; font-style: normal; letter-spacing: .2em; }
 
@@ -599,7 +599,7 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .panel-head { display: flex; align-items: baseline; gap: 9px; }
 .panel-head__group { display: flex; align-items: baseline; gap: 9px; }
 .panel-head__cn { position: relative; padding-left: 12px; color: #ecf7ff; font-size: 15px; font-weight: 800; letter-spacing: .08em; }
-.panel-head__cn::before { content: ""; position: absolute; top: 50%; left: 0; width: 4px; height: 13px; border-radius: 2px; background: linear-gradient(180deg, #58e6ff, #7c6dff); box-shadow: 0 0 8px rgba(88, 230, 255, .8); transform: translateY(-50%); }
+.panel-head__cn::before { content: ""; position: absolute; top: 50%; left: 0; width: 4px; height: 13px; border-radius: 2px; background: linear-gradient(180deg, #52ddff, #7c6dff); box-shadow: 0 0 8px rgba(88, 230, 255, .8); transform: translateY(-50%); }
 .panel-head__en { color: #5f7f95; font-size: 9px; letter-spacing: .2em; }
 
 /* ============ 任务简报 ============ */
@@ -727,7 +727,7 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .ai-basis-card { flex-shrink: 0; }
 .ai-basis { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
 .ai-brain { display: grid; place-items: center; width: 74px; height: 74px; flex-shrink: 0; border: 1px solid rgba(150, 140, 255, .4); border-radius: 14px; background: radial-gradient(circle at 50% 40%, rgba(124, 109, 255, .24), rgba(10, 20, 46, .9) 72%); box-shadow: 0 0 24px rgba(124, 109, 255, .2); }
-.ai-brain svg { width: 40px; fill: none; stroke: #58e6ff; stroke-width: 1.5; filter: drop-shadow(0 0 8px rgba(70, 215, 255, .55)); }
+.ai-brain svg { width: 40px; fill: none; stroke: #52ddff; stroke-width: 1.5; filter: drop-shadow(0 0 8px rgba(70, 215, 255, .55)); }
 .ai-basis ul { flex: 1; display: flex; flex-direction: column; gap: 9px; margin: 0; padding: 0; list-style: none; }
 .ai-basis li { display: flex; align-items: center; gap: 9px; }
 .ai-basis li svg { width: 14px; flex-shrink: 0; fill: none; stroke: #58e6a8; stroke-width: 2.2; filter: drop-shadow(0 0 5px rgba(88, 230, 168, .6)); }

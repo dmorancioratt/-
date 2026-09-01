@@ -76,16 +76,16 @@
               <svg class="skill-radar-svg" viewBox="0 0 400 400" role="img" aria-label="八类节点数量占比雷达图">
                 <defs>
                   <radialGradient id="skillRadarFill" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="#22f7ff" stop-opacity="0.4" />
-                    <stop offset="100%" stop-color="#00c9d2" stop-opacity="0.08" />
+                    <stop offset="0%" stop-color="#52ddff" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#0aa9b4" stop-opacity="0.08" />
                   </radialGradient>
                   <filter id="skillRadarGlow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
                 </defs>
-                <circle cx="200" cy="200" r="152" fill="none" stroke="rgba(34,247,255,0.14)" stroke-width="1" />
-                <polygon v-for="lv in [0.25, 0.5, 0.75, 1]" :key="'g' + lv" :points="radarGrid(lv)" fill="none" stroke="rgba(34,247,255,0.12)" stroke-width="1" />
-                <line v-for="(s, i) in radarSpokes()" :key="'s' + i" x1="200" y1="200" :x2="s.x2" :y2="s.y2" stroke="rgba(34,247,255,0.08)" stroke-width="1" />
-                <polygon :points="radarPolygon" fill="url(#skillRadarFill)" stroke="#22f7ff" stroke-width="2" filter="url(#skillRadarGlow)" />
-                <circle v-for="g in radarGroups" :key="g.type" :cx="g.x" :cy="g.y" r="5.5" fill="#fff" stroke="#22f7ff" stroke-width="2.5" />
+                <circle cx="200" cy="200" r="152" fill="none" stroke="rgba(82, 221, 255,0.14)" stroke-width="1" />
+                <polygon v-for="lv in [0.25, 0.5, 0.75, 1]" :key="'g' + lv" :points="radarGrid(lv)" fill="none" stroke="rgba(82, 221, 255,0.12)" stroke-width="1" />
+                <line v-for="(s, i) in radarSpokes()" :key="'s' + i" x1="200" y1="200" :x2="s.x2" :y2="s.y2" stroke="rgba(82, 221, 255,0.08)" stroke-width="1" />
+                <polygon :points="radarPolygon" fill="url(#skillRadarFill)" stroke="#52ddff" stroke-width="2" filter="url(#skillRadarGlow)" />
+                <circle v-for="g in radarGroups" :key="g.type" :cx="g.x" :cy="g.y" r="5.5" fill="#fff" stroke="#52ddff" stroke-width="2.5" />
                 <text v-for="g in radarGroups" :key="g.type + 't'" :x="g.lx" :y="g.ly" fill="rgba(236,247,255,0.86)" font-size="13" text-anchor="middle" font-weight="600">{{ g.label }}</text>
                 <text v-for="g in radarGroups" :key="g.type + 'c'" :class="{ 'radar-count--zero': g.count === 0 }" :x="g.x" :y="g.y + 4" fill="#202f46" font-size="11" font-weight="700" text-anchor="middle">{{ g.count }}</text>
               </svg>
@@ -461,13 +461,13 @@ async function clearSearchFocus() {
 
 function nodeColor(type: string) {
   const colors: Record<string, string> = {
-    Job: '#22f7ff',
-    Skill: '#00c9d2',
-    Tool: '#9ad8c5',
+    Job: '#52ddff',
+    Skill: '#0aa9b4',
+    Tool: '#8cc8d8',
     Certificate: '#8f7cff',
     Responsibility: '#ffb65c',
-    IndustryScenario: '#4feaff',
-    Course: '#a5dcc9',
+    IndustryScenario: '#52ddff',
+    Course: '#8cc8d8',
     Level: '#ff7088'
   }
   return colors[type] || '#78a4a9'
@@ -1123,8 +1123,8 @@ function createGlowTexture() {
   const gradient = ctx.createRadialGradient(64, 64, 4, 64, 64, 62)
   gradient.addColorStop(0, 'rgba(255,255,255,0.95)')
   gradient.addColorStop(0.22, 'rgba(115,255,248,0.62)')
-  gradient.addColorStop(0.52, 'rgba(34,247,255,0.22)')
-  gradient.addColorStop(1, 'rgba(34,247,255,0)')
+  gradient.addColorStop(0.52, 'rgba(82, 221, 255,0.22)')
+  gradient.addColorStop(1, 'rgba(82, 221, 255,0)')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, 128, 128)
   return new THREE.CanvasTexture(canvas)
@@ -1763,11 +1763,11 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .skill-graph-page {
-  --panel: rgba(3, 28, 36, .30);
-  --edge: rgba(34, 247, 255, .11);
-  --cyan: #22f7ff;
-  --teal: #00c9d2;
-  --panel-strong: rgba(3, 36, 44, .38);
+  --panel: rgba(2, 24, 30, .38);
+  --edge: rgba(21, 197, 199, .10);
+  --cyan: #15c5c7;
+  --teal: #079ea2;
+  --panel-strong: rgba(3, 44, 50, .44);
   position: relative;
   display: grid;
   gap: 16px;
@@ -1826,7 +1826,7 @@ onBeforeUnmount(() => {
   height: 92px;
   content: "";
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(34, 247, 255, 0.10), transparent 68%);
+  background: radial-gradient(circle, rgba(82, 221, 255, 0.10), transparent 68%);
 }
 
 .graph-overview strong {
@@ -1834,7 +1834,7 @@ onBeforeUnmount(() => {
   color: var(--cyan);
   font-size: 26px;
   font-weight: 950;
-  text-shadow: 0 0 8px rgba(34, 247, 255, .20);
+  text-shadow: 0 0 8px rgba(82, 221, 255, .20);
 }
 
 .graph-overview span {
@@ -1875,7 +1875,7 @@ onBeforeUnmount(() => {
 
 .graph-detail-panel::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: rgba(34, 247, 255, 0.20);
+  background: rgba(82, 221, 255, 0.20);
 }
 
 .graph-stage {
@@ -1891,11 +1891,11 @@ onBeforeUnmount(() => {
   z-index: 20;
   width: 264px;
   padding: 12px 12px 10px;
-  border: 1px solid rgba(34, 247, 255, 0.14);
+  border: 1px solid rgba(82, 221, 255, 0.14);
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
   backdrop-filter: blur(22px) saturate(1.15);
-  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.16), inset 0 1px 0 rgba(34, 247, 255, 0.08);
+  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.16), inset 0 1px 0 rgba(82, 221, 255, 0.08);
   pointer-events: auto;
 }
 .skill-radar-head {
@@ -1908,7 +1908,7 @@ onBeforeUnmount(() => {
 .skill-radar-head small { color: #6b9ea4; font-size: 9px; letter-spacing: 0.18em; }
 .skill-radar-close {
   width: 22px; height: 22px; border: 0; border-radius: 7px; cursor: pointer;
-  color: #7acfd4; background: rgba(34, 247, 255, 0.10); font-size: 16px; line-height: 1;
+  color: #7acfd4; background: rgba(82, 221, 255, 0.10); font-size: 16px; line-height: 1;
   backdrop-filter: blur(8px);
 }
 .skill-radar-close:hover { color: #fff; background: rgba(255, 112, 136, 0.45); }
@@ -1919,12 +1919,12 @@ onBeforeUnmount(() => {
   list-style: none;
   max-height: 200px;
   overflow-y: auto;
-  border-top: 1px solid rgba(34, 247, 255, 0.10);
+  border-top: 1px solid rgba(82, 221, 255, 0.10);
 }
 .radar-desc-list::-webkit-scrollbar { width: 4px; }
-.radar-desc-list::-webkit-scrollbar-thumb { border-radius: 2px; background: rgba(34, 247, 255, 0.22); }
+.radar-desc-list::-webkit-scrollbar-thumb { border-radius: 2px; background: rgba(82, 221, 255, 0.22); }
 .radar-desc-list li { padding: 6px 4px 5px; border-radius: 8px; }
-.radar-desc-list li + li { margin-top: 2px; border-top: 1px dashed rgba(34, 247, 255, 0.08); }
+.radar-desc-list li + li { margin-top: 2px; border-top: 1px dashed rgba(82, 221, 255, 0.08); }
 .radar-desc-list li.zero { opacity: 0.55; }
 .rd-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .rd-name { color: #cde9eb; font-size: 12px; font-weight: 700; }
@@ -1937,25 +1937,25 @@ onBeforeUnmount(() => {
 .radar-count--zero { fill: #f2fbff !important; }
 .radar-fade-enter-active, .radar-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
 .radar-fade-enter-from, .radar-fade-leave-to { opacity: 0; transform: translateY(6px) scale(0.98); }
-.el-button.radar-active { color: #dff8f8; border-color: var(--cyan); background: rgba(34, 247, 255, 0.10); }
-.el-button.radar-active:hover { color: #fff; border-color: #6ffaff; background: rgba(34, 247, 255, 0.16); }
+.el-button.radar-active { color: #dff8f8; border-color: var(--cyan); background: rgba(82, 221, 255, 0.10); }
+.el-button.radar-active:hover { color: #fff; border-color: #7fd4ff; background: rgba(82, 221, 255, 0.16); }
 
 .graph-box {
   position: relative;
   height: 740px;
   overflow: hidden;
-  border: 1px solid rgba(34, 247, 255, 0.18);
+  border: 1px solid rgba(82, 221, 255, 0.18);
   border-radius: 20px;
   background:
-    radial-gradient(circle at 46% 48%, rgba(34, 247, 255, 0.08), transparent 30%),
-    radial-gradient(circle at 72% 24%, rgba(0, 201, 210, 0.06), transparent 24%),
+    radial-gradient(circle at 46% 48%, rgba(82, 221, 255, 0.08), transparent 30%),
+    radial-gradient(circle at 72% 24%, rgba(10, 169, 180, 0.06), transparent 24%),
     radial-gradient(circle at 24% 78%, rgba(79, 234, 255, 0.05), transparent 28%),
     linear-gradient(145deg, #0d3347 0%, #0f3b55 50%, #0b2c44 100%);
   background-size: auto, auto, auto, auto;
   background-attachment: fixed;
   box-shadow:
     inset 0 0 100px rgba(2, 11, 18, 0.28),
-    inset 0 0 70px rgba(34, 247, 255, 0.04),
+    inset 0 0 70px rgba(82, 221, 255, 0.04),
     0 22px 70px rgba(0, 10, 14, 0.16);
 }
 
@@ -1966,7 +1966,7 @@ onBeforeUnmount(() => {
   content: "";
   pointer-events: none;
   background:
-    conic-gradient(from 80deg, transparent 0 18%, rgba(34, 247, 255, 0.06), transparent 34% 100%);
+    conic-gradient(from 80deg, transparent 0 18%, rgba(82, 221, 255, 0.06), transparent 34% 100%);
   filter: blur(18px);
   opacity: 0.28;
   animation: nebulaSpin 42s linear infinite;
@@ -2013,8 +2013,8 @@ onBeforeUnmount(() => {
 .graph-orbit-a {
   width: 500px;
   height: 500px;
-  border: 1px dashed rgba(34, 247, 255, 0.14);
-  box-shadow: 0 0 30px rgba(34, 247, 255, 0.03);
+  border: 1px dashed rgba(82, 221, 255, 0.14);
+  box-shadow: 0 0 30px rgba(82, 221, 255, 0.03);
   animation: graphOrbit 28s linear infinite;
 }
 
@@ -2022,7 +2022,7 @@ onBeforeUnmount(() => {
   width: 720px;
   height: 720px;
   border: 1px solid rgba(79, 234, 255, 0.08);
-  box-shadow: inset 0 0 46px rgba(34, 247, 255, 0.03);
+  box-shadow: inset 0 0 46px rgba(82, 221, 255, 0.03);
   animation: graphOrbit 42s linear reverse infinite;
 }
 
@@ -2031,7 +2031,7 @@ onBeforeUnmount(() => {
   z-index: 4;
   min-width: 130px;
   max-width: 220px;
-  border: 1px solid rgba(34, 247, 255, 0.32);
+  border: 1px solid rgba(82, 221, 255, 0.32);
   border-radius: 14px;
   padding: 10px 12px;
   background: linear-gradient(145deg, rgba(4, 46, 54, .50), rgba(2, 20, 24, .54));
@@ -2133,7 +2133,7 @@ onBeforeUnmount(() => {
 
 .detail-subsection {
   margin-top: 22px;
-  border-top: 1px solid rgba(34, 247, 255, 0.10);
+  border-top: 1px solid rgba(82, 221, 255, 0.10);
   padding-top: 18px;
 }
 
@@ -2148,7 +2148,7 @@ onBeforeUnmount(() => {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 8px;
-  border: 1px solid rgba(34, 247, 255, 0.10);
+  border: 1px solid rgba(82, 221, 255, 0.10);
   border-radius: 14px;
   padding: 9px 10px;
   background: linear-gradient(145deg, rgba(4, 46, 54, .22), rgba(2, 20, 24, .26));
@@ -2160,7 +2160,7 @@ onBeforeUnmount(() => {
 
 .community-row:hover,
 .community-row.active {
-  border-color: rgba(34, 247, 255, 0.26);
+  border-color: rgba(82, 221, 255, 0.26);
   background: linear-gradient(145deg, rgba(4, 62, 74, .28), rgba(2, 26, 30, .32));
   box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
   transform: translateY(-1px);
@@ -2171,7 +2171,7 @@ onBeforeUnmount(() => {
   height: 10px;
   border-radius: 50%;
   opacity: 0.88;
-  box-shadow: 0 0 8px rgba(34, 247, 255, 0.18);
+  box-shadow: 0 0 8px rgba(82, 221, 255, 0.18);
 }
 
 .community-name,
@@ -2189,7 +2189,7 @@ onBeforeUnmount(() => {
   height: 4px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(34, 247, 255, 0.08);
+  background: rgba(82, 221, 255, 0.08);
 }
 
 .community-bar i {
@@ -2198,7 +2198,7 @@ onBeforeUnmount(() => {
   border-radius: inherit;
   opacity: 0.78;
   filter: saturate(0.82);
-  box-shadow: 0 0 6px rgba(34, 247, 255, 0.16);
+  box-shadow: 0 0 6px rgba(82, 221, 255, 0.16);
 }
 
 .path-select {
@@ -2222,7 +2222,7 @@ onBeforeUnmount(() => {
 }
 
 .path-node {
-  border: 1px solid rgba(34, 247, 255, 0.14);
+  border: 1px solid rgba(82, 221, 255, 0.14);
   border-radius: 999px;
   padding: 5px 10px;
   background: linear-gradient(145deg, rgba(4, 46, 54, .22), rgba(2, 20, 24, .26));
@@ -2234,7 +2234,7 @@ onBeforeUnmount(() => {
 
 .path-node.skill,
 .path-node.Skill {
-  border-color: rgba(34, 247, 255, 0.22);
+  border-color: rgba(82, 221, 255, 0.22);
   background: linear-gradient(145deg, rgba(4, 62, 74, .24), rgba(2, 26, 30, .28));
   color: #aeeeee;
 }
@@ -2274,7 +2274,7 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid rgba(34, 247, 255, 0.10);
+  border: 1px solid rgba(82, 221, 255, 0.10);
   border-radius: 999px;
   padding: 8px 12px;
   background: linear-gradient(145deg, rgba(4, 46, 54, .22), rgba(2, 20, 24, .26));

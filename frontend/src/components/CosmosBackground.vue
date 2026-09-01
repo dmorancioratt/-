@@ -65,45 +65,19 @@ function resize() {
 
 function drawBackground() {
   if (!ctx) return
-  
-  // 以驾驶舱"计划日历"的青蓝 #4ed8ff 为基调，整体偏蓝去绿
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, height)
-  bgGrad.addColorStop(0, '#0d3347')
-  bgGrad.addColorStop(0.3, '#0f3b55')
-  bgGrad.addColorStop(0.7, '#0b2c44')
-  bgGrad.addColorStop(1, '#071f33')
-  ctx.fillStyle = bgGrad
+
+  // 纯黑色背景（用户要求：最后面就是黑色就行）
+  ctx.fillStyle = '#000000'
   ctx.fillRect(0, 0, width, height)
 
-  const bgGrad2 = ctx.createRadialGradient(
-    width * 0.5, height * 0.15, 0,
-    width * 0.5, height * 0.15, width * 0.9
+  // 极微弱的中心暗蓝光晕（保持一点点高级感，不抢眼）
+  const subtleGlow = ctx.createRadialGradient(
+    width * 0.5, height * 0.5, 0,
+    width * 0.5, height * 0.5, width * 0.7
   )
-  // 顶部光晕：低饱和灰蓝，降低高饱和蓝色
-  bgGrad2.addColorStop(0, 'rgba(74, 108, 146, 0.20)')
-  bgGrad2.addColorStop(0.4, 'rgba(62, 92, 128, 0.11)')
-  bgGrad2.addColorStop(1, 'rgba(48, 74, 106, 0)')
-  ctx.fillStyle = bgGrad2
-  ctx.fillRect(0, 0, width, height)
-
-  const glowCenter = ctx.createRadialGradient(
-    width * 0.2, height * 0.25, 0,
-    width * 0.2, height * 0.25, width * 0.45
-  )
-  glowCenter.addColorStop(0, 'rgba(96, 132, 168, 0.15)')
-  glowCenter.addColorStop(0.5, 'rgba(70, 100, 136, 0.06)')
-  glowCenter.addColorStop(1, 'rgba(56, 84, 118, 0)')
-  ctx.fillStyle = glowCenter
-  ctx.fillRect(0, 0, width, height)
-
-  const glowCenter2 = ctx.createRadialGradient(
-    width * 0.85, height * 0.75, 0,
-    width * 0.85, height * 0.75, width * 0.4
-  )
-  glowCenter2.addColorStop(0, 'rgba(82, 116, 152, 0.13)')
-  glowCenter2.addColorStop(0.5, 'rgba(62, 92, 128, 0.05)')
-  glowCenter2.addColorStop(1, 'rgba(50, 78, 112, 0)')
-  ctx.fillStyle = glowCenter2
+  subtleGlow.addColorStop(0, 'rgba(40, 60, 80, 0.08)')
+  subtleGlow.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  ctx.fillStyle = subtleGlow
   ctx.fillRect(0, 0, width, height)
 }
 
@@ -253,9 +227,8 @@ function animate(time: number) {
   
   ctx.clearRect(0, 0, width, height)
 
+  // 纯黑色背景：不绘制光球和环境光点，只保留纯黑底色
   drawBackground()
-  drawAmbientSpots(time)
-  drawGlowOrbs(time)
 
   animationId = requestAnimationFrame(animate)
 }

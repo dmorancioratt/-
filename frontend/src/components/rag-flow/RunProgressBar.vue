@@ -124,8 +124,8 @@ function stepClass(stage: string, index: number): Record<string, boolean> {
 .progress-fill {
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, #22f7ff, #4feaff, #8f7cff);
-  box-shadow: 0 0 10px rgba(34, 247, 255, 0.40);
+  background: linear-gradient(90deg, #52ddff, #52ddff, #8f7cff);
+  box-shadow: 0 0 10px rgba(82, 221, 255, 0.40);
   transition: width 0.35s ease;
 }
 

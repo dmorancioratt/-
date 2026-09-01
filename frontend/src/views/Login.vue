@@ -886,7 +886,7 @@ async function submitRegister() {
   left: 5px;
   width: calc(50% - 5px);
   border-radius: 999px;
-  background: linear-gradient(120deg, #22f7ff 0%, #0aa9b4 48%, #0aa9b4 100%);
+  background: linear-gradient(120deg, #52ddff 0%, #0aa9b4 48%, #0aa9b4 100%);
   box-shadow:
     0 6px 18px rgba(47, 124, 255, 0.5),
     0 0 26px rgba(96, 140, 255, 0.4),
@@ -1173,7 +1173,7 @@ async function submitRegister() {
   overflow: hidden;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(90deg, #4feaff 0%, #066a72 52%, #0aa9b4 100%);
+  background: linear-gradient(90deg, #52ddff 0%, #066a72 52%, #0aa9b4 100%);
   color: #fff;
   font-size: 16px;
   font-weight: 700;

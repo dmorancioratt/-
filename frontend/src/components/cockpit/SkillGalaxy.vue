@@ -9,20 +9,20 @@
     <svg ref="svgRef" class="galaxy-svg" viewBox="-400 -400 800 800" preserveAspectRatio="xMidYMid meet">
       <defs>
         <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#22f7ff" stop-opacity="0.35"/>
+          <stop offset="0%" stop-color="#52ddff" stop-opacity="0.35"/>
           <stop offset="35%" stop-color="#8f7cff" stop-opacity="0.18"/>
-          <stop offset="70%" stop-color="#22f7ff" stop-opacity="0.06"/>
+          <stop offset="70%" stop-color="#52ddff" stop-opacity="0.06"/>
           <stop offset="100%" stop-color="#07111f" stop-opacity="0"/>
         </radialGradient>
         <radialGradient id="corePulse" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#22f7ff" stop-opacity="0.2"/>
-          <stop offset="60%" stop-color="#22f7ff" stop-opacity="0.05"/>
-          <stop offset="100%" stop-color="#22f7ff" stop-opacity="0"/>
+          <stop offset="0%" stop-color="#52ddff" stop-opacity="0.2"/>
+          <stop offset="60%" stop-color="#52ddff" stop-opacity="0.05"/>
+          <stop offset="100%" stop-color="#52ddff" stop-opacity="0"/>
         </radialGradient>
         <radialGradient id="masteredGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#22f7ff" stop-opacity="0.7"/>
-          <stop offset="50%" stop-color="#22f7ff" stop-opacity="0.25"/>
-          <stop offset="100%" stop-color="#22f7ff" stop-opacity="0"/>
+          <stop offset="0%" stop-color="#52ddff" stop-opacity="0.7"/>
+          <stop offset="50%" stop-color="#52ddff" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#52ddff" stop-opacity="0"/>
         </radialGradient>
         <radialGradient id="improvingGlow" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="#8f7cff" stop-opacity="0.65"/>
@@ -92,14 +92,14 @@
         <circle cx="0" cy="0" r="62" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
 
         <circle cx="0" cy="-22" r="22" fill="rgba(78,216,255,0.15)" stroke="rgba(78,216,255,0.5)" stroke-width="1.2" filter="url(#softGlow)"/>
-        <text x="0" y="-16" text-anchor="middle" fill="#22f7ff" font-size="22" font-weight="700">{{ profile.name.charAt(0) }}</text>
+        <text x="0" y="-16" text-anchor="middle" fill="#52ddff" font-size="22" font-weight="700">{{ profile.name.charAt(0) }}</text>
 
         <text x="0" y="14" text-anchor="middle" fill="#f4f7fc" font-size="17" font-weight="700">{{ profile.name }}</text>
         <text x="0" y="32" text-anchor="middle" fill="#a8b4c8" font-size="12">{{ profile.currentIdentity }}</text>
 
         <g transform="translate(0, 52)" filter="url(#softGlow)">
           <rect x="-48" y="-11" width="96" height="22" rx="11" fill="rgba(78,216,255,0.18)" stroke="rgba(78,216,255,0.35)" stroke-width="1"/>
-          <text x="0" y="4" text-anchor="middle" fill="#22f7ff" font-size="13" font-weight="600">匹配度 {{ matchScore }}%</text>
+          <text x="0" y="4" text-anchor="middle" fill="#52ddff" font-size="13" font-weight="600">匹配度 {{ matchScore }}%</text>
         </g>
       </g>
 
@@ -279,7 +279,7 @@ function getNodeOuterRingFill(skill: Skill): string {
 
 function getNodeStroke(skill: Skill): string {
   switch (skill.status) {
-    case 'mastered': return '#22f7ff'
+    case 'mastered': return '#52ddff'
     case 'improving': return '#8f7cff'
     case 'transferable': return '#ffb65c'
     case 'missing': return '#ff7088'
@@ -309,7 +309,7 @@ function getLinkColor(status: SkillStatus): string {
 
 function getStatusColor(status: SkillStatus): string {
   const m: Record<SkillStatus, string> = {
-    mastered: '#22f7ff', improving: '#8f7cff',
+    mastered: '#52ddff', improving: '#8f7cff',
     transferable: '#ffb65c', missing: '#ff7088'
   }
   return m[status]
@@ -650,7 +650,7 @@ watch(() => props.selectedSkill, (val) => { currentSelectedId = val?.id || null 
 .galaxy-filter.active {
   background: rgba(78,216,255,0.15);
   border-color: rgba(78,216,255,0.55);
-  color: #22f7ff;
+  color: #52ddff;
   box-shadow: 0 0 20px rgba(78,216,255,0.2), inset 0 0 12px rgba(78,216,255,0.08);
 }
 </style>

@@ -209,7 +209,7 @@ onMounted(async () => {
   border: 0;
   background: transparent;
   font-size: 11px;
-  color: #65fff6;
+  color: #88ddff;
   cursor: pointer;
   margin-top: 6px;
 }
