@@ -8,7 +8,6 @@
       @keydown.esc="emit('close')"
     >
       <div class="profile-cabin__veil" aria-hidden="true"></div>
-      <div class="profile-cabin__grid" aria-hidden="true"></div>
 
       <div class="profile-frame">
         <header class="profile-head">
@@ -91,26 +90,28 @@
             </div>
           </aside>
 
-          <!-- 02 数字身份全息 -->
-          <main class="holo-stage" aria-label="数字身份全息投影">
+          <!-- 02 数字身份星空 -->
+          <main class="holo-stage" aria-label="数字身份星空">
+            <div class="holo-cosmos" aria-hidden="true">
+              <span v-for="star in holoStars" :key="`s${star.seed}`" class="holo-star" :style="star.style"></span>
+              <span class="holo-comet holo-comet--a"></span>
+              <span class="holo-comet holo-comet--b"></span>
+              <span class="holo-comet holo-comet--c"></span>
+              <div class="holo-horizon">
+                <span v-for="line in 11" :key="`l${line}`" class="holo-horizon__lat" :style="{ '--i': line }"></span>
+                <span v-for="line in 13" :key="`v${line}`" class="holo-horizon__lng" :style="{ '--i': line }"></span>
+              </div>
+            </div>
+
             <div class="holo-id">
-              <small>数字身份 ID</small>
+              <strong class="holo-id__name">{{ ownerName || '未知用户' }}</strong>
               <div class="holo-id__row">
-                <strong>{{ profile.identityId }}</strong>
+                <small>数字身份 ID</small>
+                <span class="holo-id__value">{{ profile.identityId }}</span>
                 <button type="button" aria-label="复制数字身份ID" @click="copyIdentity">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V6a2 2 0 0 1 2-2h9" /></svg>
                 </button>
               </div>
-            </div>
-
-            <img
-              v-if="!avatarUrl"
-              class="holo-figure"
-              src="/cockpit/profile-hologram.png"
-              alt="数字人全息投影"
-            />
-            <div v-else class="holo-avatar">
-              <img :src="avatarUrl" alt="个人数字形象" />
             </div>
 
             <div class="holo-skill-tags" aria-label="能力亮点">
@@ -326,12 +327,40 @@ const ownerName = computed(() => {
   return user?.display_name || user?.username || ''
 })
 
-const avatarUrl = computed(() => {
-  const url = props.profileData?.avatar_url || (authStore.user as { avatar_url?: string } | null)?.avatar_url
-  return typeof url === 'string' && url ? url : ''
-})
-
 const topSkills = computed(() => skillItems.value.slice(0, 3))
+
+/* 星空粒子（替代原人形全息投影）：伪随机分布，蓝青色调；三层深度（尘/星/亮星） */
+const holoStars = computed(() => {
+  let seed = 20260902
+  const rand = () => {
+    seed = (seed * 9301 + 49297) % 233280
+    return seed / 233280
+  }
+  const layers = [
+    { count: 96, sizeMin: 1, sizeVar: 1.4, glowMin: .3, glowVar: .35, topMax: 72 },   // 远景星尘
+    { count: 42, sizeMin: 2, sizeVar: 2, glowMin: .55, glowVar: .35, topMax: 68 },    // 中景星
+    { count: 14, sizeMin: 3.5, sizeVar: 3, glowMin: .85, glowVar: .15, topMax: 60 },  // 近景亮星
+  ]
+  const stars: Array<{ seed: number; style: Record<string, string> }> = []
+  layers.forEach((layer, layerIndex) => {
+    for (let i = 0; i < layer.count; i += 1) {
+      const size = layer.sizeMin + rand() * layer.sizeVar
+      stars.push({
+        seed: layerIndex * 1000 + i,
+        style: {
+          left: `${(rand() * 97 + 1.5).toFixed(2)}%`,
+          top: `${(rand() * layer.topMax + 2).toFixed(2)}%`,
+          width: `${size.toFixed(2)}px`,
+          height: `${size.toFixed(2)}px`,
+          '--star-delay': `${(rand() * 6).toFixed(2)}s`,
+          '--star-dur': `${(2.8 + rand() * 4.4).toFixed(2)}s`,
+          '--star-glow': (layer.glowMin + rand() * layer.glowVar).toFixed(2),
+        },
+      })
+    }
+  })
+  return stars
+})
 
 const profile = computed(() => {
   const data = props.profileData || {}
@@ -610,21 +639,32 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .profile-cabin::-webkit-scrollbar-thumb { border-radius: 8px; background: rgba(88, 200, 255, .32); }
 .profile-cabin::-webkit-scrollbar-track { background: transparent; }
 
-.profile-cabin__veil,
-.profile-cabin__grid { position: absolute; inset: 0; pointer-events: none; }
+/* 纯深色底，彻底遮挡驾驶舱背景图（不再露出舱内桌子/植物/AI助手） */
 .profile-cabin__veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background:
-    radial-gradient(circle at 50% 40%, rgba(34, 108, 210, .2), transparent 46%),
-    radial-gradient(circle at 12% 108%, rgba(37, 141, 255, .14), transparent 40%),
-    linear-gradient(180deg, #041022 0%, #061831 48%, #030c1d 100%);
+    radial-gradient(120% 70% at 18% 0%, rgba(22, 68, 120, 0.55), transparent 58%),
+    radial-gradient(90% 60% at 92% 100%, rgba(15, 50, 96, 0.50), transparent 60%),
+    radial-gradient(60% 40% at 50% 50%, rgba(10, 40, 76, 0.25), transparent 70%),
+    #000;
 }
-.profile-cabin__grid {
-  opacity: .16;
+.profile-cabin__veil::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
   background-image:
-    linear-gradient(rgba(96, 190, 255, .18) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(96, 190, 255, .13) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: radial-gradient(circle at 50% 42%, #000 8%, transparent 78%);
+    radial-gradient(1px 1px at 12% 22%, rgba(120, 220, 255, 0.9), transparent 60%),
+    radial-gradient(1px 1px at 78% 18%, rgba(160, 200, 255, 0.7), transparent 60%),
+    radial-gradient(1.5px 1.5px at 34% 76%, rgba(90, 230, 255, 0.8), transparent 60%),
+    radial-gradient(1px 1px at 86% 64%, rgba(140, 210, 255, 0.6), transparent 60%),
+    radial-gradient(1px 1px at 56% 40%, rgba(180, 230, 255, 0.5), transparent 60%),
+    radial-gradient(1.2px 1.2px at 22% 90%, rgba(100, 220, 255, 0.7), transparent 60%),
+    radial-gradient(1px 1px at 64% 88%, rgba(160, 220, 255, 0.55), transparent 60%),
+    radial-gradient(1px 1px at 8% 58%, rgba(90, 200, 255, 0.6), transparent 60%);
+  background-size: 100% 100%;
 }
 
 .profile-frame {
@@ -708,10 +748,10 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
   border-radius: 14px;
   background:
     radial-gradient(120% 60% at 18% -10%, rgba(78, 190, 255, .09), transparent 55%),
-    linear-gradient(165deg, rgba(13, 34, 70, .78), rgba(6, 16, 38, .88));
+    linear-gradient(165deg, rgba(9, 24, 50, .92), rgba(4, 11, 26, .97));
   box-shadow: 0 18px 44px rgba(1, 7, 20, .45), inset 0 1px 0 rgba(190, 235, 255, .08);
   padding: 16px 18px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(6px) saturate(1.1);
 }
 .panel-frame::before,
 .panel-frame::after { content: ""; position: absolute; width: 16px; height: 16px; pointer-events: none; opacity: .85; }
@@ -789,9 +829,16 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
   mask-image: linear-gradient(180deg, transparent 4%, #000 30%, #000 78%, transparent);
 }
 .holo-id { position: absolute; z-index: 3; top: 16px; left: 50%; text-align: center; transform: translateX(-50%); }
-.holo-id small { display: block; color: #8fd4f2; font-size: 12px; letter-spacing: .3em; text-shadow: 0 0 14px rgba(88, 214, 255, .6); }
-.holo-id__row { display: inline-flex; align-items: center; gap: 9px; margin-top: 5px; }
-.holo-id strong { color: #fff; font-size: clamp(15px, 1.25vw, 21px); letter-spacing: .08em; white-space: nowrap; text-shadow: 0 0 22px rgba(94, 220, 255, .55); }
+.holo-id__name {
+  display: block;
+  font-size: clamp(20px, 1.8vw, 30px); font-weight: 800; letter-spacing: .1em;
+  background: linear-gradient(100deg, #ffffff 24%, #9fdfff 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 26px rgba(94, 220, 255, .4);
+}
+.holo-id__row { display: inline-flex; align-items: center; gap: 9px; margin-top: 7px; }
+.holo-id__row small { color: #8fd4f2; font-size: 11px; letter-spacing: .24em; text-shadow: 0 0 14px rgba(88, 214, 255, .6); }
+.holo-id__value { color: #fff; font-size: clamp(13px, 1.05vw, 17px); letter-spacing: .08em; white-space: nowrap; text-shadow: 0 0 22px rgba(94, 220, 255, .55); }
 .holo-id button {
   display: grid; place-items: center; width: 26px; height: 26px;
   border: 1px solid rgba(120, 214, 255, .45); border-radius: 7px; background: rgba(10, 30, 60, .7); cursor: pointer;
@@ -799,36 +846,66 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .holo-id button svg { width: 14px; fill: none; stroke: #7fd8ff; stroke-width: 1.7; }
 .holo-id button:hover { border-color: #7fd8ff; box-shadow: 0 0 12px rgba(96, 214, 255, .4); }
 
-.holo-figure {
-  position: absolute; left: 50%; top: 50%;
-  width: auto; height: 88%; max-width: 88%;
-  object-fit: contain;
-  mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(96% 92% at 50% 50%, #000 58%, transparent 90%);
-  mask-image: radial-gradient(96% 92% at 50% 50%, #000 58%, transparent 90%);
-  pointer-events: none; user-select: none;
-  transform: translate(-50%, -50%);
-  animation: holo-drift 7s ease-in-out infinite;
-}
+/* 真实头像的全息化呈现（已移除：改为星空场景） */
 
-/* 真实头像的全息化呈现 */
-.holo-avatar {
-  position: absolute; left: 50%; top: 50%;
-  width: clamp(150px, 15vw, 230px); height: clamp(150px, 15vw, 230px);
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1px solid rgba(110, 220, 255, .55);
-  box-shadow: 0 0 34px rgba(66, 190, 255, .38), inset 0 0 30px rgba(66, 190, 255, .25);
-  overflow: hidden;
-  animation: holo-drift 7s ease-in-out infinite;
-}
-.holo-avatar::before {
-  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+/* ============ 中央星空场景（替代人形全息） ============ */
+.holo-cosmos {
+  position: absolute; inset: 0;
   background:
-    repeating-linear-gradient(180deg, rgba(140, 230, 255, .09) 0 2px, transparent 2px 6px),
-    radial-gradient(circle at 50% 30%, rgba(160, 240, 255, .16), transparent 62%);
+    radial-gradient(46% 34% at 30% 30%, rgba(88, 160, 255, .2), transparent 72%),
+    radial-gradient(52% 38% at 72% 24%, rgba(64, 190, 255, .16), transparent 74%),
+    radial-gradient(56% 40% at 50% 34%, rgba(64, 170, 255, .22), transparent 76%),
+    radial-gradient(90% 66% at 50% 108%, rgba(28, 90, 180, .34), transparent 72%),
+    linear-gradient(180deg, rgba(6, 20, 48, .5), rgba(10, 32, 72, .7) 62%, rgba(4, 14, 36, .84));
+  overflow: hidden;
 }
-.holo-avatar img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.05) brightness(1.06); }
+.holo-star {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, #bfe6ff 42%, transparent 72%);
+  opacity: var(--star-glow, .6);
+  box-shadow: 0 0 7px 1px rgba(170, 228, 255, .95), 0 0 16px 2px rgba(110, 200, 255, .5);
+  animation: holo-twinkle var(--star-dur, 5s) ease-in-out var(--star-delay, 0s) infinite;
+}
+.holo-comet {
+  position: absolute; top: 12%; left: -12%;
+  width: 130px; height: 1.5px; border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(190, 236, 255, .9));
+  transform: rotate(-16deg);
+  animation: holo-comet-fly 9s linear infinite;
+  animation-delay: 2.4s;
+}
+.holo-comet--b { top: 30%; width: 90px; animation-delay: 6.8s; animation-duration: 11s; }
+.holo-comet--c { top: 46%; width: 110px; animation-delay: 4.2s; animation-duration: 10s; }
+@keyframes holo-comet-fly {
+  0% { left: -14%; opacity: 0; }
+  6% { opacity: .9; }
+  22% { opacity: .9; }
+  30%, 100% { left: 112%; opacity: 0; }
+}
+/* 地平线透视网格 */
+.holo-horizon {
+  position: absolute; left: -12%; right: -12%; bottom: 0; height: 42%;
+  background: linear-gradient(180deg, rgba(80, 180, 255, .22), rgba(36, 104, 200, .08) 68%, transparent);
+  transform: perspective(560px) rotateX(58deg);
+  transform-origin: center top;
+  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 92%, transparent);
+}
+.holo-horizon__lat {
+  position: absolute; left: 0; right: 0; top: calc(var(--i) * 9%);
+  height: 1px;
+  box-shadow: 0 0 5px rgba(110, 214, 255, .55);
+  background: linear-gradient(90deg, transparent, rgba(130, 224, 255, calc(.72 - var(--i) * .038)) 30%, rgba(130, 224, 255, calc(.72 - var(--i) * .038)) 70%, transparent);
+}
+.holo-horizon__lng {
+  position: absolute; top: 0; bottom: 0; left: calc(var(--i) * 8%);
+  width: 1px;
+  box-shadow: 0 0 5px rgba(110, 214, 255, .4);
+  background: linear-gradient(180deg, transparent, rgba(116, 212, 255, .5) 40%, rgba(116, 212, 255, .12));
+}
+@keyframes holo-twinkle {
+  0%, 100% { opacity: calc(var(--star-glow, .6) * .5); transform: scale(.85); }
+  50% { opacity: var(--star-glow, .6); transform: scale(1.15); }
+}
 
 /* 能力亮点悬浮标签 */
 .holo-skill-tags {
@@ -992,7 +1069,6 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .toast-enter-from, .toast-leave-to { opacity: 0; transform: translate(-50%, 14px); }
 
 /* ============ 动画 ============ */
-@keyframes holo-drift { 0%, 100% { transform: translate(-50%, calc(-50% + 0px)); } 50% { transform: translate(-50%, calc(-50% - 6px)); } }
 
 .profile-cabin-enter-active, .profile-cabin-leave-active { transition: opacity .4s ease; }
 .profile-cabin-enter-active .profile-head { transition: opacity .5s ease, transform .55s cubic-bezier(.2, .8, .2, 1); }
@@ -1017,8 +1093,8 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
   .profile-frame { height: auto; min-height: 100%; }
   .profile-body { grid-template-columns: 1fr; grid-template-rows: auto; }
   .brief-card, .holo-stage, .right-stack, .timeline-card { grid-column: auto; grid-row: auto; }
-  .holo-stage { height: 540px; }
   .brief-card { overflow: visible; }
+  .holo-stage { height: 540px; }
   .profile-user span { display: none; }
 }
 
