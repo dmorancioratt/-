@@ -70,7 +70,9 @@
                 <small>{{ item.achievement.date }}</small>
                 <i @click.stop="openDetail(item.achievement)">查看详情 ›</i>
               </span>
-              <img :src="item.image" alt="蓝金成就奖杯" />
+              <div class="trophy-carousel__svg-wrap">
+                <TrophyStatue :variant="item.achievement.variant" />
+              </div>
               <span class="trophy-carousel__aura"></span>
             </span>
             <span class="trophy-carousel__plate">
@@ -180,18 +182,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import TrophyStatue from './TrophyStatue.vue'
-import trophyStarCup from '@/assets/cockpit/trophy-star-cup.png'
-import trophyDiamondCup from '@/assets/cockpit/trophy-diamond-cup.png'
-import trophyCrownCup from '@/assets/cockpit/trophy-crown-cup.png'
-import trophyOrbitCup from '@/assets/cockpit/trophy-orbit-cup.png'
-import trophyShieldCup from '@/assets/cockpit/trophy-shield.png'
 
 const emit = defineEmits<{ close: [] }>()
 const props = withDefaults(defineProps<{
   activityEvents?: Array<{ type: string; id: string | number; date: string; title: string; detail: string }>
 }>(), { activityEvents: () => [] })
 
-const heroTrophyImages = [trophyCrownCup, trophyStarCup, trophyDiamondCup, trophyOrbitCup, trophyShieldCup]
 let trophyTimer: number | undefined
 
 const ambientStars = Array.from({ length: 42 }, (_, index) => ({
@@ -383,9 +379,8 @@ function selectAchievement(ach: Achievement) {
 }
 
 const showcaseAchievements = computed(() => achievements.value.filter(item => item.showcase))
-const carouselItems = computed(() => showcaseAchievements.value.map((achievement, index) => ({
+const carouselItems = computed(() => showcaseAchievements.value.map((achievement) => ({
   achievement,
-  image: heroTrophyImages[index % heroTrophyImages.length],
 })))
 const carouselIndex = ref(0)
 
@@ -1272,8 +1267,9 @@ onBeforeUnmount(() => {
 .trophy-carousel__frame { position: absolute; inset: 0 0 72px; display: block; overflow: hidden; border: 1px solid rgba(63, 179, 255, .36); border-radius: 13px; background: linear-gradient(165deg, rgba(7, 43, 88, .9), rgba(2, 17, 46, .94)); box-shadow: 0 18px 38px rgba(0, 5, 24, .48), inset 0 0 34px rgba(25, 130, 255, .09); backdrop-filter: blur(10px); transition: border-color .5s ease, box-shadow .5s ease, background .5s ease; }
 .trophy-carousel__frame::before { content: ''; position: absolute; top: -45%; left: -36%; width: 42%; height: 190%; background: linear-gradient(180deg, rgba(184, 235, 255, .18), transparent); transform: rotate(18deg); }
 .trophy-carousel__item.is-center .trophy-carousel__frame { border-color: rgba(105, 211, 255, .74); background: linear-gradient(180deg, rgba(5, 39, 86, .98), rgba(1, 14, 42, .98)); box-shadow: 0 0 48px rgba(34, 151, 255, .4), inset 0 0 50px rgba(37, 148, 255, .12); }
-.trophy-carousel__frame img { position: absolute; left: 50%; bottom: 4%; z-index: 2; width: 108%; height: 94%; max-width: none; object-fit: contain; transform: translateX(-50%); filter: drop-shadow(0 18px 20px rgba(0, 4, 18, .58)) drop-shadow(0 0 14px rgba(255, 184, 50, .42)) drop-shadow(0 0 22px rgba(39, 164, 255, .28)); animation: carousel-trophy-float 4.4s ease-in-out infinite; transition: height .6s ease, bottom .6s ease, filter .5s ease; }
-.trophy-carousel__item.is-center .trophy-carousel__frame img { bottom: 1%; height: 77%; filter: drop-shadow(0 22px 24px rgba(0, 4, 18, .68)) drop-shadow(0 0 18px rgba(255, 193, 62, .62)) drop-shadow(0 0 34px rgba(42, 174, 255, .42)); }
+.trophy-carousel__svg-wrap { position: absolute; left: 50%; bottom: 4%; z-index: 2; width: 96%; height: 84%; max-width: none; transform: translateX(-50%); filter: drop-shadow(0 18px 20px rgba(0, 4, 18, .58)) drop-shadow(0 0 14px rgba(255, 184, 50, .42)) drop-shadow(0 0 22px rgba(39, 164, 255, .28)); animation: carousel-trophy-float 4.4s ease-in-out infinite; transition: height .6s ease, bottom .6s ease, filter .5s ease; display: flex; align-items: flex-end; justify-content: center; }
+.trophy-carousel__svg-wrap :deep(.trophy-svg) { width: 100%; height: 100%; object-fit: contain; display: block; }
+.trophy-carousel__item.is-center .trophy-carousel__svg-wrap { bottom: 1%; height: 70%; filter: drop-shadow(0 22px 24px rgba(0, 4, 18, .68)) drop-shadow(0 0 18px rgba(255, 193, 62, .62)) drop-shadow(0 0 34px rgba(42, 174, 255, .42)); }
 .trophy-carousel__aura { position: absolute; left: 50%; bottom: 5%; width: 86%; height: 42%; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(ellipse, rgba(56, 186, 255, .28), rgba(255, 194, 64, .1) 38%, transparent 72%); filter: blur(8px); }
 .trophy-carousel__meta { position: absolute; left: 14px; right: 14px; top: 16px; z-index: 4; display: grid; justify-items: center; gap: 6px; }
 .trophy-carousel__meta strong { font-size: clamp(17px, 1.45vw, 23px); letter-spacing: 2px; text-shadow: 0 0 16px rgba(63, 181, 255, .52); }

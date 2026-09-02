@@ -6,9 +6,9 @@
    *  背景：#0d3347 / #0f3b55 / #0b2c44 / #071f33 (深蓝青蓝渐变)
    * ============================================================ */
   /* 基础语义色（计划日历偏蓝青蓝基调，整体降饱和增蓝去绿） */
-  --primary: #0aa9b4;
-  --primary-dark: #09828b;
-  --primary-soft: rgba(10, 138, 148, 0.68);
+  --primary: #52DDFF;
+  --primary-dark: #42B1CC;
+  --primary-soft: rgba(82, 221, 255, 0.68);
   --cyan: #52ddff;
   --cyan-soft: rgba(82, 180, 220, 0.48);
   --green: #3ab6d4;
@@ -22,14 +22,14 @@
   font-family: Inter, "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
   color: var(--text);
 
-  /* ===== Element Plus 全量主题色 (计划日历蓝青调) ===== */
-  --el-color-primary: #0aa9b4;
-  --el-color-primary-light-3: #3ec3d3;
-  --el-color-primary-light-5: #52ddff;
-  --el-color-primary-light-7: #a5e8f7;
-  --el-color-primary-light-8: #c5effa;
-  --el-color-primary-light-9: #e5f7fd;
-  --el-color-primary-dark-2: #08858e;
+  /* ===== Element Plus 全量主题色 (计划日历蓝青调 · 以 #52DDFF 为基色) ===== */
+  --el-color-primary: #52DDFF;
+  --el-color-primary-dark-2:  #42B1CC;  /* #52DDFF 混 20% 黑 */
+  --el-color-primary-light-3: #86E7FF;  /* 混 30% 白 (按下态) */
+  --el-color-primary-light-5: #A8EEFF;  /* 混 50% 白 (hover) */
+  --el-color-primary-light-7: #CBF5FF;
+  --el-color-primary-light-8: #DCF8FF;
+  --el-color-primary-light-9: #EEFBFF;
 
   /* Success 蓝青调 (去绿转蓝青) */
   --el-color-success: #3ab6d4;
@@ -819,9 +819,11 @@ body::after {
 .el-button--primary {
   --el-button-bg-color: var(--primary);
   --el-button-border-color: var(--primary);
-  --el-button-hover-bg-color: #0aa9b4;
-  --el-button-hover-border-color: #0aa9b4;
-  box-shadow: 0 14px 28px rgba(10, 169, 180, 0.18);
+  --el-button-hover-bg-color: #42B1CC;
+  --el-button-hover-border-color: #42B1CC;
+  --el-button-active-bg-color: #2F9DB7;
+  --el-button-active-border-color: #2F9DB7;
+  box-shadow: 0 14px 28px rgba(82, 221, 255, 0.30);
   position: relative;
   overflow: hidden;
 }

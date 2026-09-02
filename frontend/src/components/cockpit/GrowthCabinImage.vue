@@ -59,7 +59,7 @@
     </aside>
 
     <div class="image-cabin__canvas">
-      <img class="image-cabin__image" src="/growth-cabin-reference.png" alt="个人学习成长仓模块总览" />
+      <img class="image-cabin__image" src="/cockpit-chatgpt-20260902.png" alt="个人学习成长仓模块总览" />
       <button
         v-for="item in modules"
         :key="item.id"
@@ -180,7 +180,7 @@ function showCopyStatus(message: string) {
 
 <style scoped>
 .image-cabin { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; background: #061026; }
-.image-cabin__ambience { position: absolute; inset: -28px; background: linear-gradient(rgba(3, 12, 35, .18), rgba(3, 12, 35, .18)), url('/growth-cabin-reference.png') center / cover no-repeat; filter: blur(24px) saturate(.9) brightness(.55); transform: scale(1.08); }
+.image-cabin__ambience { position: absolute; inset: -28px; background: linear-gradient(rgba(3, 12, 35, .18), rgba(3, 12, 35, .18)), url('/cockpit-chatgpt-20260902.png') center / cover no-repeat; filter: blur(24px) saturate(.9) brightness(.55); transform: scale(1.08); }
 .image-cabin__canvas { position: relative; z-index: 1; width: min(100vw, calc(100vh * 1.776833)); aspect-ratio: 1672 / 941; overflow: hidden; background: #07122b; box-shadow: 0 0 90px rgba(9, 83, 211, .28); animation: cabin-reveal .7s ease-out both; }
 .image-cabin__image { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
 .image-cabin__zone { position: absolute; z-index: 2; display: block; padding: 0; border: 0; border-radius: clamp(5px, .8vw, 14px); background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }

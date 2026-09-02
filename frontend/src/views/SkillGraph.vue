@@ -77,7 +77,7 @@
                 <defs>
                   <radialGradient id="skillRadarFill" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" stop-color="#52ddff" stop-opacity="0.4" />
-                    <stop offset="100%" stop-color="#0aa9b4" stop-opacity="0.08" />
+                    <stop offset="100%" stop-color="#52ddff" stop-opacity="0.08" />
                   </radialGradient>
                   <filter id="skillRadarGlow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
                 </defs>
@@ -460,17 +460,8 @@ async function clearSearchFocus() {
 }
 
 function nodeColor(type: string) {
-  const colors: Record<string, string> = {
-    Job: '#52ddff',
-    Skill: '#0aa9b4',
-    Tool: '#8cc8d8',
-    Certificate: '#8f7cff',
-    Responsibility: '#ffb65c',
-    IndustryScenario: '#52ddff',
-    Course: '#8cc8d8',
-    Level: '#ff7088'
-  }
-  return colors[type] || '#78a4a9'
+  // 统一为单一荧光青蓝色，不再有多色区分
+  return '#52ddff'
 }
 
 function nodeSize(type: string, isCenter: boolean) {
@@ -705,10 +696,10 @@ function initScene() {
   raycaster = new THREE.Raycaster()
   glowTexture = createGlowTexture()
 
-  const ambient = new THREE.AmbientLight(0x92fff0, 0.72)
-  const key = new THREE.DirectionalLight(0x89fff0, 1.42)
+  const ambient = new THREE.AmbientLight(0x52DDFF, 0.66)
+  const key = new THREE.DirectionalLight(0x52DDFF, 1.28)
   key.position.set(320, 520, 640)
-  const rim = new THREE.PointLight(0x22f7ff, 1.4, 1200)
+  const rim = new THREE.PointLight(0x52DDFF, 1.3, 1200)
   rim.position.set(-360, -180, 420)
   scene.add(ambient, key, rim, createStarField())
 
@@ -735,8 +726,8 @@ function createNodeGeometry(type: string, size: number) {
 
 function createNodeOrbitRings(node: PositionedNode, size: number) {
   const specs = [
-    { radius: 1.48, tube: 0.064, arc: Math.PI * 1.72, color: 0x22f7ff, x: 1.04, y: 0.16, z: 0.2, speed: 0.72, opacity: 0.9 },
-    { radius: 1.82, tube: 0.044, arc: Math.PI * 1.52, color: 0x00c9d2, x: 1.2, y: -0.34, z: 1.12, speed: -0.48, opacity: 0.72 }
+    { radius: 1.48, tube: 0.064, arc: Math.PI * 1.72, color: 0x52DDFF, x: 1.04, y: 0.16, z: 0.2, speed: 0.72, opacity: 0.9 },
+    { radius: 1.82, tube: 0.044, arc: Math.PI * 1.52, color: 0x52DDFF, x: 1.2, y: -0.34, z: 1.12, speed: -0.48, opacity: 0.72 }
   ]
 
   return specs.map((spec, index) => {
@@ -867,7 +858,7 @@ function buildEdges(edges: GraphEdge[]) {
   const line = new THREE.LineSegments(
     edgeLineGeometry,
     new THREE.LineBasicMaterial({
-      color: 0x78fffb,
+      color: 0x52DDFF,
       transparent: true,
       opacity: 0,
       blending: THREE.AdditiveBlending,
@@ -927,7 +918,7 @@ function updateFocusLines(nodeId?: string) {
   const line = new THREE.LineSegments(
     highlightLineGeometry,
     new THREE.LineBasicMaterial({
-      color: 0x22f7ff,
+      color: 0x52DDFF,
       transparent: true,
       opacity: 0.38,
       blending: THREE.AdditiveBlending,
@@ -1122,7 +1113,7 @@ function createGlowTexture() {
   const ctx = canvas.getContext('2d')!
   const gradient = ctx.createRadialGradient(64, 64, 4, 64, 64, 62)
   gradient.addColorStop(0, 'rgba(255,255,255,0.95)')
-  gradient.addColorStop(0.22, 'rgba(115,255,248,0.62)')
+  gradient.addColorStop(0.22, 'rgba(82, 221, 255,0.62)')
   gradient.addColorStop(0.52, 'rgba(82, 221, 255,0.22)')
   gradient.addColorStop(1, 'rgba(82, 221, 255,0)')
   ctx.fillStyle = gradient
@@ -1135,8 +1126,8 @@ function createStarField() {
   const positions: number[] = []
   const colors: number[] = []
   const colorA = new THREE.Color(0xffffff)
-  const colorB = new THREE.Color(0x65fff6)
-  const colorC = new THREE.Color(0x6df7ff)
+  const colorB = new THREE.Color(0x52DDFF)
+  const colorC = new THREE.Color(0x52DDFF)
 
   for (let i = 0; i < 380; i += 1) {
     const radius = 520 + Math.random() * 980
@@ -1699,6 +1690,8 @@ async function loadGraph() {
       avgDegree: cleanGraph.nodes.length ? ((cleanGraph.edges.length * 2) / cleanGraph.nodes.length).toFixed(2) : '0'
     }
     communities.value = Array.isArray(explore?.communities) ? explore.communities : []
+    // 所有社区统一颜色为 #52ddff（荧光青蓝），不再有多色区分
+    communities.value.forEach((c: any) => { if (c) c.color = '#52ddff' })
     nodeCommunityMap.value = Array.isArray(explore?.nodes)
       ? explore.nodes.reduce((map: Record<string, number>, node: { id?: string; community?: number }) => {
         if (node.id && typeof node.community === 'number') map[node.id] = node.community
@@ -1763,11 +1756,11 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .skill-graph-page {
-  --panel: rgba(2, 24, 30, .38);
-  --edge: rgba(21, 197, 199, .10);
-  --cyan: #15c5c7;
-  --teal: #079ea2;
-  --panel-strong: rgba(3, 44, 50, .44);
+  --panel: rgba(2, 14, 30, .38);
+  --edge: rgba(82, 221, 255, .10);
+  --cyan: #52ddff;
+  --teal: #52ddff;
+  --panel-strong: rgba(2, 24, 50, .44);
   position: relative;
   display: grid;
   gap: 16px;
@@ -1813,8 +1806,8 @@ onBeforeUnmount(() => {
   border: 1px solid var(--edge);
   border-radius: 20px;
   padding: 16px 18px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
-  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
+  background: linear-gradient(145deg, rgba(2, 14, 40, .28), rgba(2, 6, 20, .32));
+  box-shadow: 0 8px 28px rgba(0, 8, 20, 0.10);
   backdrop-filter: blur(26px) saturate(1.18);
 }
 
@@ -1853,9 +1846,9 @@ onBeforeUnmount(() => {
 .panel {
   border: 1px solid var(--edge);
   border-radius: 20px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  background: linear-gradient(145deg, rgba(2, 14, 40, .28), rgba(2, 6, 20, .32));
   backdrop-filter: blur(26px) saturate(1.18);
-  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
+  box-shadow: 0 8px 28px rgba(0, 8, 20, 0.10);
 }
 
 .graph-panel,
@@ -1893,9 +1886,9 @@ onBeforeUnmount(() => {
   padding: 12px 12px 10px;
   border: 1px solid rgba(82, 221, 255, 0.14);
   border-radius: 16px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  background: linear-gradient(145deg, rgba(2, 14, 40, .28), rgba(2, 6, 20, .32));
   backdrop-filter: blur(22px) saturate(1.15);
-  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.16), inset 0 1px 0 rgba(82, 221, 255, 0.08);
+  box-shadow: 0 8px 28px rgba(0, 8, 20, 0.16), inset 0 1px 0 rgba(82, 221, 255, 0.08);
   pointer-events: auto;
 }
 .skill-radar-head {
@@ -1908,7 +1901,7 @@ onBeforeUnmount(() => {
 .skill-radar-head small { color: #6b9ea4; font-size: 9px; letter-spacing: 0.18em; }
 .skill-radar-close {
   width: 22px; height: 22px; border: 0; border-radius: 7px; cursor: pointer;
-  color: #7acfd4; background: rgba(82, 221, 255, 0.10); font-size: 16px; line-height: 1;
+  color: #52ddff; background: rgba(82, 221, 255, 0.10); font-size: 16px; line-height: 1;
   backdrop-filter: blur(8px);
 }
 .skill-radar-close:hover { color: #fff; background: rgba(255, 112, 136, 0.45); }
@@ -1948,15 +1941,15 @@ onBeforeUnmount(() => {
   border-radius: 20px;
   background:
     radial-gradient(circle at 46% 48%, rgba(82, 221, 255, 0.08), transparent 30%),
-    radial-gradient(circle at 72% 24%, rgba(10, 169, 180, 0.06), transparent 24%),
-    radial-gradient(circle at 24% 78%, rgba(79, 234, 255, 0.05), transparent 28%),
-    linear-gradient(145deg, #0d3347 0%, #0f3b55 50%, #0b2c44 100%);
+    radial-gradient(circle at 72% 24%, rgba(82, 221, 255, 0.06), transparent 24%),
+    radial-gradient(circle at 24% 78%, rgba(82, 221, 255, 0.05), transparent 28%),
+    linear-gradient(145deg, #08182d 0%, #0a2036 50%, #061526 100%);
   background-size: auto, auto, auto, auto;
   background-attachment: fixed;
   box-shadow:
-    inset 0 0 100px rgba(2, 11, 18, 0.28),
+    inset 0 0 100px rgba(2, 6, 14, 0.28),
     inset 0 0 70px rgba(82, 221, 255, 0.04),
-    0 22px 70px rgba(0, 10, 14, 0.16);
+    0 22px 70px rgba(0, 6, 14, 0.16);
 }
 
 .graph-box::before {
@@ -1980,9 +1973,9 @@ onBeforeUnmount(() => {
   pointer-events: none;
   background:
     radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.72) 0 1px, transparent 2px),
-    radial-gradient(circle at 34% 36%, rgba(136, 255, 248, 0.52) 0 1px, transparent 2px),
+    radial-gradient(circle at 34% 36%, rgba(180, 240, 255, 0.52) 0 1px, transparent 2px),
     radial-gradient(circle at 62% 22%, rgba(255, 255, 255, 0.58) 0 1px, transparent 2px),
-    radial-gradient(circle at 78% 64%, rgba(111, 250, 255, 0.58) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 64%, rgba(150, 232, 255, 0.58) 0 1px, transparent 2px),
     radial-gradient(circle at 42% 82%, rgba(255, 255, 255, 0.5) 0 1px, transparent 2px);
   opacity: 0.22;
   animation: starTwinkle 5.6s ease-in-out infinite;
@@ -2021,7 +2014,7 @@ onBeforeUnmount(() => {
 .graph-orbit-b {
   width: 720px;
   height: 720px;
-  border: 1px solid rgba(79, 234, 255, 0.08);
+  border: 1px solid rgba(82, 221, 255, 0.08);
   box-shadow: inset 0 0 46px rgba(82, 221, 255, 0.03);
   animation: graphOrbit 42s linear reverse infinite;
 }
@@ -2034,8 +2027,8 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(82, 221, 255, 0.32);
   border-radius: 14px;
   padding: 10px 12px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .50), rgba(2, 20, 24, .54));
-  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.22);
+  background: linear-gradient(145deg, rgba(2, 14, 40, .50), rgba(2, 6, 20, .54));
+  box-shadow: 0 8px 28px rgba(0, 8, 20, 0.22);
   color: #fff;
   pointer-events: none;
   backdrop-filter: blur(22px) saturate(1.15);
@@ -2051,7 +2044,7 @@ onBeforeUnmount(() => {
 
 .node-tooltip span {
   margin-top: 4px;
-  color: #9eeee8;
+  color: #a8e4ff;
   font-size: 12px;
 }
 
@@ -2062,7 +2055,7 @@ onBeforeUnmount(() => {
   display: grid;
   place-items: center;
   border-radius: 20px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  background: linear-gradient(145deg, rgba(2, 14, 40, .28), rgba(2, 6, 20, .32));
   backdrop-filter: blur(26px) saturate(1.18);
 }
 
@@ -2094,7 +2087,7 @@ onBeforeUnmount(() => {
   border: 1px solid var(--edge);
   border-radius: 18px;
   padding: 14px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  background: linear-gradient(145deg, rgba(2, 14, 40, .28), rgba(2, 6, 20, .32));
   backdrop-filter: blur(22px) saturate(1.15);
 }
 
@@ -2151,7 +2144,7 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(82, 221, 255, 0.10);
   border-radius: 14px;
   padding: 9px 10px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .22), rgba(2, 20, 24, .26));
+  background: linear-gradient(145deg, rgba(2, 14, 40, .22), rgba(2, 6, 20, .26));
   color: #cfe4e6;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2161,8 +2154,8 @@ onBeforeUnmount(() => {
 .community-row:hover,
 .community-row.active {
   border-color: rgba(82, 221, 255, 0.26);
-  background: linear-gradient(145deg, rgba(4, 62, 74, .28), rgba(2, 26, 30, .32));
-  box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
+  background: linear-gradient(145deg, rgba(2, 22, 54, .28), rgba(2, 8, 24, .32));
+  box-shadow: 0 8px 28px rgba(0, 8, 20, 0.10);
   transform: translateY(-1px);
 }
 
@@ -2225,7 +2218,7 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(82, 221, 255, 0.14);
   border-radius: 999px;
   padding: 5px 10px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .22), rgba(2, 20, 24, .26));
+  background: linear-gradient(145deg, rgba(2, 14, 40, .22), rgba(2, 6, 20, .26));
   color: #cfe4e6;
   font-size: 12px;
   font-weight: 700;
@@ -2235,8 +2228,8 @@ onBeforeUnmount(() => {
 .path-node.skill,
 .path-node.Skill {
   border-color: rgba(82, 221, 255, 0.22);
-  background: linear-gradient(145deg, rgba(4, 62, 74, .24), rgba(2, 26, 30, .28));
-  color: #aeeeee;
+  background: linear-gradient(145deg, rgba(2, 22, 54, .24), rgba(2, 8, 24, .28));
+  color: #a8e4ff;
 }
 
 .path-arrow {
@@ -2277,7 +2270,7 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(82, 221, 255, 0.10);
   border-radius: 999px;
   padding: 8px 12px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .22), rgba(2, 20, 24, .26));
+  background: linear-gradient(145deg, rgba(2, 14, 40, .22), rgba(2, 6, 20, .26));
   color: #8aaeb3;
   font-size: 12px;
   font-weight: 700;

@@ -1098,7 +1098,7 @@ onBeforeUnmount(() => {
 :global(.cockpit-scene) {
   background:
     linear-gradient(rgba(89, 159, 231, .11), rgba(15, 53, 105, .13)),
-    #020713 url('/cockpit-empty-cabin.png') center / cover no-repeat;
+    #020713 url('/cockpit-chatgpt-20260902.png') center / cover no-repeat;
   background-blend-mode: screen, normal;
 }
 

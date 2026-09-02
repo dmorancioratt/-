@@ -42,13 +42,28 @@
       <rect x="25" y="134" width="70" height="6" rx="3" :fill="`url(#${uid}-rim)`" opacity=".92" />
     </g>
 
-    <!-- 星盾奖杯（奖杯2）：使用真实奖杯图，保留统一底座与地面投影 -->
+    <!-- 星盾奖杯：纯SVG绘制 -->
     <g v-else-if="variant === 'shield'">
-      <image
-        :href="shieldTrophyImage"
-        x="16" y="6" width="88" height="118"
-        preserveAspectRatio="xMidYMid meet"
-      />
+      <!-- 顶部丝带飘带 -->
+      <path d="M46 14h28l5 10h-5l-3 8H49l-3-8h-5l5-10Z" fill="#2b5cd8" stroke="#1d42a5" stroke-width=".6" />
+      <path d="M46 14h5l-3 8h-5l3-8Zm22 0h-5l3 8h5l-3-8Z" fill="rgba(255,255,255,.22)" />
+      <!-- 盾牌主体 -->
+      <path d="M60 24c16 2 30 6 30 38 0 24-16 40-30 48-14-8-30-24-30-48 0-32 14-36 30-38Z"
+            :fill="`url(#${uid}-gold)`" stroke="#8a5a12" stroke-width=".9" />
+      <!-- 盾牌高光层 -->
+      <path d="M60 24c16 2 30 6 30 38 0 8-2 15-6 22C78 70 68 58 60 58c-8 0-18 12-24 26-4-7-6-14-6-22 0-32 14-36 30-38Z"
+            fill="rgba(255,255,255,.12)" />
+      <!-- 盾牌内圈描边 -->
+      <path d="M60 34c11 1.8 22 5.6 22 28 0 17.6-11.6 29.4-22 35.6C49.6 91.4 38 79.6 38 62c0-22.4 11-26.2 22-28Z"
+            fill="none" stroke="#ffe9ad" stroke-width="1.2" opacity=".72" />
+      <!-- 中央宝石/徽记 -->
+      <circle cx="60" cy="62" r="15" :fill="`url(#${uid}-core)`" opacity=".86" />
+      <circle cx="60" cy="62" r="15" stroke="#cdefff" stroke-width="1" opacity=".6" />
+      <path d="M60 50l3 9h9l-7.2 5.4 2.8 9.2L60 66l-7.6 7.6 2.8-9.2L48 59h9l3-9Z" fill="#fff" opacity=".95" />
+      <!-- 盾牌描边外层辉光 -->
+      <path d="M60 24c16 2 30 6 30 38 0 24-16 40-30 48-14-8-30-24-30-48 0-32 14-36 30-38Z"
+            fill="none" stroke="#ffe4a5" stroke-width=".4" opacity=".7" />
+      <!-- 底座（与其他奖杯统一风格） -->
       <path d="M44 108h32l3 8H41l3-8Z" :fill="`url(#${uid}-base)`" stroke="rgba(140,200,255,.3)" stroke-width="1" />
       <rect x="36" y="116" width="48" height="9" rx="3" :fill="`url(#${uid}-base)`" stroke="rgba(140,200,255,.26)" stroke-width="1" />
       <rect x="32" y="125" width="56" height="6" rx="3" :fill="`url(#${uid}-rim)`" opacity=".92" />
@@ -96,8 +111,6 @@
 </template>
 
 <script setup lang="ts">
-import shieldTrophyImage from '@/assets/cockpit/trophy-shield.png'
-
 withDefaults(defineProps<{ variant?: 'cup' | 'shield' | 'star' | 'gem' | 'medal' }>(), { variant: 'cup' })
 const uid = `tw${Math.random().toString(36).slice(2, 9)}`
 </script>

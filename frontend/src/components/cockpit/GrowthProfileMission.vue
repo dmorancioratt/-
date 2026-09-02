@@ -104,10 +104,18 @@
             </div>
 
             <img
+              v-if="!avatarUrl"
               class="holo-figure"
               src="/cockpit/profile-hologram.png"
               alt="数字人全息投影"
             />
+            <div v-else class="holo-avatar">
+              <img :src="avatarUrl" alt="个人数字形象" />
+            </div>
+
+            <div class="holo-skill-tags" aria-label="能力亮点">
+              <span v-for="skill in topSkills" :key="skill" class="holo-skill-tag">{{ skill }}</span>
+            </div>
           </main>
 
           <!-- 03 证据构成 + AI 决策依据 -->
@@ -150,11 +158,17 @@
                     </span>
                     <span class="ev-count">{{ card.done }} / {{ card.total }}</span>
                   </div>
-                  <span class="evidence-item__more">查看详情 <i>→</i></span>
+                  <span class="evidence-item__more">{{ card.routeLabel || '查看详情' }} <i>→</i></span>
                   <Transition name="ev-detail">
-                    <ul v-if="expandedEvidence === card.key" class="evidence-item__list">
-                      <li v-for="item in card.items" :key="item">{{ item }}</li>
-                    </ul>
+                    <div v-if="expandedEvidence === card.key" class="evidence-item__detail">
+                      <ul class="evidence-item__list">
+                        <li v-for="item in card.items" :key="item">{{ item }}</li>
+                      </ul>
+                      <button v-if="card.route" class="evidence-item__go" type="button" @click.stop="openEvidenceRoute(card)">
+                        {{ card.routeLabel }}
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+                      </button>
+                    </div>
                   </Transition>
                 </button>
               </div>
@@ -196,6 +210,10 @@
                 <small key="caption" class="timeline-caption">{{ selectedTimeline.caption }}</small>
               </Transition>
             </div>
+            <button v-if="hasMoreEvents" class="timeline-all" type="button" @click="openAchievementWall">
+              全部 {{ activityEvents.length }} 条轨迹
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+            </button>
 
             <div class="timeline-track">
               <svg class="timeline-wave" viewBox="0 0 1000 150" preserveAspectRatio="none" aria-hidden="true">
@@ -263,6 +281,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { missionCabins } from './missionCabinData'
 import ProfileInfoEditor from './ProfileInfoEditor.vue'
@@ -277,14 +296,24 @@ const props = withDefaults(defineProps<{
   resumeCount?: number
   matchCount?: number
   interviewCount?: number
+  resumes?: Array<Record<string, any>>
+  matches?: Array<Record<string, any>>
+  interviews?: Array<Record<string, any>>
+  matchSuggestions?: string[]
   activityEvents?: Array<{ type: string; id: string | number; date: string; title: string; detail: string }>
 }>(), {
   profileData: () => ({}),
   resumeCount: 0,
   matchCount: 0,
   interviewCount: 0,
+  resumes: () => [],
+  matches: () => [],
+  interviews: () => [],
+  matchSuggestions: () => [],
   activityEvents: () => [],
 })
+
+const router = useRouter()
 
 const shell = ref<HTMLElement | null>(null)
 const toastText = ref('')
@@ -296,6 +325,13 @@ const ownerName = computed(() => {
   const user = authStore.user as { display_name?: string; username?: string } | null
   return user?.display_name || user?.username || ''
 })
+
+const avatarUrl = computed(() => {
+  const url = props.profileData?.avatar_url || (authStore.user as { avatar_url?: string } | null)?.avatar_url
+  return typeof url === 'string' && url ? url : ''
+})
+
+const topSkills = computed(() => skillItems.value.slice(0, 3))
 
 const profile = computed(() => {
   const data = props.profileData || {}
@@ -343,34 +379,76 @@ type EvidenceCard = {
   rgb: string
   icon: string
   items: string[]
+  route: string
+  routeLabel: string
 }
 
-const evidenceCards = computed<EvidenceCard[]>(() => [
-  {
-    key: 'course', title: '个人简历', en: 'RESUME RECORDS', percent: props.resumeCount ? 100 : 0, done: props.resumeCount, total: props.resumeCount,
-    color: '#52ddff', rgb: '34, 247, 255',
-    icon: '<circle cx="12" cy="9" r="5" /><path d="m9 13-2 8 5-3 5 3-2-8" />',
-    items: props.resumeCount ? [`当前账号已保存 ${props.resumeCount} 份简历`] : ['当前账号尚未保存简历'],
-  },
-  {
-    key: 'project', title: '岗位匹配', en: 'MATCH REPORTS', percent: props.matchCount ? 100 : 0, done: props.matchCount, total: props.matchCount,
-    color: '#0aa9b4', rgb: '10, 169, 180',
-    icon: '<path d="m12 3 9 5-9 5-9-5Z" /><path d="m5 12.5-2 1.5 9 5 9-5-2-1.5" /><path d="m5 17-2 1.5 9 5 9-5-2-1.5" />',
-    items: props.matchCount ? [`当前账号已生成 ${props.matchCount} 份匹配报告`] : ['当前账号尚未生成匹配报告'],
-  },
-  {
-    key: 'skill', title: '画像技能', en: 'PROFILE SKILLS', percent: Math.min(100, (props.profileData.skills || []).length * 10), done: (props.profileData.skills || []).length, total: (props.profileData.skills || []).length,
-    color: '#52ddff', rgb: '79, 234, 255',
-    icon: '<path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7Z" /><path d="M12 7.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />',
-    items: (props.profileData.skills || []).map((item: any) => typeof item === 'string' ? item : item?.name).filter(Boolean),
-  },
-  {
-    key: 'job', title: '面试记录', en: 'INTERVIEW RECORDS', percent: props.interviewCount ? 100 : 0, done: props.interviewCount, total: props.interviewCount,
-    color: '#8f7cff', rgb: '143, 124, 255',
-    icon: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4.5L6.8 17A8.5 8.5 0 1 1 21 11.5Z" /><path d="M9 10.5h6M9 14h4" />',
-    items: props.interviewCount ? [`当前账号已有 ${props.interviewCount} 条面试记录`] : ['当前账号尚无面试记录'],
-  },
-])
+const formatDate = (value: any) => {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit' }).format(date)
+}
+
+const resumeItems = computed(() => props.resumes.slice(0, 3).map(item => {
+  const name = item.source_filename || item.name || item.title || '未命名简历'
+  const date = formatDate(item.created_at || item.updated_at)
+  return date ? `${name} · ${date}` : name
+}))
+
+const matchItems = computed(() => props.matches.slice(0, 3).map(item => {
+  const job = item.target_job || '目标岗位'
+  const score = Math.round(Number(item.total_score || 0))
+  const date = formatDate(item.created_at)
+  return `${job} · ${score} 分${date ? ` · ${date}` : ''}`
+}))
+
+const interviewItems = computed(() => props.interviews.slice(0, 3).map(item => {
+  const job = item.job_name || item.job_title || '岗位面试'
+  const status = item.status === 'completed' ? '已完成' : '进行中'
+  const date = formatDate(item.completed_at || item.updated_at || item.created_at)
+  return `${job} · ${status}${date ? ` · ${date}` : ''}`
+}))
+
+const skillItems = computed(() => (props.profileData.skills || []).map((item: any) => typeof item === 'string' ? item : item?.name).filter(Boolean))
+
+const evidenceCards = computed<EvidenceCard[]>(() => {
+  const skillList = skillItems.value
+  const skillTarget = Math.max(8, skillList.length)
+  const cards: EvidenceCard[] = [
+    {
+      key: 'course', title: '个人简历', en: 'RESUME RECORDS',
+      percent: Math.min(100, Math.round(props.resumeCount / 3 * 100)), done: props.resumeCount, total: 3,
+      color: '#52ddff', rgb: '34, 247, 255',
+      icon: '<circle cx="12" cy="9" r="5" /><path d="m9 13-2 8 5-3 5 3-2-8" />',
+      items: resumeItems.value.length ? resumeItems.value : ['当前账号尚未保存简历'],
+      route: '/resume-parser', routeLabel: '去解析简历',
+    },
+    {
+      key: 'project', title: '岗位匹配', en: 'MATCH REPORTS',
+      percent: Math.min(100, Math.round(props.matchCount / 3 * 100)), done: props.matchCount, total: 3,
+      color: '#0aa9b4', rgb: '10, 169, 180',
+      icon: '<path d="m12 3 9 5-9 5-9-5Z" /><path d="m5 12.5-2 1.5 9 5 9-5-2-1.5" /><path d="m5 17-2 1.5 9 5 9-5-2-1.5" />',
+      items: matchItems.value.length ? matchItems.value : ['完成首次岗位匹配后生成报告'],
+      route: '/match-analysis', routeLabel: '去匹配岗位',
+    },
+    {
+      key: 'skill', title: '画像技能', en: 'PROFILE SKILLS',
+      percent: Math.min(100, Math.round(skillList.length / skillTarget * 100)), done: skillList.length, total: skillTarget,
+      color: '#52ddff', rgb: '79, 234, 255',
+      icon: '<path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7Z" /><path d="M12 7.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />',
+      items: skillList.length ? skillList.slice(0, 6).map((name: string) => `${name} · 已归档`) : ['在下方个人档案中添加技能'],
+      route: '', routeLabel: '',
+    },
+    {
+      key: 'job', title: '面试记录', en: 'INTERVIEW RECORDS',
+      percent: Math.min(100, Math.round(props.interviewCount / 3 * 100)), done: props.interviewCount, total: 3,
+      color: '#8f7cff', rgb: '143, 124, 255',
+      icon: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4.5L6.8 17A8.5 8.5 0 1 1 21 11.5Z" /><path d="M9 10.5h6M9 14h4" />',
+      items: interviewItems.value.length ? interviewItems.value : ['与数字面试官完成一次模拟面试'],
+      route: '/digital-interviewer', routeLabel: '去模拟面试',
+    },
+  ]
+  return cards
+})
 
 const expandedEvidence = ref<string | null>(null)
 
@@ -378,11 +456,27 @@ function toggleEvidence(key: string) {
   expandedEvidence.value = expandedEvidence.value === key ? null : key
 }
 
-const aiBasis = computed(() => [
-  { label: '已保存简历', value: String(props.resumeCount) },
-  { label: '岗位匹配报告', value: String(props.matchCount) },
-  { label: '面试记录', value: String(props.interviewCount) },
-])
+function openEvidenceRoute(card: EvidenceCard) {
+  if (!card.route) return
+  expandedEvidence.value = null
+  emit('primary', { id: 'avatar', route: card.route })
+}
+
+const aiBasis = computed(() => {
+  const rows: Array<{ label: string; value: string }> = []
+  const topMatch = props.matches[0]
+  if (topMatch) {
+    const score = Math.round(Number(topMatch.total_score || 0))
+    rows.push({ label: `最新匹配 · ${topMatch.target_job || '目标岗位'}`, value: `${score} 分` })
+  }
+  const suggestion = props.matchSuggestions.find(Boolean)
+  if (suggestion) rows.push({ label: 'AI 提升建议', value: suggestion.length > 26 ? `${suggestion.slice(0, 26)}…` : suggestion })
+  if (!rows.length) {
+    rows.push({ label: 'AI 决策依据', value: '等待简历与匹配数据' })
+    rows.push({ label: '建议第一步', value: '上传简历生成能力画像' })
+  }
+  return rows.slice(0, 3)
+})
 
 type TimelineNode = {
   key: string
@@ -394,15 +488,43 @@ type TimelineNode = {
   icon: string
 }
 
+const eventIcons: Record<string, string> = {
+  resume: '<path d="M6 3h9l5 5v13H6Z" /><path d="M9 12h7M9 16h5" />',
+  match: '<path d="m12 3 9 5-9 5-9-5Z" /><path d="m5 12.5-2 1.5 9 5 9-5-2-1.5" />',
+  interview: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4.5L6.8 17A8.5 8.5 0 1 1 21 11.5Z" /><path d="M9 10.5h6M9 14h4" />',
+}
 const fallbackTimelineIcon = '<rect x="3" y="5" width="18" height="14" rx="2" /><path d="M7 9h6M7 13h4" />'
+
 const timelineNodes = computed<TimelineNode[]>(() => {
-  const nodes = props.activityEvents.slice(0, 5).reverse().map((event, index) => ({
-    key: `${event.type}-${event.id}`, title: event.title,
-    date: new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit' }).format(new Date(event.date)),
-    value: String(index + 1), unit: '记录', caption: event.detail, icon: fallbackTimelineIcon,
-  }))
+  const nodes = props.activityEvents.slice(0, 5).reverse().map(event => {
+    let value = '1'
+    let unit = '记录'
+    if (event.type === 'match') {
+      const scoreMatch = event.detail.match(/(\d+)\s*分/)
+      value = scoreMatch ? scoreMatch[1] : '—'
+      unit = '匹配分'
+    } else if (event.type === 'resume') {
+      value = String(props.resumeCount)
+      unit = '简历'
+    } else if (event.type === 'interview') {
+      value = String(props.interviewCount)
+      unit = '面试'
+    }
+    return {
+      key: `${event.type}-${event.id}`, title: event.title,
+      date: new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit' }).format(new Date(event.date)),
+      value, unit, caption: event.detail, icon: eventIcons[event.type] || fallbackTimelineIcon,
+    }
+  })
   return nodes.length ? nodes : [{ key: 'empty', title: '暂无成长记录', date: '等待同步', value: '0', unit: '记录', caption: '完成简历、岗位匹配或面试后将在这里形成真实轨迹', icon: fallbackTimelineIcon }]
 })
+
+const hasMoreEvents = computed(() => props.activityEvents.length > 5)
+
+function openAchievementWall() {
+  emit('primary', { id: 'avatar', route: '/personal-center' })
+  showToast('可在成就墙查看全部成长轨迹')
+}
 /*
   {
     key: 'course', title: '课程学习', date: '2024.09', value: '136', unit: '证书',
@@ -689,6 +811,45 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
   animation: holo-drift 7s ease-in-out infinite;
 }
 
+/* 真实头像的全息化呈现 */
+.holo-avatar {
+  position: absolute; left: 50%; top: 50%;
+  width: clamp(150px, 15vw, 230px); height: clamp(150px, 15vw, 230px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(110, 220, 255, .55);
+  box-shadow: 0 0 34px rgba(66, 190, 255, .38), inset 0 0 30px rgba(66, 190, 255, .25);
+  overflow: hidden;
+  animation: holo-drift 7s ease-in-out infinite;
+}
+.holo-avatar::before {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    repeating-linear-gradient(180deg, rgba(140, 230, 255, .09) 0 2px, transparent 2px 6px),
+    radial-gradient(circle at 50% 30%, rgba(160, 240, 255, .16), transparent 62%);
+}
+.holo-avatar img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.05) brightness(1.06); }
+
+/* 能力亮点悬浮标签 */
+.holo-skill-tags {
+  position: absolute; z-index: 4; left: 7%; bottom: 9%;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  pointer-events: none;
+}
+.holo-skill-tag {
+  padding: 5px 12px; border: 1px solid rgba(110, 224, 255, .5); border-radius: 999px;
+  background: rgba(6, 24, 52, .78); box-shadow: 0 0 16px rgba(70, 195, 255, .25);
+  color: #d8f6ff; font-size: 11.5px; letter-spacing: .08em;
+  animation: holo-tag-float 4.6s ease-in-out infinite;
+}
+.holo-skill-tag:nth-child(2) { animation-delay: .6s; }
+.holo-skill-tag:nth-child(3) { animation-delay: 1.2s; }
+.holo-skill-tag::before { content: "◆ "; color: #6ee2ff; font-size: 8px; vertical-align: 1px; }
+@keyframes holo-tag-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
 /* ============ 右侧证据构成 ============ */
 .right-stack { grid-column: 3; grid-row: 1 / 3; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 .evidence-card { display: flex; flex-direction: column; min-height: 0; flex: 1; }
@@ -717,9 +878,20 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .evidence-item__more { margin-top: auto; padding-top: 10px; color: rgba(var(--card-rgb), .95); font-size: 11px; }
 .evidence-item__more i { font-style: normal; transition: transform .2s ease; }
 .evidence-item:hover .evidence-item__more i, .evidence-item.expanded .evidence-item__more i { transform: translateX(3px); }
-.evidence-item__list { position: absolute; z-index: 3; inset: auto 0 0 0; margin: 0; padding: 10px 12px; list-style: none; border-top: 1px solid rgba(var(--card-rgb), .3); background: linear-gradient(180deg, rgba(5, 14, 32, .96), rgba(8, 22, 48, .98)); }
+.evidence-item__list { position: relative; inset: auto; margin: 0; padding: 8px 2px 0; list-style: none; border-top: 1px solid rgba(var(--card-rgb), .3); }
 .evidence-item__list li { position: relative; padding: 4px 0 4px 13px; color: #c3dcea; font-size: 10.5px; line-height: 1.45; }
 .evidence-item__list li::before { content: ""; position: absolute; top: 9.5px; left: 0; width: 5px; height: 5px; border-radius: 1px; background: var(--card-color); box-shadow: 0 0 7px rgba(var(--card-rgb), .8); }
+.evidence-item__detail { position: absolute; z-index: 3; inset: auto 0 0 0; padding: 8px 12px 10px; background: linear-gradient(180deg, rgba(5, 14, 32, .96), rgba(8, 22, 48, .98)); }
+.evidence-item__go {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 5px 12px;
+  border: 1px solid rgba(var(--card-rgb), .65); border-radius: 999px;
+  background: rgba(var(--card-rgb), .14); color: var(--card-color);
+  font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .06em; cursor: pointer;
+  transition: .2s ease;
+}
+.evidence-item__go svg { width: 13px; fill: none; stroke: currentColor; stroke-width: 2; }
+.evidence-item__go:hover { background: rgba(var(--card-rgb), .3); box-shadow: 0 0 14px rgba(var(--card-rgb), .4); }
+.evidence-item__go:hover svg { transform: translateX(2px); }
 .ev-detail-enter-active, .ev-detail-leave-active { transition: opacity .22s ease, transform .22s ease; }
 .ev-detail-enter-from, .ev-detail-leave-to { opacity: 0; transform: translateY(8px); }
 
@@ -794,6 +966,19 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 .timeline-arrow svg { width: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
 .timeline-arrow:hover { border-color: #6ee2ff; color: #fff; box-shadow: 0 0 14px rgba(88, 210, 255, .4); }
 .timeline-arrow--prev { left: -6px; } .timeline-arrow--next { right: -6px; }
+
+/* 查看全部轨迹入口 */
+.timeline-all {
+  position: absolute; right: 0; bottom: -4px; z-index: 5;
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+  border: 1px solid rgba(110, 224, 255, .45); border-radius: 999px;
+  background: rgba(6, 24, 52, .85); color: #8fe6ff;
+  font: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; cursor: pointer;
+  transition: .2s ease;
+}
+.timeline-all svg { width: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
+.timeline-all:hover { border-color: #6ee2ff; color: #fff; box-shadow: 0 0 14px rgba(88, 210, 255, .4); }
+.timeline-all:hover svg { transform: translateX(2px); }
 
 /* ============ 提示 ============ */
 .profile-toast {

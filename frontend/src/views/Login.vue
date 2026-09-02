@@ -347,10 +347,20 @@ async function submitRegister() {
   perspective: 1100px;
 }
 
+/*
+ * 登录页封面背景去 logo（按用户要求：直接「拉长遮住」，底部不超不裁）：
+ *   translateY(-16%) 把顶部 16% 的挑战杯 logo/奖杯/标题行移出屏幕，
+ *   scaleY(1.16)  只拉长高度方向 16%（不改变宽度），
+ *   → 顶部裁 Logo，底部图谱同心圆底座完整保留。
+ *   父容器 overflow:hidden 负责裁切顶部超出部分。
+ *   公式保证：1.16 - 0.16 = 1.00（底部零超出）
+ */
 .bg-full-image {
   position: absolute;
   inset: 0;
   background: url('/login-bg.png') center center / cover no-repeat;
+  transform: translateY(-16%) scaleY(1.16);
+  transform-origin: center top;
 }
 
 .bg-overlay-gradient {
