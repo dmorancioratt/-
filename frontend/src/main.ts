@@ -1,0 +1,14 @@
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import '@vue-flow/core/dist/style.css'
+import '@vue-flow/controls/dist/style.css'
+import '@vue-flow/minimap/dist/style.css'
+import './styles.css'
+import './styles/dashboard.css'
+import './styles/theme-fixes.css'
+import App from './App.vue'
+import router from './router'
+
+createApp(App).use(createPinia()).use(router).use(ElementPlus).mount('#app')

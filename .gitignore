@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+.env
+.env.*
+!.env.example
+
+# SQLite runtime database (regenerated from seed on first run)
+backend/shurong_zhilian.db
+*.db
+
+# Dev logs
+*.log
+backend/devserver.*.log
+backend/qa-*.log
+frontend/qa-*.log
+
+# Generated evaluation reports (reproducible via `python -m app.evaluation.run_eval`)
+backend/app/evaluation/reports/
+backend/data/external/
+
+# RAG 运行时产物（faiss 索引 + BGE 模型缓存，~92MB，可通过 POST /api/rag/index 重建）
+backend/data/rag/
+/data/
+backend/data/rag_uploads/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/pnpm-lock.yaml
+frontend/pnpm-workspace.yaml
+*.tsbuildinfo
+frontend/output/
+frontend/.playwright-cli/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Local extraction / work dirs
+_work_shurong/
+_work_jobgraph/
+_extract/
+ez-tree-temp/
+tmp/
+
+# Local browser/visual QA artifacts
+growth-cockpit-*.png
+screenshot-edge.js
+take-screenshot.mjs
+
+# Local backup archives
+fightbei/
+
+# Accidental zip artifacts (misnamed by CLI flag parsing)
+--main.zip
+*.zip.orig
+
+# Browser screenshots / runtime temp
+frontend/shots/
+page-*.png
+student_overview.png
+
+# Scratch cockpit images
+frontend/public/cockpit-new-*.jpg
+

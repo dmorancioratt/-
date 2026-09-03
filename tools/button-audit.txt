@@ -1,0 +1,214 @@
+frontend/src/components/cockpit\ProfileInfoEditor.vue:18:          <el-button class="pie-save" type="primary" :loading="saving" :disabled="resetting" @click="saveProfile">保存修改</el-button>
+frontend/src/components/cockpit\ProfileInfoEditor.vue:19:          <el-button class="pie-reset" :loading="resetting" :disabled="saving" @click="resetProfile">重置画像</el-button>
+frontend/src/components/cockpit\ProfileInfoEditor.vue:77:          <div class="pie-avatar" @click="chooseAvatar" :title="profile.avatar_url ? '点击更换头像' : '点击上传头像'">
+frontend/src/components/cockpit\ProfileInfoEditor.vue:116:            <button v-for="item in missingTargetSkills.slice(0, 5)" :key="item" type="button" @click="addProfileValue('skills', item)">+ {{ item }}</button>
+frontend/src/components/cockpit\ProfileInfoEditor.vue:132:            <button v-for="item in targetCertificates.slice(0, 4)" :key="item.name" type="button" @click="addProfileValue('certificates', item.name)">+ {{ item.name }}</button>
+frontend/src/components/rag-flow\WorkflowToolbar.vue:16:      <el-button
+frontend/src/components/rag-flow\WorkflowToolbar.vue:19:        @click="store.openTestDialog('什么是 RAG 工作流？')"
+frontend/src/components/rag-flow\WorkflowToolbar.vue:24:      <el-button :icon="DocumentCopy" @click="onSave" :loading="store.saving">
+frontend/src/components/rag-flow\WorkflowToolbar.vue:28:      <el-button :icon="Upload" plain @click="onSave">
+frontend/src/components/rag-flow\WorkflowToolbar.vue:33:        <el-button circle :icon="MoreFilled" />
+frontend/src/components/cockpit\GrowthProfileMission.vue:16:          <button class="profile-back" type="button" @click="emit('close')">
+frontend/src/components/cockpit\GrowthProfileMission.vue:37:            <button class="profile-assist" type="button" @click="emit('assist')">
+frontend/src/components/cockpit\GrowthProfileMission.vue:79:                <button
+frontend/src/components/cockpit\GrowthProfileMission.vue:85:                  @click="removeTag(tag.label)"
+frontend/src/components/cockpit\GrowthProfileMission.vue:88:              <button class="tag-add" type="button" @click="addTag">
+frontend/src/components/cockpit\GrowthProfileMission.vue:101:                <button type="button" aria-label="复制数字身份ID" @click="copyIdentity">
+frontend/src/components/cockpit\GrowthProfileMission.vue:122:                <button
+frontend/src/components/cockpit\GrowthProfileMission.vue:129:                  @click="toggleEvidence(card.key)"
+frontend/src/components/cockpit\GrowthProfileMission.vue:183:            <button class="profile-cta" type="button" @click="openPersonalCenter">
+frontend/src/components/cockpit\GrowthProfileMission.vue:214:              <button class="timeline-arrow timeline-arrow--prev" type="button" aria-label="上一个节点" @click="stepTimeline(-1)">
+frontend/src/components/cockpit\GrowthProfileMission.vue:227:                @click="selectTimeline(index)"
+frontend/src/components/cockpit\GrowthProfileMission.vue:241:              <button class="timeline-arrow timeline-arrow--next" type="button" aria-label="下一个节点" @click="stepTimeline(1)">
+frontend/src/components/cockpit\GrowthCockpitScene.vue:52:    <button
+frontend/src/components/cockpit\GrowthCockpitScene.vue:57:      @click="frameTunerOpen = !frameTunerOpen"
+frontend/src/components/cockpit\GrowthCockpitScene.vue:105:        <button type="button" @click="resetFrameOptions">恢复默认</button>
+frontend/src/components/cockpit\GrowthCockpitScene.vue:106:        <button type="button" @click="copyFrameOptions">复制参数</button>
+frontend/src/components/cockpit\GrowthCockpitScene.vue:111:    <button
+frontend/src/components/cockpit\GrowthCockpitScene.vue:116:      @click="setEditorEnabled(!editorEnabled)"
+frontend/src/components/cockpit\GrowthCockpitScene.vue:129:        <button :class="{ active: editorMode === 'translate' }" type="button" @click="setEditorMode('translate')">移动 W</button>
+frontend/src/components/cockpit\GrowthCockpitScene.vue:130:        <button :class="{ active: editorMode === 'rotate' }" type="button" @click="setEditorMode('rotate')">旋转 E</button>
+frontend/src/components/cockpit\GrowthCockpitScene.vue:131:        <button :class="{ active: editorMode === 'scale' }" type="button" @click="setEditorMode('scale')">缩放 R</button>
+frontend/src/components/cockpit\GrowthCockpitScene.vue:156:          <button type="button" @click="resetSelectedModule">重置当前</button>
+frontend/src/components/cockpit\GrowthCockpitScene.vue:157:          <button type="button" @click="copyCurrentModule">复制当前配置</button>
+frontend/src/components/cockpit\GrowthCockpitScene.vue:173:      <button class="layout-editor__export" type="button" @click="exportAllLayouts">导出全部布局 JSON</button>
+frontend/src/components/cockpit\GrowthCabinImage.vue:6:      <button
+frontend/src/components/cockpit\GrowthCabinImage.vue:10:        @click="toggleFrameTuner"
+frontend/src/components/cockpit\GrowthCabinImage.vue:14:      <button
+frontend/src/components/cockpit\GrowthCabinImage.vue:18:        @click="toggleEditor"
+frontend/src/components/cockpit\GrowthCabinImage.vue:55:        <button type="button" @click="resetSelectedZone">恢复当前</button>
+frontend/src/components/cockpit\GrowthCabinImage.vue:56:        <button type="button" @click="copyZoneLayout">复制全部参数</button>
+frontend/src/components/cockpit\GrowthCabinImage.vue:63:      <button
+frontend/src/components/cockpit\GrowthCabinImage.vue:74:        @click="handleZoneClick(item)"
+frontend/src/components/rag-flow\RagEngineStatus.vue:7:      <el-button text size="small" @click="refresh" :loading="loading">
+frontend/src/components/cockpit\CockpitLeftPanel.vue:3:    <section class="cc-glass cc-panel cc-match cc-reveal"><div class="cc-panel-title"><h3>岗位匹配度</h3><span>↗</span></div><div class="cc-match-body"><div class="cc-ring"><div><strong>{{ match.score }}</strong><span>%</span><small>匹配度</small></div></div><div><small>目标岗位</small><h4>AI算法工程师</h4><button>重新评估</button></div></div><p class="cc-up">↑ 较上次提升 <b>+{{ match.change }}%</b></p></section>
+frontend/src/components/cockpit\CockpitLeftPanel.vue:5:    <section class="cc-glass cc-panel cc-jobs cc-reveal"><div class="cc-panel-title"><h3>推荐岗位</h3><a href="#road">更多 →</a></div><button v-for="job in jobs" :key="job.name" class="cc-job"><span>{{ job.rank }}</span><div><b>{{ job.name }}</b><small>{{ job.company }} · {{ job.salary }}</small></div><strong>{{ job.score }}<em>%</em></strong></button><button class="cc-all-jobs">查看全部岗位　→</button></section>
+frontend/src/components/cockpit\AchievementWallMission.vue:25:      <button class="wall-back" type="button" @click="emit('close')">
+frontend/src/components/cockpit\AchievementWallMission.vue:57:          <button
+frontend/src/components/cockpit\AchievementWallMission.vue:65:            @click="handleCarouselClick(itemIndex)"
+frontend/src/components/cockpit\AchievementWallMission.vue:95:          <button
+frontend/src/components/cockpit\AchievementWallMission.vue:103:            @click="activeCategory = cat"
+frontend/src/components/cockpit\AchievementWallMission.vue:108:          <button
+frontend/src/components/cockpit\AchievementWallMission.vue:115:            @click="selectAchievement(ach)"
+frontend/src/components/cockpit\AchievementWallMission.vue:136:            <button class="detail-card__close" type="button" aria-label="关闭详情" @click="detailAchievement = null">
+frontend/src/components/cockpit\AchievementWallMission.vue:167:              <button class="detail-btn detail-btn--primary" type="button" @click="shareAchievement">生成成就名片</button>
+frontend/src/components/cockpit\AchievementWallMission.vue:168:              <button class="detail-btn" type="button" @click="detailAchievement = null">关闭</button>
+frontend/src/components/rag-flow\NodeConfigDrawer.vue:9:        <el-button text circle size="small" @click="store.closeDrawer()" v-if="store.selectedNode">
+frontend/src/components/rag-flow\NodeConfigDrawer.vue:90:        <el-button type="danger" plain @click="onDelete">删除节点</el-button>
+frontend/src/components/rag-flow\NodeConfigDrawer.vue:111:        <el-button @click="store.closeTestDialog()">取消</el-button>
+frontend/src/components/rag-flow\NodeConfigDrawer.vue:112:        <el-button type="primary" :loading="store.runtime.running" :disabled="!store.configId" @click="onRunTest">
+frontend/src/components/rag-flow\NodeConfigDrawer.vue:145:        <el-button type="primary" @click="resultVisible = false">关闭</el-button>
+frontend/src/components/rag-flow\CloseLoopBar.vue:9:        <div class="loop-chip" :class="stepClass(s.key)" :title="stepMeta(s.key)" @click="onStepClick(s.key)">
+frontend/src/components/rag-flow\nodes\BaseNode.vue:5:    @click="handleClick"
+frontend/src/components/rag-flow\node-forms\RetrieveForm.vue:35:        <el-button text size="small" @click="filters.splice(i, 1)">
+frontend/src/components/rag-flow\node-forms\RetrieveForm.vue:40:    <el-button plain size="small" @click="addFilter">+ 添加过滤条件</el-button>
+frontend/src/views\SkillGraph.vue:41:        <el-button :class="{ 'radar-active': showRadar }" @click="showRadar = !showRadar">图谱结构雷达</el-button>
+frontend/src/views\SkillGraph.vue:42:        <el-button @click="resetView">重置视角</el-button>
+frontend/src/views\SkillGraph.vue:43:        <el-button type="primary" :loading="loading" @click="loadGraph">刷新图谱</el-button>
+frontend/src/views\SkillGraph.vue:74:                <button class="skill-radar-close" type="button" aria-label="关闭雷达图" @click="showRadar = false">×</button>
+frontend/src/views\SkillGraph.vue:106:              <el-button type="primary" @click="loadGraph">重新加载</el-button>
+frontend/src/views\SkillGraph.vue:155:            <button
+frontend/src/views\SkillGraph.vue:160:              @click="toggleCommunity(item.index)"
+frontend/src/views\SkillGraph.vue:182:          <el-button type="primary" :disabled="!pathFrom || !pathTo" :loading="pathLoading" class="path-button" @click="findPath">
+frontend/src/views\DigitalInterviewer.vue:11:        <el-button type="primary" plain @click="startNewInterview">新建面试</el-button>
+frontend/src/views\DigitalInterviewer.vue:26:          <button
+frontend/src/views\DigitalInterviewer.vue:32:            @click="loadInterviewSession(session.id)"
+frontend/src/views\DigitalInterviewer.vue:54:            <el-button v-if="currentSession.status !== 'completed'" :disabled="loading" @click="skipCurrentQuestion">换一题</el-button>
+frontend/src/views\DigitalInterviewer.vue:55:            <el-button v-if="currentSession.status !== 'completed'" :disabled="loading" @click="completeInterview">结束面试</el-button>
+frontend/src/views\DigitalInterviewer.vue:56:            <el-button v-else type="primary" @click="reportVisible = true">查看总评</el-button>
+frontend/src/views\DigitalInterviewer.vue:68:              @click="triggerResumeUpload"
+frontend/src/views\DigitalInterviewer.vue:77:              <el-button :loading="resumeParsing" @click.stop="triggerResumeUpload">选择文件</el-button>
+frontend/src/views\DigitalInterviewer.vue:92:              <el-button link type="primary" @click="useLastParsedResume">直接使用</el-button>
+frontend/src/views\DigitalInterviewer.vue:101:            <el-button type="primary" size="large" :loading="loading" :disabled="resumeParsing" @click="beginInterview">开始面试</el-button>
+frontend/src/views\DigitalInterviewer.vue:130:            <el-button @click="reportVisible = true">查看总评</el-button>
+frontend/src/views\DigitalInterviewer.vue:131:            <el-button type="primary" @click="resumeCompletedSession">继续这场面试</el-button>
+frontend/src/views\DigitalInterviewer.vue:150:              <el-button :disabled="loading" @click="candidateAnswer = ''">清空</el-button>
+frontend/src/views\DigitalInterviewer.vue:151:              <el-button :type="listening ? 'danger' : 'default'" :disabled="loading" @click="toggleVoiceConversation">
+frontend/src/views\DigitalInterviewer.vue:154:              <el-button type="primary" :loading="loading" @click="sendAnswer">发送回答</el-button>
+frontend/src/views\DigitalInterviewer.vue:168:              <el-button type="primary" :disabled="!virtualHumanConfigured" @click="connectDigitalHuman">连接数字人</el-button>
+frontend/src/views\DigitalInterviewer.vue:176:              <el-button class="stop-button" :loading="stopping" @click="stopDigitalHuman">停止连接</el-button>
+frontend/src/views\CapabilityEvolution.vue:8:      <el-button type="primary" :loading="loading" @click="loadAll">刷新数据</el-button>
+frontend/src/views\GrowthCockpit.vue:3:    <button v-if="!activePanel" class="exit-button" type="button" @click="router.push('/overview')">
+frontend/src/views\GrowthCockpit.vue:6:    <button v-if="!activePanel" class="refresh-button" type="button" :disabled="loading" @click="loadData">
+frontend/src/views\GrowthCockpit.vue:14:        <button type="button" title="返回驾驶舱" @click="activePanel = null"><el-icon><ArrowLeft /></el-icon></button>
+frontend/src/views\GrowthCockpit.vue:35:          <ActionButton label="进入岗位匹配" @click="router.push('/match-analysis')" />
+frontend/src/views\GrowthCockpit.vue:47:          <ActionButton :label="latestMatch ? '查看完整学习路径' : '先完成岗位匹配'" @click="goLearningPath" />
+frontend/src/views\GrowthCockpit.vue:67:          <ActionButton label="编辑账号资料" @click="router.push('/account-settings')" />
+frontend/src/views\GrowthCockpit.vue:78:          <ActionButton label="发起新的岗位分析" @click="router.push('/match-analysis')" />
+frontend/src/views\GrowthCockpit.vue:89:          <ActionButton label="进入学习路径" @click="goLearningPath" />
+frontend/src/views\GrowthCockpit.vue:97:          <ActionButton label="打开学习路径" @click="goLearningPath" />
+frontend/src/components/rag-flow\node-forms\KnowledgeBaseForm.vue:19:      <el-button text size="small" @click="refreshDocs" :loading="loading">刷新</el-button>
+frontend/src/components/rag-flow\node-forms\KnowledgeBaseForm.vue:37:          <el-button size="small" type="primary" plain :loading="chunkingId === row.id" @click="onChunk(row)" v-if="!row.indexed">
+frontend/src/components/rag-flow\node-forms\KnowledgeBaseForm.vue:40:          <el-button size="small" type="danger" plain :loading="deletingId === row.id" @click="onDelete(row)">
+frontend/src/views\Showcase.vue:20:        <button class="sc-enter" @click="goApp">进入系统<el-icon><ArrowRight /></el-icon></button>
+frontend/src/views\Showcase.vue:34:        <button class="sc-cta primary" @click="goApp">立即体验<el-icon><ArrowRight /></el-icon></button>
+frontend/src/views\Showcase.vue:35:        <button class="sc-cta ghost" @click="scrollTo('graph')">查看能力图谱</button>
+frontend/src/views\Showcase.vue:127:      <button class="sc-cta primary" @click="goApp">进入系统<el-icon><ArrowRight /></el-icon></button>
+frontend/src/views\Evaluation.vue:15:        <el-button size="small" type="primary" @click="loadMetrics">重新加载指标</el-button>
+frontend/src/views\Evaluation.vue:36:          <el-button size="small" type="primary" :loading="reportLoading" @click="loadReport">重新运行</el-button>
+frontend/src/views\MatchAnalysis.vue:6:        <el-button :loading="initializing" @click="loadBaseData">刷新数据</el-button>
+frontend/src/views\MatchAnalysis.vue:68:          <el-button type="primary" size="large" :loading="loading" :disabled="!canSubmit" @click="submit">
+frontend/src/views\MatchAnalysis.vue:83:          <button
+frontend/src/views\MatchAnalysis.vue:89:            @click="loadReport(item.report_id)"
+frontend/src/views\MatchAnalysis.vue:218:          <el-button type="primary" @click="goLearningPath">基于本报告生成学习路径</el-button>
+frontend/src/views\MatchAnalysis.vue:219:          <el-button @click="router.push('/personal-center')">补充个人画像</el-button>
+frontend/src/views\MatchAnalysis.vue:220:          <el-button @click="router.push('/digital-interviewer')">进入面试练习</el-button>
+frontend/src/views\HrCandidates.vue:41:            <el-button type="primary" link @click="current = row; visible = true">查看</el-button>
+frontend/src/views\Jobs.vue:56:        <el-button @click="resetFilters">重置筛选</el-button>
+frontend/src/views\Jobs.vue:85:            <el-button type="primary" link @click="openDetail(row)">详情</el-button>
+frontend/src/views\Jobs.vue:166:        <el-button @click="detailVisible = false">关闭</el-button>
+frontend/src/views\Jobs.vue:167:        <el-button @click="openGraph">在图谱中查看</el-button>
+frontend/src/views\Jobs.vue:168:        <el-button v-if="canEdit" @click="openEdit">人工优化</el-button>
+frontend/src/views\Jobs.vue:169:        <el-button type="primary" @click="startMatch">用于匹配分析</el-button>
+frontend/src/views\Jobs.vue:189:      <template #footer><el-button @click="editVisible = false">取消</el-button><el-button type="primary" :loading="saving" @click="saveJob">保存并生成新版本</el-button></template>
+frontend/src/views\AccountSettings.vue:15:        <el-button type="primary" :loading="savingAccount" @click="saveAccount">保存资料</el-button>
+frontend/src/views\AccountSettings.vue:25:        <el-button style="margin-top: 16px" type="primary" :loading="savingPassword" @click="changePassword">确认修改</el-button>
+frontend/src/views\LearningPath.vue:5:        <el-button @click="router.push('/match-analysis')">返回匹配分析</el-button>
+frontend/src/views\LearningPath.vue:6:        <el-button type="primary" :loading="loading" @click="regenerate">{{ path.length ? '重新生成路径' : '生成路径' }}</el-button>
+frontend/src/views\LearningPath.vue:56:            <button type="button" class="route-row" @click="activeStage = index">
+frontend/src/views\LearningPath.vue:77:        <el-button @click="router.push('/resume-parser')">更新简历</el-button>
+frontend/src/views\LearningPath.vue:78:        <el-button type="primary" @click="router.push('/digital-interviewer')">练习表达</el-button>
+frontend/src/views\Login.vue:49:            <button type="button" role="tab" :aria-selected="mode === 'login'" :class="{ active: mode === 'login' }" @click="mode = 'login'">
+frontend/src/views\Login.vue:57:            <button type="button" role="tab" :aria-selected="mode === 'register'" :class="{ active: mode === 'register' }" @click="mode = 'register'">
+frontend/src/views\Login.vue:83:                <button type="button" class="eye-toggle" @click="showPwd = !showPwd">
+frontend/src/views\Login.vue:101:              <button type="button" class="submit-button" :disabled="loading" @click="submitLogin">
+frontend/src/views\Login.vue:154:                  <button type="button" title="刷新验证码" aria-label="刷新验证码" :disabled="captchaLoading" @click="loadCaptcha">
+frontend/src/views\Login.vue:162:              <button type="button" class="submit-button" :disabled="loading" @click="submitRegister">
+frontend/src/views\ResumeParser.vue:5:        <el-button :disabled="!result" @click="copyToClipboard">复制解析摘要</el-button>
+frontend/src/views\ResumeParser.vue:6:        <el-button v-if="isCandidate" :disabled="!result" type="primary" :loading="syncing" @click="syncProfile">同步到个人画像</el-button>
+frontend/src/views\ResumeParser.vue:7:        <el-button type="primary" :loading="loading" @click="submit">{{ result ? '重新解析简历' : '解析简历' }}</el-button>
+frontend/src/views\ResumeParser.vue:115:            <el-button v-if="isCandidate" type="primary" :loading="syncing" @click="syncProfile">同步到个人画像</el-button>
+frontend/src/views\ResumeParser.vue:116:            <el-button @click="router.push('/match-analysis')">进入匹配分析</el-button>
+frontend/src/views\ResumeParser.vue:117:            <el-button @click="router.push('/learning-path')">查看学习路径</el-button>
+frontend/src/views\JdParser.vue:4:      <el-button type="primary" :loading="loading" @click="submit">{{ result ? '重新解析 JD' : '解析 JD' }}</el-button>
+frontend/src/views\JdParser.vue:42:        <el-button text :loading="historyLoading" @click="loadHistory">刷新</el-button>
+frontend/src/views\JdParser.vue:54:        <el-table-column label="操作" width="90"><template #default><el-button link type="primary">查看</el-button></template></el-table-column>
+frontend/src/views\Datasets.vue:7:          <el-button :icon="Upload" @click="importDialog = true">导入真实 JD</el-button>
+frontend/src/views\Datasets.vue:8:          <el-button type="primary" :icon="Refresh" :loading="syncing" @click="syncAll">同步全部权威源</el-button>
+frontend/src/views\Datasets.vue:31:        <el-button v-if="auth.role === 'admin'" type="primary" plain :icon="Upload" @click="importDialog = true">新建导入</el-button>
+frontend/src/views\Datasets.vue:58:            <el-button
+frontend/src/views\Datasets.vue:63:              @click="parseBatch(row)"
+frontend/src/views\Datasets.vue:82:            <button class="source-link" type="button" @click="openSource(row.source_url)">
+frontend/src/views\Datasets.vue:158:        <el-button @click="importDialog = false">取消</el-button>
+frontend/src/views\Datasets.vue:159:        <el-button type="primary" :loading="importing" @click="submitImport">校验并导入</el-button>
+frontend/src/views\ReviewTasks.vue:23:            <el-button size="small" type="success" :disabled="row.status !== 'pending'" @click="approve(row.id)">通过</el-button>
+frontend/src/views\ReviewTasks.vue:24:            <el-button size="small" type="danger" :disabled="row.status !== 'pending'" @click="reject(row.id)">驳回</el-button>
+frontend/src/views\PersonalCenter.vue:6:          <button class="profile-avatar" type="button" aria-label="更换头像" @click="chooseAvatar">
+frontend/src/views\PersonalCenter.vue:30:            <el-button class="profile-save-btn" type="primary" :loading="saving" :disabled="resetting" @click="saveProfile">保存修改</el-button>
+frontend/src/views\PersonalCenter.vue:31:            <el-button class="profile-reset-btn" :loading="resetting" :disabled="saving" @click="resetProfile">重置画像</el-button>
+frontend/src/views\PersonalCenter.vue:43:          <button type="button" @click="router.push('/resume-parser')">解析简历</button>
+frontend/src/views\PersonalCenter.vue:44:          <button type="button" @click="router.push('/match-analysis')">岗位匹配</button>
+frontend/src/views\PersonalCenter.vue:117:                <button v-for="item in missingTargetSkills.slice(0, 5)" :key="item" type="button" @click="addProfileValue('skills', item)">+ {{ item }}</button>
+frontend/src/views\PersonalCenter.vue:135:                <button v-for="item in targetCertificates.slice(0, 4)" :key="item.name" type="button" @click="addProfileValue('certificates', item.name)">+ {{ item.name }}</button>
+frontend/src/views\PersonalCenter.vue:168:        <button class="avatar-picker" type="button" @click="chooseAvatar">
+frontend/src/views\PersonalCenter.vue:186:            <el-button size="small" @click="chooseAvatar">更换头像</el-button>
+frontend/src/views\PersonalCenter.vue:187:            <el-button v-if="profile.avatar_url" size="small" text @click="profile.avatar_url = ''">移除</el-button>
+frontend/src/views\PersonalCenter.vue:208:          <el-button class="profile-save-btn" type="primary" :loading="saving" :disabled="resetting" @click="saveProfile">保存个人画像</el-button>
+frontend/src/views\PersonalCenter.vue:209:          <el-button class="profile-reset-btn" :loading="resetting" :disabled="saving" @click="resetProfile">一键重置</el-button>
+frontend/src/views\PersonalCenter.vue:237:      <button v-for="item in flowSteps" :key="item.path" type="button" class="profile-flow-card profile-glass-card" @click="router.push(item.path)">
+frontend/src/views\PersonalCenter.vue:285:          <el-button class="profile-secondary-btn" size="small" @click="focusBasicForm">编辑</el-button>
+frontend/src/views\PersonalCenter.vue:343:          <el-button class="profile-secondary-btn" size="small" @click="focusAbilityForm">编辑</el-button>
+frontend/src/views\PersonalCenter.vue:369:              <button v-for="item in missingTargetSkills.slice(0, 6)" :key="item" type="button" @click="addProfileValue('skills', item)">+ {{ item }}</button>
+frontend/src/views\PersonalCenter.vue:395:              <button v-for="item in targetCertificates" :key="item.name" type="button" @click="addProfileValue('certificates', item.name)">+ {{ item.name }}</button>
+frontend/src/views\EmergingJobs.vue:6:        <el-button :icon="Connection" :loading="validating" @click="runCrossValidation">交叉验证</el-button>
+frontend/src/views\EmergingJobs.vue:7:        <el-button type="primary" :loading="loading" @click="generate(true)">
+frontend/src/views\EmergingJobs.vue:78:            @click="selectCurrent(job)"
+frontend/src/views\EmergingJobs.vue:168:            <el-button :disabled="!current.job_id" @click="openGraph" size="small">能力图谱</el-button>
+frontend/src/views\EmergingJobs.vue:169:            <el-button type="primary" :disabled="!current.job_id" @click="startMatch" size="small">匹配分析</el-button>
+frontend/src/views\dashboards\AdminDataHub.vue:8:        <button type="button" @click="router.push('/overview')"><el-icon><HomeFilled /></el-icon>返回</button>
+frontend/src/views\dashboards\AdminDataHub.vue:9:        <button type="button" :disabled="loading" @click="loadData"><el-icon><Refresh /></el-icon>{{ loading ? '同步中' : '同步' }}</button>
+frontend/src/views\dashboards\AdminDataHub.vue:35:          <button class="panel-action" type="button" @click="router.push('/datasets')">进入数据源中心</button>
+frontend/src/views\dashboards\AdminDataHub.vue:67:          <button class="panel-action" type="button" @click="router.push('/review-tasks')">查看审核任务</button>
+frontend/src/views\dashboards\AdminDataHub.vue:100:          <button class="panel-action" type="button" @click="router.push('/settings')">查看系统设置</button>
+frontend/src/views\dashboards\AdminDashboard.vue:14:        <button class="cockpit-button" type="button" :disabled="refreshing" @click="refresh(true)"><el-icon><Refresh /></el-icon>{{ refreshing ? '更新中' : '更新数据' }}</button>
+frontend/src/views\dashboards\AdminDashboard.vue:25:      <button v-for="item in summaryItems" :key="item.label" type="button" @click="router.push(item.path)">
+frontend/src/views\dashboards\AdminDashboard.vue:38:            <button v-for="(item, index) in priorityItems" :key="item.title" type="button" @click="router.push(item.path)">
+frontend/src/views\dashboards\AdminDashboard.vue:48:          <div class="cockpit-panel__head"><div><div class="cockpit-panel__title">数据源质量与覆盖</div><p>质量低于 85 分的来源进入复核范围</p></div><button class="text-button" type="button" @click="router.push('/datasets')">管理全部来源</button></div>
+frontend/src/views\dashboards\AdminDashboard.vue:50:            <button v-for="source in model.datasets.slice(0, 6)" :key="source.id" type="button" @click="router.push('/datasets')">
+frontend/src/views\dashboards\AdminDashboard.vue:65:          <button class="panel-action" type="button" @click="router.push('/evaluation')">查看样本量与错误案例<el-icon><ArrowRight /></el-icon></button>
+frontend/src/views\dashboards\AdminDashboard.vue:76:          <button class="panel-action" type="button" @click="router.push('/settings')">配置模型与校验规则<el-icon><ArrowRight /></el-icon></button>
+frontend/src/views\dashboards\AdminDashboard.vue:85:          <button type="button" @click="router.push(step.path)"><span class="step-icon"><el-icon><component :is="step.icon" /></el-icon></span><b>{{ step.label }}</b><strong>{{ step.value }}</strong><small>{{ step.note }}</small></button>
+frontend/src/views\dashboards\CandidateDashboard.vue:31:        <button class="primary-action" type="button" @click="router.push('/match-analysis')">
+frontend/src/views\dashboards\CandidateDashboard.vue:53:        <button class="plain-link" type="button" @click="router.push('/capability-evolution')">查看能力图谱 <el-icon><ArrowRight /></el-icon></button>
+frontend/src/views\dashboards\CandidateDashboard.vue:57:          <button type="button" @click="router.push('/learning-path')">
+frontend/src/views\dashboards\CandidateDashboard.vue:73:      <button v-for="item in progressItems" :key="item.label" class="progress-card" type="button" @click="router.push(item.path)">
+frontend/src/views\dashboards\CandidateDashboard.vue:88:          <button v-for="(action, index) in nextActions" :key="action.title" type="button" @click="router.push(action.path)">
+frontend/src/views\dashboards\CandidateDashboard.vue:109:        <div class="panel-heading"><div><span class="section-kicker">PROFILE & EVIDENCE</span><h2>资料与证据</h2><p>完整资料让 AI 推荐更可信</p></div><button class="outline-button" type="button" @click="router.push('/personal-center')">完善资料</button></div>
+frontend/src/views\dashboards\CandidateDashboard.vue:117:          <button type="button" @click="router.push('/resume-parser')">{{ latestResume ? '查看简历' : '上传简历' }}</button>
+frontend/src/views\dashboards\CandidateDashboard.vue:122:        <div class="panel-heading"><div><span class="section-kicker">SKILL SIGNAL</span><h2>能力信号</h2><p>从总览进入完整的能力演化图谱</p></div><button class="outline-button" type="button" @click="router.push('/capability-evolution')">能力图谱</button></div>
+frontend/src/views\dashboards\CandidateDashboard.vue:124:          <button v-for="item in skillItems.slice(0, 8)" :key="item.name" type="button" :class="['skill-pill', item.status, { active: selectedSkill === item.name }]" @click="focusSkill(item.name)">
+frontend/src/views\dashboards\CandidateDashboard.vue:140:      <button type="button" :disabled="refreshing" @click="refresh(true)">
+frontend/src/views\dashboards\HrDashboard.vue:18:        <button class="refresh-btn" :class="{ 'is-spinning': refreshing }" @click="triggerDataRefresh">
+frontend/src/views\dashboards\HrDashboard.vue:33:        @click="goKpi(card)"
+frontend/src/views\dashboards\HrDashboard.vue:96:              <button class="action-row__btn" @click="goAction(action)">
+frontend/src/views\dashboards\HrDashboard.vue:243:            <button class="text-link" @click="goPath('/hr-candidates')">查看更多</button>
+frontend/src/views\dashboards\HrDashboard.vue:260:                <button class="talent-row__contact" @click="contactTalent(talent)">立即沟通</button>
+frontend/src/views\dashboards\HrDashboard.vue:308:            <button class="info-modal__btn" @click="closeModal">确定并关闭</button>
+frontend/src/views\dashboards\OverviewHr.vue:24:        <button type="button" @click="router.push(selectedJob ? '/jobs' : '/hr-candidates')">{{ selectedJob ? '查看岗位画像' : '进入候选人库' }}<el-icon><ArrowRight /></el-icon></button>
+frontend/src/views\dashboards\OverviewHr.vue:26:      <button v-for="item in decisionKpis" :key="item.label" type="button" @click="router.push(item.path)">
+frontend/src/views\dashboards\OverviewHr.vue:39:          <button v-for="skill in skillGap.slice(0, 3)" :key="skill.name" type="button" @click="router.push({ path: '/skill-graph', query: { keyword: skill.name } })">
+frontend/src/views\dashboards\OverviewHr.vue:47:        <div class="cockpit-panel__head"><div><div class="cockpit-panel__title">优先联系人才</div><p>{{ selectedJob ? '按必备技能覆盖率排序' : '按资料完整度与简历准备度排序' }}</p></div><button class="text-button" type="button" @click="router.push('/hr-candidates')">查看全部</button></div>
+frontend/src/views\dashboards\OverviewHr.vue:49:          <button v-for="(candidate, index) in rankedCandidates.slice(0, 5)" :key="candidate.user?.id || index" type="button" @click="router.push('/hr-candidates')">
+frontend/src/views\dashboards\OverviewHr.vue:64:          <button v-for="(action, index) in recruitmentActions" :key="action.title" type="button" @click="router.push(action.path)">
+frontend/src/views\dashboards\OverviewHr.vue:78:          <button v-for="item in model.emerging.slice(0, 4)" :key="item.job_name || item.name" type="button" @click="router.push('/emerging-jobs')">
+frontend/src/views\dashboards\OverviewHr.vue:93:      <button class="cockpit-button" type="button" :disabled="refreshing" @click="refresh(true)">

@@ -1,0 +1,5 @@
+{"id": "m_001", "top1_job": "大模型应用工程师", "top3_jobs": ["大模型应用工程师", "AI 智能体开发工程师", "智能体开发员"], "top1_score": 64.2, "focus_hits": ["大模型"], "scoring_version": "evidence-v2"}
+{"id": "m_002", "top1_job": "Java 开发工程师", "top3_jobs": ["Java 开发工程师", "软件质量保障工程师", "软件开发工程师"], "top1_score": 70.9, "focus_hits": ["java"], "scoring_version": "evidence-v2"}
+{"id": "m_003", "top1_job": "精算数据分析师", "top3_jobs": ["精算数据分析师", "信用数据分析师", "金融量化分析师"], "top1_score": 86.0, "focus_hits": ["数据分析"], "scoring_version": "evidence-v2"}
+{"id": "m_004", "top1_job": "前端开发工程师", "top3_jobs": ["前端开发工程师", "UI/UX 设计师", "遥感科学家"], "top1_score": 56.1, "focus_hits": ["前端"], "scoring_version": "evidence-v2"}
+{"id": "m_005", "top1_job": "DevOps 平台工程师", "top3_jobs": ["DevOps 平台工程师", "云计算架构师", "SRE 站点可靠性工程师"], "top1_score": 69.8, "focus_hits": ["devops"], "scoring_version": "evidence-v2"}

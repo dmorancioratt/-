@@ -1,0 +1,1911 @@
+:root {
+  /* ============================================================
+   *  Mission Calendar Blue-Cyan Theme (计划日历偏蓝青蓝风格)
+   *  主色：#52ddff (weekly-plan accent, 偏蓝青蓝去绿)
+   *  深主色：#0aa9b4 (accentSoft)；亮阶：#88ddff
+   *  背景：#0d3347 / #0f3b55 / #0b2c44 / #071f33 (深蓝青蓝渐变)
+   * ============================================================ */
+  /* 基础语义色（计划日历偏蓝青蓝基调，整体降饱和增蓝去绿） */
+  --primary: #52DDFF;
+  --primary-dark: #42B1CC;
+  --primary-soft: rgba(82, 221, 255, 0.68);
+  --cyan: #52ddff;
+  --cyan-soft: rgba(82, 180, 220, 0.48);
+  --green: #3ab6d4;
+  --orange: #f59e0b;
+  --bg: #000000;
+  --text: #d8eef5;
+  --muted: #6e96a8;
+  --border: rgba(82, 221, 255, 0.20);
+  --glass: rgba(8, 28, 46, 0.78);
+  --shadow: 0 18px 54px rgba(0, 0, 0, 0.42);
+  font-family: Inter, "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+  color: var(--text);
+
+  /* ===== Element Plus 全量主题色 (计划日历蓝青调 · 以 #52DDFF 为基色) ===== */
+  --el-color-primary: #52DDFF;
+  --el-color-primary-dark-2:  #42B1CC;  /* #52DDFF 混 20% 黑 */
+  --el-color-primary-light-3: #86E7FF;  /* 混 30% 白 (按下态) */
+  --el-color-primary-light-5: #A8EEFF;  /* 混 50% 白 (hover) */
+  --el-color-primary-light-7: #CBF5FF;
+  --el-color-primary-light-8: #DCF8FF;
+  --el-color-primary-light-9: #EEFBFF;
+
+  /* Success 蓝青调 (去绿转蓝青) */
+  --el-color-success: #3ab6d4;
+  --el-color-success-light-3: #6bc9df;
+  --el-color-success-light-5: #8cc8d8;
+  --el-color-success-light-7: #c6e4ee;
+  --el-color-success-light-8: #dceff5;
+  --el-color-success-light-9: #eff7fa;
+  --el-color-success-dark-2: #2e91aa;
+
+  /* Warning / Danger 保持橙红语义不动，保持信息对比度 */
+  --el-color-warning: #ffc048;
+  --el-color-warning-light-3: #ffd077;
+  --el-color-warning-light-5: #ffe0a6;
+  --el-color-warning-light-7: #ffefd0;
+  --el-color-warning-light-8: #fff6e3;
+  --el-color-warning-light-9: #fffbf1;
+  --el-color-warning-dark-2: #d19a35;
+
+  --el-color-danger:  #ff5d7d;
+  --el-color-danger-light-3: #ff879d;
+  --el-color-danger-light-5: #ffb1c0;
+  --el-color-danger-light-7: #ffdbe2;
+  --el-color-danger-light-8: #ffe9ee;
+  --el-color-danger-light-9: #fff4f6;
+  --el-color-danger-dark-2:  #d14762;
+
+  --el-color-info: #6e9cb5;
+  --el-color-info-light-3: #94b8ca;
+  --el-color-info-light-5: #bac9d1;
+  --el-color-info-light-7: #dfe7ec;
+  --el-color-info-light-8: #eceff2;
+  --el-color-info-light-9: #f6f8f9;
+  --el-color-info-dark-2: #5a7e93;
+
+  /* Element Plus 文本 / 背景 / 边框 统一深蓝青蓝系 */
+  --el-text-color-primary: #d8eef5;
+  --el-text-color-regular: #b4cfdb;
+  --el-text-color-secondary: #8aa7b6;
+  --el-text-color-placeholder: #607d8c;
+  --el-bg-color: #000000;
+  --el-bg-color-page: #000000;
+  --el-bg-color-overlay: #050505;
+  --el-disabled-bg-color: #050505;
+  --el-border-color: rgba(82, 221, 255, 0.15);
+  --el-border-color-light: rgba(82, 221, 255, 0.22);
+  --el-border-color-lighter: rgba(82, 221, 255, 0.28);
+  --el-border-color-extra-light: rgba(82, 221, 255, 0.36);
+  --el-fill-color: rgba(82, 221, 255, 0.05);
+  --el-fill-color-light: rgba(82, 221, 255, 0.09);
+  --el-fill-color-lighter: rgba(82, 221, 255, 0.13);
+  --el-fill-color-extra-light: rgba(82, 221, 255, 0.17);
+  --el-fill-color-blank: rgba(8, 28, 46, 0.72);
+  --el-mask-color: rgba(4, 16, 28, 0.84);
+  --el-disabled-text-color: #4e6e7e;
+  --el-disabled-border-color: rgba(82, 221, 255, 0.11);
+  /* 文字阴影发光减弱, 偏蓝青 */
+  --el-color-primary-text-shadow: 0 0 8px rgba(82, 221, 255, 0.36), 0 0 18px rgba(82, 221, 255, 0.17);
+}
+
+@property --sr-card-border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 0;
+  min-height: 100vh;
+  background: #000000;
+  background-attachment: fixed;
+  /* 防止某页全局锁滚动导致"下滑不了" —— 页面必须允许用户滚动浏览内容 */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+}
+
+body {
+  margin: 0;
+  min-width: 0;
+  min-height: 100vh;
+  background: #000000;
+  background-attachment: fixed;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  /* 同上，保证页面滚动条一直可用 */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+}
+
+body::before {
+  position: fixed;
+  z-index: -3;
+  inset: 0;
+  content: "";
+  opacity: 0.045;
+  background:
+    linear-gradient(rgba(20, 140, 150, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 140, 150, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+body::after {
+  display: none;
+}
+
+
+
+@keyframes pulseLine {
+  0%, 100% {
+    opacity: 0.26;
+  }
+
+  50% {
+    opacity: 0.72;
+  }
+}
+
+.app-header,
+.page-header,
+.panel,
+.metric-card,
+.profile-glass-card,
+.hero-card,
+.name-card,
+.intent-card,
+.score-card,
+.missing-card,
+.path-card,
+.formula-card,
+.tag-panel,
+.page-toolbar,
+.candidate-hero,
+.candidate-section,
+.detail-grid article,
+.experience-block,
+.resume-snippet,
+.workflow-item,
+.result-block,
+.score-panel,
+.radar-panel,
+.gap-panel,
+.evidence-panel,
+.ai-panel,
+.action-item,
+.todo-item,
+.side-block,
+.avatar-panel {
+  border-color: rgba(21, 197, 199, 0.26);
+  background:
+    linear-gradient(145deg, rgba(6, 38, 44, 0.74), rgba(3, 22, 26, 0.68)),
+    rgba(4, 30, 34, 0.66);
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.36);
+}
+
+.app-aside {
+  border-color: rgba(21, 197, 199, 0.24);
+  background:
+    radial-gradient(circle at 15% 8%, rgba(21, 197, 199, 0.14), transparent 28%),
+    linear-gradient(180deg, #02161a, #021014 52%, #01080b);
+}
+
+.brand-name,
+.header-title,
+.page-title,
+.panel h3,
+.panel h4,
+.metric-value,
+.section-title h4,
+.candidate-title-row h3,
+.detail-grid b {
+  color: #e3f7f8;
+}
+
+.header-desc,
+.brand-desc,
+.candidate-title-row p,
+.candidate-summary,
+.metric-label,
+.section-title span,
+.detail-grid article > span {
+  color: #78a2a7;
+}
+
+.el-table,
+.el-table__inner-wrapper,
+.el-table th.el-table__cell,
+.el-table tr,
+.el-table td.el-table__cell {
+  background-color: rgba(4, 22, 26, 0.82);
+  color: #c9edef;
+}
+
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner {
+  border-color: rgba(21, 197, 199, 0.30);
+  background-color: rgba(4, 22, 26, 0.74);
+  box-shadow: none;
+}
+
+.el-input__inner,
+.el-select__placeholder,
+.el-textarea__inner {
+  color: #c9edef;
+}
+
+/* ========== PersonalCenter / 个人中心页面深色覆盖 ========== */
+.profile-page::before {
+  background:
+    radial-gradient(circle at 82% 6%, rgba(21, 197, 199, 0.14), transparent 28%),
+    radial-gradient(circle at 18% 24%, rgba(15, 155, 157, 0.10), transparent 26%),
+    linear-gradient(180deg, #04161b 0%, #020c10 100%);
+}
+
+.profile-page::after {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(21, 197, 199, 0.05) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(90deg, rgba(21, 197, 199, 0.05) 0 1px, transparent 1px 36px);
+}
+
+.profile-page .profile-glass-card,
+.profile-page .profile-card,
+.profile-page .profile-section-card,
+.profile-page .profile-flow-card,
+.profile-page .profile-flow-summary,
+.profile-page .profile-status-card {
+  border-color: rgba(21, 197, 199, 0.30) !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(7, 158, 162, 0.07), transparent 30%),
+    linear-gradient(145deg, rgba(6, 40, 46, 0.74), rgba(3, 20, 24, 0.68)),
+    rgba(4, 28, 32, 0.66) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.38) !important;
+}
+
+.profile-page .profile-chip,
+.profile-page .certificate-chip {
+  border-color: rgba(82, 221, 255, 0.34) !important;
+  background: rgba(10, 56, 66, 0.72) !important;
+  color: #bff0f4 !important;
+}
+
+.profile-page .more-chip {
+  color: #34f0ff !important;
+}
+
+.profile-page .profile-secondary-btn {
+  border-color: rgba(82, 221, 255, 0.34) !important;
+  background: rgba(10, 56, 66, 0.62) !important;
+  color: #34f0ff !important;
+}
+
+.profile-page .section-head h3,
+.profile-page .experience-head h3,
+.profile-page .profile-status-card b,
+.profile-page .experience-item p {
+  color: #ecffff !important;
+}
+
+.profile-page .profile-flow-card b,
+.profile-page .profile-flow-card strong,
+.profile-page .profile-status-card strong {
+  color: #d2f2f5 !important;
+}
+
+.profile-page .profile-flow-summary h3 {
+  color: #ecffff;
+}
+
+.profile-page .profile-flow-summary p,
+.profile-page .experience-head p,
+.profile-page .profile-chip span,
+.profile-page .salary-range span,
+.profile-page .salary-range em,
+.profile-page .select-meta {
+  color: #86b0b5 !important;
+}
+
+.profile-page :deep(.experience-item),
+.profile-page .experience-item {
+  border-color: rgba(82, 221, 255, 0.3) !important;
+  background: rgba(8, 46, 54, 0.72) !important;
+  box-shadow: none !important;
+}
+
+.profile-page :deep(.experience-empty),
+.profile-page .experience-empty {
+  border-color: rgba(82, 221, 255, 0.28) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 243, 254, 0.08), transparent 42%),
+    rgba(6, 36, 42, 0.52) !important;
+}
+
+.profile-page :deep(.experience-empty p),
+.profile-page .experience-empty p {
+  color: #86b0b5 !important;
+}
+
+.profile-page :deep(.experience-remove-btn),
+.profile-page .experience-remove-btn {
+  border-color: rgba(220, 38, 38, 0.26) !important;
+  background: rgba(46, 16, 18, 0.7) !important;
+  color: #ff9999 !important;
+}
+
+.profile-page :deep(.el-form-item__label) {
+  color: #86b0b5 !important;
+}
+
+.profile-page :deep(.el-input__wrapper),
+.profile-page :deep(.el-select__wrapper),
+.profile-page :deep(.el-cascader .el-input__wrapper),
+.profile-page :deep(.el-textarea__inner) {
+  border-color: rgba(82, 221, 255, 0.3) !important;
+  background: rgba(6, 36, 42, 0.62) !important;
+}
+
+.profile-page :deep(.el-input__wrapper.is-focus),
+.profile-page :deep(.el-select__wrapper.is-focused),
+.profile-page :deep(.el-textarea__inner:focus) {
+  background: rgba(10, 56, 66, 0.78) !important;
+}
+
+.profile-page .experience-index {
+  background: linear-gradient(135deg, rgba(0, 243, 254, 0.22), rgba(82, 221, 255, 0.24)) !important;
+  color: #52ddff !important;
+}
+
+.profile-page .completion-panel > span {
+  color: #86b0b5;
+}
+
+/* ========== DigitalInterviewer / 数字人面试官页面深色覆盖 ========== */
+.digital-page .surface {
+  border-color: rgba(82, 221, 255, 0.36) !important;
+  background:
+    linear-gradient(145deg, rgba(10, 56, 66, 0.82), rgba(4, 26, 32, 0.74)),
+    rgba(6, 36, 42, 0.72) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.32) !important;
+}
+
+.digital-page .section-title h3,
+.digital-page .conversation-title h3,
+.digital-page .start-card h2,
+.digital-page .report-hero > div:last-child > b {
+  color: #ecffff !important;
+}
+
+.digital-page .section-title span,
+.digital-page .conversation-header p,
+.digital-page .history-item span,
+.digital-page .history-item small,
+.digital-page .history-empty,
+.digital-page .start-card p,
+.digital-page .input-state,
+.digital-page .resume-session-bar,
+.digital-page .score-list span,
+.digital-page .report-hero p,
+.digital-page .report-dimensions span,
+.digital-page .report-columns p,
+.digital-page .report-trend b,
+.digital-page .connection-empty,
+.digital-page .connection-loading,
+.digital-page .start-card label,
+.digital-page .resume-upload-copy span,
+.digital-page .recent-resume-row {
+  color: #86b0b5 !important;
+}
+
+.digital-page .history-item:hover {
+  background: rgba(8, 46, 54, 0.78) !important;
+}
+
+.digital-page .history-item.active {
+  border-color: rgba(0, 243, 254, 0.32) !important;
+  background: rgba(8, 86, 100, 0.42) !important;
+  box-shadow: inset 3px 0 #52ddff !important;
+}
+
+.digital-page .history-item strong,
+.digital-page .resume-upload-copy strong {
+  color: #d2f2f5 !important;
+}
+
+.digital-page .resume-upload-card {
+  border-color: rgba(82, 221, 255, 0.38) !important;
+  background: rgba(8, 46, 54, 0.72) !important;
+}
+
+.digital-page .resume-upload-card:hover {
+  background: rgba(14, 76, 90, 0.78) !important;
+}
+
+.digital-page .parsed-resume-status {
+  background: rgba(8, 60, 66, 0.7) !important;
+}
+
+.digital-page .parsed-resume-status span {
+  color: #34f0ff !important;
+}
+
+.digital-page .conversation-title span {
+  background: rgba(8, 86, 100, 0.56) !important;
+  color: #34f0ff !important;
+}
+
+.digital-page .composer {
+  border-top-color: rgba(82, 221, 255, 0.3) !important;
+  background: rgba(6, 36, 42, 0.62) !important;
+}
+
+.digital-page .avatar-stage {
+  background: linear-gradient(180deg, #041418, #0a2e36) !important;
+}
+
+.digital-page .interviewer-bubble {
+  border-color: rgba(82, 221, 255, 0.3) !important;
+  background: rgba(8, 46, 54, 0.8) !important;
+  color: #d2f2f5 !important;
+}
+
+.digital-page .chat-bubble {
+  color: #d2f2f5 !important;
+}
+
+.digital-page .candidate-mark {
+  background: rgba(0, 243, 254, 0.14) !important;
+  color: #34f0ff !important;
+}
+
+.digital-page .report-hero,
+.digital-page .final-score-mini {
+  background:
+    linear-gradient(135deg, rgba(8, 86, 100, 0.56), rgba(10, 56, 66, 0.54)) !important;
+}
+
+.digital-page .report-columns section {
+  background: rgba(10, 56, 66, 0.62) !important;
+}
+
+.digital-page .report-columns .improvement-section {
+  background: rgba(60, 44, 16, 0.56) !important;
+}
+
+.digital-page .report-columns h4 {
+  color: #8ee8cb !important;
+}
+
+.digital-page .report-columns .improvement-section h4 {
+  color: #ffcc66 !important;
+}
+
+.digital-page .final-score-mini strong,
+.digital-page .final-score-mini b,
+.digital-page .report-score strong,
+.digital-page .report-dimensions strong,
+.digital-page .score-list b {
+  color: #52ddff !important;
+}
+
+.digital-page .final-score-mini span,
+.digital-page .report-score span {
+  color: #8ef9ff !important;
+}
+
+.digital-page .report-trend {
+  border-top-color: rgba(82, 221, 255, 0.3) !important;
+}
+
+.digital-page .connection-badge {
+  background: rgba(10, 56, 66, 0.82) !important;
+  color: #34f0ff !important;
+}
+
+.digital-page .start-kicker {
+  color: #52ddff !important;
+}
+
+.digital-page .turn-feedback {
+  border-left-color: #34f0ff !important;
+}
+
+.digital-page .turn-feedback span {
+  color: #34f0ff !important;
+}
+
+.digital-page .turn-feedback p {
+  color: #86b0b5 !important;
+}
+
+/* ========== SkillGraph / 能力图谱页面深色覆盖（补充） ========== */
+.skill-graph-page .graph-overview__item {
+  border-color: rgba(82, 221, 255, 0.36) !important;
+  background:
+    linear-gradient(145deg, rgba(10, 56, 66, 0.82), rgba(4, 26, 32, 0.74)),
+    rgba(6, 36, 42, 0.72) !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.32) !important;
+}
+
+.skill-graph-page .graph-message {
+  background: rgba(6, 36, 42, 0.72) !important;
+}
+
+.skill-graph-page .detail-block p {
+  color: #d2f2f5 !important;
+}
+
+.skill-graph-page .path-node {
+  border-color: rgba(82, 221, 255, 0.3) !important;
+  background: rgba(8, 46, 54, 0.76) !important;
+  color: #bff0f4 !important;
+}
+
+.skill-graph-page .path-node.skill,
+.skill-graph-page .path-node.Skill {
+  border-color: rgba(0, 243, 254, 0.34) !important;
+  background: rgba(12, 78, 86, 0.72) !important;
+  color: #8ef9ff !important;
+}
+
+.skill-graph-page .graph-legend__item {
+  border-color: rgba(82, 221, 255, 0.32) !important;
+  background: rgba(8, 46, 54, 0.72) !important;
+  color: #86b0b5 !important;
+}
+
+@keyframes sheen {
+  from {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+
+  to {
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 1720px;
+  margin: 0 auto;
+}
+
+.page-header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 112px;
+  gap: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px 24px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(235, 246, 255, 0.7)),
+    rgba(255, 255, 255, 0.66);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px);
+}
+
+.page-header::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(6, 182, 212, 0.2), transparent 30%),
+    radial-gradient(circle at 88% 0%, rgba(37, 99, 235, 0.16), transparent 28%),
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.62), transparent);
+}
+
+.page-header::after {
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  width: 220px;
+  height: 3px;
+  content: "";
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--primary), var(--cyan), transparent);
+  box-shadow: 0 0 22px rgba(6, 182, 212, 0.48);
+}
+
+.page-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+.page-title {
+  position: relative;
+  margin: 0;
+  color: #071a3d;
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.page-title::before {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--cyan);
+  content: "SKILL GRAPH MODULE";
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.page-subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(248, 251, 255, 0.72)),
+    var(--glass);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px);
+  animation: ambientFloat 7.2s ease-in-out infinite;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, filter 220ms ease;
+}
+
+.panel::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(6, 182, 212, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent 35%);
+}
+
+.panel > * {
+  position: relative;
+  z-index: 2;
+}
+
+.panel:hover {
+  border-color: rgba(6, 182, 212, 0.42);
+  box-shadow: 0 22px 64px rgba(37, 99, 235, 0.16);
+  filter: saturate(1.03);
+  transform: translateY(-2px);
+}
+
+.panel h3,
+.panel h4 {
+  color: #0f2148;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.span-4 {
+  grid-column: span 4;
+}
+
+.span-5 {
+  grid-column: span 5;
+}
+
+.span-6 {
+  grid-column: span 6;
+}
+
+.span-7 {
+  grid-column: span 7;
+}
+
+.span-8 {
+  grid-column: span 8;
+}
+
+.span-12 {
+  grid-column: span 12;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 128px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(235, 246, 255, 0.78)),
+    rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 48px rgba(37, 99, 235, 0.1);
+  backdrop-filter: blur(18px);
+  animation: ambientFloat 7.6s ease-in-out infinite;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, filter 220ms ease;
+}
+
+.metric-card::before {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 44px;
+  height: 44px;
+  content: "";
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), transparent 34%),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(6, 182, 212, 0.78));
+  box-shadow: 0 0 28px rgba(6, 182, 212, 0.28);
+}
+
+.metric-card::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 0%, transparent 38%, rgba(255, 255, 255, 0.7) 48%, transparent 58%, transparent 100%);
+  transform: translateX(-120%) skewX(-18deg);
+}
+
+.metric-card:hover {
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 22px 64px rgba(37, 99, 235, 0.16);
+  transform: translateY(-3px);
+}
+
+.metric-card:hover::after {
+  animation: sheen 900ms ease;
+}
+
+.metric-label {
+  color: #53657e;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.metric-value {
+  margin-top: 14px;
+  color: #071a3d;
+  font-size: 31px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.metric-value::after {
+  display: block;
+  width: 54px;
+  height: 3px;
+  margin-top: 14px;
+  content: "";
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--primary), var(--cyan));
+  box-shadow: 0 0 18px rgba(6, 182, 212, 0.45);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chart {
+  width: 100%;
+  height: 320px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.el-button--primary {
+  --el-button-bg-color: var(--primary);
+  --el-button-border-color: var(--primary);
+  --el-button-hover-bg-color: #42B1CC;
+  --el-button-hover-border-color: #42B1CC;
+  --el-button-active-bg-color: #2F9DB7;
+  --el-button-active-border-color: #2F9DB7;
+  box-shadow: 0 14px 28px rgba(82, 221, 255, 0.30);
+  position: relative;
+  overflow: hidden;
+}
+
+.el-button {
+  border-radius: 14px;
+  font-weight: 800;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, filter 180ms ease;
+}
+
+.el-button:hover {
+  filter: saturate(1.06);
+  transform: translateY(-1px);
+}
+
+.el-button--primary::after {
+  position: absolute;
+  inset: -40% auto -40% -54%;
+  width: 42%;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.58), transparent);
+  transform: rotate(18deg);
+  animation: buttonGlowSweep 4.4s ease-in-out infinite;
+}
+
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 0 0 1px rgba(190, 213, 242, 0.85) inset;
+  transition: box-shadow 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.el-input__wrapper:hover,
+.el-textarea__inner:hover,
+.el-select__wrapper:hover {
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 0 0 1px rgba(82, 221, 255, 0.30) inset, 0 10px 24px rgba(82, 221, 255, 0.05);
+}
+
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused,
+.el-textarea__inner:focus {
+  box-shadow: 0 0 0 1px rgba(82, 221, 255, 0.38) inset, 0 0 0 4px rgba(82, 221, 255, 0.07), 0 14px 28px rgba(82, 221, 255, 0.07);
+  transform: translateY(-1px);
+}
+
+.el-table {
+  overflow: hidden;
+  border-radius: 16px;
+  background: transparent;
+  --el-table-header-bg-color: rgba(232, 242, 255, 0.88);
+  --el-table-tr-bg-color: rgba(255, 255, 255, 0.62);
+  --el-table-row-hover-bg-color: rgba(231, 251, 255, 0.9);
+  --el-table-border-color: rgba(190, 213, 242, 0.62);
+}
+
+.el-table__row {
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.el-table__row:hover {
+  box-shadow: inset 3px 0 0 rgba(10, 169, 180, 0.48), 0 10px 24px rgba(82, 221, 255, 0.05);
+  transform: translateX(2px);
+}
+
+.el-table th.el-table__cell {
+  color: #163263;
+  font-weight: 900;
+}
+
+.el-table .cell {
+  text-align: center;
+}
+
+.el-tag {
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.elite-badge {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 25px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 999px;
+  padding: 0 10px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    0 8px 18px rgba(10, 169, 180, 0.14);
+  transform: translateZ(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.elite-badge::before {
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  content: "";
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.9), transparent 20%),
+    linear-gradient(135deg, var(--badge-a), var(--badge-b) 54%, var(--badge-c));
+}
+
+.elite-badge::after {
+  position: absolute;
+  top: -36%;
+  bottom: -36%;
+  left: -58%;
+  width: 38%;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.78), transparent);
+  transform: rotate(18deg);
+  animation: eliteBadgeSheen 3.2s ease-in-out infinite;
+}
+
+.elite-badge:hover {
+  filter: saturate(1.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    0 10px 22px rgba(10, 169, 180, 0.20),
+    0 0 18px color-mix(in srgb, var(--badge-b) 48%, transparent);
+  transform: translateY(-1px);
+}
+
+.elite-badge-985 {
+  --badge-a: #ff5f6d;
+  --badge-b: #f59e0b;
+  --badge-c: #ffd166;
+}
+
+.elite-badge-211 {
+  --badge-a: #0aa9b4;
+  --badge-b: #0aa9b4;
+  --badge-c: #b9e5ff;
+}
+
+.elite-badge-double {
+  min-width: 68px;
+  --badge-a: #7c3aed;
+  --badge-b: #0aa9b4;
+  --badge-c: #52ddff;
+}
+
+@keyframes eliteBadgeSheen {
+  0%, 42% {
+    left: -58%;
+    opacity: 0;
+  }
+
+  52% {
+    opacity: 0.95;
+  }
+
+  72%, 100% {
+    left: 122%;
+    opacity: 0;
+  }
+}
+
+@keyframes ambientFloat {
+  0%,
+  100% {
+    box-shadow: var(--shadow);
+  }
+
+  50% {
+    box-shadow: 0 22px 64px rgba(10, 169, 180, 0.12);
+  }
+}
+
+@keyframes buttonGlowSweep {
+  0%,
+  58%,
+  100% {
+    left: -54%;
+    opacity: 0;
+  }
+
+  70% {
+    opacity: 0.75;
+  }
+
+  84% {
+    left: 112%;
+    opacity: 0;
+  }
+}
+
+@keyframes softEdgePulse {
+  0%,
+  100% {
+    border-color: rgba(113, 177, 255, 0.3);
+  }
+
+  50% {
+    border-color: rgba(6, 182, 212, 0.46);
+  }
+}
+
+.profile-glass-card,
+.hero-card,
+.name-card,
+.intent-card,
+.score-card,
+.missing-card,
+.path-card,
+.formula-card,
+.tag-panel,
+.page-toolbar {
+  animation: ambientFloat 7.4s ease-in-out infinite, softEdgePulse 5.8s ease-in-out infinite;
+}
+
+:where(
+  .profile-glass-card,
+  .hero-card,
+  .name-card,
+  .intent-card,
+  .score-card,
+  .missing-card,
+  .path-card,
+  .formula-card,
+  .tag-panel,
+  .page-toolbar,
+  .auth-card,
+  .workflow-panel,
+  .guard-panel,
+  .overview-hero,
+  .candidate-hero,
+  .candidate-section,
+  .detail-grid article,
+  .experience-block,
+  .resume-snippet,
+  .workflow-item,
+  .result-block,
+  .score-panel,
+  .radar-panel,
+  .gap-panel,
+  .evidence-panel,
+  .ai-panel,
+  .action-item,
+  .todo-item,
+  .side-block,
+  .avatar-panel
+) {
+  position: relative;
+  overflow: hidden;
+}
+
+:where(
+  .profile-glass-card,
+  .hero-card,
+  .name-card,
+  .intent-card,
+  .score-card,
+  .missing-card,
+  .path-card,
+  .formula-card,
+  .tag-panel,
+  .page-toolbar,
+  .auth-card,
+  .workflow-panel,
+  .guard-panel,
+  .overview-hero,
+  .candidate-hero,
+  .candidate-section,
+  .detail-grid article,
+  .experience-block,
+  .resume-snippet,
+  .workflow-item,
+  .result-block,
+  .score-panel,
+  .radar-panel,
+  .gap-panel,
+  .evidence-panel,
+  .ai-panel,
+  .action-item,
+  .todo-item,
+  .side-block,
+  .avatar-panel
+) > * {
+  position: relative;
+  z-index: 2;
+}
+
+:where(
+  .profile-glass-card,
+  .hero-card,
+  .name-card,
+  .intent-card,
+  .score-card,
+  .missing-card,
+  .path-card,
+  .formula-card,
+  .tag-panel,
+  .page-toolbar,
+  .auth-card,
+  .workflow-panel,
+  .guard-panel,
+  .overview-hero,
+  .candidate-hero,
+  .candidate-section,
+  .detail-grid article,
+  .experience-block,
+  .resume-snippet,
+  .workflow-item,
+  .result-block,
+  .score-panel,
+  .radar-panel,
+  .gap-panel,
+  .evidence-panel,
+  .ai-panel,
+  .action-item,
+  .todo-item,
+  .avatar-panel
+)::before,
+.panel::after,
+.metric-card::after {
+  --sr-card-border-angle: 0deg;
+
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: "";
+  padding: 2.2px;
+  border-radius: inherit;
+  background:
+    conic-gradient(
+      from var(--sr-card-border-angle),
+      transparent 0deg,
+      transparent 16deg,
+      rgba(0, 200, 245, 0.08) 26deg,
+      rgba(77, 245, 255, 0.58) 36deg,
+      rgba(255, 255, 255, 0.9) 43deg,
+      rgba(30, 123, 255, 0.62) 51deg,
+      rgba(124, 58, 237, 0.22) 60deg,
+      transparent 72deg,
+      transparent 188deg,
+      rgba(0, 200, 245, 0.08) 198deg,
+      rgba(77, 245, 255, 0.52) 208deg,
+      rgba(255, 255, 255, 0.82) 215deg,
+      rgba(30, 123, 255, 0.56) 224deg,
+      rgba(124, 58, 237, 0.2) 234deg,
+      transparent 248deg,
+      transparent 360deg
+    );
+  opacity: 0.58;
+  filter:
+    drop-shadow(0 0 7px rgba(0, 200, 245, 0.42))
+    drop-shadow(0 0 13px rgba(30, 123, 255, 0.25));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  transform: none;
+  animation: srCardBorderSpin 9.5s linear infinite;
+}
+
+:where(
+  .profile-glass-card,
+  .hero-card,
+  .name-card,
+  .intent-card,
+  .score-card,
+  .missing-card,
+  .path-card,
+  .formula-card,
+  .tag-panel,
+  .page-toolbar,
+  .auth-card,
+  .workflow-panel,
+  .guard-panel,
+  .overview-hero,
+  .candidate-hero,
+  .candidate-section,
+  .detail-grid article,
+  .experience-block,
+  .resume-snippet,
+  .workflow-item,
+  .result-block,
+  .score-panel,
+  .radar-panel,
+  .gap-panel,
+  .evidence-panel,
+  .ai-panel,
+  .action-item,
+  .todo-item,
+  .avatar-panel
+):hover::before,
+.panel:hover::after,
+.metric-card:hover::after {
+  opacity: 0.72;
+}
+
+.metric-card:hover::after {
+  animation: srCardBorderSpin 9.5s linear infinite;
+}
+
+@keyframes srCardBorderSpin {
+  to {
+    --sr-card-border-angle: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.el-progress-bar__outer {
+  background-color: rgba(190, 213, 242, 0.48);
+}
+
+.el-progress-bar__inner {
+  background: linear-gradient(90deg, var(--primary), var(--cyan));
+}
+
+.el-alert {
+  border-radius: 16px;
+  border: 1px solid rgba(190, 213, 242, 0.72);
+  background: rgba(232, 242, 255, 0.7);
+}
+
+.tech-dialog.el-dialog {
+  overflow: hidden;
+  border: 1px solid rgba(190, 213, 242, 0.9);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(6, 182, 212, 0.16), transparent 28%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(238, 247, 255, 0.88));
+  box-shadow: 0 28px 90px rgba(15, 47, 120, 0.24);
+  backdrop-filter: blur(24px);
+}
+
+.tech-dialog .el-dialog__header {
+  margin: 0;
+  padding: 22px 24px 14px;
+}
+
+.tech-dialog .el-dialog__body {
+  padding: 10px 24px 20px;
+}
+
+.tech-dialog .el-dialog__footer {
+  border-top: 1px solid rgba(190, 213, 242, 0.7);
+  padding: 15px 24px 20px;
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.el-overlay {
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 1100px) {
+  html,
+  body {
+    min-width: 0;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .span-4,
+  .span-5,
+  .span-6,
+  .span-7,
+  .span-8 {
+    grid-column: span 12;
+  }
+}
+
+/* Glass cards for the logged-in animated workspace background. */
+body:not(.login-active) .app-main :is(
+  .page-header,
+  .panel,
+  .metric-card,
+  .overview-hero,
+  .overview-metric,
+  .workflow-step,
+  .profile-glass-card,
+  .hero-card,
+  .name-card,
+  .intent-card,
+  .score-card,
+  .missing-card,
+  .path-card,
+  .formula-card,
+  .tag-panel,
+  .page-toolbar,
+  .candidate-hero,
+  .candidate-section,
+  .detail-grid article,
+  .experience-block,
+  .resume-snippet,
+  .workflow-item,
+  .result-block,
+  .score-panel,
+  .radar-panel,
+  .gap-panel,
+  .evidence-panel,
+  .ai-panel,
+  .action-item,
+  .todo-item,
+  .side-block,
+  .avatar-panel,
+  .el-card
+) {
+  border-color: rgba(110, 220, 255, 0.32) !important;
+  background:
+    linear-gradient(135deg, rgba(13, 51, 104, 0.24), rgba(4, 18, 54, 0.07)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(191, 246, 255, 0.1),
+    0 18px 48px rgba(0, 4, 22, 0.24) !important;
+  backdrop-filter: blur(0.5px) saturate(1.04);
+}
+
+body:not(.login-active) .app-main :is(
+  .graph-status > div,
+  .task-list button,
+  .workflow-step,
+  .el-table,
+  .el-table__inner-wrapper,
+  .el-table th.el-table__cell,
+  .el-table tr,
+  .el-table td.el-table__cell
+) {
+  border-color: rgba(110, 220, 255, 0.26) !important;
+  background: rgba(6, 31, 77, 0.14) !important;
+  backdrop-filter: blur(0.5px);
+}
+
+body:not(.login-active) .app-main :is(
+  .page-title,
+  .panel h1,
+  .panel h2,
+  .panel h3,
+  .panel h4,
+  .metric-value,
+  .overview-hero h1,
+  .overview-metric strong,
+  .workflow-step b,
+  .graph-status b,
+  .quality-item b,
+  .candidate-title-row h3,
+  .detail-grid b,
+  .section-title h4
+) {
+  color: #effbff !important;
+}
+
+body:not(.login-active) .app-main :is(
+  .page-subtitle,
+  .panel-heading p,
+  .overview-hero p,
+  .overview-metric small,
+  .workflow-step small,
+  .metric-label,
+  .metric-top,
+  .quality-item > div,
+  .graph-status span,
+  .task-list small,
+  .candidate-summary,
+  .candidate-title-row p,
+  .detail-grid article > span,
+  .section-title span
+) {
+  color: #b8d9f1 !important;
+}
+
+body:not(.login-active) .app-main .hero-kicker {
+  border-color: rgba(103, 230, 255, 0.38) !important;
+  background: rgba(15, 128, 189, 0.22) !important;
+  color: #9cf4ff !important;
+}
+
+body:not(.login-active) .app-main .overview-metric:hover,
+body:not(.login-active) .app-main .workflow-step:hover,
+body:not(.login-active) .app-main .task-list button:hover {
+  border-color: rgba(123, 239, 255, 0.7) !important;
+  background: rgba(16, 110, 174, 0.34) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(210, 251, 255, 0.16),
+    0 22px 58px rgba(0, 136, 255, 0.2) !important;
+}
+
+body:not(.login-active) .app-main :is(
+  .el-input__wrapper,
+  .el-select__wrapper,
+  .el-textarea__inner
+) {
+  border-color: rgba(111, 219, 255, 0.3) !important;
+  background: rgba(3, 20, 58, 0.42) !important;
+  color: #ecf9ff !important;
+  box-shadow: inset 0 0 0 1px rgba(112, 215, 255, 0.08) !important;
+}
+
+body:not(.login-active) .app-main :is(
+  .el-input__inner,
+  .el-textarea__inner,
+  .el-select__selected-item,
+  .el-select__placeholder
+) {
+  color: #eaf8ff !important;
+}
+
+/* Remove white gloss from every workspace card and keep a single blue-cyan system. */
+body:not(.login-active) .app-main :is(
+  .page-header,
+  .panel,
+  .metric-card,
+  .overview-hero,
+  .overview-metric,
+  .workflow-step,
+  .profile-glass-card,
+  .hero-card,
+  .name-card,
+  .intent-card,
+  .score-card,
+  .missing-card,
+  .path-card,
+  .formula-card,
+  .tag-panel,
+  .page-toolbar,
+  .candidate-hero,
+  .candidate-section,
+  .detail-grid article,
+  .experience-block,
+  .resume-snippet,
+  .workflow-item,
+  .result-block,
+  .score-panel,
+  .radar-panel,
+  .gap-panel,
+  .evidence-panel,
+  .ai-panel,
+  .action-item,
+  .todo-item,
+  .side-block,
+  .avatar-panel,
+  .el-card
+) {
+  box-shadow: 0 18px 48px rgba(0, 4, 22, 0.24) !important;
+}
+
+body:not(.login-active) .app-main .panel::before {
+  background: radial-gradient(circle at 8% 0%, rgba(42, 207, 255, 0.12), transparent 30%) !important;
+}
+
+body:not(.login-active) .app-main :is(
+  .profile-glass-card,
+  .hero-card,
+  .name-card,
+  .intent-card,
+  .score-card,
+  .missing-card,
+  .path-card,
+  .formula-card,
+  .tag-panel,
+  .page-toolbar,
+  .auth-card,
+  .workflow-panel,
+  .guard-panel,
+  .overview-hero,
+  .candidate-hero,
+  .candidate-section,
+  .detail-grid article,
+  .experience-block,
+  .resume-snippet,
+  .workflow-item,
+  .result-block,
+  .score-panel,
+  .radar-panel,
+  .gap-panel,
+  .evidence-panel,
+  .ai-panel,
+  .action-item,
+  .todo-item,
+  .avatar-panel
+)::before,
+body:not(.login-active) .app-main :is(.panel, .metric-card)::after {
+  background: conic-gradient(
+    from var(--sr-card-border-angle),
+    transparent 0deg,
+    transparent 16deg,
+    rgba(0, 200, 245, 0.08) 26deg,
+    rgba(77, 245, 255, 0.52) 36deg,
+    rgba(71, 194, 255, 0.56) 43deg,
+    rgba(30, 123, 255, 0.62) 51deg,
+    transparent 72deg,
+    transparent 188deg,
+    rgba(0, 200, 245, 0.08) 198deg,
+    rgba(77, 245, 255, 0.46) 208deg,
+    rgba(71, 194, 255, 0.5) 215deg,
+    rgba(30, 123, 255, 0.56) 224deg,
+    transparent 248deg,
+    transparent 360deg
+  ) !important;
+}
+
+body:not(.login-active) .app-main .el-tag {
+  border-color: rgba(81, 211, 255, 0.34) !important;
+  color: #aeeeff !important;
+  background: rgba(7, 50, 104, 0.78) !important;
+}
+
+body:not(.login-active) .app-main .el-tag--success {
+  border-color: rgba(93, 230, 180, 0.38) !important;
+  color: #7ff0c3 !important;
+  background: rgba(8, 88, 85, 0.62) !important;
+}
+
+body:not(.login-active) .app-main .el-tag--warning {
+  border-color: rgba(255, 190, 91, 0.4) !important;
+  color: #ffd08a !important;
+  background: rgba(108, 65, 14, 0.62) !important;
+}
+
+body:not(.login-active) .app-main .el-button:not(.el-button--primary) {
+  border-color: rgba(86, 207, 255, 0.38) !important;
+  color: #c9f2ff !important;
+  background: rgba(6, 48, 106, 0.78) !important;
+}
+
+body:not(.login-active) .app-main .el-button:not(.el-button--primary):hover {
+  border-color: rgba(112, 232, 255, 0.68) !important;
+  color: #f0fdff !important;
+  background: rgba(16, 106, 177, 0.78) !important;
+}
+
+/* Keep all content readable against the deep-blue workspace background. */
+body:not(.login-active) .app-main {
+  color: #d9f3ff;
+}
+
+body:not(.login-active) .app-main :is(
+  .panel,
+  .metric-card,
+  .page-header,
+  .overview-hero,
+  .workflow-step,
+  .el-card
+) :is(p, span, li, dt, dd, label) {
+  color: #ccecff;
+}
+
+body:not(.login-active) .app-main :is(
+  .panel,
+  .metric-card,
+  .page-header,
+  .overview-hero,
+  .workflow-step,
+  .el-card
+) :is(h1, h2, h3, h4, h5, strong, b) {
+  color: #f1fcff;
+}
+
+body:not(.login-active) .app-main .el-table {
+  --el-table-text-color: #d9f3ff;
+  --el-table-header-text-color: #b9efff;
+  --el-table-row-hover-text-color: #f3fdff;
+}
+
+body:not(.login-active) .app-main :is(.el-table th.el-table__cell, .el-table th.el-table__cell .cell) {
+  color: #b9efff !important;
+  font-weight: 800;
+}
+
+body:not(.login-active) .app-main :is(.el-table td.el-table__cell, .el-table td.el-table__cell .cell) {
+  color: #d9f3ff !important;
+}
+
+body:not(.login-active) .app-main :is(
+  .el-select__selected-item,
+  .el-select__placeholder,
+  .el-input__inner,
+  .el-textarea__inner
+) {
+  color: #e9f9ff !important;
+}
+
+/* ============================================================
+ *  Skill Graph page — force deep-blue glassmorphism (no grey)
+ * ============================================================ */
+
+.skill-graph-page .graph-overview__item {
+  border-color: rgba(10, 169, 180, 0.4) !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.14), transparent 36%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.8)),
+    rgba(14, 34, 72, 0.8) !important;
+  box-shadow:
+    0 0 0 1px rgba(10, 169, 180, 0.16) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+.skill-graph-page .graph-overview strong {
+  color: #7fc8ff !important;
+  text-shadow: 0 0 18px rgba(89, 166, 255, 0.35);
+}
+
+.skill-graph-page .graph-overview span {
+  color: #9db3cf !important;
+}
+
+.skill-graph-page .selected-node {
+  border-color: rgba(10, 169, 180, 0.42) !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(0, 200, 245, 0.14), transparent 40%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.9), rgba(10, 28, 62, 0.82)),
+    rgba(14, 34, 72, 0.82) !important;
+  box-shadow:
+    0 0 0 1px rgba(10, 169, 180, 0.18) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+.skill-graph-page .selected-node h3 {
+  color: #e8f2ff !important;
+}
+
+.skill-graph-page .detail-heading {
+  color: #e8f2ff !important;
+}
+
+.skill-graph-page .detail-block span,
+.skill-graph-page .community-count,
+.skill-graph-page .path-shared span {
+  color: #9db3cf !important;
+}
+
+.skill-graph-page .detail-block p {
+  color: #d8e8ff !important;
+}
+
+.skill-graph-page .community-row {
+  border-color: rgba(10, 169, 180, 0.34) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(79, 234, 255, 0.10), transparent 40%),
+    linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.78)),
+    rgba(12, 30, 66, 0.8) !important;
+  color: #e8f2ff !important;
+  box-shadow:
+    0 0 0 1px rgba(10, 169, 180, 0.14) inset !important;
+}
+
+.skill-graph-page .community-row:hover,
+.skill-graph-page .community-row.active {
+  border-color: rgba(0, 214, 255, 0.58) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 214, 255, 0.24), transparent 42%),
+    linear-gradient(145deg, rgba(24, 72, 138, 0.92), rgba(14, 44, 92, 0.84)),
+    rgba(18, 56, 112, 0.86) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 214, 255, 0.24) inset,
+    0 14px 40px rgba(0, 120, 220, 0.24) !important;
+}
+
+.skill-graph-page .community-bar {
+  background: rgba(70, 110, 170, 0.3) !important;
+  box-shadow: inset 0 0 0 1px rgba(10, 169, 180, 0.2) !important;
+}
+
+.skill-graph-page .path-node {
+  border-color: rgba(10, 169, 180, 0.42) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.14), transparent 40%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.9), rgba(10, 28, 62, 0.82)),
+    rgba(14, 34, 72, 0.82) !important;
+  color: #d8e8ff !important;
+}
+
+.skill-graph-page .path-node.skill,
+.skill-graph-page .path-node.Skill {
+  border-color: rgba(0, 214, 255, 0.5) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(0, 214, 255, 0.22), transparent 40%),
+    linear-gradient(145deg, rgba(12, 70, 118, 0.9), rgba(8, 40, 78, 0.82)),
+    rgba(10, 50, 96, 0.82) !important;
+  color: #bef3ff !important;
+}
+
+.skill-graph-page .path-shared .el-tag {
+  border-color: rgba(0, 214, 255, 0.38) !important;
+  background:
+    linear-gradient(145deg, rgba(12, 70, 118, 0.76), rgba(8, 40, 78, 0.7)),
+    rgba(10, 50, 96, 0.68) !important;
+  color: #bef3ff !important;
+}
+
+.skill-graph-page .graph-legend__item {
+  border-color: rgba(10, 169, 180, 0.38) !important;
+  background:
+    linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.76)),
+    rgba(12, 30, 66, 0.78) !important;
+  color: #9db3cf !important;
+}
+
+.skill-graph-page .graph-message {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.12), transparent 30%),
+    linear-gradient(145deg, rgba(18, 38, 78, 0.9), rgba(8, 22, 48, 0.84)),
+    rgba(12, 28, 58, 0.82) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+/* ============================================================
+ *  Evaluation page — force deep-blue glassmorphism (no grey)
+ * ============================================================ */
+
+.eval-page .metric-card {
+  border-color: rgba(10, 169, 180, 0.4) !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 200, 245, 0.14), transparent 36%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.8)),
+    rgba(14, 34, 72, 0.8) !important;
+  box-shadow:
+    0 0 0 1px rgba(10, 169, 180, 0.16) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+.eval-page .metric-card .metric-label {
+  color: #9db3cf !important;
+}
+
+.eval-page .metric-card .metric-value {
+  color: #7fc8ff !important;
+  text-shadow: 0 0 18px rgba(89, 166, 255, 0.35);
+}
+
+.eval-page .panel,
+.eval-page .report-panel {
+  border-color: rgba(10, 169, 180, 0.38) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 200, 245, 0.12), transparent 30%),
+    linear-gradient(145deg, rgba(18, 38, 78, 0.86), rgba(8, 22, 48, 0.78)),
+    rgba(12, 28, 58, 0.76) !important;
+  box-shadow:
+    0 0 0 1px rgba(10, 169, 180, 0.16) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+}
+
+.eval-page .panel-title-row,
+.eval-page .report-title,
+.eval-page .error-block__head {
+  color: #e8f2ff !important;
+}
+
+.eval-page .report-head small {
+  color: #9db3cf !important;
+}
+
+.eval-page .report-cmd code {
+  border-color: rgba(82, 221, 255, 0.28) !important;
+  background:
+    linear-gradient(145deg, rgba(12, 56, 106, 0.82), rgba(8, 34, 72, 0.76)),
+    rgba(10, 44, 88, 0.78) !important;
+  color: #8ee2ff !important;
+}
+
+.eval-page .report-card {
+  border-color: color-mix(in srgb, var(--c, #0aa9b4) 48%, rgba(10, 169, 180, 0.4)) !important;
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--c, #0aa9b4) 28%, transparent), transparent 36%),
+    linear-gradient(145deg, rgba(22, 48, 98, 0.88), rgba(10, 28, 62, 0.82)),
+    rgba(14, 34, 72, 0.82) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--c, #0aa9b4) 24%, rgba(10, 169, 180, 0.16)) inset,
+    0 18px 54px rgba(0, 0, 0, 0.28) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.eval-page .report-card::before {
+  opacity: 0.56 !important;
+  filter: blur(46px) !important;
+}
+
+.eval-page .report-card__name {
+  color: #e8f2ff !important;
+}
+
+.eval-page .score-num {
+  filter: brightness(1.28) saturate(1.35);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--c, #0aa9b4) 60%, transparent);
+}
+
+.eval-page .score-lbl,
+.eval-page .prf-label,
+.eval-page .error-id {
+  color: #9db3cf !important;
+}
+
+.eval-page .prf-val,
+.eval-page .err-detail {
+  color: #d8e8ff !important;
+}
+
+.eval-page .prf-bar {
+  background: rgba(85, 150, 160, 0.28) !important;
+  box-shadow: inset 0 0 0 1px rgba(10, 169, 180, 0.22) !important;
+}
+
+.eval-page .prf-bar i {
+  filter: brightness(1.22) saturate(1.28);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--c, #0aa9b4) 62%, transparent);
+}
+
+.eval-page .error-item {
+  border-color: rgba(10, 169, 180, 0.34) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(79, 234, 255, 0.10), transparent 40%),
+    linear-gradient(145deg, rgba(20, 44, 90, 0.86), rgba(10, 26, 58, 0.78)),
+    rgba(12, 30, 66, 0.8) !important;
+  box-shadow:
+    0 0 0 1px rgba(10, 169, 180, 0.14) inset !important;
+}
+
+.eval-page .el-table {
+  background: transparent !important;
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --el-table-header-bg-color: transparent !important;
+  --el-table-row-hover-bg-color: rgba(30, 123, 255, 0.08) !important;
+  --el-table-border-color: rgba(10, 169, 180, 0.24) !important;
+  color: #d8e8ff !important;
+}
+
+.eval-page .el-table th.el-table__cell {
+  background: rgba(20, 44, 90, 0.56) !important;
+  color: #e8f2ff !important;
+}
+
+.eval-page .el-table tr {
+  background: transparent !important;
+}
+
+.eval-page .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: rgba(20, 44, 90, 0.3) !important;
+}
+
+.eval-page .el-table td.el-table__cell,
+.eval-page .el-table th.el-table__cell.is-leaf {
+  border-color: rgba(10, 169, 180, 0.2) !important;
+}
+
+/* 登录后保留动态背景：body::before 网格渐变 + body::after 粒子脉冲 + workspace-atmosphere 流光 */
+body:not(.login-active) {
+  background: linear-gradient(180deg, #0c52a8 0%, #094494 50%, #063880 100%);
+  background-attachment: fixed;
+}
+
+body.theme-dark .eval-page .el-table::before {
+  background-color: rgba(10, 169, 180, 0.2) !important;
+}
