@@ -630,6 +630,7 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
   z-index: 140;
   overflow-y: auto;
   overflow-x: hidden;
+  background: #071426;
   color: #eefaff;
   font-family: "Bahnschrift", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   outline: none;
@@ -641,8 +642,9 @@ onBeforeUnmount(() => window.clearTimeout(toastTimer))
 
 /* 纯深色底，彻底遮挡驾驶舱背景图（不再露出舱内桌子/植物/AI助手） */
 .profile-cabin__veil {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
   background:
     radial-gradient(120% 70% at 18% 0%, rgba(22, 68, 120, 0.55), transparent 58%),

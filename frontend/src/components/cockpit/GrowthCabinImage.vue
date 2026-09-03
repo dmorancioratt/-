@@ -179,22 +179,22 @@ function showCopyStatus(message: string) {
 </script>
 
 <style scoped>
-.image-cabin { position: absolute; inset: 0; overflow: hidden; background: #061026; }
-.image-cabin__ambience { position: absolute; inset: 0; background: linear-gradient(rgba(3, 12, 35, .18), rgba(3, 12, 35, .18)), url('/growth-cabin-overview-20260903.png') center / cover no-repeat; filter: blur(24px) saturate(.9) brightness(.55); transform: scale(1.08); }
+.image-cabin { position: absolute; inset: 0; overflow: hidden; background: #020715; }
+.image-cabin__ambience { position: absolute; inset: 0; background: linear-gradient(rgba(2, 7, 21, .54), rgba(2, 7, 21, .54)), url('/growth-cabin-overview-20260903.png') center / cover no-repeat; filter: blur(24px) saturate(.66) brightness(.44); transform: scale(1.08); }
 /* 全屏铺满：去掉原来的 aspect-ratio 和宽高限制，让画布直接占满整个驾驶舱可视区（100% × 100%），
    图片用 object-fit: cover 按比例填满，不留黑边 */
-.image-cabin__canvas { position: relative; z-index: 1; width: 100%; height: 100%; overflow: hidden; background: #07122b; animation: cabin-reveal .7s ease-out both; }
+.image-cabin__canvas { position: relative; z-index: 1; width: 100%; height: 100%; overflow: hidden; background: #020715; animation: cabin-reveal .7s ease-out both; }
 .image-cabin__image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center center; user-select: none; -webkit-user-drag: none; }
-.image-cabin__zone { position: absolute; z-index: 2; display: block; padding: 0; border: 0; border-radius: clamp(5px, .8vw, 14px); background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.image-cabin__frame { position: absolute; inset: 0; border: 1px solid rgba(103, 230, 255, 0); border-radius: inherit; background: radial-gradient(circle at 50% 50%, rgba(60, 196, 255, 0), rgba(29, 112, 255, 0)); box-shadow: inset 0 0 0 1px rgba(116, 235, 255, 0), 0 0 0 rgba(30, 151, 255, 0); transition: border-color .22s ease, background .22s ease, box-shadow .22s ease; pointer-events: none; }
+.image-cabin__zone { position: absolute; z-index: 2; display: block; padding: 0; border: 0; border-radius: 8px; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.image-cabin__frame { position: absolute; inset: 0; border: 1px solid rgba(82, 221, 255, 0); border-radius: inherit; background: rgba(17,49,66,0); box-shadow: inset 0 0 0 1px rgba(82,221,255,0), 0 0 0 rgba(82,221,255,0); transition: border-color .22s ease, background .22s ease, box-shadow .22s ease; pointer-events: none; }
 .image-cabin__frame::before, .image-cabin__frame::after { content: ''; position: absolute; inset: clamp(4px, .45vw, 8px); opacity: 0; transition: opacity .22s ease; pointer-events: none; }
-.image-cabin__frame::before { border-top: 2px solid #d9fbff; border-left: 2px solid #d9fbff; clip-path: polygon(0 0, 34% 0, 34% 2px, 2px 2px, 2px 34%, 0 34%); filter: drop-shadow(0 0 7px #28baff); }
-.image-cabin__frame::after { border-right: 2px solid #d9fbff; border-bottom: 2px solid #d9fbff; clip-path: polygon(66% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 66%, 100% 66%, 100% 100%, 66% 100%); filter: drop-shadow(0 0 7px #28baff); }
-.image-cabin__hint { position: absolute; bottom: clamp(7px, .9vw, 15px); left: 50%; padding: clamp(4px, .45vw, 8px) clamp(8px, .8vw, 14px); border: 1px solid rgba(113, 232, 255, .78); border-radius: 999px; background: rgba(2, 23, 68, .9); box-shadow: 0 0 20px rgba(44, 184, 255, .45); color: #effcff; font-size: clamp(8px, .75vw, 13px); font-weight: 700; letter-spacing: .04em; white-space: nowrap; opacity: 0; transform: translate(-50%, 6px); transition: opacity .2s ease, transform .2s ease; pointer-events: none; }
-.image-cabin__zone:hover .image-cabin__frame, .image-cabin__zone:focus-visible .image-cabin__frame { border-color: rgba(137, 238, 255, .76); background: radial-gradient(circle at 50% 50%, rgba(64, 204, 255, .16), rgba(33, 105, 255, .04)); box-shadow: inset 0 0 32px rgba(73, 203, 255, .18), 0 0 28px rgba(34, 164, 255, .42); }
+.image-cabin__frame::before { border-top: 2px solid #52ddff; border-left: 2px solid #52ddff; clip-path: polygon(0 0, 34% 0, 34% 2px, 2px 2px, 2px 34%, 0 34%); filter: drop-shadow(0 0 5px rgba(82,221,255,.52)); }
+.image-cabin__frame::after { border-right: 2px solid #52ddff; border-bottom: 2px solid #52ddff; clip-path: polygon(66% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 66%, 100% 66%, 100% 100%, 66% 100%); filter: drop-shadow(0 0 5px rgba(82,221,255,.52)); }
+.image-cabin__hint { position: absolute; bottom: clamp(7px, .9vw, 15px); left: 50%; padding: clamp(4px, .45vw, 8px) clamp(8px, .8vw, 14px); border: 1px solid rgba(82,221,255,.52); border-radius: 6px; background: rgba(10,29,48,.94); box-shadow: 0 8px 24px rgba(0,3,14,.38); color: #e7f1f7; font-size: clamp(8px, .75vw, 13px); font-weight: 700; letter-spacing: 0; white-space: nowrap; opacity: 0; transform: translate(-50%, 6px); transition: opacity .2s ease, transform .2s ease; pointer-events: none; }
+.image-cabin__zone:hover .image-cabin__frame, .image-cabin__zone:focus-visible .image-cabin__frame { border-color: rgba(82,221,255,.52); background: rgba(17,49,66,.28); box-shadow: inset 0 0 30px rgba(82,221,255,.08), 0 0 18px rgba(82,221,255,.12); }
 .image-cabin__zone:hover .image-cabin__frame::before, .image-cabin__zone:hover .image-cabin__frame::after, .image-cabin__zone:focus-visible .image-cabin__frame::before, .image-cabin__zone:focus-visible .image-cabin__frame::after, .image-cabin__zone:hover .image-cabin__hint, .image-cabin__zone:focus-visible .image-cabin__hint { opacity: 1; }
 .image-cabin__zone:hover .image-cabin__hint, .image-cabin__zone:focus-visible .image-cabin__hint { transform: translate(-50%, 0); }
-.image-cabin__zone:focus-visible { outline: 2px solid #bdf6ff; outline-offset: 3px; }
+.image-cabin__zone:focus-visible { outline: 2px solid #52ddff; outline-offset: 3px; }
 .image-cabin__zone--ai-suggest { z-index: 4; }
 .image-cabin__zone.is-editing { cursor: crosshair; }
 .image-cabin__zone.is-editing .image-cabin__frame { border-color: rgba(101, 222, 255, .55); background: rgba(22, 126, 255, .055); box-shadow: inset 0 0 18px rgba(67, 197, 255, .11); }

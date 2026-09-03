@@ -66,19 +66,31 @@ function resize() {
 function drawBackground() {
   if (!ctx) return
 
-  // 纯黑色背景（用户要求：最后面就是黑色就行）
-  ctx.fillStyle = '#000000'
+  ctx.fillStyle = '#071426'
   ctx.fillRect(0, 0, width, height)
 
-  // 极微弱的中心暗蓝光晕（保持一点点高级感，不抢眼）
   const subtleGlow = ctx.createRadialGradient(
     width * 0.5, height * 0.5, 0,
     width * 0.5, height * 0.5, width * 0.7
   )
-  subtleGlow.addColorStop(0, 'rgba(40, 60, 80, 0.08)')
-  subtleGlow.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  subtleGlow.addColorStop(0, 'rgba(17, 49, 66, 0.30)')
+  subtleGlow.addColorStop(1, 'rgba(7, 20, 38, 0)')
   ctx.fillStyle = subtleGlow
   ctx.fillRect(0, 0, width, height)
+
+  ctx.beginPath()
+  ctx.strokeStyle = 'rgba(82, 221, 255, 0.042)'
+  ctx.lineWidth = 1
+  const gridSize = 58
+  for (let x = 0; x <= width; x += gridSize) {
+    ctx.moveTo(x + 0.5, 0)
+    ctx.lineTo(x + 0.5, height)
+  }
+  for (let y = 0; y <= height; y += gridSize) {
+    ctx.moveTo(0, y + 0.5)
+    ctx.lineTo(width, y + 0.5)
+  }
+  ctx.stroke()
 }
 
 function drawHexGrid(time: number) {
@@ -227,7 +239,6 @@ function animate(time: number) {
   
   ctx.clearRect(0, 0, width, height)
 
-  // 纯黑色背景：不绘制光球和环境光点，只保留纯黑底色
   drawBackground()
 
   animationId = requestAnimationFrame(animate)

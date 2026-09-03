@@ -1,15 +1,15 @@
 .cockpit {
   --cockpit-bg: transparent;
-  --cockpit-panel: rgba(6, 32, 54, 0.26);
-  --cockpit-panel-strong: rgba(8, 42, 68, 0.38);
-  --cockpit-border: rgba(82, 221, 255, 0.09);
-  --cockpit-cyan: #0aa9b4;
+  --cockpit-panel: rgba(6, 18, 37, 0.72);
+  --cockpit-panel-strong: rgba(10, 29, 48, 0.86);
+  --cockpit-border: rgba(82, 221, 255, 0.18);
+  --cockpit-cyan: #22a8c9;
   --cockpit-blue: #52ddff;
-  --cockpit-teal: #09828b;
+  --cockpit-teal: #176f8d;
   --cockpit-amber: #ffc048;
   --cockpit-red: #ff5d7d;
-  --cockpit-text: #d8eef5;
-  --cockpit-muted: #6e96a8;
+  --cockpit-text: #e7f1f7;
+  --cockpit-muted: #7893a5;
 
   position: relative;
   min-height: calc(100vh - 68px);

@@ -86,9 +86,11 @@ const trendOption = computed(() => ({
 </script>
 
 <style scoped>
-.timeline-dashboard { display: grid; gap: 14px; min-width: 0; color: #e5ffff; --edge: rgba(82, 221, 255, .16); --muted: #78a9bc; --text: #e8fbff; }
+.timeline-dashboard { display: grid; gap: 14px; min-width: 0; color: #e5ffff; --edge: rgba(220, 242, 249, .12); --muted: #78a9bc; --text: #e8fbff; }
 .summary-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.summary-card, .timeline-panel, .events-panel { border: 1px solid var(--edge); border-radius: 8px; background: linear-gradient(145deg, rgba(5, 31, 48, .72), rgba(2, 16, 29, .78)); box-shadow: inset 0 1px 0 rgba(171, 244, 255, .04), 0 16px 40px rgba(0, 8, 20, .25); backdrop-filter: blur(18px) saturate(1.12); }
+.summary-card, .timeline-panel, .events-panel { border: 1px solid var(--edge); background: linear-gradient(145deg, rgba(28, 54, 71, .44), rgba(7, 23, 40, .28)); box-shadow: inset 0 1px 0 rgba(241, 251, 255, .075), 0 18px 46px rgba(0, 3, 14, .22); backdrop-filter: blur(26px) saturate(1.10); -webkit-backdrop-filter: blur(26px) saturate(1.10); }
+.summary-card { border-radius: 16px; }
+.timeline-panel, .events-panel { border-radius: 18px; }
 .summary-card { position: relative; display: grid; grid-template-columns: 1fr auto; align-items: center; min-height: 94px; overflow: hidden; padding: 16px 18px; }
 .summary-card::before { position: absolute; inset: 0 auto 0 0; width: 3px; background: #52ddff; content: ''; box-shadow: 0 0 12px #52ddff; }
 .summary-card.gold::before { background: #ffc048; }.summary-card.red::before { background: #ff7088; }
@@ -103,7 +105,7 @@ header h2 { margin: 5px 0 0; color: var(--text); font-size: 17px; }
 header > span { color: var(--muted); font-size: 11px; }
 .trend-chart { width: 100%; height: 370px; }
 .period-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); border-top: 1px solid rgba(82, 221, 255, .09); padding: 10px; gap: 7px; }
-.period-strip button { display: grid; grid-template-columns: 1fr repeat(3, auto); align-items: center; gap: 6px; min-width: 0; border: 1px solid rgba(82, 221, 255, .10); border-radius: 6px; padding: 8px; color: #8eb9ca; background: rgba(5, 38, 58, .38); }
+.period-strip button { display: grid; grid-template-columns: 1fr repeat(3, auto); align-items: center; gap: 6px; min-width: 0; border: 1px solid rgba(220, 242, 249, .09); border-radius: 10px; padding: 8px; color: #8eb9ca; background: rgba(231, 247, 252, .035); }
 .period-strip time { grid-column: 1 / -1; color: #c8eef5; font: 700 10px Consolas, monospace; }
 .period-strip span { display: flex; align-items: center; gap: 3px; font-size: 9px; }.period-strip i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 .event-list { display: grid; gap: 0; }

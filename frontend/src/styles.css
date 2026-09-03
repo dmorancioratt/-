@@ -1,32 +1,31 @@
 :root {
-  /* ============================================================
-   *  Mission Calendar Blue-Cyan Theme (计划日历偏蓝青蓝风格)
-   *  主色：#52ddff (weekly-plan accent, 偏蓝青蓝去绿)
-   *  深主色：#0aa9b4 (accentSoft)；亮阶：#88ddff
-   *  背景：#0d3347 / #0f3b55 / #0b2c44 / #071f33 (深蓝青蓝渐变)
-   * ============================================================ */
-  /* 基础语义色（计划日历偏蓝青蓝基调，整体降饱和增蓝去绿） */
+  /* Resource-vault palette sampled from the approved task-cabin reference. */
   --primary: #52DDFF;
-  --primary-dark: #42B1CC;
-  --primary-soft: rgba(82, 221, 255, 0.68);
+  --primary-dark: #22A8C9;
+  --primary-soft: rgba(82, 221, 255, 0.56);
   --cyan: #52ddff;
-  --cyan-soft: rgba(82, 180, 220, 0.48);
-  --green: #3ab6d4;
+  --cyan-soft: rgba(82, 221, 255, 0.28);
+  --green: #39b8d2;
   --orange: #f59e0b;
-  --bg: #000000;
-  --text: #d8eef5;
-  --muted: #6e96a8;
-  --border: rgba(82, 221, 255, 0.20);
-  --glass: rgba(8, 28, 46, 0.78);
-  --shadow: 0 18px 54px rgba(0, 0, 0, 0.42);
+  --bg: #071426;
+  --bg-deep: #030a16;
+  --surface: #061225;
+  --surface-raised: #0a1d30;
+  --surface-action: #113142;
+  --text: #e7f1f7;
+  --muted: #7893a5;
+  --border: rgba(82, 221, 255, 0.18);
+  --border-strong: rgba(82, 221, 255, 0.52);
+  --glass: rgba(6, 18, 37, 0.84);
+  --shadow: 0 16px 42px rgba(0, 3, 14, 0.42);
   font-family: Inter, "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
   color: var(--text);
 
   /* ===== Element Plus 全量主题色 (计划日历蓝青调 · 以 #52DDFF 为基色) ===== */
   --el-color-primary: #52DDFF;
-  --el-color-primary-dark-2:  #42B1CC;  /* #52DDFF 混 20% 黑 */
-  --el-color-primary-light-3: #86E7FF;  /* 混 30% 白 (按下态) */
-  --el-color-primary-light-5: #A8EEFF;  /* 混 50% 白 (hover) */
+  --el-color-primary-dark-2:  #22A8C9;
+  --el-color-primary-light-3: #70E4FF;
+  --el-color-primary-light-5: #8DEAFF;
   --el-color-primary-light-7: #CBF5FF;
   --el-color-primary-light-8: #DCF8FF;
   --el-color-primary-light-9: #EEFBFF;
@@ -70,20 +69,20 @@
   --el-text-color-regular: #b4cfdb;
   --el-text-color-secondary: #8aa7b6;
   --el-text-color-placeholder: #607d8c;
-  --el-bg-color: #000000;
-  --el-bg-color-page: #000000;
-  --el-bg-color-overlay: #050505;
-  --el-disabled-bg-color: #050505;
-  --el-border-color: rgba(82, 221, 255, 0.15);
+  --el-bg-color: #061225;
+  --el-bg-color-page: #071426;
+  --el-bg-color-overlay: #0a1d30;
+  --el-disabled-bg-color: #071426;
+  --el-border-color: rgba(82, 221, 255, 0.18);
   --el-border-color-light: rgba(82, 221, 255, 0.22);
-  --el-border-color-lighter: rgba(82, 221, 255, 0.28);
-  --el-border-color-extra-light: rgba(82, 221, 255, 0.36);
+  --el-border-color-lighter: rgba(82, 221, 255, 0.26);
+  --el-border-color-extra-light: rgba(82, 221, 255, 0.30);
   --el-fill-color: rgba(82, 221, 255, 0.05);
   --el-fill-color-light: rgba(82, 221, 255, 0.09);
   --el-fill-color-lighter: rgba(82, 221, 255, 0.13);
   --el-fill-color-extra-light: rgba(82, 221, 255, 0.17);
-  --el-fill-color-blank: rgba(8, 28, 46, 0.72);
-  --el-mask-color: rgba(4, 16, 28, 0.84);
+  --el-fill-color-blank: rgba(6, 18, 37, 0.88);
+  --el-mask-color: rgba(1, 5, 18, 0.88);
   --el-disabled-text-color: #4e6e7e;
   --el-disabled-border-color: rgba(82, 221, 255, 0.11);
   /* 文字阴影发光减弱, 偏蓝青 */
@@ -103,7 +102,7 @@
 html {
   min-width: 0;
   min-height: 100vh;
-  background: #000000;
+  background: #071426;
   background-attachment: fixed;
   /* 防止某页全局锁滚动导致"下滑不了" —— 页面必须允许用户滚动浏览内容 */
   overflow-y: auto !important;
@@ -115,7 +114,7 @@ body {
   margin: 0;
   min-width: 0;
   min-height: 100vh;
-  background: #000000;
+  background: #071426;
   background-attachment: fixed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -131,11 +130,12 @@ body::before {
   z-index: -3;
   inset: 0;
   content: "";
-  opacity: 0.045;
+  opacity: 0.72;
   background:
-    linear-gradient(rgba(20, 140, 150, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(20, 140, 150, 0.05) 1px, transparent 1px);
-  background-size: 56px 56px;
+    linear-gradient(rgba(82, 221, 255, 0.042) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(82, 221, 255, 0.042) 1px, transparent 1px),
+    #071426;
+  background-size: 58px 58px;
 }
 
 body::after {
@@ -370,18 +370,16 @@ body::after {
 
 /* ========== DigitalInterviewer / 数字人面试官页面深色覆盖 ========== */
 .digital-page .surface {
-  border-color: rgba(82, 221, 255, 0.36) !important;
-  background:
-    linear-gradient(145deg, rgba(10, 56, 66, 0.82), rgba(4, 26, 32, 0.74)),
-    rgba(6, 36, 42, 0.72) !important;
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.32) !important;
+  border-color: rgba(82, 221, 255, 0.18) !important;
+  background: rgba(6, 18, 37, 0.88) !important;
+  box-shadow: inset 0 1px 0 rgba(185, 229, 242, 0.04), 0 12px 34px rgba(0, 3, 14, 0.24) !important;
 }
 
 .digital-page .section-title h3,
 .digital-page .conversation-title h3,
 .digital-page .start-card h2,
 .digital-page .report-hero > div:last-child > b {
-  color: #ecffff !important;
+  color: #e7f1f7 !important;
 }
 
 .digital-page .section-title span,
@@ -402,78 +400,85 @@ body::after {
 .digital-page .start-card label,
 .digital-page .resume-upload-copy span,
 .digital-page .recent-resume-row {
-  color: #86b0b5 !important;
+  color: #7893a5 !important;
 }
 
 .digital-page .history-item:hover {
-  background: rgba(8, 46, 54, 0.78) !important;
+  background: #0a1d30 !important;
 }
 
 .digital-page .history-item.active {
-  border-color: rgba(0, 243, 254, 0.32) !important;
-  background: rgba(8, 86, 100, 0.42) !important;
+  border-color: rgba(82, 221, 255, 0.52) !important;
+  background: #113142 !important;
   box-shadow: inset 3px 0 #52ddff !important;
 }
 
 .digital-page .history-item strong,
 .digital-page .resume-upload-copy strong {
-  color: #d2f2f5 !important;
+  color: #e7f1f7 !important;
 }
 
 .digital-page .resume-upload-card {
-  border-color: rgba(82, 221, 255, 0.38) !important;
-  background: rgba(8, 46, 54, 0.72) !important;
+  border-color: rgba(82, 221, 255, 0.26) !important;
+  background: #0a1d30 !important;
 }
 
 .digital-page .resume-upload-card:hover {
-  background: rgba(14, 76, 90, 0.78) !important;
+  border-color: rgba(82, 221, 255, 0.52) !important;
+  background: #113142 !important;
 }
 
 .digital-page .parsed-resume-status {
-  background: rgba(8, 60, 66, 0.7) !important;
+  background: #0a1d30 !important;
 }
 
 .digital-page .parsed-resume-status span {
-  color: #34f0ff !important;
+  color: #52ddff !important;
 }
 
 .digital-page .conversation-title span {
-  background: rgba(8, 86, 100, 0.56) !important;
-  color: #34f0ff !important;
+  background: #113142 !important;
+  color: #52ddff !important;
 }
 
 .digital-page .composer {
-  border-top-color: rgba(82, 221, 255, 0.3) !important;
-  background: rgba(6, 36, 42, 0.62) !important;
+  border-top-color: rgba(82, 221, 255, 0.18) !important;
+  background: #061225 !important;
 }
 
 .digital-page .avatar-stage {
-  background: linear-gradient(180deg, #041418, #0a2e36) !important;
+  background: #020715 !important;
 }
 
 .digital-page .interviewer-bubble {
-  border-color: rgba(82, 221, 255, 0.3) !important;
-  background: rgba(8, 46, 54, 0.8) !important;
-  color: #d2f2f5 !important;
+  border-color: rgba(82, 221, 255, 0.18) !important;
+  background: #0a1d30 !important;
+  color: #e7f1f7 !important;
+}
+
+.digital-page .candidate-bubble {
+  border: 1px solid rgba(82, 221, 255, 0.34) !important;
+  background: #113142 !important;
 }
 
 .digital-page .chat-bubble {
-  color: #d2f2f5 !important;
+  color: #e7f1f7 !important;
 }
 
 .digital-page .candidate-mark {
-  background: rgba(0, 243, 254, 0.14) !important;
-  color: #34f0ff !important;
+  background: #113142 !important;
+  color: #52ddff !important;
 }
 
 .digital-page .report-hero,
 .digital-page .final-score-mini {
-  background:
-    linear-gradient(135deg, rgba(8, 86, 100, 0.56), rgba(10, 56, 66, 0.54)) !important;
+  border: 1px solid rgba(82, 221, 255, 0.18) !important;
+  background: #0a1d30 !important;
 }
 
 .digital-page .report-columns section {
-  background: rgba(10, 56, 66, 0.62) !important;
+  border: 1px solid rgba(82, 221, 255, 0.18) !important;
+  background: #0a1d30 !important;
 }
 
 .digital-page .report-columns .improvement-section {
@@ -481,7 +486,7 @@ body::after {
 }
 
 .digital-page .report-columns h4 {
-  color: #8ee8cb !important;
+  color: #52ddff !important;
 }
 
 .digital-page .report-columns .improvement-section h4 {
@@ -498,16 +503,16 @@ body::after {
 
 .digital-page .final-score-mini span,
 .digital-page .report-score span {
-  color: #8ef9ff !important;
+  color: #b9d5e4 !important;
 }
 
 .digital-page .report-trend {
-  border-top-color: rgba(82, 221, 255, 0.3) !important;
+  border-top-color: rgba(82, 221, 255, 0.18) !important;
 }
 
 .digital-page .connection-badge {
-  background: rgba(10, 56, 66, 0.82) !important;
-  color: #34f0ff !important;
+  background: #0a1d30 !important;
+  color: #52ddff !important;
 }
 
 .digital-page .start-kicker {
@@ -515,15 +520,15 @@ body::after {
 }
 
 .digital-page .turn-feedback {
-  border-left-color: #34f0ff !important;
+  border-left-color: #52ddff !important;
 }
 
 .digital-page .turn-feedback span {
-  color: #34f0ff !important;
+  color: #52ddff !important;
 }
 
 .digital-page .turn-feedback p {
-  color: #86b0b5 !important;
+  color: #b9d5e4 !important;
 }
 
 /* ========== SkillGraph / 能力图谱页面深色覆盖（补充） ========== */

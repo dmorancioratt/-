@@ -250,12 +250,12 @@ onMounted(() => refresh(false))
 </script>
 
 <style scoped>
-.candidate-dashboard { --panel: rgba(2, 24, 30, .38); --edge: rgba(21, 197, 199, .10); --cyan: #15c5c7; --text: #d8f2f3; max-width: 1680px; margin: 0 auto; color: var(--text); font-family: "Microsoft YaHei", "Noto Sans SC", sans-serif; }
+.candidate-dashboard { --panel: rgba(17, 40, 58, .48); --edge: rgba(220, 242, 249, .12); --cyan: #52ddff; --text: #e7f1f7; --glass-highlight: rgba(241, 251, 255, .08); --glass-shadow: 0 18px 46px rgba(0, 3, 14, .22), inset 0 1px 0 var(--glass-highlight); max-width: 1680px; margin: 0 auto; color: var(--text); font-family: "Microsoft YaHei", "Noto Sans SC", sans-serif; }
 .cockpit-loading { position: fixed; z-index: 20; top: 18px; right: 20px; border: 1px solid var(--edge); border-radius: 999px; padding: 9px 15px; color: #9fffff; background: rgba(2, 16, 20, .36); box-shadow: 0 0 20px rgba(0, 222, 230, .10); backdrop-filter: blur(22px); font-size: 12px; }
 .overview-rail { position: sticky; z-index: 5; top: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; width: max-content; max-width: calc(100vw - 36px); margin: 0 auto 14px; border: 1px solid rgba(82, 221, 255, .10); border-radius: 999px; padding: 5px; background: rgba(3, 22, 28, .28); box-shadow: 0 8px 24px rgba(0, 8, 12, .11); backdrop-filter: blur(30px) saturate(1.18); }
 .overview-rail a,.overview-rail button { display: inline-flex; align-items: center; gap: 5px; border: 0; border-radius: 999px; padding: 8px 12px; color: #79b3b8; background: transparent; font: inherit; font-size: 12px; text-decoration: none; cursor: pointer; }.overview-rail a:hover,.overview-rail button:hover { color: #e6ffff; background: rgba(82, 221, 255, .08); }.overview-rail button { color: #52ddff; }.overview-rail button:disabled { cursor: wait; opacity: .6; }
-.career-hero { display: grid; grid-template-columns: minmax(250px, .8fr) minmax(480px, 2.15fr) minmax(260px, .84fr); min-height: 555px; overflow: hidden; border: 1px solid rgba(82, 221, 255, .11); border-radius: 20px; background: radial-gradient(circle at 50% 100%, rgba(10, 169, 180, .07), transparent 44%), rgba(2, 15, 19, .28); box-shadow: 0 24px 62px rgba(0, 10, 14, .16), inset 0 1px 0 rgba(141, 255, 255, .04); backdrop-filter: blur(26px) saturate(1.18); }
-.hero-card { position: relative; z-index: 2; padding: 30px 24px; background: linear-gradient(160deg, rgba(4, 44, 54, .26), rgba(2, 18, 22, .20)); backdrop-filter: blur(26px) saturate(1.15); }.readiness-card { border-right: 1px solid rgba(82, 221, 255, .07); }.focus-card { border-left: 1px solid rgba(82, 221, 255, .07); }
+.career-hero { display: grid; grid-template-columns: minmax(250px, .8fr) minmax(480px, 2.15fr) minmax(260px, .84fr); min-height: 555px; overflow: hidden; border: 1px solid var(--edge); border-radius: 20px; background: linear-gradient(145deg, rgba(23, 48, 66, .46), rgba(6, 18, 37, .30)); box-shadow: var(--glass-shadow); backdrop-filter: blur(28px) saturate(1.12); }
+.hero-card { position: relative; z-index: 2; padding: 30px 24px; background: linear-gradient(160deg, rgba(31, 58, 75, .38), rgba(10, 27, 44, .24)); backdrop-filter: blur(28px) saturate(1.10); }.readiness-card { border-right: 1px solid rgba(220, 242, 249, .08); }.focus-card { border-left: 1px solid rgba(220, 242, 249, .08); }
 .section-kicker { display: block; color: #52ddff; font-size: 10px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; text-shadow: 0 0 8px rgba(82, 221, 255, .30); }.card-label { margin: 25px 0 8px; color: #739ea3; font-size: 12px; }.hero-card h2 { margin: 0; color: #ecffff; font-size: 21px; letter-spacing: -.04em; }.role-tag { display: inline-block; margin-top: 10px; border-radius: 5px; padding: 5px 8px; color: #7dfaff; background: rgba(82, 221, 255, .07); box-shadow: inset 0 0 0 1px rgba(82, 221, 255, .08); font-size: 11px; }.readiness-label { margin-top: 25px; }
 .readiness-score { position: relative; display: grid; place-items: center; width: 138px; height: 138px; margin: 6px 0 2px; }.readiness-score svg { position: absolute; width: 100%; height: 100%; transform: rotate(-90deg); }.readiness-score circle { fill: none; stroke-width: 8; }.score-track { stroke: rgba(0, 142, 156, .24); }.score-progress { stroke: #52ddff; stroke-linecap: round; stroke-dasharray: 320; transition: stroke-dashoffset 1s ease; filter: drop-shadow(0 0 5px rgba(82, 221, 255, .48)); }.readiness-score strong { color: #e5ffff; font-size: 47px; letter-spacing: -.07em; text-shadow: 0 0 8px rgba(82, 221, 255, .30); }.readiness-score small { margin-left: 2px; color: #9be3e8; font-size: 15px; }.score-verdict { display: grid; gap: 5px; }.score-verdict b { font-size: 17px; }.score-verdict b.success { color: #8cc8d8; text-shadow: 0 0 6px rgba(165, 220, 201, .20); }.score-verdict b.warning { color: #ffc048; }.score-verdict b.danger { color: #ff5d7d; }.score-verdict span { color: #72a0a5; font-size: 11px; }
 .skill-summary { display: grid; gap: 8px; margin-top: 22px; }.skill-summary > span { color: #6ea0a5; font-size: 11px; }.skill-summary > div { display: flex; flex-wrap: wrap; gap: 6px; }.skill-summary i { border: 1px solid rgba(82, 221, 255, .22); border-radius: 5px; padding: 4px 7px; color: #8df4f9; background: rgba(0, 120, 133, .14); font-size: 10px; font-style: normal; }.skill-summary i.gap { border-color: rgba(255, 192, 72, .26); color: #ffd888; background: rgba(110, 76, 10, .18); }
@@ -289,4 +289,33 @@ onMounted(() => refresh(false))
 .overview-footer button:disabled { cursor: wait; opacity: .7; }
 .overview-footer .fa-spin { color: #52ddff; }
 @media (max-width: 620px) { .overview-footer { flex-direction: column; align-items: flex-start; } .overview-footer button { align-self: stretch; justify-content: center; } }
+
+/* Keep the overview surfaces light and glassy without turning every item into a hard outline. */
+.progress-card,
+.overview-panel,
+.overview-footer {
+  border-color: var(--edge);
+  background: linear-gradient(145deg, rgba(28, 54, 71, .44), rgba(7, 23, 40, .28));
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(28px) saturate(1.1);
+  -webkit-backdrop-filter: blur(28px) saturate(1.1);
+}
+.progress-card { border-radius: 16px; }
+.overview-panel { border-radius: 18px; }
+.overview-footer { border-radius: 14px; }
+.focus-skill,
+.recommendation button,
+.action-list button,
+.resume-evidence {
+  border-color: rgba(220, 242, 249, .09);
+  border-radius: 12px;
+  background: rgba(231, 247, 252, .04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035);
+}
+.progress-card:hover,
+.recommendation button:hover,
+.action-list button:hover {
+  border-color: rgba(112, 228, 255, .28);
+  background: rgba(82, 221, 255, .07);
+}
 </style>

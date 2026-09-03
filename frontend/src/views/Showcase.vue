@@ -239,8 +239,8 @@ onMounted(async () => {
   min-width: 0;
   min-height: 100vh;
   overflow-x: hidden;
-  color: #e6f2ff;
-  background: #060d1f;
+  color: #e7f1f7;
+  background: #020715;
   font-family: Inter, 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', Arial, sans-serif;
 }
 
@@ -252,10 +252,7 @@ onMounted(async () => {
 }
 
 .sc-aurora {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.5;
+  display: none;
 }
 
 .sc-aurora.a {
@@ -278,10 +275,9 @@ onMounted(async () => {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(rgba(120, 180, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 180, 255, 0.05) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(circle at 50% 30%, #000 30%, transparent 78%);
+    linear-gradient(rgba(82, 221, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(82, 221, 255, 0.035) 1px, transparent 1px);
+  background-size: 58px 58px;
 }
 
 .showcase > *:not(.sc-bg) {
@@ -309,9 +305,10 @@ onMounted(async () => {
   place-items: center;
   width: 46px;
   height: 46px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #0aa9b4, #0aa9b4);
-  box-shadow: 0 0 26px rgba(6, 182, 212, 0.4);
+  border: 1px solid rgba(82, 221, 255, 0.52);
+  border-radius: 6px;
+  background: #113142;
+  box-shadow: inset 0 0 18px rgba(82, 221, 255, 0.08);
   font-weight: 950;
   color: #fff;
 }
@@ -322,7 +319,7 @@ onMounted(async () => {
 }
 
 .sc-brand small {
-  color: #8fb2d6;
+  color: #7893a5;
   font-size: 12px;
 }
 
@@ -333,7 +330,7 @@ onMounted(async () => {
 }
 
 .sc-nav a {
-  color: #b8d4ef;
+  color: #b9d5e4;
   font-weight: 700;
   font-size: 14px;
   text-decoration: none;
@@ -348,22 +345,22 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 0;
-  border-radius: 12px;
+  border: 1px solid #52ddff;
+  border-radius: 6px;
   padding: 10px 18px;
   font-weight: 800;
   font-size: 14px;
   cursor: pointer;
   color: #fff;
-  background: linear-gradient(135deg, #0aa9b4, #0aa9b4);
-  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.35);
+  background: #113142;
+  box-shadow: inset 0 0 18px rgba(82, 221, 255, 0.06);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .sc-enter:hover,
 .sc-cta.primary:hover {
   transform: translateY(-2px);
-  filter: saturate(1.1);
+  background: #123b50;
 }
 
 .sc-hero {
@@ -379,11 +376,11 @@ onMounted(async () => {
   border: 1px solid rgba(120, 200, 255, 0.3);
   border-radius: 999px;
   padding: 6px 16px;
-  color: #7fe3ff;
+  color: #52ddff;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.16em;
-  background: rgba(80, 180, 255, 0.08);
+  background: #0a1d30;
 }
 
 .sc-hero h1 {
@@ -395,7 +392,7 @@ onMounted(async () => {
 }
 
 .grad {
-  background: linear-gradient(120deg, #52ddff, #52ddff, #818cf8);
+  background: #52ddff;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -404,13 +401,13 @@ onMounted(async () => {
 .sc-sub {
   max-width: 760px;
   margin: 22px auto 0;
-  color: #a9c6e4;
+  color: #b9d5e4;
   font-size: 16px;
   line-height: 1.8;
 }
 
 .sc-sub b {
-  color: #d7ecff;
+  color: #e7f1f7;
 }
 
 .sc-hero-actions {
@@ -429,11 +426,11 @@ onMounted(async () => {
   background: transparent;
   border: 1px solid rgba(120, 200, 255, 0.4);
   box-shadow: none;
-  color: #cfe6ff;
+  color: #b9d5e4;
 }
 
 .sc-cta.ghost:hover {
-  background: rgba(80, 180, 255, 0.12);
+  background: #113142;
 }
 
 .sc-kpis {
@@ -446,10 +443,10 @@ onMounted(async () => {
 }
 
 .sc-kpi {
-  border: 1px solid rgba(120, 180, 255, 0.18);
-  border-radius: 16px;
+  border: 1px solid rgba(82, 221, 255, 0.18);
+  border-radius: 8px;
   padding: 18px 16px;
-  background: linear-gradient(160deg, rgba(20, 40, 82, 0.7), rgba(9, 20, 44, 0.6));
+  background: rgba(6, 18, 37, 0.88);
   backdrop-filter: blur(10px);
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
@@ -463,20 +460,20 @@ onMounted(async () => {
   display: block;
   font-size: 30px;
   font-weight: 950;
-  color: #eaf6ff;
+  color: #e7f1f7;
   line-height: 1;
 }
 
 .sc-kpi__num i {
   font-size: 14px;
   font-style: normal;
-  color: #7fb8e6;
+  color: #7893a5;
 }
 
 .sc-kpi__label {
   display: block;
   margin-top: 10px;
-  color: #8fb2d6;
+  color: #7893a5;
   font-size: 13px;
   font-weight: 700;
 }
@@ -501,7 +498,7 @@ onMounted(async () => {
 .sc-sec-head span {
   display: block;
   margin-top: 10px;
-  color: #8fb2d6;
+  color: #7893a5;
   font-size: 15px;
 }
 
@@ -516,17 +513,17 @@ onMounted(async () => {
 .sc-flow-node {
   flex: 0 0 122px;
   width: 122px;
-  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
-  border-radius: 14px;
+  border: 1px solid rgba(82, 221, 255, 0.18);
+  border-radius: 8px;
   padding: 14px 12px;
-  background: color-mix(in srgb, var(--c) 10%, rgba(10, 22, 46, 0.7));
+  background: #061225;
   text-align: center;
 }
 
 .sc-flow-idx {
   display: inline-block;
   margin-bottom: 6px;
-  color: var(--c);
+  color: #52ddff;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -535,13 +532,13 @@ onMounted(async () => {
 .sc-flow-node b {
   display: block;
   font-size: 15px;
-  color: #eaf6ff;
+  color: #e7f1f7;
 }
 
 .sc-flow-node small {
   display: block;
   margin-top: 5px;
-  color: #91b4d8;
+  color: #7893a5;
   font-size: 11px;
 }
 
@@ -558,10 +555,10 @@ onMounted(async () => {
 }
 
 .sc-card {
-  border: 1px solid rgba(120, 180, 255, 0.18);
-  border-radius: 20px;
+  border: 1px solid rgba(82, 221, 255, 0.18);
+  border-radius: 8px;
   padding: 20px;
-  background: linear-gradient(160deg, rgba(18, 36, 74, 0.66), rgba(9, 20, 44, 0.6));
+  background: rgba(6, 18, 37, 0.88);
   backdrop-filter: blur(12px);
 }
 
@@ -580,16 +577,16 @@ onMounted(async () => {
 }
 
 .sc-card-head span {
-  color: #7fb8e6;
+  color: #7893a5;
   font-size: 12px;
   font-weight: 700;
 }
 
 .sc-ver-card {
-  border: 1px solid rgba(120, 180, 255, 0.16);
-  border-radius: 14px;
+  border: 1px solid rgba(82, 221, 255, 0.18);
+  border-radius: 6px;
   padding: 16px;
-  background: rgba(10, 24, 50, 0.5);
+  background: #0a1d30;
 }
 
 .sc-ver-top {
@@ -604,10 +601,10 @@ onMounted(async () => {
 }
 
 .sc-ver-badge {
-  border: 1px solid rgba(37, 99, 235, 0.5);
+  border: 1px solid rgba(82, 221, 255, 0.52);
   border-radius: 8px;
   padding: 3px 10px;
-  color: #7fc9ff;
+  color: #52ddff;
   font-size: 12px;
   font-weight: 850;
 }
@@ -619,7 +616,7 @@ onMounted(async () => {
 }
 
 .sc-ver-col {
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 10px;
   background: rgba(255, 255, 255, 0.03);
 }
@@ -656,7 +653,7 @@ onMounted(async () => {
 
 .sc-ver-foot {
   margin-top: 14px;
-  color: #7fb8e6;
+  color: #7893a5;
   font-size: 12px;
   font-weight: 700;
 }
@@ -669,28 +666,19 @@ onMounted(async () => {
 
 .sc-innov-card {
   position: relative;
-  border: 1px solid color-mix(in srgb, var(--c) 34%, transparent);
-  border-radius: 18px;
+  border: 1px solid rgba(82, 221, 255, 0.18);
+  border-radius: 8px;
   padding: 24px 20px;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--c) 12%, rgba(12, 26, 52, 0.7)), rgba(9, 20, 44, 0.6));
+  background: rgba(6, 18, 37, 0.88);
   overflow: hidden;
 }
 
 .sc-innov-card::before {
-  content: '';
-  position: absolute;
-  top: -30px;
-  right: -30px;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: var(--c);
-  filter: blur(46px);
-  opacity: 0.4;
+  display: none;
 }
 
 .sc-innov-idx {
-  color: var(--c);
+  color: #52ddff;
   font-size: 26px;
   font-weight: 950;
 }
@@ -703,7 +691,7 @@ onMounted(async () => {
 
 .sc-innov-card p {
   margin: 0;
-  color: #a9c6e4;
+  color: #b9d5e4;
   font-size: 14px;
   line-height: 1.8;
 }
@@ -718,7 +706,7 @@ onMounted(async () => {
   position: relative;
   margin-bottom: 14px;
   padding-left: 20px;
-  color: #a9c6e4;
+  color: #b9d5e4;
   font-size: 14px;
   line-height: 1.7;
 }
@@ -731,13 +719,13 @@ onMounted(async () => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #52ddff, #818cf8);
+  background: #52ddff;
   box-shadow: 0 0 10px rgba(34, 211, 238, 0.7);
 }
 
 .sc-evi-list b {
   display: block;
-  color: #eaf6ff;
+  color: #e7f1f7;
   font-size: 14px;
 }
 
@@ -748,18 +736,18 @@ onMounted(async () => {
 }
 
 .sc-metric {
-  border: 1px solid rgba(120, 180, 255, 0.16);
-  border-radius: 14px;
+  border: 1px solid rgba(82, 221, 255, 0.18);
+  border-radius: 6px;
   padding: 14px;
   text-align: center;
-  background: rgba(10, 24, 50, 0.5);
+  background: #0a1d30;
 }
 
 .sc-metric .n {
   display: block;
   font-size: 26px;
   font-weight: 950;
-  color: #7fe3ff;
+  color: #52ddff;
 }
 
 .sc-metric .n i {
@@ -770,14 +758,14 @@ onMounted(async () => {
 .sc-metric .l {
   display: block;
   margin-top: 6px;
-  color: #8fb2d6;
+  color: #7893a5;
   font-size: 12px;
   font-weight: 700;
 }
 
 .sc-metric-note {
   margin: 14px 0 0;
-  color: #7fb8e6;
+  color: #7893a5;
   font-size: 13px;
 }
 
@@ -788,7 +776,7 @@ onMounted(async () => {
   max-width: 1200px;
   margin: 70px auto 0;
   padding: 28px 24px 50px;
-  border-top: 1px solid rgba(120, 180, 255, 0.14);
+  border-top: 1px solid rgba(82, 221, 255, 0.18);
 }
 
 .sc-footer b {
@@ -797,7 +785,7 @@ onMounted(async () => {
 }
 
 .sc-footer span {
-  color: #8fb2d6;
+  color: #7893a5;
   font-size: 13px;
 }
 

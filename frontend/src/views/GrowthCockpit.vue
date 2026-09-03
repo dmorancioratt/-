@@ -918,12 +918,13 @@ const heatmapData: number[][] = []
 .cockpit-container {
   position: fixed;
   inset: 0;
-  background: #050d1f;
+  background: #020715;
   overflow: hidden;
   perspective: 1800px;
 }
-.data-sync-state,.data-sync-button { position: fixed; z-index: 80; right: 24px; top: 22px; border: 1px solid rgba(78,216,255,.38); border-radius: 6px; padding: 9px 13px; color: #c9f5ff; background: rgba(4,20,52,.82); font-size: 12px; backdrop-filter: blur(12px); }
-.data-sync-button { cursor: pointer; }
+.data-sync-state,.data-sync-button { position: fixed; z-index: 80; right: 24px; top: 22px; min-height: 36px; border: 1px solid rgba(82,221,255,.26); border-radius: 6px; padding: 8px 13px; color: #b9d5e4; background: rgba(10,29,48,.94); box-shadow: 0 10px 28px rgba(0,3,14,.34); font-size: 12px; backdrop-filter: blur(12px); }
+.data-sync-button { cursor: pointer; transition: border-color .2s ease, background .2s ease, color .2s ease; }
+.data-sync-button:hover { border-color: rgba(82,221,255,.52); color: #e7f1f7; background: #113142; }
 
 .exit-cockpit-btn {
   position: fixed;
@@ -933,18 +934,19 @@ const heatmapData: number[][] = []
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 28px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
-  border: 1.5px solid rgba(255,255,255,0.25);
-  border-radius: 14px;
-  color: #fff;
-  font-size: 15px;
+  min-height: 44px;
+  padding: 0 18px;
+  background: rgba(10,29,48,.94);
+  border: 1px solid rgba(82,221,255,.26);
+  border-radius: 6px;
+  color: #e7f1f7;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   backdrop-filter: blur(20px);
   transition: all 0.3s;
   animation: fadeInLeft 0.6s ease;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+  box-shadow: 0 10px 28px rgba(0,3,14,.34), inset 0 1px 0 rgba(185,229,242,.04);
 }
 .exit-cockpit-btn svg {
   width: 20px;
@@ -952,11 +954,11 @@ const heatmapData: number[][] = []
   transition: transform 0.3s;
 }
 .exit-cockpit-btn:hover {
-  background: linear-gradient(135deg, rgba(78,216,255,0.25), rgba(78,216,255,0.1));
-  border-color: rgba(78,216,255,0.5);
-  box-shadow: 0 6px 32px rgba(78,216,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  background: #113142;
+  border-color: rgba(82,221,255,.52);
+  box-shadow: 0 10px 28px rgba(0,3,14,.4), inset 0 0 18px rgba(82,221,255,.06);
   color: #52ddff;
-  transform: scale(1.05);
+  transform: translateY(-1px);
 }
 .exit-cockpit-btn:hover svg {
   transform: translateX(-4px);
