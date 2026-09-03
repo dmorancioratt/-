@@ -315,39 +315,44 @@ function getHeatLevel(heat: number): string {
 async function initTree() {
   if (!canvasRef.value || !containerRef.value) return
 
-  renderer = new THREE.WebGLRenderer({
-    canvas: canvasRef.value,
-    antialias: true,
-    alpha: true,
-    powerPreference: 'high-performance'
-  })
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas: canvasRef.value,
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance'
+    })
 
-  labelRenderer = new CSS2DRenderer()
-  labelRenderer.setSize(containerRef.value.clientWidth, containerRef.value.clientHeight)
-  labelRenderer.domElement.style.position = 'absolute'
-  labelRenderer.domElement.style.top = '0'
-  labelRenderer.domElement.style.left = '0'
-  labelRenderer.domElement.style.pointerEvents = 'none'
-  labelRenderer.domElement.style.zIndex = '2'
-  containerRef.value.appendChild(labelRenderer.domElement)
+    labelRenderer = new CSS2DRenderer()
+    labelRenderer.setSize(containerRef.value.clientWidth, containerRef.value.clientHeight)
+    labelRenderer.domElement.style.position = 'absolute'
+    labelRenderer.domElement.style.top = '0'
+    labelRenderer.domElement.style.left = '0'
+    labelRenderer.domElement.style.pointerEvents = 'none'
+    labelRenderer.domElement.style.zIndex = '2'
+    containerRef.value.appendChild(labelRenderer.domElement)
 
-  sceneCtx = await createScene(canvasRef.value, renderer)
-  const { scene, camera, controls, tree, composer } = sceneCtx
+    // 注意：createScene 用外层 div 读取 clientWidth/Height
+    // 因为 canvas 自身 clientWidth 在 CSS 指定前常为 0
+    sceneCtx = await createScene(containerRef.value, renderer)
+    const { scene, camera, controls, tree, composer } = sceneCtx
 
-  // Add decorative particles first (lower visual priority)
-  addDecorativeFlowers(tree)
+    // Add decorative particles first (lower visual priority)
+    addDecorativeFlowers(tree)
 
-  // Add skill nodes
-  addSkillFruits(tree, camera)
+    // Add skill nodes
+    addSkillFruits(tree, camera)
 
-  // Setup interaction
-  setupInteraction(camera, scene, controls)
-
-  // Mark loading as complete
-  loading.value = false
+    // Setup interaction
+    setupInteraction(camera, scene, controls)
+  } catch (e) {
+    console.error('[SkillEvolutionTree] init failed:', e)
+  } finally {
+    loading.value = false
+  }
 
   // Start animation
-  animate(composer, controls, camera)
+  if (sceneCtx) animate(sceneCtx.composer, sceneCtx.controls, sceneCtx.camera)
 }
 
 function addDecorativeFlowers(tree: THREE.Object3D) {

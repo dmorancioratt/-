@@ -8,11 +8,17 @@
       <el-button type="primary" :loading="loading" @click="loadAll">刷新数据</el-button>
     </PageHeader>
 
-    <!-- 求职者端：演化时间线 + 能力热点（生命树）合并为单页，无tab -->
+    <!-- 求职者端：能力热点（生命树）为主视觉放顶部 + 演化时间线放底部，避免时间线过长把树挤到看不见 -->
     <template v-if="!isAdminSide">
-      <EvolutionTimeline :timeline="timeline" />
       <div class="evo-merge-label">能力热点 · 生命演化树</div>
       <EvolutionViews mode="hotspot" :hotspot="hotspot" :compare="compare" :cards="versionCards" />
+      <div class="evo-merge-label evo-merge-label--secondary">
+        <span>岗位演化时间线</span>
+        <small>（时间线过长时可在本区域内滚动）</small>
+      </div>
+      <div class="evo-timeline-wrap">
+        <EvolutionTimeline :timeline="timeline" />
+      </div>
     </template>
     <!-- HR/管理端：版本对比 / 领域对比（已迁移，后续用于大屏展示） -->
     <EvolutionViews v-else :mode="tab" :hotspot="hotspot" :compare="compare" :cards="versionCards" />
@@ -356,11 +362,19 @@ onMounted(loadAll)
   box-shadow: inset 0 -2px rgba(141, 255, 255, 0.38), 0 0 12px rgba(82, 221, 255, 0.28);
 }
 
+/* 求职者端顶部紧凑化：能力演化树是主视觉，必须一进页面就看到，
+   不允许被上方页头 + 空白把它挤到视口之外 */
+.evolution-page :deep(.page-toolbar) {
+  margin-bottom: 4px !important;
+  min-height: 36px !important;
+}
+
 .evo-merge-label {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 22px 0 14px;
+  /* 顶部由 22px 压缩到 4px，整体向上贴近页头 */
+  margin: 4px 0 6px;
   color: var(--cyan);
   font-size: 14px;
   font-weight: 850;
@@ -374,6 +388,7 @@ onMounted(loadAll)
   border-radius: 2px;
   background: linear-gradient(180deg, var(--teal), var(--cyan));
   content: "";
+  flex: 0 0 auto;
 }
 
 .evo-merge-label::after {
@@ -381,6 +396,77 @@ onMounted(loadAll)
   height: 1px;
   background: linear-gradient(90deg, rgba(82, 221, 255, 0.28), transparent);
   content: "";
+}
+
+/* 能力热点（主树）的标签与舞台之间不留 14→6px 的大空，
+   让 3D 生命树尽量贴着标签，用户一进页面就能看到完整树冠 */
+.evolution-page :deep(.hotspot-tree-view) {
+  /* 舞台与上方标签的间距控制：外层 wrapper 没有额外 margin，
+     所以直接把舞台顶部向上拉 4px，消除装饰性空隙 */
+  margin-top: -4px;
+  /* 原 calc(100vh - 180px) 基于旧布局的页头+空白估计。
+     现在页头/标签已被压缩，把 180 改为 110，相当于舞台整体向上多延伸了 70px，
+     树冠（平均 top 约 15%）会从 y=300 提到 y=240 左右，首屏完整可见 */
+  height: calc(100vh - 110px);
+  min-height: 680px;
+}
+
+.evo-merge-label--secondary {
+  color: #78b9c0;
+  letter-spacing: 0.04em;
+  text-shadow: none;
+  margin-top: 36px;
+}
+
+.evo-merge-label--secondary::before {
+  width: 3px;
+  height: 12px;
+  background: linear-gradient(180deg, #3a797f, #1299a2);
+}
+
+.evo-merge-label--secondary::after {
+  background: linear-gradient(90deg, rgba(82, 221, 255, 0.14), transparent);
+}
+
+.evo-merge-label--secondary span {
+  flex: 0 0 auto;
+}
+
+.evo-merge-label--secondary small {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-left: 8px;
+  flex: 0 0 auto;
+}
+
+/* 时间线外层限高 —— 主视觉是生命树，时间线作为次要内容放在容器内滚动阅读，
+   避免把能力树推到页面底部导致用户"往下滑看不到树" */
+.evo-timeline-wrap {
+  max-height: 560px;
+  overflow-y: auto;
+  overflow-x: clip;
+  padding-right: 6px;
+  border: 1px solid rgba(82, 221, 255, 0.08);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(3, 36, 44, 0.14), rgba(2, 18, 22, 0.18));
+  backdrop-filter: blur(14px) saturate(1.10);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(82, 221, 255, 0.28) transparent;
+}
+
+.evo-timeline-wrap::-webkit-scrollbar {
+  width: 6px;
+}
+
+.evo-timeline-wrap::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(10, 169, 180, 0.55), rgba(82, 221, 255, 0.45));
+  border-radius: 3px;
+}
+
+.evo-timeline-wrap::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .evo-metrics {

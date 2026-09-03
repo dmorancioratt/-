@@ -194,20 +194,20 @@ watch(() => route.query.reportId, (next, previous) => {
 
 <style scoped>
 .learning-page {
-  --panel: rgba(2, 24, 30, .38);
-  --edge: rgba(21, 197, 199, .10);
-  --cyan: #15c5c7;
-  --teal: #079ea2;
+  --panel: rgba(6, 32, 54, .38);
+  --edge: rgba(82, 221, 255, .10);
+  --cyan: #52ddff;
+  --teal: #0aa9b4;
   --amber: #ffc048;
   display: grid;
   gap: 16px;
-  color: #d8f2f3;
+  color: #d8eef5;
 }
 
 .panel {
   border: 1px solid var(--edge);
   border-radius: 20px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  background: linear-gradient(145deg, rgba(8, 42, 68, .28), rgba(3, 18, 36, .32));
   backdrop-filter: blur(26px) saturate(1.18);
   box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
 }
@@ -220,7 +220,7 @@ watch(() => route.query.reportId, (next, previous) => {
   overflow: hidden;
   border: 1px solid var(--edge);
   border-radius: 20px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  background: linear-gradient(145deg, rgba(8, 42, 68, .28), rgba(3, 18, 36, .32));
   backdrop-filter: blur(26px) saturate(1.18);
   box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
 }
@@ -254,7 +254,7 @@ watch(() => route.query.reportId, (next, previous) => {
 
 .goal-copy h2 {
   margin: 7px 0 8px;
-  color: #f0f7f8;
+  color: #eef8ff;
   font-size: 27px;
   letter-spacing: 0;
   font-weight: 700;
@@ -263,7 +263,7 @@ watch(() => route.query.reportId, (next, previous) => {
 .goal-copy p {
   max-width: 650px;
   margin: 0;
-  color: #8aaeb3;
+  color: #7fa6c3;
   font-size: 13px;
   line-height: 1.65;
 }
@@ -278,20 +278,20 @@ watch(() => route.query.reportId, (next, previous) => {
 
 .match-number span {
   margin-top: 10px;
-  color: #8aaeb3;
+  color: #7fa6c3;
   font-size: 12px;
 }
 
 .priority-copy b {
   margin-top: 7px;
-  color: #f0f6f7;
+  color: #eef8ff;
   font-size: 20px;
   font-weight: 700;
 }
 
 .priority-copy small {
   margin-top: 9px;
-  color: #849aa5;
+  color: #7fa6c3;
   font-size: 11px;
   line-height: 1.5;
 }
@@ -303,7 +303,7 @@ watch(() => route.query.reportId, (next, previous) => {
   overflow: hidden;
   border: 1px solid var(--edge);
   border-radius: 20px;
-  background: linear-gradient(145deg, rgba(4, 46, 54, .28), rgba(2, 20, 24, .32));
+  background: linear-gradient(145deg, rgba(8, 42, 68, .28), rgba(3, 18, 36, .32));
   backdrop-filter: blur(26px) saturate(1.18);
   box-shadow: 0 8px 28px rgba(0, 14, 18, 0.10);
 }
@@ -311,13 +311,13 @@ watch(() => route.query.reportId, (next, previous) => {
 .weekly-panel {
   padding: 26px;
   border-right: 1px solid rgba(82, 221, 255, .10);
-  background: linear-gradient(145deg, rgba(4, 46, 54, .18), rgba(2, 20, 24, .22));
+  background: linear-gradient(145deg, rgba(8, 42, 68, .18), rgba(3, 18, 36, .22));
 }
 
 .workspace-heading h3,
 .route-heading h3 {
   margin: 5px 0 0;
-  color: #edf5f7;
+  color: #eef8ff;
   font-size: 18px;
   letter-spacing: 0;
   font-weight: 700;
@@ -354,7 +354,7 @@ watch(() => route.query.reportId, (next, previous) => {
 }
 
 .weekly-list span {
-  color: #cbdbe0;
+  color: #b9d8ee;
   font-size: 13px;
   line-height: 1.6;
 }
@@ -369,7 +369,7 @@ watch(() => route.query.reportId, (next, previous) => {
 
 .certificate-note p {
   margin: 5px 0 0;
-  color: #a9b9bf;
+  color: #8fb7d8;
   font-size: 12px;
   line-height: 1.55;
 }
@@ -382,7 +382,7 @@ watch(() => route.query.reportId, (next, previous) => {
   gap: 20px;
   margin-bottom: 16px;
 }
-.route-heading small { color: #718a96; font-size: 11px; }
+.route-heading small { color: #6e96a8; font-size: 11px; }
 
 .route-list {
   margin: 0;
@@ -396,7 +396,7 @@ watch(() => route.query.reportId, (next, previous) => {
   transition: background 150ms ease;
 }
 
-.route-list > li.active { background: linear-gradient(90deg, rgba(4, 62, 74, .22), rgba(2, 20, 24, .16)); }
+.route-list > li.active { background: linear-gradient(90deg, rgba(8, 62, 92, .22), rgba(3, 18, 36, .16)); }
 
 .route-row {
   display: grid;
@@ -438,8 +438,8 @@ watch(() => route.query.reportId, (next, previous) => {
   min-width: 0;
 }
 
-.route-row b { color: #dce9ed; font-size: 14px; font-weight: 700; }
-.route-row small { color: #8298a3; font-size: 11px; }
+.route-row b { color: #d8eef5; font-size: 14px; font-weight: 700; }
+.route-row small { color: #7fa6c3; font-size: 11px; }
 .route-row em { color: var(--teal); font-size: 14px; font-style: normal; text-align: center; font-weight: 700; }
 
 .route-detail {
@@ -448,7 +448,7 @@ watch(() => route.query.reportId, (next, previous) => {
 
 .route-detail > p {
   margin: 0 0 15px;
-  color: #9eb2bb;
+  color: #a9c9e8;
   font-size: 13px;
   line-height: 1.7;
 }
@@ -466,8 +466,8 @@ watch(() => route.query.reportId, (next, previous) => {
 }
 
 .route-detail dt { color: var(--teal); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; }
-.route-detail dd { margin: 5px 0 0; color: #c6d5da; font-size: 12px; line-height: 1.55; }
-.route-empty { padding: 60px 20px; color: #7f97a2; text-align: center; }
+.route-detail dd { margin: 5px 0 0; color: #b9d8ee; font-size: 12px; line-height: 1.55; }
+.route-empty { padding: 60px 20px; color: #6e96a8; text-align: center; }
 
 /* ===== Footer ===== */
 .learning-footer {
@@ -480,7 +480,7 @@ watch(() => route.query.reportId, (next, previous) => {
   padding: 8px 2px 0;
 }
 
-.learning-footer > small { color: #718894; font-size: 11px; }
+.learning-footer > small { color: #6e96a8; font-size: 11px; }
 .learning-footer > div { display: flex; gap: 8px; }
 
 @media (max-width: 980px) {

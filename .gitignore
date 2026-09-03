@@ -61,3 +61,16 @@ fightbei/
 # Accidental zip artifacts (misnamed by CLI flag parsing)
 --main.zip
 *.zip.orig
+
+# agent-browser screenshots / runtime temp
+frontend/shots/
+page-*.png
+student_overview.png
+
+# reasonix runtime
+.reasonix/
+reasonix.toml
+
+# scratch cockpit images (superseded by cockpit-chatgpt-20260903.png)
+frontend/public/cockpit-new-*.jpg
+

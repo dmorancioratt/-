@@ -59,7 +59,7 @@
     </aside>
 
     <div class="image-cabin__canvas">
-      <img class="image-cabin__image" src="/cockpit-chatgpt-20260902.png" alt="个人学习成长仓模块总览" />
+      <img class="image-cabin__image" src="/cockpit-chatgpt-20260903.png" alt="个人学习成长仓模块总览" />
       <button
         v-for="item in modules"
         :key="item.id"
@@ -92,13 +92,13 @@ const emit = defineEmits<{ select: [id: MissionCabinId] }>()
 const showLayoutEditor = false
 
 const defaultModules: ModuleZone[] = [
-  { id: 'radar',            label: '能力图谱', x: 13.6, y: 10.8, width: 16.5, height: 31.2 },
-  { id: 'path',             label: '学习路径', x: 33.5, y: 11.2, width: 34.8, height: 29.2 },
-  { id: 'avatar',           label: '成长档案', x: 70.5, y: 9.2,  width: 19.0, height: 23.8 },
-  { id: 'resource-library', label: '资源库',   x: 5.6,  y: 42.4, width: 21.0, height: 50.1 },
-  { id: 'ai-suggest',       label: 'AI 助手',  x: 41.1, y: 40.4, width: 14.5, height: 21.0 },
-  { id: 'weekly-plan',      label: '计划日历', x: 70.3, y: 33.0, width: 22.0, height: 25.0 },
-  { id: 'timeline',         label: '成就墙',   x: 70.2, y: 58.0, width: 25.4, height: 30.0 },
+  { id: 'radar',            label: '能力图谱', x: 9.0,  y: 8.0,  width: 24.0, height: 30.0 },
+  { id: 'path',             label: '学习路径', x: 33.5, y: 9.0,  width: 27.5, height: 29.0 },
+  { id: 'avatar',           label: '成长档案', x: 63.0, y: 7.0,  width: 28.0, height: 25.0 },
+  { id: 'resource-library', label: '资源库',   x: 3.0,  y: 39.0, width: 20.5, height: 52.0 },
+  { id: 'ai-suggest',       label: 'AI 助手',  x: 35.5, y: 38.5, width: 22.5, height: 22.0 },
+  { id: 'weekly-plan',      label: '计划日历', x: 64.5, y: 33.5, width: 25.5, height: 24.0 },
+  { id: 'timeline',         label: '成就墙',   x: 64.5, y: 58.0, width: 31.0, height: 34.0 },
 ]
 
 const modules = ref<ModuleZone[]>(defaultModules.map(item => ({ ...item })))
@@ -179,10 +179,12 @@ function showCopyStatus(message: string) {
 </script>
 
 <style scoped>
-.image-cabin { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; background: #061026; }
-.image-cabin__ambience { position: absolute; inset: -28px; background: linear-gradient(rgba(3, 12, 35, .18), rgba(3, 12, 35, .18)), url('/cockpit-chatgpt-20260902.png') center / cover no-repeat; filter: blur(24px) saturate(.9) brightness(.55); transform: scale(1.08); }
-.image-cabin__canvas { position: relative; z-index: 1; width: min(100vw, calc(100vh * 1.776833)); aspect-ratio: 1672 / 941; overflow: hidden; background: #07122b; box-shadow: 0 0 90px rgba(9, 83, 211, .28); animation: cabin-reveal .7s ease-out both; }
-.image-cabin__image { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+.image-cabin { position: absolute; inset: 0; overflow: hidden; background: #061026; }
+.image-cabin__ambience { position: absolute; inset: 0; background: linear-gradient(rgba(3, 12, 35, .18), rgba(3, 12, 35, .18)), url('/cockpit-chatgpt-20260903.png') center / cover no-repeat; filter: blur(24px) saturate(.9) brightness(.55); transform: scale(1.08); }
+/* 全屏铺满：去掉原来的 aspect-ratio 和宽高限制，让画布直接占满整个驾驶舱可视区（100% × 100%），
+   图片用 object-fit: cover 按比例填满，不留黑边 */
+.image-cabin__canvas { position: relative; z-index: 1; width: 100%; height: 100%; overflow: hidden; background: #07122b; animation: cabin-reveal .7s ease-out both; }
+.image-cabin__image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center center; user-select: none; -webkit-user-drag: none; }
 .image-cabin__zone { position: absolute; z-index: 2; display: block; padding: 0; border: 0; border-radius: clamp(5px, .8vw, 14px); background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .image-cabin__frame { position: absolute; inset: 0; border: 1px solid rgba(103, 230, 255, 0); border-radius: inherit; background: radial-gradient(circle at 50% 50%, rgba(60, 196, 255, 0), rgba(29, 112, 255, 0)); box-shadow: inset 0 0 0 1px rgba(116, 235, 255, 0), 0 0 0 rgba(30, 151, 255, 0); transition: border-color .22s ease, background .22s ease, box-shadow .22s ease; pointer-events: none; }
 .image-cabin__frame::before, .image-cabin__frame::after { content: ''; position: absolute; inset: clamp(4px, .45vw, 8px); opacity: 0; transition: opacity .22s ease; pointer-events: none; }

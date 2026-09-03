@@ -105,6 +105,10 @@ html {
   min-height: 100vh;
   background: #000000;
   background-attachment: fixed;
+  /* 防止某页全局锁滚动导致"下滑不了" —— 页面必须允许用户滚动浏览内容 */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
 }
 
 body {
@@ -116,6 +120,10 @@ body {
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  /* 同上，保证页面滚动条一直可用 */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
 }
 
 body::before {
