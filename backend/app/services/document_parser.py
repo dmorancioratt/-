@@ -4,8 +4,15 @@ import zipfile
 from pathlib import Path
 from typing import BinaryIO
 
-from docx import Document
-from pypdf import PdfReader
+try:
+    from docx import Document
+except ImportError:  # pragma: no cover - python-docx 未安装时降级，登录/非 docx 功能不受影响
+    Document = None  # type: ignore[assignment,misc]
+
+try:
+    from pypdf import PdfReader
+except ImportError:  # pragma: no cover - pypdf 未安装时降级，登录/非 pdf 功能不受影响
+    PdfReader = None  # type: ignore[assignment,misc]
 
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
@@ -54,6 +61,8 @@ def extract_resume_text(filename: str, content: bytes) -> tuple[str, str]:
 
 
 def _extract_pdf(content: bytes) -> str:
+    if PdfReader is None:
+        raise DocumentParseError("后端未安装 pypdf，请先执行 pip install pypdf 后重启服务", status_code=503)
     if not content.startswith(b"%PDF"):
         raise DocumentParseError("文件扩展名是 PDF，但文件内容不是有效 PDF")
     try:
@@ -83,6 +92,8 @@ def _extract_pdf(content: bytes) -> str:
 
 
 def _extract_docx(content: bytes) -> str:
+    if Document is None:
+        raise DocumentParseError("后端未安装 python-docx，请先执行 pip install python-docx 后重启服务", status_code=503)
     if not content.startswith(b"PK"):
         raise DocumentParseError("文件扩展名是 DOCX，但文件内容不是有效 Word 文档")
     _validate_docx_archive(content)

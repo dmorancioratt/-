@@ -2,7 +2,7 @@
   <section class="image-cabin" :class="{ 'image-cabin--editing': editorEnabled }" aria-label="个人学习成长仓">
     <div class="image-cabin__ambience" aria-hidden="true"></div>
 
-    <div v-if="false && showLayoutEditor" class="image-cabin__dev-controls" aria-label="成长仓开发工具">
+    <div v-if="showLayoutEditor" class="image-cabin__dev-controls" aria-label="成长仓开发工具">
       <button
         type="button"
         class="image-cabin__dev-button"
@@ -89,16 +89,16 @@ type ZoneMetric = 'x' | 'y' | 'width' | 'height'
 type ZoneControl = { key: ZoneMetric; label: string; min: number; step: number }
 
 const emit = defineEmits<{ select: [id: MissionCabinId] }>()
-const showLayoutEditor = false
+const showLayoutEditor = true
 
 const defaultModules: ModuleZone[] = [
-  { id: 'radar',            label: '能力图谱', x: 9.0,  y: 8.0,  width: 24.0, height: 30.0 },
-  { id: 'path',             label: '学习路径', x: 33.5, y: 9.0,  width: 27.5, height: 29.0 },
-  { id: 'avatar',           label: '成长档案', x: 63.0, y: 7.0,  width: 28.0, height: 25.0 },
-  { id: 'resource-library', label: '资源库',   x: 3.0,  y: 39.0, width: 20.5, height: 52.0 },
-  { id: 'ai-suggest',       label: 'AI 助手',  x: 35.5, y: 38.5, width: 22.5, height: 22.0 },
-  { id: 'weekly-plan',      label: '计划日历', x: 64.5, y: 33.5, width: 25.5, height: 24.0 },
-  { id: 'timeline',         label: '成就墙',   x: 64.5, y: 58.0, width: 31.0, height: 34.0 },
+  { id: 'radar',            label: '能力图谱', x: 11.5, y: 7.1,  width: 21.6, height: 34.2 },
+  { id: 'path',             label: '学习路径', x: 33.5, y: 9.0,  width: 35.6, height: 30.9 },
+  { id: 'avatar',           label: '成长档案', x: 69.6, y: 7.0,  width: 20.6, height: 25.0 },
+  { id: 'resource-library', label: '资源库',   x: 5.2,  y: 41.8, width: 20.5, height: 52.0 },
+  { id: 'ai-suggest',       label: 'AI 助手',  x: 38.1, y: 41.9, width: 22.5, height: 22.0 },
+  { id: 'weekly-plan',      label: '计划日历', x: 66.8, y: 33.5, width: 31.5, height: 28.7 },
+  { id: 'timeline',         label: '成就墙',   x: 67.8, y: 58.0, width: 31.0, height: 34.0 },
 ]
 
 const modules = ref<ModuleZone[]>(defaultModules.map(item => ({ ...item })))
