@@ -500,20 +500,26 @@ def dry_run(cfg_id: int, req: TestRunRequest, db: Session = Depends(get_db)) -> 
 
     stages.append({"stage": "问题解析", "status": "done", "output": req.question[:80]})
 
-    embedder = get_embedder()
-    user_docs = get_user_docs_store(dim=int(embedder.dim))
+    user_docs = get_user_docs_store(dim=512)
     if user_docs.size() == 0:
         stages.append({
             "stage": "本地知识库",
             "status": "warn",
             "output": "本地知识库为空，请先上传并切分文档",
         })
-    else:
-        stages.append({
-            "stage": "本地知识库",
-            "status": "done",
-            "output": f"已索引 {user_docs.size()} 个 chunks",
-        })
+        return TestRunResponse(
+            answer=SAFE_REFUSAL,
+            evidence=[],
+            confidence=0.0,
+            blocked=True,
+            guard_issues=["本地知识库为空，请先上传并切分文档"],
+            stages_log=stages,
+        )
+    stages.append({
+        "stage": "本地知识库",
+        "status": "done",
+        "output": f"已索引 {user_docs.size()} 个 chunks",
+    })
 
     stages.append({
         "stage": "Top-K 检索",
@@ -521,8 +527,8 @@ def dry_run(cfg_id: int, req: TestRunRequest, db: Session = Depends(get_db)) -> 
         "output": f"top_k={policy.top_k}",
     })
 
-    # 真实 BGE 语义检索
     try:
+        embedder = get_embedder()
         raw_hits = retrieve(
             req.question,
             embedder,
@@ -671,22 +677,27 @@ def dry_run_stream(
         yield emit(0, "running", "解析用户问题")
         yield emit(0, "done", req.question[:80])
 
-        # 2 本地知识库
+        # 2 本地知识库：读取本地索引不需要初始化或下载模型。
         yield emit(1, "running", "加载本地知识库")
-        embedder = get_embedder()
-        user_docs = get_user_docs_store(dim=int(embedder.dim))
+        user_docs = get_user_docs_store(dim=512)
         if user_docs.size() == 0:
             yield emit(1, "warn", "本地知识库为空，请先上传并切分文档")
-        else:
-            yield emit(1, "done", f"已索引 {user_docs.size()} 个 chunks")
+            issue = "本地知识库为空，请先上传并切分文档"
+            yield _sse({
+                "event": "result", "answer": SAFE_REFUSAL, "evidence": [], "validated_citations": [],
+                "confidence": 0.0, "blocked": True, "guard_issues": [issue], "stages_log": stages_log,
+            })
+            return
+        yield emit(1, "done", f"已索引 {user_docs.size()} 个 chunks")
 
         # 3 Top-K 检索参数
         yield emit(2, "running", "确定检索参数")
         yield emit(2, "done", f"top_k={policy.top_k}")
 
-        # 4 向量检索（真耗时：BGE 编码 + faiss 召回）
-        yield emit(3, "running", "语义向量召回中")
+        # 4 向量检索（真耗时：BGE 初始化 + 编码 + faiss 召回）
+        yield emit(3, "running", "加载 BGE 模型并进行语义向量召回")
         try:
+            embedder = get_embedder()
             raw_hits = retrieve(req.question, embedder, {"user_docs": user_docs}, top_k=policy.top_k)
         except RagError as exc:
             yield emit(3, "error", str(exc))

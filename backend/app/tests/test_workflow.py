@@ -198,6 +198,36 @@ def test_dry_run_stages(client):
     assert all("status" in s and "output" in s for s in data["stages_log"])
 
 
+def test_empty_knowledge_base_stops_before_loading_embedder(client, monkeypatch):
+    """空知识库应立即返回可操作结果，不能卡在模型初始化。"""
+    cfg_id = _create_test_config(client, "空知识库前置检查", {})
+
+    class EmptyStore:
+        def size(self):
+            return 0
+
+    monkeypatch.setattr(workflow_router, "get_user_docs_store", lambda dim=512: EmptyStore())
+
+    def fail_if_called():
+        pytest.fail("空知识库不应初始化向量模型")
+
+    monkeypatch.setattr(workflow_router, "get_embedder", fail_if_called)
+    response = client.post(f"/api/workflow/configs/{cfg_id}/test", json={"question": "测试问题"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["blocked"] is True
+    assert data["stages_log"][-1]["stage"] == "本地知识库"
+    assert data["stages_log"][-1]["status"] == "warn"
+
+    stream = client.post(
+        f"/api/workflow/configs/{cfg_id}/test-stream",
+        json={"question": "测试问题"},
+    )
+    assert stream.status_code == 200, stream.text
+    assert "本地知识库为空" in stream.text
+    assert '"event": "result"' in stream.text
+
+
 def _create_test_config(client, name: str, settings: dict, graph: dict | None = None) -> int:
     response = client.post("/api/workflow/configs", json={
         "name": name,

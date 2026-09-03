@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import threading
 from pathlib import Path
 from typing import Protocol, runtime_checkable
 
@@ -46,6 +47,21 @@ class BGESmallZhEmbedder:
     def _ensure_loaded(self) -> None:
         if self._model is not None:
             return
+        if self._cache_dir is not None:
+            self._cache_dir.mkdir(parents=True, exist_ok=True)
+            os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", str(self._cache_dir))
+
+        cache_folder = str(self._cache_dir) if self._cache_dir else None
+        local = self._find_local_snapshot()
+        offline_env_existed = {
+            key: key in os.environ
+            for key in ("HF_HUB_OFFLINE", "TRANSFORMERS_OFFLINE")
+        }
+        if local is not None:
+            # huggingface_hub 在导入时读取离线变量，必须先设置再导入。
+            os.environ.setdefault("HF_HUB_OFFLINE", "1")
+            os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
         try:
             from sentence_transformers import SentenceTransformer
         except ImportError as exc:
@@ -53,23 +69,15 @@ class BGESmallZhEmbedder:
                 "sentence-transformers 未安装，请先 pip install sentence-transformers"
             ) from exc
 
-        if self._cache_dir is not None:
-            self._cache_dir.mkdir(parents=True, exist_ok=True)
-            os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", str(self._cache_dir))
-
-        cache_folder = str(self._cache_dir) if self._cache_dir else None
-        local = self._find_local_snapshot()
-
         # 1) 优先直接用本地缓存的模型目录加载（零网络请求）
         if local is not None:
             try:
-                os.environ["HF_HUB_OFFLINE"] = "1"
-                os.environ["TRANSFORMERS_OFFLINE"] = "1"
                 self._model = SentenceTransformer(str(local))
                 return
             except Exception:
-                os.environ.pop("HF_HUB_OFFLINE", None)
-                os.environ.pop("TRANSFORMERS_OFFLINE", None)
+                for key, existed in offline_env_existed.items():
+                    if not existed:
+                        os.environ.pop(key, None)
 
         # 2) 回退：按 model_name 加载（缓存缺失时触发下载）
         try:
@@ -137,6 +145,7 @@ class FakeEmbedder:
 _DEFAULT_MODEL_CACHE_DIR = Path(__file__).resolve().parents[3] / "data" / "rag" / "models"
 
 _shared_embedder: "Embedder | None" = None
+_shared_embedder_lock = threading.Lock()
 
 
 def get_embedder(cache_dir: Path | None = None, *, force_fake: bool | None = None) -> Embedder:
@@ -146,7 +155,11 @@ def get_embedder(cache_dir: Path | None = None, *, force_fake: bool | None = Non
     只有 APP_ENV=test 时才允许通过 RAG_EMBEDDER=fake 使用伪向量。
     """
     global _shared_embedder
-    if _shared_embedder is None:
+    if _shared_embedder is not None:
+        return _shared_embedder
+    with _shared_embedder_lock:
+        if _shared_embedder is not None:
+            return _shared_embedder
         is_test = os.getenv("APP_ENV", "production").strip().lower() == "test"
         if force_fake is None:
             env = os.getenv("RAG_EMBEDDER", "").strip().lower()
@@ -161,4 +174,4 @@ def get_embedder(cache_dir: Path | None = None, *, force_fake: bool | None = Non
             # 立即预热，确保模型不可用时请求返回明确错误，而不是生成伪向量。
             candidate.encode(["embedder 预热检测"])
             _shared_embedder = candidate
-    return _shared_embedder
+        return _shared_embedder

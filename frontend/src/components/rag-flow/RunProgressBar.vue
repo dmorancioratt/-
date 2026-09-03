@@ -7,6 +7,7 @@
       </span>
       <span class="progress-meta">
         <span v-if="store.runtime.running" class="state running">运行中</span>
+        <span v-else-if="knowledgeRequired" class="state warn">等待知识库</span>
         <span v-else-if="store.runtime.lastResult" class="state done">已完成</span>
         <span v-else class="state idle">待运行</span>
         <span class="percent">{{ store.runtime.progress }}%</span>
@@ -39,6 +40,7 @@ import { useWorkflowStore } from '@/stores/workflow'
 const store = useWorkflowStore()
 
 const STAGES = ['问题解析', '本地知识库', 'Top-K 检索', '向量检索', '相关性判断', '大模型生成', '幻觉检测', '引用校验']
+const knowledgeRequired = computed(() => store.runtime.lastResult?.guard_issues.some((issue) => issue.includes('本地知识库为空')) ?? false)
 
 function stageStatus(stage: string): string {
   const log = store.runtime.logs.find((l) => l.stage === stage)
@@ -102,6 +104,7 @@ function stepClass(stage: string, index: number): Record<string, boolean> {
   border-radius: 4px;
 }
 .state.running { color: #93c5fd; background: rgba(96, 165, 250, 0.15); }
+.state.warn { color: #fbbf24; background: rgba(251, 191, 36, 0.15); }
 .state.done { color: #46c8ff; background: rgba(70, 200, 255, 0.15); }
 .state.idle { color: #64748b; background: rgba(30, 41, 59, 0.6); }
 

@@ -16,9 +16,14 @@
       <el-button
         type="primary"
         :icon="VideoPlay"
-        @click="store.openTestDialog('什么是 RAG 工作流？')"
+        @click="onRun"
       >
         运行
+      </el-button>
+
+      <el-button :icon="UploadFilled" @click="store.openKnowledgeBase()">
+        上传知识库
+        <span class="kb-count">{{ store.totalDocs }} 文档 · {{ store.totalChunks }} chunks</span>
       </el-button>
 
       <el-button :icon="DocumentCopy" @click="onSave" :loading="store.saving">
@@ -47,7 +52,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Document, DocumentCopy, MoreFilled, Upload, VideoPlay, Warning } from '@element-plus/icons-vue'
+import { Document, DocumentCopy, MoreFilled, Upload, UploadFilled, VideoPlay, Warning } from '@element-plus/icons-vue'
 import { useWorkflowStore } from '@/stores/workflow'
 
 const store = useWorkflowStore()
@@ -55,6 +60,16 @@ const importInput = ref<HTMLInputElement | null>(null)
 const saveLabel = computed(() => store.lastSavedAt
   ? `已保存于 ${new Date(store.lastSavedAt).toLocaleTimeString('zh-CN', { hour12: false })}`
   : '尚未保存到服务器')
+
+async function onRun() {
+  await store.fetchDocs()
+  if (store.totalChunks === 0) {
+    store.openKnowledgeBase()
+    ElMessage.warning('本地知识库为空，请先上传文档；上传后系统会自动切片并建立索引')
+    return
+  }
+  store.openTestDialog('什么是 RAG 工作流？')
+}
 
 async function onSave() {
   let name = store.configName || ''
@@ -174,6 +189,12 @@ async function onImportFile(event: Event) {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.kb-count {
+  margin-left: 6px;
+  color: #8fb3cc;
+  font-size: 11px;
 }
 
 .file-input { display: none; }

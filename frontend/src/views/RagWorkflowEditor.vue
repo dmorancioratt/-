@@ -76,7 +76,8 @@ function focusRunLog() {
 onMounted(async () => {
   store.loadDraft()
   await store.ensureConfig()
-  store.fetchDocs()
+  await store.fetchDocs()
+  if (store.totalChunks === 0) store.openKnowledgeBase()
 })
 </script>
 

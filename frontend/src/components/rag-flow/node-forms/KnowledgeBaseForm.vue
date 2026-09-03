@@ -6,11 +6,12 @@
       :auto-upload="false"
       :show-file-list="false"
       :on-change="handleChange"
+      :disabled="uploading"
       accept=".pdf,.docx,.txt,.md"
       class="kb-uploader"
     >
-      <el-icon class="upload-icon"><UploadFilled /></el-icon>
-      <div class="upload-text">点击或拖拽上传文档</div>
+      <el-icon class="upload-icon" :class="{ spinning: uploading }"><Loading v-if="uploading" /><UploadFilled v-else /></el-icon>
+      <div class="upload-text">{{ uploading ? '正在上传并建立索引...' : '点击或拖拽上传文档' }}</div>
       <div class="upload-tip">支持 .pdf / .docx / .txt / .md，单文件 10MB 以内</div>
     </el-upload>
 
@@ -55,7 +56,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { UploadFilled } from '@element-plus/icons-vue'
+import { Loading, UploadFilled } from '@element-plus/icons-vue'
 import { useWorkflowStore } from '@/stores/workflow'
 import type { DocumentInfo } from '@/types/workflow'
 
@@ -84,12 +85,14 @@ async function handleChange(file: any) {
   uploading.value = true
   try {
     const doc = await store.uploadDoc(file.raw)
-    ElMessage.success(`已上传 ${doc.filename}（${doc.char_count} 字符）`)
+    const indexed = await store.chunkDoc(doc.id, 500, 50)
+    ElMessage.success(`已上传并索引 ${doc.filename}（${indexed.chunk_count} 个 chunks）`)
     await refreshDocs()
   } catch (e: any) {
-    ElMessage.error(e?.message || '上传失败')
+    ElMessage.error(e?.response?.data?.detail || e?.message || '上传或索引失败')
   } finally {
     uploading.value = false
+    await refreshDocs()
   }
 }
 
@@ -135,6 +138,7 @@ onMounted(refreshDocs)
 }
 .kb-uploader :deep(.el-upload-dragger:hover) { border-color: rgba(91,155,213,0.7); }
 .upload-icon { font-size: 28px; color: #93c5fd; margin-bottom: 6px; }
+.upload-icon.spinning { animation: spin 1s linear infinite; }
 .upload-text { font-size: 13px; color: #cbd5e1; }
 .upload-tip { font-size: 11px; color: #94a3b8; margin-top: 4px; }
 
@@ -153,4 +157,5 @@ onMounted(refreshDocs)
   font-family: ui-monospace, Menlo, monospace;
   margin: 0 4px;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>

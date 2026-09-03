@@ -56,7 +56,7 @@ export const useWorkflowStore = defineStore('workflow', {
   getters: {
     selectedNode: (state) => state.nodes.find((n) => n.id === state.selectedNodeId) || null,
     totalDocs: (state) => state.docs.length,
-    totalChunks: (state) => state.docs.reduce((acc, d) => acc + d.chunk_count, 0),
+    totalChunks: (state) => state.docs.reduce((acc, d) => acc + (d.indexed ? d.chunk_count : 0), 0),
   },
 
   actions: {
@@ -71,6 +71,11 @@ export const useWorkflowStore = defineStore('workflow', {
     openDrawer(nodeId: string) {
       this.selectedNodeId = nodeId
       this.drawerOpen = true
+    },
+
+    openKnowledgeBase() {
+      const node = this.nodes.find((item) => item.data.kind === 'knowledge')
+      if (node) this.openDrawer(node.id)
     },
 
     addNode(node: FlowNode) {
@@ -371,8 +376,10 @@ export const useWorkflowStore = defineStore('workflow', {
           guard_issues: payload.guard_issues || [],
           stages_log: payload.stages_log || [],
         }
-        this.runtime.progress = 100
+        const knowledgeRequired = this.runtime.lastResult.guard_issues.some((issue) => issue.includes('本地知识库为空'))
+        this.runtime.progress = knowledgeRequired ? 25 : 100
         this.runtime.running = false
+        if (knowledgeRequired) this.openKnowledgeBase()
       }
     },
 
